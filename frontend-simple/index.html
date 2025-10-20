@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeneyApp - Healthcare Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-brand { font-weight: bold; }
+        .card { margin-bottom: 20px; }
+        .stats-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .stats-card .card-body { padding: 1.5rem; }
+        .btn-primary { background-color: #1976d2; border-color: #1976d2; }
+        .table th { background-color: #f8f9fa; }
+        .login-container { max-width: 400px; margin: 100px auto; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="loginForm" class="container">
+        <div class="login-container">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">KeneyApp Login</h3>
+                    <form id="loginFormElement">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Sign In</button>
+                    </form>
+                    <div id="loginError" class="alert alert-danger mt-3 hidden" role="alert"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="hidden">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#"><i class="fas fa-hospital"></i> KeneyApp</a>
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="#" onclick="showSection('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a class="nav-link" href="#" onclick="showSection('patients')"><i class="fas fa-users"></i> Patients</a>
+                    <a class="nav-link" href="#" onclick="showSection('appointments')"><i class="fas fa-calendar"></i> Appointments</a>
+                    <a class="nav-link" href="#" onclick="showSection('prescriptions')"><i class="fas fa-pills"></i> Prescriptions</a>
+                    <a class="nav-link" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid mt-4">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section">
+                <h2>Dashboard</h2>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-users fa-2x mb-2"></i>
+                                <h4 id="totalPatients">0</h4>
+                                <p>Total Patients</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-calendar fa-2x mb-2"></i>
+                                <h4 id="totalAppointments">0</h4>
+                                <p>Appointments</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-pills fa-2x mb-2"></i>
+                                <h4 id="totalPrescriptions">0</h4>
+                                <p>Prescriptions</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-user-md fa-2x mb-2"></i>
+                                <h4>12</h4>
+                                <p>Active Users</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patients Section -->
+            <div id="patients" class="section hidden">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2>Patients</h2>
+                    <button class="btn btn-primary" onclick="showPatientForm()">
+                        <i class="fas fa-plus"></i> Add Patient
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Date of Birth</th>
+                                    <th>Gender</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patientsTable">
+                                <!-- Patients will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments Section -->
+            <div id="appointments" class="section hidden">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2>Appointments</h2>
+                    <button class="btn btn-primary" onclick="showAppointmentForm()">
+                        <i class="fas fa-plus"></i> Schedule Appointment
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Date & Time</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentsTable">
+                                <!-- Appointments will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prescriptions Section -->
+            <div id="prescriptions" class="section hidden">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2>Prescriptions</h2>
+                    <button class="btn btn-primary" onclick="showPrescriptionForm()">
+                        <i class="fas fa-plus"></i> New Prescription
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Medication</th>
+                                    <th>Dosage</th>
+                                    <th>Frequency</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="prescriptionsTable">
+                                <!-- Prescriptions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        let authToken = localStorage.getItem('token');
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            if (authToken) {
+                showMainApp();
+                loadDashboard();
+            } else {
+                showLoginForm();
+            }
+        });
+
+        // Login functionality
+        document.getElementById('loginFormElement').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.access_token;
+                    localStorage.setItem('token', authToken);
+                    showMainApp();
+                    loadDashboard();
+                } else {
+                    showError('Invalid username or password');
+                }
+            } catch (error) {
+                showError('Login failed. Please try again.');
+            }
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+        }
+
+        function showMainApp() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            authToken = null;
+            showLoginForm();
+        }
+
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            // Show selected section
+            document.getElementById(sectionName).classList.remove('hidden');
+
+            // Load data for the section
+            if (sectionName === 'dashboard') {
+                loadDashboard();
+            } else if (sectionName === 'patients') {
+                loadPatients();
+            } else if (sectionName === 'appointments') {
+                loadAppointments();
+            } else if (sectionName === 'prescriptions') {
+                loadPrescriptions();
+            }
+        }
+
+        async function loadDashboard() {
+            try {
+                const [patientsRes, appointmentsRes, prescriptionsRes] = await Promise.all([
+                    fetch(`${API_BASE}/patients`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }),
+                    fetch(`${API_BASE}/appointments`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }),
+                    fetch(`${API_BASE}/prescriptions`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    })
+                ]);
+
+                const patients = await patientsRes.json();
+                const appointments = await appointmentsRes.json();
+                const prescriptions = await prescriptionsRes.json();
+
+                document.getElementById('totalPatients').textContent = patients.length;
+                document.getElementById('totalAppointments').textContent = appointments.length;
+                document.getElementById('totalPrescriptions').textContent = prescriptions.length;
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        async function loadPatients() {
+            try {
+                const response = await fetch(`${API_BASE}/patients`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const patients = await response.json();
+                
+                const tbody = document.getElementById('patientsTable');
+                tbody.innerHTML = patients.map(patient => `
+                    <tr>
+                        <td>${patient.first_name} ${patient.last_name}</td>
+                        <td>${patient.date_of_birth}</td>
+                        <td>${patient.gender}</td>
+                        <td>${patient.phone || '-'}</td>
+                        <td>${patient.email || '-'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+
+        async function loadAppointments() {
+            try {
+                const response = await fetch(`${API_BASE}/appointments`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const appointments = await response.json();
+                
+                const tbody = document.getElementById('appointmentsTable');
+                tbody.innerHTML = appointments.map(appointment => `
+                    <tr>
+                        <td>Patient ${appointment.patient_id}</td>
+                        <td>${new Date(appointment.appointment_date).toLocaleString()}</td>
+                        <td>${appointment.duration_minutes} min</td>
+                        <td><span class="badge bg-info">${appointment.status}</span></td>
+                        <td>${appointment.notes || '-'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+            }
+        }
+
+        async function loadPrescriptions() {
+            try {
+                const response = await fetch(`${API_BASE}/prescriptions`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const prescriptions = await response.json();
+                
+                const tbody = document.getElementById('prescriptionsTable');
+                tbody.innerHTML = prescriptions.map(prescription => `
+                    <tr>
+                        <td>Patient ${prescription.patient_id}</td>
+                        <td>${prescription.medication_name}</td>
+                        <td>${prescription.dosage}</td>
+                        <td>${prescription.frequency}</td>
+                        <td><span class="badge bg-success">${prescription.status}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading prescriptions:', error);
+            }
+        }
+
+        function showPatientForm() {
+            alert('Patient form would open here');
+        }
+
+        function showAppointmentForm() {
+            alert('Appointment form would open here');
+        }
+
+        function showPrescriptionForm() {
+            alert('Prescription form would open here');
+        }
+    </script>
+</body>
+</html>

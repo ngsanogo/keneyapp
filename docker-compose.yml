@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: keneyapp
+      POSTGRES_USER: keneyapp
+      POSTGRES_PASSWORD: keneyapp123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keneyapp -d keneyapp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://keneyapp:keneyapp123@db:5432/keneyapp
+      - SECRET_KEY=your-secret-key-change-in-production
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+    command: >
+      sh -c "
+        python start_backend.py
+      "
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend-simple:/usr/share/nginx/html
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
