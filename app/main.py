@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.routers import auth, patients, appointments, prescriptions, users
+from app.routers import auth, patients, appointments, prescriptions, users, health
 from app.core.config import settings
 
 app = FastAPI(
@@ -29,14 +29,11 @@ app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(patients.router, prefix="/api/patients", tags=["patients"])
 app.include_router(appointments.router, prefix="/api/appointments", tags=["appointments"])
 app.include_router(prescriptions.router, prefix="/api/prescriptions", tags=["prescriptions"])
+app.include_router(health.router, tags=["health"])
 
 @app.get("/")
 async def root():
     return {"message": "Welcome to KeneyApp API", "version": "1.0.0"}
-
-@app.get("/api/health")
-async def health_check():
-    return {"status": "healthy", "service": "KeneyApp API"}
 
 if __name__ == "__main__":
     import uvicorn
