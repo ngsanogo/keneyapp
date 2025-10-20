@@ -19,13 +19,13 @@ async def read_appointments(
     appointments = db.query(Appointment).offset(skip).limit(limit).all()
     return appointments
 
-@router.post("/", response_model=AppointmentSchema)
+@router.post("/", response_model=AppointmentSchema, status_code=status.HTTP_201_CREATED)
 async def create_appointment(
     appointment: AppointmentCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    db_appointment = Appointment(**appointment.dict())
+    db_appointment = Appointment(**appointment.model_dump())
     db.add(db_appointment)
     db.commit()
     db.refresh(db_appointment)
@@ -53,7 +53,7 @@ async def update_appointment(
     if appointment is None:
         raise HTTPException(status_code=404, detail="Appointment not found")
     
-    update_data = appointment_update.dict(exclude_unset=True)
+    update_data = appointment_update.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(appointment, field, value)
     

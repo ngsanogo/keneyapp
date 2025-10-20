@@ -19,7 +19,7 @@ async def read_patients(
     patients = db.query(Patient).filter(Patient.is_active == True).offset(skip).limit(limit).all()
     return patients
 
-@router.post("/", response_model=PatientSchema)
+@router.post("/", response_model=PatientSchema, status_code=status.HTTP_201_CREATED)
 async def create_patient(
     patient: PatientCreate, 
     db: Session = Depends(get_db),
@@ -37,7 +37,7 @@ async def read_patient(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    patient = db.query(Patient).filter(Patient.id == patient_id, Patient.is_active == True).first()
     if patient is None:
         raise HTTPException(status_code=404, detail="Patient not found")
     return patient
@@ -61,7 +61,7 @@ async def update_patient(
     db.refresh(patient)
     return patient
 
-@router.delete("/{patient_id}")
+@router.delete("/{patient_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_patient(
     patient_id: int,
     db: Session = Depends(get_db),
@@ -73,4 +73,3 @@ async def delete_patient(
     
     patient.is_active = False
     db.commit()
-    return {"message": "Patient deactivated successfully"}

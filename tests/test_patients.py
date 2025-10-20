@@ -5,6 +5,7 @@ import pytest
 from fastapi import status
 from datetime import date
 from app.models.patient import Patient
+from tests.conftest import parse_date_string
 
 
 class TestPatients:
@@ -54,7 +55,7 @@ class TestPatients:
             last_name="Smith",
             email="jane.smith@example.com",
             phone="+1234567890",
-            date_of_birth="1985-05-15",
+            date_of_birth=parse_date_string("1985-05-15"),
             gender="female"
         )
         db_session.add(patient)
@@ -76,7 +77,7 @@ class TestPatients:
             last_name="Johnson",
             email="bob.johnson@example.com",
             phone="+1234567890",
-            date_of_birth="1975-03-20",
+            date_of_birth=parse_date_string("1975-03-20"),
             gender="male"
         )
         db_session.add(patient)
@@ -104,7 +105,7 @@ class TestPatients:
             last_name="Brown",
             email="alice.brown@example.com",
             phone="+1234567890",
-            date_of_birth="1992-08-10",
+            date_of_birth=parse_date_string("1992-08-10"),
             gender="female"
         )
         db_session.add(patient)

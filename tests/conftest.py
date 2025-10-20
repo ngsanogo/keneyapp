@@ -13,6 +13,12 @@ from app.main import app
 from app.database import get_db, Base
 from app.core.security import get_password_hash
 from app.models.user import User, UserRole
+from datetime import date, datetime
+
+
+def parse_date_string(date_str: str) -> date:
+    """Parse date string to Python date object for SQLite compatibility"""
+    return datetime.strptime(date_str, "%Y-%m-%d").date()
 
 
 # Test database URL (in-memory SQLite for testing)
