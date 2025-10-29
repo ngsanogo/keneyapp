@@ -35,6 +35,4 @@ class User(Base):
 
     # Relationships
     appointments = relationship("Appointment", back_populates="doctor")
-    prescriptions = relationship(
-        "Prescription", back_populates="prescriptions"
-    )
+    prescriptions = relationship("Prescription", back_populates="doctor")
