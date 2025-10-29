@@ -1,6 +1,7 @@
 """
 Patient model for healthcare record management.
 """
+
 from sqlalchemy import Column, Integer, String, Date, Text, Enum
 from sqlalchemy.orm import relationship
 import enum
@@ -10,6 +11,7 @@ from app.core.database import Base
 
 class Gender(str, enum.Enum):
     """Gender options for patient records."""
+
     MALE = "male"
     FEMALE = "female"
     OTHER = "other"
@@ -17,9 +19,9 @@ class Gender(str, enum.Enum):
 
 class Patient(Base):
     """Patient model for storing patient information and medical history."""
-    
+
     __tablename__ = "patients"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
@@ -33,7 +35,7 @@ class Patient(Base):
     blood_type = Column(String(5))
     emergency_contact = Column(String)
     emergency_phone = Column(String)
-    
+
     # Relationships
     appointments = relationship("Appointment", back_populates="patient")
     prescriptions = relationship("Prescription", back_populates="patient")

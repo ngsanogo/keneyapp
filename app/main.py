@@ -1,15 +1,30 @@
 """
 Main FastAPI application entry point for KeneyApp.
 """
+
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.routers import auth, patients, appointments, prescriptions, dashboard
+from app.routers import (
+    auth,
+    patients,
+    appointments,
+    prescriptions,
+    dashboard,
+)
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifespan events."""
+    # Startup: Initialize database tables
+    Base.metadata.create_all(bind=engine)
+    yield
+    # Shutdown: cleanup if needed
+
 
 # Create FastAPI application
 app = FastAPI(
@@ -18,7 +33,8 @@ app = FastAPI(
     description="Healthcare Data Management Platform - GDPR/HIPAA Compliant",
     docs_url=f"{settings.API_V1_PREFIX}/docs",
     redoc_url=f"{settings.API_V1_PREFIX}/redoc",
-    openapi_url=f"{settings.API_V1_PREFIX}/openapi.json"
+    openapi_url=f"{settings.API_V1_PREFIX}/openapi.json",
+    lifespan=lifespan,
 )
 
 # Configure CORS
@@ -45,7 +61,7 @@ def root():
         "name": settings.APP_NAME,
         "version": settings.APP_VERSION,
         "status": "running",
-        "docs": f"{settings.API_V1_PREFIX}/docs"
+        "docs": f"{settings.API_V1_PREFIX}/docs",
     }
 
 
