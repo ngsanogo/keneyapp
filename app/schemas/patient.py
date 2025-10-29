@@ -1,7 +1,8 @@
 """
 Patient schemas for request/response validation.
 """
-from pydantic import BaseModel, EmailStr
+
+from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import date
 from typing import Optional
 from app.models.patient import Gender
@@ -9,6 +10,7 @@ from app.models.patient import Gender
 
 class PatientBase(BaseModel):
     """Base patient schema with common fields."""
+
     first_name: str
     last_name: str
     date_of_birth: date
@@ -25,11 +27,13 @@ class PatientBase(BaseModel):
 
 class PatientCreate(PatientBase):
     """Schema for creating a new patient."""
+
     pass
 
 
 class PatientUpdate(BaseModel):
     """Schema for updating patient information."""
+
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -44,7 +48,7 @@ class PatientUpdate(BaseModel):
 
 class PatientResponse(PatientBase):
     """Schema for patient response."""
+
     id: int
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)

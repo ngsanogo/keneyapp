@@ -1,7 +1,8 @@
 """
 Appointment schemas for request/response validation.
 """
-from pydantic import BaseModel
+
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional
 from app.models.appointment import AppointmentStatus
@@ -9,6 +10,7 @@ from app.models.appointment import AppointmentStatus
 
 class AppointmentBase(BaseModel):
     """Base appointment schema with common fields."""
+
     patient_id: int
     doctor_id: int
     appointment_date: datetime
@@ -19,11 +21,13 @@ class AppointmentBase(BaseModel):
 
 class AppointmentCreate(AppointmentBase):
     """Schema for creating a new appointment."""
+
     pass
 
 
 class AppointmentUpdate(BaseModel):
     """Schema for updating appointment information."""
+
     appointment_date: Optional[datetime] = None
     duration_minutes: Optional[int] = None
     status: Optional[AppointmentStatus] = None
@@ -33,8 +37,8 @@ class AppointmentUpdate(BaseModel):
 
 class AppointmentResponse(AppointmentBase):
     """Schema for appointment response."""
+
     id: int
     status: AppointmentStatus
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)
