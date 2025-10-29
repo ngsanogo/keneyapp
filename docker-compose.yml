@@ -29,10 +29,17 @@ services:
       DATABASE_URL: postgresql://keneyapp:keneyapp@db:5432/keneyapp
       SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
       ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8000
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
     ports:
       - "8000:8000"
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - ./app:/app/app
@@ -59,5 +66,74 @@ services:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
 
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: keneyapp_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Celery Worker
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: keneyapp_celery_worker
+    environment:
+      DATABASE_URL: postgresql://keneyapp:keneyapp@db:5432/keneyapp
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+    command: celery -A app.core.celery_app worker --loglevel=info
+
+  # Celery Beat (Scheduler)
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: keneyapp_celery_beat
+    environment:
+      DATABASE_URL: postgresql://keneyapp:keneyapp@db:5432/keneyapp
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+    command: celery -A app.core.celery_app beat --loglevel=info
+
+  # Flower (Celery Monitoring)
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: keneyapp_flower
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+      - celery_worker
+    command: celery -A app.core.celery_app flower --port=5555
+
 volumes:
   postgres_data:
+  redis_data:

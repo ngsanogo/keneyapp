@@ -40,9 +40,7 @@ def create_prescription(
 
 
 @router.get("/", response_model=List[PrescriptionResponse])
-def get_prescriptions(
-    skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
-):
+def get_prescriptions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     Retrieve a list of prescriptions with pagination.
 
@@ -71,9 +69,7 @@ def get_prescription(prescription_id: int, db: Session = Depends(get_db)):
         Prescription record
     """
     prescription = (
-        db.query(Prescription)
-        .filter(Prescription.id == prescription_id)
-        .first()
+        db.query(Prescription).filter(Prescription.id == prescription_id).first()
     )
     if not prescription:
         raise HTTPException(
@@ -96,9 +92,7 @@ def get_patient_prescriptions(patient_id: int, db: Session = Depends(get_db)):
         List of patient's prescriptions
     """
     prescriptions = (
-        db.query(Prescription)
-        .filter(Prescription.patient_id == patient_id)
-        .all()
+        db.query(Prescription).filter(Prescription.patient_id == patient_id).all()
     )
     return prescriptions
 
@@ -113,9 +107,7 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
         db: Database session
     """
     prescription = (
-        db.query(Prescription)
-        .filter(Prescription.id == prescription_id)
-        .first()
+        db.query(Prescription).filter(Prescription.id == prescription_id).first()
     )
     if not prescription:
         raise HTTPException(

@@ -16,15 +16,35 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 - ✅ JWT-based authentication
 - ✅ Password hashing with bcrypt
 - ✅ Role-based access control (RBAC)
+- ✅ **Comprehensive audit logging** for all critical operations
+- ✅ **Rate limiting** to prevent abuse
+- ✅ **Security headers** (XSS, CSRF, CSP protection)
 - ✅ CORS protection
 - ✅ Input validation with Pydantic
+
+### Performance & Scalability
+- ⚡ **Redis caching** for frequently accessed data
+- ⚡ **Celery background tasks** for asynchronous operations
+- ⚡ **Horizontal auto-scaling** with Kubernetes HPA
+- ⚡ **Prometheus metrics** for monitoring
+- ⚡ Database query optimization
+
+### Enterprise Features
+- 🚀 **Kubernetes deployment** ready with Helm charts
+- 📊 **Grafana dashboards** for visualization
+- 🔍 **Prometheus monitoring** for metrics collection
+- 📝 **Comprehensive API documentation**
+- 🔄 **Background job processing** with Celery
+- 📈 **Health check endpoints** for load balancers
 
 ## 🛠 Tech Stack
 
 - **Backend**: FastAPI (Python 3.11)
 - **Frontend**: React 18 + TypeScript
 - **Database**: PostgreSQL 15
-- **Containerization**: Docker & Docker Compose
+- **Cache & Queue**: Redis 7 + Celery
+- **Monitoring**: Prometheus + Grafana
+- **Containerization**: Docker & Kubernetes
 - **CI/CD**: GitHub Actions
 - **Testing**: pytest (backend), Jest (frontend)
 - **Code Quality**: Black, Flake8, ESLint
@@ -100,6 +120,9 @@ keneyapp/
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:8000
    - API Documentation: http://localhost:8000/api/v1/docs
+   - Prometheus Metrics: http://localhost:8000/metrics
+   - Flower (Celery Monitoring): http://localhost:5555
+   - Redis: localhost:6379
 
 ### Option 2: Manual Setup
 
@@ -183,6 +206,81 @@ The API documentation is automatically generated and available at:
 - `GET /api/v1/prescriptions/` - List all prescriptions
 - `POST /api/v1/prescriptions/` - Create new prescription
 - `GET /api/v1/dashboard/stats` - Get dashboard statistics
+- `GET /health` - Health check endpoint
+- `GET /metrics` - Prometheus metrics
+
+## 🔍 Monitoring & Observability
+
+### Prometheus Metrics
+
+KeneyApp exposes detailed metrics at `/metrics` endpoint:
+
+```bash
+curl http://localhost:8000/metrics
+```
+
+**Available Metrics:**
+- `http_requests_total` - Total HTTP requests by method, endpoint, and status
+- `http_request_duration_seconds` - Request duration histogram
+- `patient_operations_total` - Total patient operations
+- `appointment_bookings_total` - Total appointment bookings
+- `prescription_created_total` - Total prescriptions created
+- `active_users` - Current active users
+- `database_connections` - Active database connections
+
+### Grafana Dashboards
+
+Pre-configured dashboards are available in `/monitoring/grafana-dashboard.json`:
+- API performance metrics
+- Database health
+- Redis cache statistics
+- Healthcare-specific KPIs
+
+### Celery Monitoring with Flower
+
+Monitor background tasks in real-time:
+
+```bash
+# Access Flower UI
+http://localhost:5555
+```
+
+**Background Tasks:**
+- `send_appointment_reminder` - Send appointment notifications
+- `generate_patient_report` - Create comprehensive patient reports
+- `check_prescription_interactions` - Validate drug interactions
+- `backup_patient_data` - Automated data backups
+- `cleanup_expired_tokens` - Remove expired authentication tokens
+
+## 🔐 Audit Logging
+
+All critical operations are logged for GDPR/HIPAA compliance:
+
+```python
+# Audit logs include:
+- User authentication events
+- Patient record access/modifications
+- Prescription creation/updates
+- Appointment management
+- Administrative actions
+
+# Each log entry contains:
+- Timestamp
+- User ID and username
+- Action performed (CREATE, READ, UPDATE, DELETE)
+- Resource type and ID
+- IP address and user agent
+- Additional context
+- Success/failure status
+```
+
+Query audit logs via the database:
+```sql
+SELECT * FROM audit_logs 
+WHERE resource_type = 'patient' 
+ORDER BY timestamp DESC 
+LIMIT 100;
+```
 
 ## 🧪 Testing
 
@@ -244,11 +342,49 @@ DATABASE_URL=postgresql://keneyapp:keneyapp@localhost:5432/keneyapp
 
 # CORS
 ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_DB=0
+
+# Celery
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
 ```
 
 ## 🚢 Deployment
 
-### Production Deployment
+### Kubernetes Deployment
+
+KeneyApp is production-ready with comprehensive Kubernetes manifests:
+
+```bash
+# Deploy to Kubernetes
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/secret.yaml
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/postgres-deployment.yaml
+kubectl apply -f k8s/redis-deployment.yaml
+kubectl apply -f k8s/backend-deployment.yaml
+kubectl apply -f k8s/frontend-deployment.yaml
+kubectl apply -f k8s/ingress.yaml
+
+# Check deployment status
+kubectl get pods -n keneyapp
+```
+
+**Features:**
+- Horizontal Pod Autoscaling (3-10 replicas)
+- Health checks and readiness probes
+- Resource limits and requests
+- Persistent storage for PostgreSQL
+- TLS/SSL termination at ingress
+- Rolling updates with zero downtime
+
+See [k8s/README.md](k8s/README.md) for detailed deployment instructions.
+
+### Docker Production Deployment
 
 1. **Set environment variables**
    ```bash

@@ -33,12 +33,8 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
 
     # Today's appointments
     today = datetime.now(timezone.utc).date()
-    today_start = datetime.combine(
-        today, datetime.min.time(), tzinfo=timezone.utc
-    )
-    today_end = datetime.combine(
-        today, datetime.max.time(), tzinfo=timezone.utc
-    )
+    today_start = datetime.combine(today, datetime.min.time(), tzinfo=timezone.utc)
+    today_end = datetime.combine(today, datetime.max.time(), tzinfo=timezone.utc)
 
     today_appointments = (
         db.query(func.count(Appointment.id))

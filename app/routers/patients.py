@@ -13,9 +13,7 @@ from app.schemas.patient import PatientCreate, PatientUpdate, PatientResponse
 router = APIRouter(prefix="/patients", tags=["patients"])
 
 
-@router.post(
-    "/", response_model=PatientResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("/", response_model=PatientResponse, status_code=status.HTTP_201_CREATED)
 def create_patient(patient_data: PatientCreate, db: Session = Depends(get_db)):
     """
     Create a new patient record.
@@ -29,11 +27,7 @@ def create_patient(patient_data: PatientCreate, db: Session = Depends(get_db)):
     """
     # Check if email already exists
     if patient_data.email:
-        existing = (
-            db.query(Patient)
-            .filter(Patient.email == patient_data.email)
-            .first()
-        )
+        existing = db.query(Patient).filter(Patient.email == patient_data.email).first()
         if existing:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -49,9 +43,7 @@ def create_patient(patient_data: PatientCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=List[PatientResponse])
-def get_patients(
-    skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
-):
+def get_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     Retrieve a list of patients with pagination.
 

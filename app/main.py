@@ -5,9 +5,14 @@ Main FastAPI application entry point for KeneyApp.
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
 from app.core.database import engine, Base
+from app.core.rate_limit import limiter
+from app.core.middleware import MetricsMiddleware, SecurityHeadersMiddleware
+from app.core.metrics import metrics_endpoint
 from app.routers import (
     auth,
     patients,
@@ -36,6 +41,14 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_PREFIX}/openapi.json",
     lifespan=lifespan,
 )
+
+# Configure rate limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Add custom middleware
+app.add_middleware(MetricsMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Configure CORS
 app.add_middleware(
@@ -69,3 +82,9 @@ def root():
 def health_check():
     """Health check endpoint for monitoring."""
     return {"status": "healthy"}
+
+
+@app.get("/metrics")
+def metrics():
+    """Prometheus metrics endpoint."""
+    return metrics_endpoint()
