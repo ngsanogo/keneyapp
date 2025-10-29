@@ -3,7 +3,7 @@ Core configuration for KeneyApp.
 Manages environment variables and application settings.
 """
 
-from typing import List
+from typing import List, Union
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,15 +20,14 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "your-secret-key-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    MFA_ISSUER: str = "KeneyApp"
+    MAX_FAILED_LOGIN_ATTEMPTS: int = 5
 
     # Database
     DATABASE_URL: str = "postgresql://keneyapp:keneyapp@localhost:5432/keneyapp"
 
     # CORS
-    ALLOWED_ORIGINS: List[str] = [
-        "http://localhost:3000",
-        "http://localhost:8000",
-    ]
+    ALLOWED_ORIGINS: Union[str, List[str]] = "http://localhost:3000,http://localhost:8000"
 
     # Redis
     REDIS_HOST: str = "localhost"
@@ -44,4 +43,13 @@ class Settings(BaseSettings):
     )
 
 
-settings = Settings()
+_settings = Settings()
+
+
+if isinstance(_settings.ALLOWED_ORIGINS, str):
+    raw_origins = [origin.strip() for origin in _settings.ALLOWED_ORIGINS.split(",")]
+    _settings.ALLOWED_ORIGINS = [origin for origin in raw_origins if origin]
+elif isinstance(_settings.ALLOWED_ORIGINS, list):
+    _settings.ALLOWED_ORIGINS = [origin.strip() for origin in _settings.ALLOWED_ORIGINS]
+
+settings = _settings

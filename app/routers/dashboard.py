@@ -2,30 +2,58 @@
 Dashboard router for real-time health metrics and statistics.
 """
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime, timedelta, timezone
 
+from app.core.audit import log_audit_event
+from app.core.cache import cache_get, cache_set
 from app.core.database import get_db
+from app.core.dependencies import require_roles
+from app.core.rate_limit import limiter
 from app.models.patient import Patient
 from app.models.appointment import Appointment, AppointmentStatus
 from app.models.prescription import Prescription
+from app.models.user import User, UserRole
+
+DASHBOARD_STATS_CACHE_KEY = "dashboard:stats"
+DASHBOARD_STATS_TTL_SECONDS = 120
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
 @router.get("/stats")
-def get_dashboard_stats(db: Session = Depends(get_db)):
+@limiter.limit("30/minute")
+def get_dashboard_stats(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.DOCTOR])),
+):
     """
     Get real-time dashboard statistics.
 
     Args:
+        request: Incoming request for auditing
         db: Database session
+        current_user: Authenticated user requesting dashboard data
 
     Returns:
         Dictionary containing various health metrics and statistics
     """
+    cached_stats = cache_get(DASHBOARD_STATS_CACHE_KEY)
+    if cached_stats is not None:
+        log_audit_event(
+            db=db,
+            action="READ",
+            resource_type="dashboard",
+            status="success",
+            user_id=current_user.id,
+            username=current_user.username,
+            details={"operation": "stats", "cached": True},
+            request=request,
+        )
+        return cached_stats
     # Total counts
     total_patients = db.query(func.count(Patient.id)).scalar()
     total_appointments = db.query(func.count(Appointment.id)).scalar()
@@ -82,7 +110,7 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
         .scalar()
     )
 
-    return {
+    stats = {
         "total_patients": total_patients,
         "total_appointments": total_appointments,
         "total_prescriptions": total_prescriptions,
@@ -98,3 +126,22 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
             "prescriptions": recent_prescriptions,
         },
     }
+
+    cache_set(
+        DASHBOARD_STATS_CACHE_KEY,
+        stats,
+        expire=DASHBOARD_STATS_TTL_SECONDS,
+    )
+
+    log_audit_event(
+        db=db,
+        action="READ",
+        resource_type="dashboard",
+        status="success",
+        user_id=current_user.id,
+        username=current_user.username,
+        details={"operation": "stats", "cached": False},
+        request=request,
+    )
+
+    return stats

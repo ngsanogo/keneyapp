@@ -19,6 +19,7 @@ from app.routers import (
     appointments,
     prescriptions,
     dashboard,
+    users,
 )
 
 
@@ -65,6 +66,7 @@ app.include_router(patients.router, prefix=settings.API_V1_PREFIX)
 app.include_router(appointments.router, prefix=settings.API_V1_PREFIX)
 app.include_router(prescriptions.router, prefix=settings.API_V1_PREFIX)
 app.include_router(dashboard.router, prefix=settings.API_V1_PREFIX)
+app.include_router(users.router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")

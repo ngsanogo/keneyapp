@@ -2,17 +2,34 @@
 Appointment management router for scheduling and tracking appointments.
 """
 
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+import logging
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from app.core.audit import log_audit_event
+from app.core.cache import cache_clear_pattern, cache_get, cache_set
 from app.core.database import get_db
-from app.models.appointment import Appointment
+from app.core.dependencies import require_roles
+from app.core.metrics import appointment_bookings_total
+from app.core.rate_limit import limiter
+from app.models.appointment import Appointment, AppointmentStatus
+from app.models.patient import Patient
+from app.models.user import User, UserRole
 from app.schemas.appointment import (
     AppointmentCreate,
     AppointmentUpdate,
     AppointmentResponse,
 )
+from app.tasks import send_appointment_reminder
+
+logger = logging.getLogger(__name__)
+
+APPOINTMENT_LIST_CACHE_PREFIX = "appointments:list"
+APPOINTMENT_DETAIL_CACHE_PREFIX = "appointments:detail"
+DASHBOARD_CACHE_PATTERN = "dashboard:*"
+APPOINTMENT_LIST_TTL_SECONDS = 60
+APPOINTMENT_DETAIL_TTL_SECONDS = 180
 
 router = APIRouter(prefix="/appointments", tags=["appointments"])
 
@@ -22,15 +39,23 @@ router = APIRouter(prefix="/appointments", tags=["appointments"])
     response_model=AppointmentResponse,
     status_code=status.HTTP_201_CREATED,
 )
+@limiter.limit("20/minute")
 def create_appointment(
-    appointment_data: AppointmentCreate, db: Session = Depends(get_db)
+    appointment_data: AppointmentCreate,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST])
+    ),
 ):
     """
     Create a new appointment.
 
     Args:
         appointment_data: Appointment information
+        request: Incoming request for auditing
         db: Database session
+        current_user: Authenticated user creating the appointment
 
     Returns:
         Created appointment
@@ -40,52 +65,224 @@ def create_appointment(
     db.commit()
     db.refresh(db_appointment)
 
+    cache_set(
+        f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{db_appointment.id}",
+        AppointmentResponse.model_validate(db_appointment).model_dump(mode="json"),
+        expire=APPOINTMENT_DETAIL_TTL_SECONDS,
+    )
+    cache_clear_pattern(f"{APPOINTMENT_LIST_CACHE_PREFIX}:*")
+    cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
+
+    # Track metrics
+    appointment_bookings_total.labels(
+        status=db_appointment.status.value
+    ).inc()
+
+    # Queue reminder notifications (best effort)
+    try:
+        patient = (
+            db.query(Patient)
+            .filter(Patient.id == db_appointment.patient_id)
+            .first()
+        )
+        patient_email = patient.email if patient else None
+        send_appointment_reminder.delay(
+            appointment_id=db_appointment.id,
+            patient_email=patient_email or "",
+        )
+    except Exception as exc:  # pragma: no cover - best effort
+        logger.warning("Failed to queue appointment reminder: %s", exc)
+
+    log_audit_event(
+        db=db,
+        action="CREATE",
+        resource_type="appointment",
+        resource_id=db_appointment.id,
+        status="success",
+        user_id=current_user.id,
+        username=current_user.username,
+        details={
+            "patient_id": db_appointment.patient_id,
+            "doctor_id": db_appointment.doctor_id,
+            "appointment_date": db_appointment.appointment_date.isoformat(),
+        },
+        request=request,
+    )
+
     return db_appointment
 
 
 @router.get("/", response_model=List[AppointmentResponse])
-def get_appointments(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+@limiter.limit("60/minute")
+def get_appointments(
+    request: Request,
+    skip: int = 0,
+    limit: int = 100,
+    status_filter: Optional[AppointmentStatus] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(
+            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
+        )
+    ),
+):
     """
     Retrieve a list of appointments with pagination.
 
     Args:
+        request: Incoming request for auditing
         skip: Number of records to skip
         limit: Maximum number of records to return
+        status_filter: Optional appointment status to filter by
         db: Database session
+        current_user: Authenticated user performing the read
 
     Returns:
         List of appointments
     """
-    appointments = db.query(Appointment).offset(skip).limit(limit).all()
-    return appointments
+    status_key = status_filter.value if status_filter else "all"
+    cache_key = (
+        f"{APPOINTMENT_LIST_CACHE_PREFIX}:{skip}:{limit}:{status_key}"
+    )
+    cached_appointments = cache_get(cache_key)
+    if cached_appointments is not None:
+        log_audit_event(
+            db=db,
+            action="READ",
+            resource_type="appointment",
+            status="success",
+            user_id=current_user.id,
+            username=current_user.username,
+            details={
+                "operation": "list",
+                "skip": skip,
+                "limit": limit,
+                "status": status_key,
+                "cached": True,
+            },
+            request=request,
+        )
+        return cached_appointments
+
+    query = db.query(Appointment)
+    if status_filter:
+        query = query.filter(Appointment.status == status_filter)
+
+    appointments = query.offset(skip).limit(limit).all()
+    serialized_appointments = [
+        AppointmentResponse.model_validate(appt).model_dump(mode="json")
+        for appt in appointments
+    ]
+
+    cache_set(cache_key, serialized_appointments, expire=APPOINTMENT_LIST_TTL_SECONDS)
+
+    log_audit_event(
+        db=db,
+        action="READ",
+        resource_type="appointment",
+        status="success",
+        user_id=current_user.id,
+        username=current_user.username,
+        details={
+            "operation": "list",
+            "skip": skip,
+            "limit": limit,
+            "status": status_key,
+            "cached": False,
+        },
+        request=request,
+    )
+
+    return serialized_appointments
 
 
 @router.get("/{appointment_id}", response_model=AppointmentResponse)
-def get_appointment(appointment_id: int, db: Session = Depends(get_db)):
+@limiter.limit("120/minute")
+def get_appointment(
+    appointment_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(
+            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
+        )
+    ),
+):
     """
     Retrieve a specific appointment by ID.
 
     Args:
         appointment_id: Appointment ID
+        request: Incoming request for auditing
         db: Database session
+        current_user: Authenticated user performing the read
 
     Returns:
         Appointment record
     """
+    cache_key = f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{appointment_id}"
+    cached_appointment = cache_get(cache_key)
+    if cached_appointment is not None:
+        log_audit_event(
+            db=db,
+            action="READ",
+            resource_type="appointment",
+            resource_id=appointment_id,
+            status="success",
+            user_id=current_user.id,
+            username=current_user.username,
+            details={"cached": True},
+            request=request,
+        )
+        return cached_appointment
+
     appointment = db.query(Appointment).filter(Appointment.id == appointment_id).first()
     if not appointment:
+        log_audit_event(
+            db=db,
+            action="READ",
+            resource_type="appointment",
+            resource_id=appointment_id,
+            status="failure",
+            user_id=current_user.id,
+            username=current_user.username,
+            details={"reason": "not_found"},
+            request=request,
+        )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Appointment not found",
         )
-    return appointment
+
+    log_audit_event(
+        db=db,
+        action="READ",
+        resource_type="appointment",
+        resource_id=appointment.id,
+        status="success",
+        user_id=current_user.id,
+        username=current_user.username,
+        request=request,
+    )
+    serialized = AppointmentResponse.model_validate(appointment).model_dump(
+        mode="json"
+    )
+    cache_set(
+        cache_key,
+        serialized,
+        expire=APPOINTMENT_DETAIL_TTL_SECONDS,
+    )
+    return serialized
 
 
 @router.put("/{appointment_id}", response_model=AppointmentResponse)
+@limiter.limit("15/minute")
 def update_appointment(
     appointment_id: int,
     appointment_data: AppointmentUpdate,
+    request: Request,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.DOCTOR])),
 ):
     """
     Update an appointment.
@@ -93,13 +290,26 @@ def update_appointment(
     Args:
         appointment_id: Appointment ID
         appointment_data: Updated appointment information
+        request: Incoming request for auditing
         db: Database session
+        current_user: Authenticated user performing the update
 
     Returns:
         Updated appointment
     """
     appointment = db.query(Appointment).filter(Appointment.id == appointment_id).first()
     if not appointment:
+        log_audit_event(
+            db=db,
+            action="UPDATE",
+            resource_type="appointment",
+            resource_id=appointment_id,
+            status="failure",
+            user_id=current_user.id,
+            username=current_user.username,
+            details={"reason": "not_found"},
+            request=request,
+        )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Appointment not found",
@@ -113,20 +323,62 @@ def update_appointment(
     db.commit()
     db.refresh(appointment)
 
-    return appointment
+    log_audit_event(
+        db=db,
+        action="UPDATE",
+        resource_type="appointment",
+        resource_id=appointment.id,
+        status="success",
+        user_id=current_user.id,
+        username=current_user.username,
+        details={"updated_fields": list(update_data.keys())},
+        request=request,
+    )
+
+    serialized = AppointmentResponse.model_validate(appointment).model_dump(
+        mode="json"
+    )
+    cache_set(
+        f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{appointment.id}",
+        serialized,
+        expire=APPOINTMENT_DETAIL_TTL_SECONDS,
+    )
+    cache_clear_pattern(f"{APPOINTMENT_LIST_CACHE_PREFIX}:*")
+    cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
+
+    return serialized
 
 
 @router.delete("/{appointment_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_appointment(appointment_id: int, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def delete_appointment(
+    appointment_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.ADMIN)),
+):
     """
     Delete an appointment.
 
     Args:
         appointment_id: Appointment ID
+        request: Incoming request for auditing
         db: Database session
+        current_user: Authenticated user performing the delete
     """
     appointment = db.query(Appointment).filter(Appointment.id == appointment_id).first()
     if not appointment:
+        log_audit_event(
+            db=db,
+            action="DELETE",
+            resource_type="appointment",
+            resource_id=appointment_id,
+            status="failure",
+            user_id=current_user.id,
+            username=current_user.username,
+            details={"reason": "not_found"},
+            request=request,
+        )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Appointment not found",
@@ -134,3 +386,18 @@ def delete_appointment(appointment_id: int, db: Session = Depends(get_db)):
 
     db.delete(appointment)
     db.commit()
+
+    log_audit_event(
+        db=db,
+        action="DELETE",
+        resource_type="appointment",
+        resource_id=appointment.id,
+        status="success",
+        user_id=current_user.id,
+        username=current_user.username,
+        request=request,
+    )
+
+    cache_clear_pattern(f"{APPOINTMENT_LIST_CACHE_PREFIX}:*")
+    cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
+    cache_clear_pattern(f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{appointment_id}")

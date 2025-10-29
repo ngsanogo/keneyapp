@@ -105,15 +105,10 @@ keneyapp/
    cd keneyapp
    ```
 
-2. **Set up environment variables**
+2. **Start all services**
    ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
-
-3. **Start all services**
-   ```bash
-   docker-compose up -d
+   ./scripts/start_stack.sh
+   # add --logs to follow container output, or --down to stop everything
    ```
 
 4. **Access the application**
@@ -199,6 +194,7 @@ The API documentation is automatically generated and available at:
 
 - `POST /api/v1/auth/register` - Register new user
 - `POST /api/v1/auth/login` - User login
+- `GET /api/v1/auth/me` - Retrieve current authenticated user profile
 - `GET /api/v1/patients/` - List all patients
 - `POST /api/v1/patients/` - Create new patient
 - `GET /api/v1/appointments/` - List all appointments
@@ -336,6 +332,8 @@ DEBUG=False
 SECRET_KEY=your-secret-key-change-in-production
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
+MFA_ISSUER=KeneyApp
+MAX_FAILED_LOGIN_ATTEMPTS=5
 
 # Database
 DATABASE_URL=postgresql://keneyapp:keneyapp@localhost:5432/keneyapp

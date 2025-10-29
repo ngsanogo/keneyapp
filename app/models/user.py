@@ -2,7 +2,8 @@
 User model for authentication and authorization.
 """
 
-from sqlalchemy import Column, Integer, String, Boolean, Enum
+from sqlalchemy import Column, Integer, String, Boolean, Enum, DateTime
+from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
 
@@ -30,6 +31,16 @@ class User(Base):
     full_name = Column(String, nullable=False)
     role = Column(Enum(UserRole), nullable=False, default=UserRole.RECEPTIONIST)
     is_active = Column(Boolean, default=True)
+    is_locked = Column(Boolean, nullable=False, default=False)
+    failed_login_attempts = Column(Integer, nullable=False, default=0)
+    mfa_enabled = Column(Boolean, nullable=False, default=False)
+    mfa_secret = Column(String, nullable=True)
+    last_login = Column(DateTime(timezone=True), nullable=True)
+    password_changed_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
     # Relationships
     appointments = relationship("Appointment", back_populates="doctor")
