@@ -28,9 +28,7 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
-    role = Column(
-        Enum(UserRole), nullable=False, default=UserRole.RECEPTIONIST
-    )
+    role = Column(Enum(UserRole), nullable=False, default=UserRole.RECEPTIONIST)
     is_active = Column(Boolean, default=True)
 
     # Relationships

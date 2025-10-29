@@ -28,29 +28,26 @@ class MetricsMiddleware(BaseHTTPMiddleware):
             Response from the handler
         """
         start_time = time.time()
-        
+
         # Process request
         response = await call_next(request)
-        
+
         # Calculate duration
         duration = time.time() - start_time
-        
+
         # Record metrics
         method = request.method
         endpoint = request.url.path
         status = response.status_code
-        
+
         http_requests_total.labels(
-            method=method,
-            endpoint=endpoint,
-            status=status
+            method=method, endpoint=endpoint, status=status
         ).inc()
-        
-        http_request_duration_seconds.labels(
-            method=method,
-            endpoint=endpoint
-        ).observe(duration)
-        
+
+        http_request_duration_seconds.labels(method=method, endpoint=endpoint).observe(
+            duration
+        )
+
         return response
 
 
@@ -69,12 +66,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             Response with security headers
         """
         response = await call_next(request)
-        
+
         # Add security headers
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
         response.headers["Content-Security-Policy"] = "default-src 'self'"
-        
+
         return response

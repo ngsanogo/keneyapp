@@ -19,7 +19,9 @@ class AuditLog(Base):
     user_id = Column(Integer, nullable=True)  # Nullable for anonymous actions
     username = Column(String, nullable=True)
     action = Column(String, nullable=False, index=True)  # CREATE, READ, UPDATE, DELETE
-    resource_type = Column(String, nullable=False, index=True)  # patient, appointment, prescription, etc.
+    resource_type = Column(
+        String, nullable=False, index=True
+    )  # patient, appointment, prescription, etc.
     resource_id = Column(Integer, nullable=True)
     ip_address = Column(String, nullable=True)
     user_agent = Column(Text, nullable=True)

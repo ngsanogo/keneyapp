@@ -22,9 +22,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # Database
-    DATABASE_URL: str = (
-        "postgresql://keneyapp:keneyapp@localhost:5432/keneyapp"
-    )
+    DATABASE_URL: str = "postgresql://keneyapp:keneyapp@localhost:5432/keneyapp"
 
     # CORS
     ALLOWED_ORIGINS: List[str] = [

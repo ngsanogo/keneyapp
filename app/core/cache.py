@@ -51,11 +51,7 @@ def cache_get(key: str) -> Optional[Any]:
         return None
 
 
-def cache_set(
-    key: str,
-    value: Any,
-    expire: Optional[int] = None
-) -> bool:
+def cache_set(key: str, value: Any, expire: Optional[int] = None) -> bool:
     """
     Set value in cache.
 
