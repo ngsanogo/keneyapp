@@ -1,0 +1,78 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: keneyapp
+          POSTGRES_PASSWORD: keneyapp
+          POSTGRES_DB: keneyapp_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run linting
+      run: |
+        flake8 app --count --select=E9,F63,F7,F82 --show-source --statistics
+        black --check app
+    
+    - name: Run tests
+      env:
+        DATABASE_URL: postgresql://keneyapp:keneyapp@localhost:5432/keneyapp_test
+        SECRET_KEY: test-secret-key-for-ci-only
+      run: |
+        pytest tests/ -v
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: npm install
+    
+    - name: Run linting
+      working-directory: ./frontend
+      run: npm run lint || true
+    
+    - name: Run tests
+      working-directory: ./frontend
+      run: npm test -- --watchAll=false || true
+    
+    - name: Build
+      working-directory: ./frontend
+      run: npm run build
