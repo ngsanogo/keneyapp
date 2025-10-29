@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: keneyapp_db
+    environment:
+      POSTGRES_USER: keneyapp
+      POSTGRES_PASSWORD: keneyapp
+      POSTGRES_DB: keneyapp
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keneyapp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: keneyapp_backend
+    environment:
+      DATABASE_URL: postgresql://keneyapp:keneyapp@db:5432/keneyapp
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+      - ./alembic:/app/alembic
+      - ./scripts:/app/scripts
+    command: >
+      sh -c "alembic upgrade head &&
+             python scripts/init_db.py &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: keneyapp_frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+
+volumes:
+  postgres_data:
