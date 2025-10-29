@@ -2,7 +2,10 @@
 Celery background tasks for asynchronous processing.
 """
 
+import logging
 from app.core.celery_app import celery_app
+
+logger = logging.getLogger(__name__)
 
 
 @celery_app.task(name="send_appointment_reminder")
@@ -16,7 +19,8 @@ def send_appointment_reminder(appointment_id: int, patient_email: str):
     """
     # TODO: Implement email sending logic
     # This is a placeholder for the actual implementation
-    print(f"Sending reminder for appointment {appointment_id} to {patient_email}")
+    # Note: Avoid logging identifiable information for HIPAA compliance
+    logger.info("Processing appointment reminder task")
     return {"status": "sent", "appointment_id": appointment_id}
 
 
@@ -29,7 +33,8 @@ def generate_patient_report(patient_id: int):
         patient_id: ID of the patient
     """
     # TODO: Implement report generation logic
-    print(f"Generating report for patient {patient_id}")
+    # Note: Avoid logging identifiable information for HIPAA compliance
+    logger.info("Processing patient report generation task")
     return {"status": "generated", "patient_id": patient_id}
 
 
@@ -44,8 +49,13 @@ def check_prescription_interactions(prescription_id: int, medications: list):
     """
     # TODO: Implement drug interaction checking logic
     # This would integrate with a drug interaction database
-    print(f"Checking interactions for prescription {prescription_id}")
-    return {"status": "checked", "prescription_id": prescription_id, "interactions": []}
+    # Note: Avoid logging identifiable information for HIPAA compliance
+    logger.info("Processing drug interaction check task")
+    return {
+        "status": "checked",
+        "prescription_id": prescription_id,
+        "interactions": [],
+    }
 
 
 @celery_app.task(name="backup_patient_data")
@@ -54,7 +64,7 @@ def backup_patient_data():
     Perform automated backup of patient data.
     """
     # TODO: Implement backup logic
-    print("Performing patient data backup")
+    logger.info("Starting patient data backup operation")
     return {"status": "completed"}
 
 
@@ -64,5 +74,5 @@ def cleanup_expired_tokens():
     Clean up expired authentication tokens.
     """
     # TODO: Implement token cleanup logic
-    print("Cleaning up expired tokens")
+    logger.info("Starting expired token cleanup")
     return {"status": "completed"}
