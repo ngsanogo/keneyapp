@@ -1,0 +1,74 @@
+{
+  "dashboard": {
+    "title": "KeneyApp Health Dashboard",
+    "tags": ["keneyapp", "healthcare", "monitoring"],
+    "timezone": "utc",
+    "panels": [
+      {
+        "title": "API Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{path}}"
+          }
+        ]
+      },
+      {
+        "title": "API Response Time (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          }
+        ]
+      },
+      {
+        "title": "Database Connections",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends",
+            "legendFormat": "Active Connections"
+          }
+        ]
+      },
+      {
+        "title": "Redis Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "redis_memory_used_bytes",
+            "legendFormat": "Memory Used"
+          }
+        ]
+      },
+      {
+        "title": "Patient Operations",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(patient_operations_total[1h]))",
+            "legendFormat": "Operations/hour"
+          }
+        ]
+      },
+      {
+        "title": "Appointment Bookings",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(appointment_bookings_total[1h]))",
+            "legendFormat": "Bookings/hour"
+          }
+        ]
+      }
+    ],
+    "refresh": "30s",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    }
+  }
+}
