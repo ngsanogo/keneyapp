@@ -38,6 +38,16 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str = "redis://localhost:6379/0"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/0"
 
+    # OAuth2/OIDC
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    MICROSOFT_CLIENT_ID: str = ""
+    MICROSOFT_CLIENT_SECRET: str = ""
+    OKTA_CLIENT_ID: str = ""
+    OKTA_CLIENT_SECRET: str = ""
+    OKTA_DOMAIN: str = ""
+    APP_URL: str = "http://localhost:8000"
+
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=True, extra="allow"
     )
