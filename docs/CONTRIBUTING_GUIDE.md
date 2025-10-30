@@ -37,14 +37,14 @@ python3 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
+# Install pre-commit hooks (must be done after activating virtual environment)
+pip install pre-commit
+pre-commit install
+
 # Frontend setup
 cd frontend
 npm install
 cd ..
-
-# Install pre-commit hooks
-pip install pre-commit
-pre-commit install
 ```
 
 ### 3. Configure Environment

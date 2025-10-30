@@ -84,18 +84,23 @@ def test_patient_creation():
     assert patient.last_name == "Doe"
     assert patient.gender == Gender.MALE
     
-def test_patient_full_name_property():
-    """Test patient full name property."""
+def test_patient_age_calculation():
+    """Test patient age calculation."""
+    from datetime import date
+    
+    # Patient born 30 years ago
+    birth_date = date(date.today().year - 30, 1, 1)
     patient = Patient(
         first_name="Jane",
         last_name="Smith",
-        date_of_birth=date(1985, 5, 20),
+        date_of_birth=birth_date,
         gender=Gender.FEMALE,
         phone="+1234567890"
     )
     
-    # If you add a full_name property
-    # assert patient.full_name == "Jane Smith"
+    # Example: if you implement an age property
+    # assert patient.age >= 30
+    assert patient.date_of_birth == birth_date
 ```
 
 #### Testing Services
@@ -329,12 +334,14 @@ def db_session():
 
 def test_patient_crud_operations(db_session):
     """Test CRUD operations on patient model."""
+    from datetime import date
+    
     # Create
     patient = Patient(
         first_name="Test",
         last_name="Patient",
-        date_of_birth="1990-01-01",
-        gender="male",
+        date_of_birth=date(1990, 1, 1),
+        gender=Gender.MALE,
         phone="+1234567890"
     )
     db_session.add(patient)
