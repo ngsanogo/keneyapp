@@ -60,17 +60,22 @@ def create_appointment(
     Returns:
         Created appointment
     """
-    db_appointment = Appointment(**appointment_data.model_dump())
+    db_appointment = Appointment(
+        **appointment_data.model_dump(),
+        tenant_id=current_user.tenant_id,
+    )
     db.add(db_appointment)
     db.commit()
     db.refresh(db_appointment)
 
     cache_set(
-        f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{db_appointment.id}",
+        f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{db_appointment.id}",
         AppointmentResponse.model_validate(db_appointment).model_dump(mode="json"),
         expire=APPOINTMENT_DETAIL_TTL_SECONDS,
     )
-    cache_clear_pattern(f"{APPOINTMENT_LIST_CACHE_PREFIX}:*")
+    cache_clear_pattern(
+        f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*"
+    )
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
 
     # Track metrics
@@ -142,7 +147,7 @@ def get_appointments(
     """
     status_key = status_filter.value if status_filter else "all"
     cache_key = (
-        f"{APPOINTMENT_LIST_CACHE_PREFIX}:{skip}:{limit}:{status_key}"
+        f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:{skip}:{limit}:{status_key}"
     )
     cached_appointments = cache_get(cache_key)
     if cached_appointments is not None:
@@ -164,7 +169,9 @@ def get_appointments(
         )
         return cached_appointments
 
-    query = db.query(Appointment)
+    query = db.query(Appointment).filter(
+        Appointment.tenant_id == current_user.tenant_id
+    )
     if status_filter:
         query = query.filter(Appointment.status == status_filter)
 
@@ -220,7 +227,7 @@ def get_appointment(
     Returns:
         Appointment record
     """
-    cache_key = f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{appointment_id}"
+    cache_key = f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{appointment_id}"
     cached_appointment = cache_get(cache_key)
     if cached_appointment is not None:
         log_audit_event(
@@ -236,7 +243,14 @@ def get_appointment(
         )
         return cached_appointment
 
-    appointment = db.query(Appointment).filter(Appointment.id == appointment_id).first()
+    appointment = (
+        db.query(Appointment)
+        .filter(
+            Appointment.id == appointment_id,
+            Appointment.tenant_id == current_user.tenant_id,
+        )
+        .first()
+    )
     if not appointment:
         log_audit_event(
             db=db,
@@ -297,7 +311,14 @@ def update_appointment(
     Returns:
         Updated appointment
     """
-    appointment = db.query(Appointment).filter(Appointment.id == appointment_id).first()
+    appointment = (
+        db.query(Appointment)
+        .filter(
+            Appointment.id == appointment_id,
+            Appointment.tenant_id == current_user.tenant_id,
+        )
+        .first()
+    )
     if not appointment:
         log_audit_event(
             db=db,
@@ -339,11 +360,13 @@ def update_appointment(
         mode="json"
     )
     cache_set(
-        f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{appointment.id}",
+        f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{appointment.id}",
         serialized,
         expire=APPOINTMENT_DETAIL_TTL_SECONDS,
     )
-    cache_clear_pattern(f"{APPOINTMENT_LIST_CACHE_PREFIX}:*")
+    cache_clear_pattern(
+        f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*"
+    )
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
 
     return serialized
@@ -366,7 +389,14 @@ def delete_appointment(
         db: Database session
         current_user: Authenticated user performing the delete
     """
-    appointment = db.query(Appointment).filter(Appointment.id == appointment_id).first()
+    appointment = (
+        db.query(Appointment)
+        .filter(
+            Appointment.id == appointment_id,
+            Appointment.tenant_id == current_user.tenant_id,
+        )
+        .first()
+    )
     if not appointment:
         log_audit_event(
             db=db,
@@ -398,6 +428,10 @@ def delete_appointment(
         request=request,
     )
 
-    cache_clear_pattern(f"{APPOINTMENT_LIST_CACHE_PREFIX}:*")
+    cache_clear_pattern(
+        f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*"
+    )
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
-    cache_clear_pattern(f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{appointment_id}")
+    cache_clear_pattern(
+        f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{appointment_id}"
+    )

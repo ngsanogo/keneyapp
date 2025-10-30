@@ -24,22 +24,28 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.get("/", response_model=List[UserResponse])
 def list_users(
     db: Session = Depends(get_db),
-    _: User = Depends(require_roles(UserRole.ADMIN)),
+    current_admin: User = Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ):
     """Return the full user directory (admin only)."""
 
-    return db.query(User).order_by(User.id).all()
+    query = db.query(User)
+    if current_admin.role != UserRole.SUPER_ADMIN:
+        query = query.filter(User.tenant_id == current_admin.tenant_id)
+    return query.order_by(User.id).all()
 
 
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user(
     user_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_roles(UserRole.ADMIN)),
+    current_admin: User = Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ):
     """Retrieve a single user."""
 
-    user = db.query(User).filter(User.id == user_id).first()
+    query = db.query(User).filter(User.id == user_id)
+    if current_admin.role != UserRole.SUPER_ADMIN:
+        query = query.filter(User.tenant_id == current_admin.tenant_id)
+    user = query.first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
@@ -51,11 +57,14 @@ def update_user_status(
     payload: UserStatusUpdate,
     request: Request,
     db: Session = Depends(get_db),
-    current_admin: User = Depends(require_roles(UserRole.ADMIN)),
+    current_admin: User = Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ):
     """Update activation or lock status for a user."""
 
-    user = db.query(User).filter(User.id == user_id).first()
+    query = db.query(User).filter(User.id == user_id)
+    if current_admin.role != UserRole.SUPER_ADMIN:
+        query = query.filter(User.tenant_id == current_admin.tenant_id)
+    user = query.first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
@@ -91,11 +100,14 @@ def update_user_role(
     payload: UserRoleUpdate,
     request: Request,
     db: Session = Depends(get_db),
-    current_admin: User = Depends(require_roles(UserRole.ADMIN)),
+    current_admin: User = Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ):
     """Assign a new role to a user."""
 
-    user = db.query(User).filter(User.id == user_id).first()
+    query = db.query(User).filter(User.id == user_id)
+    if current_admin.role != UserRole.SUPER_ADMIN:
+        query = query.filter(User.tenant_id == current_admin.tenant_id)
+    user = query.first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
@@ -124,11 +136,14 @@ def reset_user_password(
     payload: UserPasswordReset,
     request: Request,
     db: Session = Depends(get_db),
-    current_admin: User = Depends(require_roles(UserRole.ADMIN)),
+    current_admin: User = Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ):
     """Reset a user's password and require re-login."""
 
-    user = db.query(User).filter(User.id == user_id).first()
+    query = db.query(User).filter(User.id == user_id)
+    if current_admin.role != UserRole.SUPER_ADMIN:
+        query = query.filter(User.tenant_id == current_admin.tenant_id)
+    user = query.first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 

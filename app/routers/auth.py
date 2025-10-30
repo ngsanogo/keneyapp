@@ -18,6 +18,7 @@ from app.core.security import (
 )
 from app.core.config import settings
 from app.models.user import User
+from app.models.tenant import Tenant
 from app.schemas.user import (
     ChangePasswordRequest,
     MFASetupResponse,
@@ -70,10 +71,18 @@ def register_user(
             detail="Username already taken",
         )
 
+    tenant = db.query(Tenant).filter(Tenant.id == user_data.tenant_id).first()
+    if not tenant or not tenant.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or inactive tenant",
+        )
+
     # Create new user
     hashed_password = get_password_hash(user_data.password)
     now = datetime.now(timezone.utc)
     db_user = User(
+        tenant_id=tenant.id,
         email=user_data.email,
         username=user_data.username,
         full_name=user_data.full_name,
@@ -94,7 +103,7 @@ def register_user(
         status="success",
         username=db_user.username,
         user_id=db_user.id,
-        details={"role": db_user.role.value},
+        details={"role": db_user.role.value, "tenant_id": tenant.id},
         request=request,
     )
 
@@ -134,6 +143,12 @@ def login(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User account is inactive",
+        )
+
+    if not user.tenant.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tenant is inactive",
         )
 
     if user.is_locked:
@@ -194,7 +209,11 @@ def login(
     # Create access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username, "role": user.role.value},
+        data={
+            "sub": user.username,
+            "role": user.role.value,
+            "tenant_id": user.tenant_id,
+        },
         expires_delta=access_token_expires,
     )
 

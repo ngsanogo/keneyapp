@@ -41,7 +41,14 @@ def get_fhir_patient(
     Returns:
         FHIR Patient resource
     """
-    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    patient = (
+        db.query(Patient)
+        .filter(
+            Patient.id == patient_id,
+            Patient.tenant_id == current_user.tenant_id,
+        )
+        .first()
+    )
 
     if not patient:
         raise HTTPException(
@@ -77,7 +84,7 @@ def create_fhir_patient(
     patient_data = fhir_converter.fhir_to_patient(fhir_patient)
 
     # Create patient
-    patient = Patient(**patient_data)
+    patient = Patient(**patient_data, tenant_id=current_user.tenant_id)
     db.add(patient)
     db.commit()
     db.refresh(patient)
@@ -109,7 +116,14 @@ def get_fhir_appointment(
     Returns:
         FHIR Appointment resource
     """
-    appointment = db.query(Appointment).filter(Appointment.id == appointment_id).first()
+    appointment = (
+        db.query(Appointment)
+        .filter(
+            Appointment.id == appointment_id,
+            Appointment.tenant_id == current_user.tenant_id,
+        )
+        .first()
+    )
 
     if not appointment:
         raise HTTPException(
@@ -142,7 +156,12 @@ def get_fhir_medication_request(
         FHIR MedicationRequest resource
     """
     prescription = (
-        db.query(Prescription).filter(Prescription.id == prescription_id).first()
+        db.query(Prescription)
+        .filter(
+            Prescription.id == prescription_id,
+            Prescription.tenant_id == current_user.tenant_id,
+        )
+        .first()
     )
 
     if not prescription:

@@ -22,6 +22,7 @@ class UserCreate(UserBase):
     """Schema for creating a new user."""
 
     password: str
+    tenant_id: int
 
 
 class UserLogin(BaseModel):
@@ -35,6 +36,7 @@ class UserResponse(UserBase):
     """Schema for user response."""
 
     id: int
+    tenant_id: int
     is_active: bool
     is_locked: bool
     mfa_enabled: bool
@@ -58,6 +60,7 @@ class TokenData(BaseModel):
 
     username: Optional[str] = None
     role: Optional[UserRole] = None
+    tenant_id: Optional[int] = None
 
 
 class UserStatusUpdate(BaseModel):

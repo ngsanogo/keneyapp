@@ -50,5 +50,6 @@ class PatientResponse(PatientBase):
     """Schema for patient response."""
 
     id: int
+    tenant_id: int
 
     model_config = ConfigDict(from_attributes=True)

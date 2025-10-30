@@ -10,6 +10,7 @@ from app.core.database import Base
 from app.models.patient import Patient
 from app.models.appointment import Appointment, AppointmentStatus
 from app.models.prescription import Prescription
+from app.models.tenant import Tenant
 from app.fhir.converters import fhir_converter
 
 
@@ -37,9 +38,25 @@ def db():
 
 
 @pytest.fixture
-def sample_patient(db):
+def tenant(db):
+    """Create a default tenant for fixtures."""
+    tenant = Tenant(
+        name="Test Tenant",
+        slug="test-tenant",
+        is_active=True,
+        configuration={},
+    )
+    db.add(tenant)
+    db.commit()
+    db.refresh(tenant)
+    return tenant
+
+
+@pytest.fixture
+def sample_patient(db, tenant):
     """Create a sample patient."""
     patient = Patient(
+        tenant_id=tenant.id,
         first_name="John",
         last_name="Doe",
         date_of_birth=date(1980, 1, 15),
@@ -125,7 +142,9 @@ def test_fhir_to_patient():
 
 def test_appointment_to_fhir(db, sample_patient):
     """Test converting Appointment to FHIR Appointment resource."""
+    tenant_id = sample_patient.tenant_id
     appointment = Appointment(
+        tenant_id=tenant_id,
         patient_id=sample_patient.id,
         doctor_id=1,
         appointment_date=datetime(2024, 2, 15, 10, 30),
@@ -148,7 +167,9 @@ def test_appointment_to_fhir(db, sample_patient):
 
 def test_prescription_to_fhir(db, sample_patient):
     """Test converting Prescription to FHIR MedicationRequest resource."""
+    tenant_id = sample_patient.tenant_id
     prescription = Prescription(
+        tenant_id=tenant_id,
         patient_id=sample_patient.id,
         doctor_id=1,
         medication_name="Metformin",
@@ -184,6 +205,7 @@ def test_appointment_status_mapping(db, sample_patient):
     
     for keneyapp_status, fhir_status in statuses:
         appointment = Appointment(
+            tenant_id=sample_patient.tenant_id,
             patient_id=sample_patient.id,
             doctor_id=1,
             appointment_date=datetime(2024, 2, 15, 10, 30),

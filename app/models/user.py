@@ -2,12 +2,13 @@
 User model for authentication and authorization.
 """
 
-from sqlalchemy import Column, Integer, String, Boolean, Enum, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, Enum, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
 
 from app.core.database import Base
+from app.models.tenant import Tenant
 
 
 class UserRole(str, enum.Enum):
@@ -17,6 +18,7 @@ class UserRole(str, enum.Enum):
     DOCTOR = "doctor"
     NURSE = "nurse"
     RECEPTIONIST = "receptionist"
+    SUPER_ADMIN = "super_admin"
 
 
 class User(Base):
@@ -25,6 +27,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
@@ -43,5 +46,6 @@ class User(Base):
     )
 
     # Relationships
+    tenant = relationship(Tenant, back_populates="users")
     appointments = relationship("Appointment", back_populates="doctor")
     prescriptions = relationship("Prescription", back_populates="doctor")

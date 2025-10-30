@@ -54,19 +54,24 @@ def create_prescription(
     Returns:
         Created prescription
     """
-    db_prescription = Prescription(**prescription_data.model_dump())
+    db_prescription = Prescription(
+        **prescription_data.model_dump(),
+        tenant_id=current_user.tenant_id,
+    )
     db.add(db_prescription)
     db.commit()
     db.refresh(db_prescription)
 
     cache_set(
-        f"{PRESCRIPTION_DETAIL_CACHE_PREFIX}:{db_prescription.id}",
+        f"{PRESCRIPTION_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{db_prescription.id}",
         PrescriptionResponse.model_validate(db_prescription).model_dump(mode="json"),
         expire=PRESCRIPTION_DETAIL_TTL_SECONDS,
     )
-    cache_clear_pattern(f"{PRESCRIPTION_LIST_CACHE_PREFIX}:*")
     cache_clear_pattern(
-        f"{PRESCRIPTION_PATIENT_CACHE_PREFIX}:{db_prescription.patient_id}"
+        f"{PRESCRIPTION_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*"
+    )
+    cache_clear_pattern(
+        f"{PRESCRIPTION_PATIENT_CACHE_PREFIX}:{current_user.tenant_id}:{db_prescription.patient_id}"
     )
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
 
@@ -123,7 +128,9 @@ def get_prescriptions(
     Returns:
         List of prescriptions
     """
-    cache_key = f"{PRESCRIPTION_LIST_CACHE_PREFIX}:{skip}:{limit}"
+    cache_key = (
+        f"{PRESCRIPTION_LIST_CACHE_PREFIX}:{current_user.tenant_id}:{skip}:{limit}"
+    )
     cached = cache_get(cache_key)
     if cached is not None:
         log_audit_event(
@@ -138,7 +145,13 @@ def get_prescriptions(
         )
         return cached
 
-    prescriptions = db.query(Prescription).offset(skip).limit(limit).all()
+    prescriptions = (
+        db.query(Prescription)
+        .filter(Prescription.tenant_id == current_user.tenant_id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
     serialized = [
         PrescriptionResponse.model_validate(p).model_dump(mode="json")
         for p in prescriptions
@@ -182,7 +195,9 @@ def get_prescription(
     Returns:
         Prescription record
     """
-    cache_key = f"{PRESCRIPTION_DETAIL_CACHE_PREFIX}:{prescription_id}"
+    cache_key = (
+        f"{PRESCRIPTION_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{prescription_id}"
+    )
     cached = cache_get(cache_key)
     if cached is not None:
         log_audit_event(
@@ -199,7 +214,12 @@ def get_prescription(
         return cached
 
     prescription = (
-        db.query(Prescription).filter(Prescription.id == prescription_id).first()
+        db.query(Prescription)
+        .filter(
+            Prescription.id == prescription_id,
+            Prescription.tenant_id == current_user.tenant_id,
+        )
+        .first()
     )
     if not prescription:
         log_audit_event(
@@ -261,7 +281,9 @@ def get_patient_prescriptions(
     Returns:
         List of patient's prescriptions
     """
-    cache_key = f"{PRESCRIPTION_PATIENT_CACHE_PREFIX}:{patient_id}"
+    cache_key = (
+        f"{PRESCRIPTION_PATIENT_CACHE_PREFIX}:{current_user.tenant_id}:{patient_id}"
+    )
     cached = cache_get(cache_key)
     if cached is not None:
         log_audit_event(
@@ -278,7 +300,12 @@ def get_patient_prescriptions(
         return cached
 
     prescriptions = (
-        db.query(Prescription).filter(Prescription.patient_id == patient_id).all()
+        db.query(Prescription)
+        .filter(
+            Prescription.patient_id == patient_id,
+            Prescription.tenant_id == current_user.tenant_id,
+        )
+        .all()
     )
     serialized = [
         PrescriptionResponse.model_validate(p).model_dump(mode="json")
@@ -319,7 +346,12 @@ def delete_prescription(
         current_user: Authenticated user performing the delete
     """
     prescription = (
-        db.query(Prescription).filter(Prescription.id == prescription_id).first()
+        db.query(Prescription)
+        .filter(
+            Prescription.id == prescription_id,
+            Prescription.tenant_id == current_user.tenant_id,
+        )
+        .first()
     )
     if not prescription:
         log_audit_event(
@@ -352,9 +384,13 @@ def delete_prescription(
         request=request,
     )
 
-    cache_clear_pattern(f"{PRESCRIPTION_LIST_CACHE_PREFIX}:*")
-    cache_clear_pattern(f"{PRESCRIPTION_DETAIL_CACHE_PREFIX}:{prescription_id}")
     cache_clear_pattern(
-        f"{PRESCRIPTION_PATIENT_CACHE_PREFIX}:{prescription.patient_id}"
+        f"{PRESCRIPTION_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*"
+    )
+    cache_clear_pattern(
+        f"{PRESCRIPTION_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{prescription_id}"
+    )
+    cache_clear_pattern(
+        f"{PRESCRIPTION_PATIENT_CACHE_PREFIX}:{current_user.tenant_id}:{prescription.patient_id}"
     )
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)

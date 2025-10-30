@@ -31,5 +31,6 @@ class PrescriptionResponse(PrescriptionBase):
 
     id: int
     prescribed_date: datetime
+    tenant_id: int
 
     model_config = ConfigDict(from_attributes=True)

@@ -42,9 +42,20 @@ def get_current_user(
     if not username:
         raise unauthorized
 
+    tenant_id = payload.get("tenant_id")
+
     user = db.query(User).filter(User.username == username).first()
     if not user:
         raise unauthorized
+
+    if tenant_id is not None and user.tenant_id != tenant_id:
+        raise unauthorized
+
+    if not user.tenant.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tenant is inactive",
+        )
 
     return user
 
@@ -82,8 +93,13 @@ def require_roles(*allowed_roles: Iterable[UserRole]) -> Callable:
     """
 
     # Flatten single iterable passed in (require_roles([UserRole.ADMIN, ...]))
-    if len(allowed_roles) == 1 and isinstance(allowed_roles[0], Iterable):
-        allowed = set(allowed_roles[0])
+    first = allowed_roles[0] if allowed_roles else None
+    if (
+        len(allowed_roles) == 1
+        and isinstance(first, Iterable)
+        and not isinstance(first, (str, UserRole))
+    ):
+        allowed = set(first)
     else:
         allowed = set(allowed_roles)
 

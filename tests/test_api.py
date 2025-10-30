@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 import pyotp
 from fastapi.testclient import TestClient
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -13,6 +14,7 @@ from app.main import app
 from app.core.database import Base, get_db
 from app.core.security import get_password_hash, create_access_token
 from app.models.user import User, UserRole
+from app.models.tenant import Tenant
 
 # Create an in-memory SQLite database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
@@ -42,8 +44,37 @@ app.dependency_overrides[get_db] = override_get_db
 # Create tables
 Base.metadata.create_all(bind=engine)
 
+
+def _ensure_default_tenant() -> Tenant:
+    """Create or fetch a default tenant for testing."""
+    db = TestingSessionLocal()
+    tenant = db.query(Tenant).filter(Tenant.slug == "test-tenant").first()
+    if not tenant:
+        tenant = Tenant(
+            name="Test Tenant",
+            slug="test-tenant",
+            is_active=True,
+            configuration={},
+        )
+        db.add(tenant)
+        db.commit()
+        db.refresh(tenant)
+    db.close()
+    return tenant
+
+
+DEFAULT_TENANT_ID = _ensure_default_tenant().id
+
 # Create test client
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def _reset_override_and_tenant():
+    """Ensure DB override and default tenant are in place for each test."""
+    app.dependency_overrides[get_db] = override_get_db
+    _ensure_default_tenant()
+    yield
 
 
 def _create_user(role: UserRole = UserRole.ADMIN, password: str = "StrongPass123!"):
@@ -51,6 +82,7 @@ def _create_user(role: UserRole = UserRole.ADMIN, password: str = "StrongPass123
     db = TestingSessionLocal()
     username = f"{role.value}_{uuid.uuid4().hex[:8]}"
     user = User(
+        tenant_id=DEFAULT_TENANT_ID,
         email=f"{username}@example.com",
         username=username,
         full_name="Test User",
@@ -70,7 +102,7 @@ def _authenticate_user(role: UserRole = UserRole.ADMIN):
     """Create and authenticate a user, returning the auth header."""
     user, password = _create_user(role=role)
     token = create_access_token(
-        data={"sub": user.username, "role": user.role.value},
+        data={"sub": user.username, "role": user.role.value, "tenant_id": user.tenant_id},
     )
     return {"Authorization": f"Bearer {token}"}, user
 
@@ -200,6 +232,7 @@ def test_change_password_flow():
         data={"username": user.username, "password": "NewStrongPass!1"},
     )
     assert login_response.status_code == 200
+    assert "access_token" in login_response.json()
 
 
 def test_mfa_login_flow():
@@ -230,3 +263,78 @@ def test_mfa_login_flow():
         data={"username": user.username, "password": "StrongPass123!", "otp": otp},
     )
     assert login_with_otp.status_code == 200
+    assert "access_token" in login_with_otp.json()
+
+
+def test_super_admin_tenant_crud_and_module_management():
+    """Super admin can manage tenants and their modules."""
+    headers, _ = _authenticate_user(role=UserRole.SUPER_ADMIN)
+
+    tenant_payload = {
+        "name": f"Tenant {uuid.uuid4().hex[:6]}",
+        "slug": f"tenant-{uuid.uuid4().hex[:6]}",
+        "contact_email": "ops@example.com",
+        "region": "US",
+        "default_timezone": "UTC",
+        "is_active": True,
+        "configuration": {"theme": "light"},
+    }
+
+    create_resp = client.post(
+        "/api/v1/tenants/",
+        json=tenant_payload,
+        headers=headers,
+    )
+    assert create_resp.status_code == 201
+    tenant_data = create_resp.json()
+    tenant_id = tenant_data["id"]
+    assert tenant_data["slug"] == tenant_payload["slug"]
+
+    list_resp = client.get("/api/v1/tenants/", headers=headers)
+    assert list_resp.status_code == 200
+    tenant_ids = [tenant["id"] for tenant in list_resp.json()]
+    assert tenant_id in tenant_ids
+
+    update_resp = client.patch(
+        f"/api/v1/tenants/{tenant_id}",
+        json={"is_active": False, "region": "EU"},
+        headers=headers,
+    )
+    assert update_resp.status_code == 200
+    assert update_resp.json()["is_active"] is False
+    assert update_resp.json()["region"] == "EU"
+
+    module_payload = {
+        "is_enabled": True,
+        "configuration": {"features": ["patients", "appointments"]},
+    }
+    module_resp = client.put(
+        f"/api/v1/tenants/{tenant_id}/modules/patients",
+        json=module_payload,
+        headers=headers,
+    )
+    assert module_resp.status_code == 200
+    module_data = module_resp.json()
+    assert module_data["module_key"] == "patients"
+    assert module_data["tenant_id"] == tenant_id
+    assert module_data["is_enabled"] is True
+
+    modules_list = client.get(
+        f"/api/v1/tenants/{tenant_id}/modules",
+        headers=headers,
+    )
+    assert modules_list.status_code == 200
+    assert len(modules_list.json()) >= 1
+
+    delete_resp = client.delete(
+        f"/api/v1/tenants/{tenant_id}/modules/patients",
+        headers=headers,
+    )
+    assert delete_resp.status_code == 204
+
+
+def test_admin_cannot_manage_tenants():
+    """Tenant-level admins should be forbidden from global tenant management."""
+    headers, _ = _authenticate_user(role=UserRole.ADMIN)
+    response = client.get("/api/v1/tenants/", headers=headers)
+    assert response.status_code == 403

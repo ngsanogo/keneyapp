@@ -57,14 +57,24 @@ def create_patient(
     """
     # Check if email already exists
     if patient_data.email:
-        existing = db.query(Patient).filter(Patient.email == patient_data.email).first()
+        existing = (
+            db.query(Patient)
+            .filter(
+                Patient.email == patient_data.email,
+                Patient.tenant_id == current_user.tenant_id,
+            )
+            .first()
+        )
         if existing:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered",
             )
 
-    db_patient = Patient(**patient_data.model_dump())
+    db_patient = Patient(
+        **patient_data.model_dump(),
+        tenant_id=current_user.tenant_id,
+    )
     db.add(db_patient)
     db.commit()
     db.refresh(db_patient)
@@ -83,11 +93,11 @@ def create_patient(
 
     # Cache management
     cache_set(
-        f"{PATIENT_DETAIL_CACHE_PREFIX}:{db_patient.id}",
+        f"{PATIENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{db_patient.id}",
         PatientResponse.model_validate(db_patient).model_dump(mode="json"),
         expire=PATIENT_DETAIL_TTL_SECONDS,
     )
-    cache_clear_pattern(f"{PATIENT_LIST_CACHE_PREFIX}:*")
+    cache_clear_pattern(f"{PATIENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
 
     patient_operations_total.labels(operation="create").inc()
@@ -127,7 +137,7 @@ def get_patients(
     Returns:
         List of patient records
     """
-    cache_key = f"{PATIENT_LIST_CACHE_PREFIX}:{skip}:{limit}"
+    cache_key = f"{PATIENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:{skip}:{limit}"
     cached_patients = cache_get(cache_key)
     if cached_patients is not None:
         log_audit_event(
@@ -142,7 +152,13 @@ def get_patients(
         )
         return cached_patients
 
-    patients = db.query(Patient).offset(skip).limit(limit).all()
+    patients = (
+        db.query(Patient)
+        .filter(Patient.tenant_id == current_user.tenant_id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
     serialized_patients = [
         PatientResponse.model_validate(patient).model_dump(mode="json")
         for patient in patients
@@ -193,7 +209,7 @@ def get_patient(
     Returns:
         Patient record
     """
-    cache_key = f"{PATIENT_DETAIL_CACHE_PREFIX}:{patient_id}"
+    cache_key = f"{PATIENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{patient_id}"
     cached_patient = cache_get(cache_key)
     if cached_patient is not None:
         log_audit_event(
@@ -209,7 +225,14 @@ def get_patient(
         )
         return cached_patient
 
-    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    patient = (
+        db.query(Patient)
+        .filter(
+            Patient.id == patient_id,
+            Patient.tenant_id == current_user.tenant_id,
+        )
+        .first()
+    )
     if not patient:
         log_audit_event(
             db=db,
@@ -265,7 +288,14 @@ def update_patient(
     Returns:
         Updated patient record
     """
-    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    patient = (
+        db.query(Patient)
+        .filter(
+            Patient.id == patient_id,
+            Patient.tenant_id == current_user.tenant_id,
+        )
+        .first()
+    )
     if not patient:
         log_audit_event(
             db=db,
@@ -306,11 +336,11 @@ def update_patient(
         PatientResponse.model_validate(patient).model_dump(mode="json")
     )
     cache_set(
-        f"{PATIENT_DETAIL_CACHE_PREFIX}:{patient.id}",
+        f"{PATIENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{patient.id}",
         serialized_patient,
         expire=PATIENT_DETAIL_TTL_SECONDS,
     )
-    cache_clear_pattern(f"{PATIENT_LIST_CACHE_PREFIX}:*")
+    cache_clear_pattern(f"{PATIENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
 
     patient_operations_total.labels(operation="update").inc()
@@ -340,7 +370,14 @@ def delete_patient(
         db: Database session
         current_user: Authenticated user performing the operation
     """
-    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    patient = (
+        db.query(Patient)
+        .filter(
+            Patient.id == patient_id,
+            Patient.tenant_id == current_user.tenant_id,
+        )
+        .first()
+    )
     if not patient:
         log_audit_event(
             db=db,
@@ -371,8 +408,10 @@ def delete_patient(
         request=request,
     )
 
-    cache_clear_pattern(f"{PATIENT_LIST_CACHE_PREFIX}:*")
+    cache_clear_pattern(f"{PATIENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
-    cache_clear_pattern(f"{PATIENT_DETAIL_CACHE_PREFIX}:{patient_id}")
+    cache_clear_pattern(
+        f"{PATIENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{patient_id}"
+    )
 
     patient_operations_total.labels(operation="delete").inc()

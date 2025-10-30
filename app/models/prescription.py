@@ -7,6 +7,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 
 from app.core.database import Base
+from app.models.tenant import Tenant
 
 
 class Prescription(Base):
@@ -15,6 +16,7 @@ class Prescription(Base):
     __tablename__ = "prescriptions"
 
     id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False, index=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     doctor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     medication_name = Column(String, nullable=False)
@@ -30,3 +32,4 @@ class Prescription(Base):
     # Relationships
     patient = relationship("Patient", back_populates="prescriptions")
     doctor = relationship("User", back_populates="prescriptions")
+    tenant = relationship(Tenant, back_populates="prescriptions")

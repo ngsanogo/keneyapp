@@ -41,7 +41,8 @@ def get_dashboard_stats(
     Returns:
         Dictionary containing various health metrics and statistics
     """
-    cached_stats = cache_get(DASHBOARD_STATS_CACHE_KEY)
+    cache_key = f"{DASHBOARD_STATS_CACHE_KEY}:{current_user.tenant_id}"
+    cached_stats = cache_get(cache_key)
     if cached_stats is not None:
         log_audit_event(
             db=db,
@@ -55,9 +56,21 @@ def get_dashboard_stats(
         )
         return cached_stats
     # Total counts
-    total_patients = db.query(func.count(Patient.id)).scalar()
-    total_appointments = db.query(func.count(Appointment.id)).scalar()
-    total_prescriptions = db.query(func.count(Prescription.id)).scalar()
+    total_patients = (
+        db.query(func.count(Patient.id))
+        .filter(Patient.tenant_id == current_user.tenant_id)
+        .scalar()
+    )
+    total_appointments = (
+        db.query(func.count(Appointment.id))
+        .filter(Appointment.tenant_id == current_user.tenant_id)
+        .scalar()
+    )
+    total_prescriptions = (
+        db.query(func.count(Prescription.id))
+        .filter(Prescription.tenant_id == current_user.tenant_id)
+        .scalar()
+    )
 
     # Today's appointments
     today = datetime.now(timezone.utc).date()
@@ -67,6 +80,7 @@ def get_dashboard_stats(
     today_appointments = (
         db.query(func.count(Appointment.id))
         .filter(
+            Appointment.tenant_id == current_user.tenant_id,
             Appointment.appointment_date >= today_start,
             Appointment.appointment_date <= today_end,
         )
@@ -76,19 +90,28 @@ def get_dashboard_stats(
     # Appointments by status
     scheduled_appointments = (
         db.query(func.count(Appointment.id))
-        .filter(Appointment.status == AppointmentStatus.SCHEDULED)
+        .filter(
+            Appointment.tenant_id == current_user.tenant_id,
+            Appointment.status == AppointmentStatus.SCHEDULED,
+        )
         .scalar()
     )
 
     completed_appointments = (
         db.query(func.count(Appointment.id))
-        .filter(Appointment.status == AppointmentStatus.COMPLETED)
+        .filter(
+            Appointment.tenant_id == current_user.tenant_id,
+            Appointment.status == AppointmentStatus.COMPLETED,
+        )
         .scalar()
     )
 
     cancelled_appointments = (
         db.query(func.count(Appointment.id))
-        .filter(Appointment.status == AppointmentStatus.CANCELLED)
+        .filter(
+            Appointment.tenant_id == current_user.tenant_id,
+            Appointment.status == AppointmentStatus.CANCELLED,
+        )
         .scalar()
     )
 
@@ -96,17 +119,27 @@ def get_dashboard_stats(
     week_ago = datetime.now(timezone.utc) - timedelta(days=7)
 
     # Assuming we'd have a created_at field
-    recent_patients = db.query(func.count(Patient.id)).scalar()
+    recent_patients = (
+        db.query(func.count(Patient.id))
+        .filter(Patient.tenant_id == current_user.tenant_id)
+        .scalar()
+    )
 
     recent_appointments = (
         db.query(func.count(Appointment.id))
-        .filter(Appointment.appointment_date >= week_ago)
+        .filter(
+            Appointment.tenant_id == current_user.tenant_id,
+            Appointment.appointment_date >= week_ago,
+        )
         .scalar()
     )
 
     recent_prescriptions = (
         db.query(func.count(Prescription.id))
-        .filter(Prescription.prescribed_date >= week_ago)
+        .filter(
+            Prescription.tenant_id == current_user.tenant_id,
+            Prescription.prescribed_date >= week_ago,
+        )
         .scalar()
     )
 
@@ -127,11 +160,7 @@ def get_dashboard_stats(
         },
     }
 
-    cache_set(
-        DASHBOARD_STATS_CACHE_KEY,
-        stats,
-        expire=DASHBOARD_STATS_TTL_SECONDS,
-    )
+    cache_set(cache_key, stats, expire=DASHBOARD_STATS_TTL_SECONDS)
 
     log_audit_event(
         db=db,

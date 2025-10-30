@@ -14,6 +14,7 @@ from app.core.oauth import get_oauth_authorization_url, handle_oauth_callback
 from app.core.rate_limit import limiter
 from app.core.security import create_access_token, get_password_hash
 from app.models.user import User, UserRole
+from app.models.tenant import Tenant
 from app.schemas.user import Token
 
 router = APIRouter(prefix="/oauth", tags=["OAuth"])
@@ -95,7 +96,26 @@ async def oauth_callback(
             counter += 1
 
         # Create new user with OAuth
+        tenant = (
+            db.query(Tenant)
+            .filter(Tenant.slug == "default", Tenant.is_active.is_(True))
+            .first()
+        )
+        if not tenant:
+            tenant = (
+                db.query(Tenant)
+                .filter(Tenant.is_active.is_(True))
+                .order_by(Tenant.id)
+                .first()
+            )
+        if not tenant:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="No active tenants available for registration",
+            )
+
         user = User(
+            tenant_id=tenant.id,
             email=email,
             username=username,
             full_name=user_info.get("name", email),
@@ -119,7 +139,11 @@ async def oauth_callback(
             status="success",
             username=user.username,
             user_id=user.id,
-            details={"oauth_provider": provider, "registration_method": "oauth"},
+            details={
+                "oauth_provider": provider,
+                "registration_method": "oauth",
+                "tenant_id": tenant.id,
+            },
             request=request,
         )
 
@@ -127,6 +151,11 @@ async def oauth_callback(
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="User account is inactive"
+        )
+
+    if not user.tenant.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Tenant is inactive"
         )
 
     if user.is_locked:
@@ -141,7 +170,11 @@ async def oauth_callback(
     # Create access token
     access_token_expires = timedelta(minutes=30)
     access_token = create_access_token(
-        data={"sub": user.username, "role": user.role.value},
+        data={
+            "sub": user.username,
+            "role": user.role.value,
+            "tenant_id": user.tenant_id,
+        },
         expires_delta=access_token_expires,
     )
 
@@ -153,7 +186,11 @@ async def oauth_callback(
         status="success",
         username=user.username,
         user_id=user.id,
-        details={"oauth_provider": provider, "authentication_method": "oauth"},
+        details={
+            "oauth_provider": provider,
+            "authentication_method": "oauth",
+            "tenant_id": user.tenant_id,
+        },
         request=request,
     )
 
