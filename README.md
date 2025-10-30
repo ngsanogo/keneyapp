@@ -11,11 +11,19 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 - **Dashboard**: Real-time health metrics and statistics
 - **Multi-Role Support**: Role-based access control for Admin, Doctor, Nurse, and Receptionist
 
+### 🆕 Enterprise Features (v2.0)
+- ✅ **OAuth2/OIDC Authentication**: SSO with Google, Microsoft, and Okta
+- ✅ **Data Encryption at Rest**: AES-256-GCM encryption for sensitive patient data
+- ✅ **GraphQL API**: Modern API alongside REST for flexible data queries
+- ✅ **FHIR Interoperability**: HL7 FHIR R4 support for healthcare data exchange
+- ✅ **Cloud Deployment**: Terraform scripts for AWS, Azure, and GCP
+
 ### Security & Compliance
 - ✅ GDPR/HIPAA compliant architecture
-- ✅ JWT-based authentication
+- ✅ JWT-based authentication + OAuth2/OIDC
 - ✅ Password hashing with bcrypt
 - ✅ Role-based access control (RBAC)
+- ✅ **Data encryption at rest** (AES-256-GCM)
 - ✅ **Comprehensive audit logging** for all critical operations
 - ✅ **Rate limiting** to prevent abuse
 - ✅ **Security headers** (XSS, CSRF, CSP protection)
@@ -192,18 +200,33 @@ The API documentation is automatically generated and available at:
 
 ### Main Endpoints
 
+**Authentication:**
 - `POST /api/v1/auth/register` - Register new user
 - `POST /api/v1/auth/login` - User login
 - `GET /api/v1/auth/me` - Retrieve current authenticated user profile
+- `GET /api/v1/oauth/authorize/{provider}` - 🆕 Initiate OAuth flow
+- `GET /api/v1/oauth/callback/{provider}` - 🆕 OAuth callback handler
+
+**Patient Management:**
 - `GET /api/v1/patients/` - List all patients
 - `POST /api/v1/patients/` - Create new patient
+- `GET /api/v1/fhir/Patient/{id}` - 🆕 Get patient in FHIR format
+- `POST /api/v1/fhir/Patient` - 🆕 Create patient from FHIR resource
+
+**Appointments & Prescriptions:**
 - `GET /api/v1/appointments/` - List all appointments
 - `POST /api/v1/appointments/` - Create new appointment
 - `GET /api/v1/prescriptions/` - List all prescriptions
 - `POST /api/v1/prescriptions/` - Create new prescription
+- `GET /api/v1/fhir/Appointment/{id}` - 🆕 Get appointment in FHIR format
+- `GET /api/v1/fhir/MedicationRequest/{id}` - 🆕 Get prescription in FHIR format
+
+**Dashboard & Monitoring:**
 - `GET /api/v1/dashboard/stats` - Get dashboard statistics
 - `GET /health` - Health check endpoint
 - `GET /metrics` - Prometheus metrics
+- `POST /graphql` - 🆕 GraphQL endpoint
+- `GET /api/v1/fhir/metadata` - 🆕 FHIR capability statement
 
 ## 🔍 Monitoring & Observability
 
@@ -411,6 +434,16 @@ See [k8s/README.md](k8s/README.md) for detailed deployment instructions.
 6. Commit your changes (`git commit -m 'Add amazing feature'`)
 7. Push to the branch (`git push origin feature/amazing-feature`)
 8. Open a Pull Request
+
+## 📚 Documentation
+
+Comprehensive documentation available in the `docs/` directory:
+
+- **[OAuth Guide](docs/OAUTH_GUIDE.md)** - OAuth2/OIDC authentication setup
+- **[Encryption Guide](docs/ENCRYPTION_GUIDE.md)** - Data encryption implementation
+- **[FHIR Guide](docs/FHIR_GUIDE.md)** - FHIR interoperability guide
+- **[New Features](docs/NEW_FEATURES.md)** - Complete v2.0 feature overview
+- **[Integration Plan](docs/INTEGRATION_PLAN.md)** - System integration guide
 
 ## 📄 License
 
