@@ -27,7 +27,9 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://keneyapp:keneyapp@localhost:5432/keneyapp"
 
     # CORS
-    ALLOWED_ORIGINS: Union[str, List[str]] = "http://localhost:3000,http://localhost:8000"
+    ALLOWED_ORIGINS: Union[str, List[str]] = (
+        "http://localhost:3000,http://localhost:8000"
+    )
 
     # Redis
     REDIS_HOST: str = "localhost"

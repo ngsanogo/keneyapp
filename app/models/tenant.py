@@ -31,7 +31,9 @@ class Tenant(Base):
     default_timezone = Column(String, nullable=True, default="UTC")
     is_active = Column(Boolean, nullable=False, default=True)
     configuration = Column(JSON, nullable=False, default=dict)
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -68,7 +70,9 @@ class TenantModule(Base):
     module_key = Column(String, nullable=False)
     is_enabled = Column(Boolean, nullable=False, default=True)
     configuration = Column(JSON, nullable=False, default=dict)
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -77,4 +81,3 @@ class TenantModule(Base):
     )
 
     tenant = relationship("Tenant", back_populates="modules")
-
