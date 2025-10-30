@@ -73,22 +73,16 @@ def create_appointment(
         AppointmentResponse.model_validate(db_appointment).model_dump(mode="json"),
         expire=APPOINTMENT_DETAIL_TTL_SECONDS,
     )
-    cache_clear_pattern(
-        f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*"
-    )
+    cache_clear_pattern(f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
 
     # Track metrics
-    appointment_bookings_total.labels(
-        status=db_appointment.status.value
-    ).inc()
+    appointment_bookings_total.labels(status=db_appointment.status.value).inc()
 
     # Queue reminder notifications (best effort)
     try:
         patient = (
-            db.query(Patient)
-            .filter(Patient.id == db_appointment.patient_id)
-            .first()
+            db.query(Patient).filter(Patient.id == db_appointment.patient_id).first()
         )
         patient_email = patient.email if patient else None
         send_appointment_reminder.delay(
@@ -146,9 +140,7 @@ def get_appointments(
         List of appointments
     """
     status_key = status_filter.value if status_filter else "all"
-    cache_key = (
-        f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:{skip}:{limit}:{status_key}"
-    )
+    cache_key = f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:{skip}:{limit}:{status_key}"
     cached_appointments = cache_get(cache_key)
     if cached_appointments is not None:
         log_audit_event(
@@ -227,7 +219,9 @@ def get_appointment(
     Returns:
         Appointment record
     """
-    cache_key = f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{appointment_id}"
+    cache_key = (
+        f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{appointment_id}"
+    )
     cached_appointment = cache_get(cache_key)
     if cached_appointment is not None:
         log_audit_event(
@@ -278,9 +272,7 @@ def get_appointment(
         username=current_user.username,
         request=request,
     )
-    serialized = AppointmentResponse.model_validate(appointment).model_dump(
-        mode="json"
-    )
+    serialized = AppointmentResponse.model_validate(appointment).model_dump(mode="json")
     cache_set(
         cache_key,
         serialized,
@@ -356,17 +348,13 @@ def update_appointment(
         request=request,
     )
 
-    serialized = AppointmentResponse.model_validate(appointment).model_dump(
-        mode="json"
-    )
+    serialized = AppointmentResponse.model_validate(appointment).model_dump(mode="json")
     cache_set(
         f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{appointment.id}",
         serialized,
         expire=APPOINTMENT_DETAIL_TTL_SECONDS,
     )
-    cache_clear_pattern(
-        f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*"
-    )
+    cache_clear_pattern(f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
 
     return serialized
@@ -428,9 +416,7 @@ def delete_appointment(
         request=request,
     )
 
-    cache_clear_pattern(
-        f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*"
-    )
+    cache_clear_pattern(f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
     cache_clear_pattern(
         f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{appointment_id}"

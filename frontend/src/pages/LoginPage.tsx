@@ -27,17 +27,17 @@ const LoginPage: React.FC = () => {
       <div className="login-card">
         <h1>KeneyApp</h1>
         <h2>Healthcare Management Platform</h2>
-        
+
         <form onSubmit={handleSubmit} className="login-form">
           {error && <div className="error-message">{error}</div>}
-          
+
           <div className="form-group">
             <label htmlFor="username">Username</label>
             <input
               type="text"
               id="username"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={e => setUsername(e.target.value)}
               required
               autoFocus
             />
@@ -49,7 +49,7 @@ const LoginPage: React.FC = () => {
               type="password"
               id="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               required
             />
           </div>
@@ -60,7 +60,9 @@ const LoginPage: React.FC = () => {
         </form>
 
         <div className="demo-credentials">
-          <p><strong>Demo Accounts:</strong></p>
+          <p>
+            <strong>Demo Accounts:</strong>
+          </p>
           <p>Admin: admin / admin123</p>
           <p>Doctor: doctor / doctor123</p>
           <p>Nurse: nurse / nurse123</p>

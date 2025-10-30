@@ -2,7 +2,16 @@
 Patient model for healthcare record management.
 """
 
-from sqlalchemy import Column, Integer, String, Date, Text, Enum, ForeignKey, UniqueConstraint
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Date,
+    Text,
+    Enum,
+    ForeignKey,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 import enum
 

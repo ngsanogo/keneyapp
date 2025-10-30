@@ -23,9 +23,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem('token')
-  );
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
 
   const login = async (username: string, password: string) => {
     try {
@@ -33,10 +31,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       formData.append('username', username);
       formData.append('password', password);
 
-      const response = await axios.post(
-        `${API_URL}/api/v1/auth/login`,
-        formData
-      );
+      const response = await axios.post(`${API_URL}/api/v1/auth/login`, formData);
 
       const { access_token } = response.data;
       setToken(access_token);
@@ -48,7 +43,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         username,
         email: `${username}@keneyapp.com`,
         full_name: username,
-        role: 'doctor'
+        role: 'doctor',
       };
       setUser(userInfo);
     } catch (error) {
@@ -68,7 +63,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     token,
     login,
     logout,
-    isAuthenticated: !!token
+    isAuthenticated: !!token,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

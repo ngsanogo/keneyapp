@@ -426,19 +426,41 @@ See [k8s/README.md](k8s/README.md) for detailed deployment instructions.
 
 ## 🤝 Contributing
 
+We welcome contributions! Please read our contribution guidelines before submitting PRs.
+
+**Quick Links:**
+- [Contributing Guide](CONTRIBUTING.md) - Detailed contribution guidelines
+- [Code of Conduct](CODE_OF_CONDUCT.md) - Community standards
+- [Security Policy](SECURITY.md) - Security reporting and best practices
+
+**Development Setup:**
+```bash
+# Quick setup with Makefile
+make setup          # Install dependencies and hooks
+make dev            # Start development servers
+make test           # Run tests
+make lint           # Check code quality
+```
+
+**Contribution Process:**
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
+3. Make your changes following our [coding standards](CONTRIBUTING.md#coding-standards)
 4. Add tests for new functionality
-5. Run linting and tests
-6. Commit your changes (`git commit -m 'Add amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
+5. Run quality checks (`make lint && make test`)
+6. Commit using [conventional commits](CONTRIBUTING.md#commit-message-convention)
+7. Push to your fork and open a Pull Request
 
 ## 📚 Documentation
 
 Comprehensive documentation available in the `docs/` directory:
 
+### Getting Started
+- **[Development Guide](docs/DEVELOPMENT.md)** - Complete development setup and workflow
+- **[API Reference](docs/API_REFERENCE.md)** - Full API documentation with examples
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment instructions
+
+### Advanced Features
 - **[OAuth Guide](docs/OAUTH_GUIDE.md)** - OAuth2/OIDC authentication setup
 - **[Encryption Guide](docs/ENCRYPTION_GUIDE.md)** - Data encryption implementation
 - **[FHIR Guide](docs/FHIR_GUIDE.md)** - FHIR interoperability guide

@@ -259,9 +259,7 @@ def get_patient(
         username=current_user.username,
         request=request,
     )
-    serialized_patient = (
-        PatientResponse.model_validate(patient).model_dump(mode="json")
-    )
+    serialized_patient = PatientResponse.model_validate(patient).model_dump(mode="json")
     cache_set(cache_key, serialized_patient, expire=PATIENT_DETAIL_TTL_SECONDS)
     return serialized_patient
 
@@ -332,9 +330,7 @@ def update_patient(
         request=request,
     )
 
-    serialized_patient = (
-        PatientResponse.model_validate(patient).model_dump(mode="json")
-    )
+    serialized_patient = PatientResponse.model_validate(patient).model_dump(mode="json")
     cache_set(
         f"{PATIENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{patient.id}",
         serialized_patient,
@@ -392,7 +388,7 @@ def delete_patient(
         )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
-    )
+        )
 
     db.delete(patient)
     db.commit()

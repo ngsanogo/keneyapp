@@ -23,7 +23,9 @@ from app.schemas.tenant import (
 router = APIRouter(prefix="/tenants", tags=["tenants"])
 
 
-def _require_super_admin(current_user: User = Depends(require_roles(UserRole.SUPER_ADMIN))) -> User:
+def _require_super_admin(
+    current_user: User = Depends(require_roles(UserRole.SUPER_ADMIN)),
+) -> User:
     """Ensure the current user is a platform super administrator."""
     return current_user
 
@@ -32,7 +34,9 @@ def _get_tenant_or_404(db: Session, tenant_id: int) -> Tenant:
     """Fetch tenant or raise 404."""
     tenant = db.query(Tenant).filter(Tenant.id == tenant_id).first()
     if not tenant:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found"
+        )
     return tenant
 
 
@@ -160,9 +164,7 @@ def update_tenant(
         status="success",
         user_id=current_user.id,
         username=current_user.username,
-        details={
-            "updated_fields": list(payload.model_dump(exclude_unset=True).keys())
-        },
+        details={"updated_fields": list(payload.model_dump(exclude_unset=True).keys())},
         request=request,
     )
 
@@ -282,7 +284,8 @@ def delete_tenant_module(
 
     if not module:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Module configuration not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Module configuration not found",
         )
 
     db.delete(module)

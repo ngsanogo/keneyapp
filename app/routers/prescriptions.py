@@ -67,9 +67,7 @@ def create_prescription(
         PrescriptionResponse.model_validate(db_prescription).model_dump(mode="json"),
         expire=PRESCRIPTION_DETAIL_TTL_SECONDS,
     )
-    cache_clear_pattern(
-        f"{PRESCRIPTION_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*"
-    )
+    cache_clear_pattern(f"{PRESCRIPTION_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
     cache_clear_pattern(
         f"{PRESCRIPTION_PATIENT_CACHE_PREFIX}:{current_user.tenant_id}:{db_prescription.patient_id}"
     )
@@ -384,9 +382,7 @@ def delete_prescription(
         request=request,
     )
 
-    cache_clear_pattern(
-        f"{PRESCRIPTION_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*"
-    )
+    cache_clear_pattern(f"{PRESCRIPTION_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
     cache_clear_pattern(
         f"{PRESCRIPTION_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{prescription_id}"
     )

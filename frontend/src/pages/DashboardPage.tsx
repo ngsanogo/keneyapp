@@ -28,8 +28,8 @@ const DashboardPage: React.FC = () => {
       try {
         const response = await axios.get(`${API_URL}/api/v1/dashboard/stats`, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         setStats(response.data);
       } catch (error) {
@@ -56,23 +56,23 @@ const DashboardPage: React.FC = () => {
       <Header />
       <div className="container">
         <h1>Dashboard</h1>
-        
+
         <div className="dashboard-grid">
           <div className="stat-card">
             <h3>{stats.total_patients}</h3>
             <p>Total Patients</p>
           </div>
-          
+
           <div className="stat-card">
             <h3>{stats.total_appointments}</h3>
             <p>Total Appointments</p>
           </div>
-          
+
           <div className="stat-card">
             <h3>{stats.today_appointments}</h3>
             <p>Today's Appointments</p>
           </div>
-          
+
           <div className="stat-card">
             <h3>{stats.total_prescriptions}</h3>
             <p>Total Prescriptions</p>

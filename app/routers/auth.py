@@ -260,7 +260,9 @@ def change_password(
     """Allow the current user to change their password."""
 
     if not verify_password(payload.current_password, current_user.hashed_password):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid current password")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid current password"
+        )
 
     current_user.hashed_password = get_password_hash(payload.new_password)
     current_user.password_changed_at = datetime.now(timezone.utc)
@@ -312,10 +314,14 @@ def activate_mfa(
     """Activate MFA for the user after validating the provided code."""
 
     if not current_user.mfa_secret:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="MFA has not been initiated")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="MFA has not been initiated"
+        )
 
     if not verify_totp(current_user.mfa_secret, payload.code):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid MFA code")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid MFA code"
+        )
 
     current_user.mfa_enabled = True
     db.commit()
@@ -346,10 +352,14 @@ def disable_mfa(
     """Disable MFA for the user (requires a valid code)."""
 
     if not current_user.mfa_enabled:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="MFA is not enabled")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="MFA is not enabled"
+        )
 
     if not verify_totp(current_user.mfa_secret, payload.code):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid MFA code")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid MFA code"
+        )
 
     current_user.mfa_enabled = False
     current_user.mfa_secret = None
