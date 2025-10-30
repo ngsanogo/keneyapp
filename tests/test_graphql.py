@@ -15,16 +15,13 @@ def test_graphql_endpoint_accessible():
         hello
     }
     """
-    
-    response = client.post(
-        "/graphql",
-        json={"query": query}
-    )
-    
+
+    response = client.post("/graphql", json={"query": query})
+
     assert response.status_code == 200
     data = response.json()
-    assert 'data' in data
-    assert data['data']['hello'] == "Hello from KeneyApp GraphQL API!"
+    assert "data" in data
+    assert data["data"]["hello"] == "Hello from KeneyApp GraphQL API!"
 
 
 def test_graphql_api_version():
@@ -34,15 +31,12 @@ def test_graphql_api_version():
         apiVersion
     }
     """
-    
-    response = client.post(
-        "/graphql",
-        json={"query": query}
-    )
-    
+
+    response = client.post("/graphql", json={"query": query})
+
     assert response.status_code == 200
     data = response.json()
-    assert data['data']['apiVersion'] == "1.0.0"
+    assert data["data"]["apiVersion"] == "1.0.0"
 
 
 def test_graphql_invalid_query():
@@ -52,15 +46,12 @@ def test_graphql_invalid_query():
         nonExistentField
     }
     """
-    
-    response = client.post(
-        "/graphql",
-        json={"query": query}
-    )
-    
+
+    response = client.post("/graphql", json={"query": query})
+
     # Should return 400 or have errors
     data = response.json()
-    assert 'errors' in data
+    assert "errors" in data
 
 
 def test_graphql_introspection():
@@ -74,13 +65,10 @@ def test_graphql_introspection():
         }
     }
     """
-    
-    response = client.post(
-        "/graphql",
-        json={"query": query}
-    )
-    
+
+    response = client.post("/graphql", json={"query": query})
+
     assert response.status_code == 200
     data = response.json()
-    assert 'data' in data
-    assert '__schema' in data['data']
+    assert "data" in data
+    assert "__schema" in data["data"]

@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import PatientsPage from './pages/PatientsPage';
@@ -10,19 +11,21 @@ import './App.css';
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="app">
-          <Routes>
-            <Route path="/" element={<LoginPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/patients" element={<PatientsPage />} />
-            <Route path="/appointments" element={<AppointmentsPage />} />
-            <Route path="/prescriptions" element={<PrescriptionsPage />} />
-          </Routes>
-        </div>
-      </Router>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <div className="app">
+            <Routes>
+              <Route path="/" element={<LoginPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/patients" element={<PatientsPage />} />
+              <Route path="/appointments" element={<AppointmentsPage />} />
+              <Route path="/prescriptions" element={<PrescriptionsPage />} />
+            </Routes>
+          </div>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 };
 
