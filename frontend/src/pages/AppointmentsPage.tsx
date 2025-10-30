@@ -30,8 +30,8 @@ const AppointmentsPage: React.FC = () => {
       try {
         const response = await axios.get(`${API_URL}/api/v1/appointments/`, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         setAppointments(response.data);
       } catch (error) {
@@ -47,10 +47,10 @@ const AppointmentsPage: React.FC = () => {
       <Header />
       <div className="container">
         <h1>Appointments</h1>
-        
+
         <div className="card">
           <h2>Appointment List</h2>
-          
+
           {appointments.length === 0 ? (
             <p>No appointments found.</p>
           ) : (
@@ -66,7 +66,7 @@ const AppointmentsPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {appointments.map((appointment) => (
+                {appointments.map(appointment => (
                   <tr key={appointment.id}>
                     <td>{appointment.id}</td>
                     <td>{new Date(appointment.appointment_date).toLocaleString()}</td>
@@ -74,9 +74,7 @@ const AppointmentsPage: React.FC = () => {
                     <td>{appointment.doctor_id}</td>
                     <td>{appointment.reason}</td>
                     <td>
-                      <span className={`status-${appointment.status}`}>
-                        {appointment.status}
-                      </span>
+                      <span className={`status-${appointment.status}`}>{appointment.status}</span>
                     </td>
                   </tr>
                 ))}

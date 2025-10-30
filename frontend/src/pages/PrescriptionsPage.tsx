@@ -31,8 +31,8 @@ const PrescriptionsPage: React.FC = () => {
       try {
         const response = await axios.get(`${API_URL}/api/v1/prescriptions/`, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         setPrescriptions(response.data);
       } catch (error) {
@@ -48,10 +48,10 @@ const PrescriptionsPage: React.FC = () => {
       <Header />
       <div className="container">
         <h1>Prescriptions</h1>
-        
+
         <div className="card">
           <h2>Prescription List</h2>
-          
+
           {prescriptions.length === 0 ? (
             <p>No prescriptions found.</p>
           ) : (
@@ -67,7 +67,7 @@ const PrescriptionsPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {prescriptions.map((prescription) => (
+                {prescriptions.map(prescription => (
                   <tr key={prescription.id}>
                     <td>{prescription.id}</td>
                     <td>{prescription.medication_name}</td>
