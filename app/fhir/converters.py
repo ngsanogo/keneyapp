@@ -149,16 +149,6 @@ class FHIRConverter:
         Returns:
             FHIR Appointment resource as dictionary
         """
-        fhir_appointment = FHIRAppointment()
-        
-        # Identifier
-        fhir_appointment.identifier = [
-            Identifier(**{
-                'system': 'https://keneyapp.com/appointment-id',
-                'value': str(appointment.id)
-            })
-        ]
-        
         # Status mapping
         status_map = {
             'scheduled': 'booked',
@@ -166,21 +156,44 @@ class FHIRConverter:
             'cancelled': 'cancelled',
             'confirmed': 'booked'
         }
-        fhir_appointment.status = status_map.get(appointment.status, 'booked')
+        
+        fhir_appointment = {
+            'resourceType': 'Appointment',
+            'id': str(appointment.id),
+            'identifier': [{
+                'system': 'https://keneyapp.com/appointment-id',
+                'value': str(appointment.id)
+            }],
+            'status': status_map.get(appointment.status, 'booked'),
+            'participant': [
+                {
+                    'actor': {
+                        'reference': f'Patient/{appointment.patient_id}'
+                    },
+                    'status': 'accepted'
+                },
+                {
+                    'actor': {
+                        'reference': f'Practitioner/{appointment.doctor_id}'
+                    },
+                    'status': 'accepted'
+                }
+            ]
+        }
         
         # Start time
         if appointment.appointment_date:
-            fhir_appointment.start = appointment.appointment_date.isoformat()
+            fhir_appointment['start'] = appointment.appointment_date.isoformat()
         
         # Description
         if appointment.reason:
-            fhir_appointment.description = appointment.reason
+            fhir_appointment['description'] = appointment.reason
         
         # Comment/Notes
         if appointment.notes:
-            fhir_appointment.comment = appointment.notes
+            fhir_appointment['comment'] = appointment.notes
         
-        return fhir_appointment.dict()
+        return fhir_appointment
     
     @staticmethod
     def prescription_to_fhir(prescription: Prescription) -> Dict[str, Any]:
@@ -193,47 +206,44 @@ class FHIRConverter:
         Returns:
             FHIR MedicationRequest resource as dictionary
         """
-        fhir_med_request = MedicationRequest()
-        
-        # Identifier
-        fhir_med_request.identifier = [
-            Identifier(**{
+        fhir_med_request = {
+            'resourceType': 'MedicationRequest',
+            'id': str(prescription.id),
+            'identifier': [{
                 'system': 'https://keneyapp.com/prescription-id',
                 'value': str(prescription.id)
-            })
-        ]
-        
-        # Status
-        fhir_med_request.status = 'active'
-        
-        # Intent
-        fhir_med_request.intent = 'order'
-        
-        # Medication (simplified - would normally reference a medication resource)
-        fhir_med_request.medicationCodeableConcept = {
-            'text': prescription.medication_name
+            }],
+            'status': 'active',
+            'intent': 'order',
+            'medicationCodeableConcept': {
+                'text': prescription.medication_name
+            },
+            'subject': {
+                'reference': f'Patient/{prescription.patient_id}'
+            },
+            'requester': {
+                'reference': f'Practitioner/{prescription.doctor_id}'
+            },
+            'dosageInstruction': [{
+                'text': f"{prescription.dosage} {prescription.frequency} for {prescription.duration}",
+                'timing': {
+                    'repeat': {
+                        'frequency': 1,
+                        'period': 1,
+                        'periodUnit': 'd'
+                    }
+                }
+            }]
         }
         
-        # Dosage instructions
-        fhir_med_request.dosageInstruction = [{
-            'text': f"{prescription.dosage} {prescription.frequency} for {prescription.duration}",
-            'timing': {
-                'repeat': {
-                    'frequency': 1,
-                    'period': 1,
-                    'periodUnit': 'd'
-                }
-            }
-        }]
-        
         if prescription.instructions:
-            fhir_med_request.dosageInstruction[0]['patientInstruction'] = prescription.instructions
+            fhir_med_request['dosageInstruction'][0]['patientInstruction'] = prescription.instructions
         
         # Authored date
         if prescription.prescribed_date:
-            fhir_med_request.authoredOn = prescription.prescribed_date.isoformat()
+            fhir_med_request['authoredOn'] = prescription.prescribed_date.isoformat()
         
-        return fhir_med_request.dict()
+        return fhir_med_request
 
 
 # Global converter instance
