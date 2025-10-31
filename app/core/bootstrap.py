@@ -52,9 +52,7 @@ def ensure_bootstrap_admin(db: Session, requested_username: str) -> Optional[Use
 
     # Ensure there is an active tenant to attach the bootstrap user to.
     tenant = (
-        db.query(Tenant)
-        .filter(Tenant.slug == settings.BOOTSTRAP_TENANT_SLUG)
-        .first()
+        db.query(Tenant).filter(Tenant.slug == settings.BOOTSTRAP_TENANT_SLUG).first()
     )
 
     if not tenant:

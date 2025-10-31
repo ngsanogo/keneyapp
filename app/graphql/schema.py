@@ -37,9 +37,7 @@ from app.services.patient_security import (
 
 # GraphQL enums that mirror core application enums
 GenderEnum = strawberry.enum(Gender, name="Gender")
-AppointmentStatusEnum = strawberry.enum(
-    AppointmentStatus, name="AppointmentStatus"
-)
+AppointmentStatusEnum = strawberry.enum(AppointmentStatus, name="AppointmentStatus")
 UserRoleEnum = strawberry.enum(UserRole, name="UserRole")
 
 
@@ -514,7 +512,9 @@ class Query:
                 .all()
             )
 
-            return [to_prescription_type(prescription) for prescription in prescriptions]
+            return [
+                to_prescription_type(prescription) for prescription in prescriptions
+            ]
 
     @strawberry.field
     def prescription(
@@ -576,7 +576,9 @@ class Query:
             today_start = datetime.combine(
                 today, datetime.min.time(), tzinfo=timezone.utc
             )
-            today_end = datetime.combine(today, datetime.max.time(), tzinfo=timezone.utc)
+            today_end = datetime.combine(
+                today, datetime.max.time(), tzinfo=timezone.utc
+            )
 
             today_appointments = (
                 session.query(func.count(Appointment.id))
