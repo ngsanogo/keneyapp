@@ -9,7 +9,7 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ### 1. Diagnostic Coding
 
 #### ICD-11 (International Classification of Diseases, 11th Revision)
-- **Organisme**: World Health Organization (WHO)
+- **Organization**: World Health Organization (WHO)
 - **Usage**: Classification and coding of diseases, symptoms, and health conditions
 - **URI**: `http://id.who.int/icd/release/11/mms`
 - **Implementation**: Used in `Condition` resources for diagnosis coding
@@ -23,7 +23,7 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ```
 
 #### SNOMED CT (Systematized Nomenclature of Medicine - Clinical Terms)
-- **Organisme**: SNOMED International
+- **Organization**: SNOMED International
 - **Usage**: Comprehensive clinical terminology for diseases, clinical findings, procedures, and more
 - **URI**: `http://snomed.info/sct`
 - **Implementation**: Used in `Condition` and `Procedure` resources for detailed clinical coding
@@ -39,7 +39,7 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ### 2. Laboratory and Observations
 
 #### LOINC (Logical Observation Identifiers Names and Codes)
-- **Organisme**: Regenstrief Institute
+- **Organization**: Regenstrief Institute
 - **Usage**: Universal standard for laboratory and clinical observations
 - **URI**: `http://loinc.org`
 - **Implementation**: Used in `Observation` resources for lab results and vital signs
@@ -57,7 +57,7 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ### 3. Medication Coding
 
 #### ATC (Anatomical Therapeutic Chemical Classification)
-- **Organisme**: World Health Organization (WHO)
+- **Organization**: World Health Organization (WHO)
 - **Usage**: Classification of medications by therapeutic, pharmacological, and chemical properties
 - **URI**: `http://www.whocc.no/atc`
 - **Implementation**: Used in `Prescription` resources for medication coding
@@ -74,7 +74,7 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ### 4. Procedure Coding
 
 #### CPT (Current Procedural Terminology)
-- **Organisme**: American Medical Association (AMA)
+- **Organization**: American Medical Association (AMA)
 - **Usage**: Medical procedure coding for billing and documentation (primarily US)
 - **URI**: `http://www.ama-assn.org/go/cpt`
 - **Implementation**: Used in `Procedure` resources
@@ -88,7 +88,7 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ```
 
 #### CCAM (Classification Commune des Actes Médicaux)
-- **Organisme**: Agence Nationale de Santé (ANS), France
+- **Organization**: Agence Nationale de Santé (ANS), France
 - **Usage**: Medical procedure classification for billing and reimbursement (France)
 - **URI**: `http://www.ccam.fr`
 - **Implementation**: Used in `Procedure` resources
@@ -104,7 +104,7 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ### 5. Medical Imaging
 
 #### DICOM (Digital Imaging and Communications in Medicine)
-- **Organisme**: NEMA (National Electrical Manufacturers Association)
+- **Organization**: NEMA (National Electrical Manufacturers Association)
 - **Usage**: Standard for medical imaging and related information
 - **URI**: `http://dicom.nema.org/resources/ontology/DCM`
 - **Implementation**: Reference support for future imaging integration

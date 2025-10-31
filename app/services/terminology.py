@@ -151,10 +151,14 @@ class TerminologyService:
             CodeSystem.DICOM: "http://dicom.nema.org/resources/ontology/DCM",
         }
 
+        if code_system not in system_uris:
+            raise ValueError(
+                f"Unsupported code system: {code_system}. "
+                f"Supported systems: {', '.join(cs.value for cs in CodeSystem)}"
+            )
+
         return {
-            "system": system_uris.get(
-                code_system, f"https://keneyapp.com/{code_system.value}"
-            ),
+            "system": system_uris[code_system],
             "code": code,
             "display": display or code,
         }

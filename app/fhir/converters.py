@@ -218,7 +218,7 @@ class FHIRConverter:
         medication_concept = {"text": prescription.medication_name}
 
         # Add ATC coding if available
-        if hasattr(prescription, "atc_code") and prescription.atc_code:
+        if prescription.atc_code:
             medication_concept["coding"] = [
                 {
                     "system": "http://www.whocc.no/atc",
