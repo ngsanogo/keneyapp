@@ -214,6 +214,19 @@ class FHIRConverter:
         Returns:
             FHIR MedicationRequest resource as dictionary
         """
+        # Build medication codeable concept with ATC code if available
+        medication_concept = {"text": prescription.medication_name}
+
+        # Add ATC coding if available
+        if prescription.atc_code:
+            medication_concept["coding"] = [
+                {
+                    "system": "http://www.whocc.no/atc",
+                    "code": prescription.atc_code,
+                    "display": prescription.atc_display or prescription.medication_name,
+                }
+            ]
+
         fhir_med_request = {
             "resourceType": "MedicationRequest",
             "id": str(prescription.id),
@@ -225,7 +238,7 @@ class FHIRConverter:
             ],
             "status": "active",
             "intent": "order",
-            "medicationCodeableConcept": {"text": prescription.medication_name},
+            "medicationCodeableConcept": medication_concept,
             "subject": {"reference": f"Patient/{prescription.patient_id}"},
             "requester": {"reference": f"Practitioner/{prescription.doctor_id}"},
             "dosageInstruction": [
@@ -248,6 +261,267 @@ class FHIRConverter:
             fhir_med_request["authoredOn"] = prescription.prescribed_date.isoformat()
 
         return fhir_med_request
+
+    @staticmethod
+    def condition_to_fhir(condition) -> Dict[str, Any]:
+        """
+        Convert KeneyApp Condition to FHIR Condition resource.
+
+        Args:
+            condition: KeneyApp Condition model instance
+
+        Returns:
+            FHIR Condition resource as dictionary
+        """
+        # Build code with ICD-11 and SNOMED CT
+        code_concept = {}
+        codings = []
+
+        if condition.icd11_code:
+            codings.append(
+                {
+                    "system": "http://id.who.int/icd/release/11/mms",
+                    "code": condition.icd11_code,
+                    "display": condition.icd11_display or condition.icd11_code,
+                }
+            )
+
+        if condition.snomed_code:
+            codings.append(
+                {
+                    "system": "http://snomed.info/sct",
+                    "code": condition.snomed_code,
+                    "display": condition.snomed_display or condition.snomed_code,
+                }
+            )
+
+        if codings:
+            code_concept["coding"] = codings
+
+        fhir_condition = {
+            "resourceType": "Condition",
+            "id": str(condition.id),
+            "identifier": [
+                {
+                    "system": "https://keneyapp.com/condition-id",
+                    "value": str(condition.id),
+                }
+            ],
+            "clinicalStatus": {
+                "coding": [
+                    {
+                        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                        "code": condition.clinical_status,
+                    }
+                ]
+            },
+            "verificationStatus": {
+                "coding": [
+                    {
+                        "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                        "code": condition.verification_status,
+                    }
+                ]
+            },
+            "code": code_concept,
+            "subject": {"reference": f"Patient/{condition.patient_id}"},
+        }
+
+        if condition.severity:
+            fhir_condition["severity"] = {
+                "coding": [
+                    {
+                        "system": "http://snomed.info/sct",
+                        "code": condition.severity,
+                        "display": condition.severity,
+                    }
+                ]
+            }
+
+        if condition.onset_date:
+            fhir_condition["onsetDateTime"] = condition.onset_date.isoformat()
+
+        if condition.abatement_date:
+            fhir_condition["abatementDateTime"] = condition.abatement_date.isoformat()
+
+        if condition.notes:
+            fhir_condition["note"] = [{"text": condition.notes}]
+
+        if condition.recorded_date:
+            fhir_condition["recordedDate"] = condition.recorded_date.isoformat()
+
+        return fhir_condition
+
+    @staticmethod
+    def observation_to_fhir(observation) -> Dict[str, Any]:
+        """
+        Convert KeneyApp Observation to FHIR Observation resource.
+
+        Args:
+            observation: KeneyApp Observation model instance
+
+        Returns:
+            FHIR Observation resource as dictionary
+        """
+        fhir_observation = {
+            "resourceType": "Observation",
+            "id": str(observation.id),
+            "identifier": [
+                {
+                    "system": "https://keneyapp.com/observation-id",
+                    "value": str(observation.id),
+                }
+            ],
+            "status": observation.status,
+            "code": {
+                "coding": [
+                    {
+                        "system": "http://loinc.org",
+                        "code": observation.loinc_code,
+                        "display": observation.loinc_display,
+                    }
+                ],
+                "text": observation.loinc_display,
+            },
+            "subject": {"reference": f"Patient/{observation.patient_id}"},
+            "effectiveDateTime": observation.effective_datetime.isoformat(),
+        }
+
+        # Add value based on type
+        if observation.value_quantity and observation.value_unit:
+            fhir_observation["valueQuantity"] = {
+                "value": (
+                    float(observation.value_quantity)
+                    if observation.value_quantity
+                    else None
+                ),
+                "unit": observation.value_unit,
+            }
+        elif observation.value_string:
+            fhir_observation["valueString"] = observation.value_string
+
+        # Add reference range if available
+        if observation.reference_range_low or observation.reference_range_high:
+            fhir_observation["referenceRange"] = [
+                {
+                    "low": (
+                        {"value": float(observation.reference_range_low)}
+                        if observation.reference_range_low
+                        else None
+                    ),
+                    "high": (
+                        {"value": float(observation.reference_range_high)}
+                        if observation.reference_range_high
+                        else None
+                    ),
+                }
+            ]
+
+        # Add interpretation
+        if observation.interpretation:
+            fhir_observation["interpretation"] = [
+                {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                            "code": observation.interpretation.upper(),
+                            "display": observation.interpretation,
+                        }
+                    ]
+                }
+            ]
+
+        if observation.issued_datetime:
+            fhir_observation["issued"] = observation.issued_datetime.isoformat()
+
+        if observation.notes:
+            fhir_observation["note"] = [{"text": observation.notes}]
+
+        return fhir_observation
+
+    @staticmethod
+    def procedure_to_fhir(procedure) -> Dict[str, Any]:
+        """
+        Convert KeneyApp Procedure to FHIR Procedure resource.
+
+        Args:
+            procedure: KeneyApp Procedure model instance
+
+        Returns:
+            FHIR Procedure resource as dictionary
+        """
+        # Build code with CPT, CCAM, and SNOMED CT
+        code_concept = {}
+        codings = []
+
+        if procedure.cpt_code:
+            codings.append(
+                {
+                    "system": "http://www.ama-assn.org/go/cpt",
+                    "code": procedure.cpt_code,
+                    "display": procedure.cpt_display or procedure.cpt_code,
+                }
+            )
+
+        if procedure.ccam_code:
+            codings.append(
+                {
+                    "system": "http://www.ccam.fr",
+                    "code": procedure.ccam_code,
+                    "display": procedure.ccam_display or procedure.ccam_code,
+                }
+            )
+
+        if procedure.snomed_code:
+            codings.append(
+                {
+                    "system": "http://snomed.info/sct",
+                    "code": procedure.snomed_code,
+                    "display": procedure.snomed_display or procedure.snomed_code,
+                }
+            )
+
+        if codings:
+            code_concept["coding"] = codings
+
+        fhir_procedure = {
+            "resourceType": "Procedure",
+            "id": str(procedure.id),
+            "identifier": [
+                {
+                    "system": "https://keneyapp.com/procedure-id",
+                    "value": str(procedure.id),
+                }
+            ],
+            "status": procedure.status,
+            "code": code_concept,
+            "subject": {"reference": f"Patient/{procedure.patient_id}"},
+            "performedDateTime": procedure.performed_datetime.isoformat(),
+        }
+
+        if procedure.category:
+            fhir_procedure["category"] = {
+                "coding": [
+                    {
+                        "system": "http://snomed.info/sct",
+                        "code": procedure.category,
+                        "display": procedure.category,
+                    }
+                ]
+            }
+
+        if procedure.outcome:
+            fhir_procedure["outcome"] = {"text": procedure.outcome}
+
+        if procedure.notes:
+            fhir_procedure["note"] = [{"text": procedure.notes}]
+
+        if procedure.performed_by_id:
+            fhir_procedure["performer"] = [
+                {"actor": {"reference": f"Practitioner/{procedure.performed_by_id}"}}
+            ]
+
+        return fhir_procedure
 
 
 # Global converter instance

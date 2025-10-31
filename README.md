@@ -16,10 +16,11 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 - ✅ **Data Encryption at Rest**: AES-256-GCM encryption for sensitive patient data
 - ✅ **GraphQL API**: Modern API alongside REST for flexible data queries
 - ✅ **FHIR Interoperability**: HL7 FHIR R4 support for healthcare data exchange
+- ✅ **Medical Terminologies**: ICD-11, SNOMED CT, LOINC, ATC, CPT/CCAM coding support
 - ✅ **Cloud Deployment**: Terraform scripts for AWS, Azure, and GCP
 
 ### Security & Compliance
-- ✅ GDPR/HIPAA compliant architecture
+- ✅ **GDPR/HIPAA/HDS compliant architecture**
 - ✅ JWT-based authentication + OAuth2/OIDC
 - ✅ Password hashing with bcrypt
 - ✅ Role-based access control (RBAC)
@@ -29,6 +30,7 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 - ✅ **Security headers** (XSS, CSRF, CSP protection)
 - ✅ CORS protection
 - ✅ Input validation with Pydantic
+- ✅ **International medical coding standards** (ICD-11, SNOMED CT, LOINC, ATC, CPT/CCAM)
 
 ### Performance & Scalability
 - ⚡ **Redis caching** for frequently accessed data
@@ -44,6 +46,34 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 - 📝 **Comprehensive API documentation**
 - 🔄 **Background job processing** with Celery
 - 📈 **Health check endpoints** for load balancers
+
+## 🏥 Medical Standards & Interoperability
+
+KeneyApp implements international healthcare standards for maximum interoperability and compliance:
+
+### Supported Medical Terminologies
+- **ICD-11** (WHO): International Classification of Diseases for diagnosis coding
+- **SNOMED CT**: Comprehensive clinical terminology for detailed medical coding
+- **LOINC**: Laboratory and clinical observation coding
+- **ATC**: Medication classification (Anatomical Therapeutic Chemical)
+- **CPT** (US): Current Procedural Terminology for medical procedures
+- **CCAM** (France): Classification Commune des Actes Médicaux for procedures
+- **DICOM**: Digital Imaging and Communications in Medicine (reference support)
+
+### FHIR Resources
+- **Patient**: Demographics and identifiers
+- **Appointment**: Scheduling and visits
+- **MedicationRequest**: Prescriptions with ATC codes
+- **Condition**: Diagnoses with ICD-11/SNOMED CT codes
+- **Observation**: Lab results and vital signs with LOINC codes
+- **Procedure**: Medical procedures with CPT/CCAM codes
+
+### Compliance
+- ✅ **RGPD** (Europe): Full GDPR compliance with data protection and privacy controls
+- ✅ **HIPAA** (US): Security and confidentiality of health information
+- ✅ **HDS** (France): Hébergeur de Données de Santé certification-ready architecture
+
+See [Medical Terminologies Guide](docs/MEDICAL_TERMINOLOGIES.md) for complete documentation.
 
 ## 🛠 Tech Stack
 
@@ -533,6 +563,7 @@ Comprehensive documentation available in the `docs/` directory:
 - **[OAuth Guide](docs/OAUTH_GUIDE.md)** - OAuth2/OIDC authentication setup
 - **[Encryption Guide](docs/ENCRYPTION_GUIDE.md)** - Data encryption implementation
 - **[FHIR Guide](docs/FHIR_GUIDE.md)** - FHIR interoperability guide
+- **[Medical Terminologies](docs/MEDICAL_TERMINOLOGIES.md)** - Healthcare standards implementation (ICD-11, SNOMED CT, LOINC, ATC, CPT/CCAM)
 - **[New Features](docs/NEW_FEATURES.md)** - Complete v2.0 feature overview
 - **[Integration Plan](docs/INTEGRATION_PLAN.md)** - System integration guide
 
