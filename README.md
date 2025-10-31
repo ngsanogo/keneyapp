@@ -247,6 +247,31 @@ curl http://localhost:8000/metrics
 - `active_users` - Current active users
 - `database_connections` - Active database connections
 
+### Structured Logging & Correlation IDs
+
+All requests are automatically assigned a correlation ID for distributed tracing:
+
+```bash
+# Requests include X-Correlation-ID header in responses
+curl -v https://api.keneyapp.com/health
+
+# Custom correlation IDs can be passed
+curl -H "X-Correlation-ID: my-trace-id" https://api.keneyapp.com/health
+```
+
+Logs are structured in JSON format for easy parsing:
+```json
+{
+  "event": "request_complete",
+  "correlation_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "method": "GET",
+  "path": "/api/v1/patients",
+  "status_code": 200,
+  "duration_ms": 45.23,
+  "client_ip": "192.168.1.100"
+}
+```
+
 ### Grafana Dashboards
 
 Pre-configured dashboards are available in `/monitoring/grafana-dashboard.json`:
@@ -466,6 +491,10 @@ Comprehensive documentation available in the `docs/` directory:
 - **[FHIR Guide](docs/FHIR_GUIDE.md)** - FHIR interoperability guide
 - **[New Features](docs/NEW_FEATURES.md)** - Complete v2.0 feature overview
 - **[Integration Plan](docs/INTEGRATION_PLAN.md)** - System integration guide
+
+### Operations & Maintenance
+- **[Incident Response Playbook](docs/INCIDENT_RESPONSE.md)** - Step-by-step incident handling procedures
+- **[Operations Runbook](docs/OPERATIONS_RUNBOOK.md)** - Standard operating procedures and troubleshooting
 
 ## 📄 License
 

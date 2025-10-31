@@ -12,6 +12,7 @@ from app.core.config import settings
 from app.core.database import engine, Base
 from app.core.rate_limit import limiter
 from app.core.middleware import MetricsMiddleware, SecurityHeadersMiddleware
+from app.core.logging_middleware import CorrelationIdMiddleware
 from app.core.metrics import metrics_endpoint
 from app.routers import (
     auth,
@@ -52,6 +53,7 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Add custom middleware
+app.add_middleware(CorrelationIdMiddleware)
 app.add_middleware(MetricsMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 
