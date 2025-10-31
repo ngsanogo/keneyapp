@@ -37,6 +37,6 @@ def verify_totp(secret: Optional[str], code: Optional[str]) -> bool:
     totp = get_totp(secret)
     try:
         return totp.verify(code, valid_window=1)
-    except (ValueError, Exception):
-        # Catch any validation errors from pyotp
+    except (ValueError, TypeError):
+        # Catch validation errors from pyotp (invalid secret or code format)
         return False
