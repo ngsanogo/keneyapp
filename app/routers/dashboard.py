@@ -121,7 +121,10 @@ def get_dashboard_stats(
     # Assuming we'd have a created_at field
     recent_patients = (
         db.query(func.count(Patient.id))
-        .filter(Patient.tenant_id == current_user.tenant_id)
+        .filter(
+            Patient.tenant_id == current_user.tenant_id,
+            Patient.created_at >= week_ago,
+        )
         .scalar()
     )
 
@@ -129,7 +132,7 @@ def get_dashboard_stats(
         db.query(func.count(Appointment.id))
         .filter(
             Appointment.tenant_id == current_user.tenant_id,
-            Appointment.appointment_date >= week_ago,
+            Appointment.created_at >= week_ago,
         )
         .scalar()
     )
@@ -138,7 +141,7 @@ def get_dashboard_stats(
         db.query(func.count(Prescription.id))
         .filter(
             Prescription.tenant_id == current_user.tenant_id,
-            Prescription.prescribed_date >= week_ago,
+            Prescription.created_at >= week_ago,
         )
         .scalar()
     )

@@ -2,9 +2,10 @@
 Patient schemas for request/response validation.
 """
 
-from pydantic import BaseModel, EmailStr, ConfigDict
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
+
+from pydantic import BaseModel, EmailStr, ConfigDict
 from app.models.patient import Gender
 
 
@@ -51,5 +52,7 @@ class PatientResponse(PatientBase):
 
     id: int
     tenant_id: int
+    created_at: datetime
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

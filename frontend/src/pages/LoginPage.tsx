@@ -7,7 +7,7 @@ const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { login, loading } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,8 +54,8 @@ const LoginPage: React.FC = () => {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary btn-full">
-            Login
+          <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+            {loading ? 'Signing in...' : 'Login'}
           </button>
         </form>
 

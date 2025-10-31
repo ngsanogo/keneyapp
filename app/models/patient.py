@@ -2,18 +2,21 @@
 Patient model for healthcare record management.
 """
 
+import enum
+
 from sqlalchemy import (
     Column,
     Integer,
     String,
     Date,
+    DateTime,
     Text,
     Enum,
     ForeignKey,
     UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
-import enum
+from sqlalchemy.sql import func
 
 from app.core.database import Base
 from app.models.tenant import Tenant
@@ -49,6 +52,15 @@ class Patient(Base):
     blood_type = Column(String(5))
     emergency_contact = Column(String)
     emergency_phone = Column(String)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
 
     # Relationships
     appointments = relationship("Appointment", back_populates="patient")

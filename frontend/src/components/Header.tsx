@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Header: React.FC = () => {
-  const { logout } = useAuth();
+  const { logout, user, loading } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -19,10 +19,18 @@ const Header: React.FC = () => {
         <Link to="/patients">Patients</Link>
         <Link to="/appointments">Appointments</Link>
         <Link to="/prescriptions">Prescriptions</Link>
+      </nav>
+      <div className="header-actions">
+        {user && !loading && (
+          <span className="header-user">
+            {user.fullName}{' '}
+            <span className="header-role">({user.role.replace('_', ' ')})</span>
+          </span>
+        )}
         <button onClick={handleLogout} className="btn btn-secondary">
           Logout
         </button>
-      </nav>
+      </div>
     </header>
   );
 };

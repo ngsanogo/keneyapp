@@ -2,9 +2,11 @@
 Prescription model for managing patient prescriptions and medications.
 """
 
+from datetime import datetime, timezone
+
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
 from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
+from sqlalchemy.sql import func
 
 from app.core.database import Base
 from app.models.tenant import Tenant
@@ -28,6 +30,15 @@ class Prescription(Base):
         DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
     refills = Column(Integer, default=0)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
 
     # Relationships
     patient = relationship("Patient", back_populates="prescriptions")

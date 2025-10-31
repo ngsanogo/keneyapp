@@ -2,9 +2,11 @@
 Appointment model for scheduling and tracking patient appointments.
 """
 
+import enum
+
 from sqlalchemy import Column, Integer, String, DateTime, Text, Enum, ForeignKey
 from sqlalchemy.orm import relationship
-import enum
+from sqlalchemy.sql import func
 
 from app.core.database import Base
 from app.models.tenant import Tenant
@@ -35,6 +37,15 @@ class Appointment(Base):
     status = Column(Enum(AppointmentStatus), default=AppointmentStatus.SCHEDULED)
     reason = Column(String, nullable=False)
     notes = Column(Text)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
 
     # Relationships
     patient = relationship("Patient", back_populates="appointments")
