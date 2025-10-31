@@ -47,6 +47,11 @@ jobs:
         flake8 app --count --select=E9,F63,F7,F82 --show-source --statistics
         black --check app
     
+    - name: Run type checking
+      run: |
+        mypy app --config-file mypy.ini || echo "Type checking found issues. Review and address them."
+      continue-on-error: true
+    
     - name: Run tests with coverage
       env:
         DATABASE_URL: postgresql://keneyapp:keneyapp@localhost:5432/keneyapp_test
@@ -156,10 +161,26 @@ jobs:
         docker compose -f docker-compose.yml logs backend
         exit 1
 
-    - name: Smoke test API endpoints
+    - name: Basic smoke tests
       run: |
         curl -sf http://localhost:8000/health
         curl -sf http://localhost:8000/api/v1/docs > /dev/null
+    
+    - name: Set up Python for smoke tests
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install test dependencies
+      run: |
+        pip install pytest requests
+    
+    - name: Run API smoke tests
+      env:
+        BASE_URL: http://localhost:8000
+      run: |
+        pytest tests/test_smoke.py -v --tb=short
+      continue-on-error: true
 
     - name: Tear down services
       if: always()

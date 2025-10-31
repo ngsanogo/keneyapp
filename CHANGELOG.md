@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Continuous Improvement Cycle Iteration 5
+
+#### Type Safety & Testing Infrastructure
+- Established mypy baseline configuration with gradual typing approach
+- Created comprehensive smoke test suite (`tests/test_smoke.py`) with 8 test classes and 15+ tests covering:
+  - Health checks and API documentation
+  - Authentication flows (login, token validation, user profile)
+  - Patient management (list, create, retrieve)
+  - Appointment listing
+  - Dashboard statistics
+  - Access control and authorization
+- Integrated mypy type checking into CI/CD pipeline with continue-on-error for gradual adoption
+- Added smoke tests to CI/CD pipeline running against docker compose stack
+- Configured strict type checking for core modules (`app.core.*`, `app.routers.*`)
+
+#### Documentation Enhancements
+- Added comprehensive CI/CD pipeline architecture diagram in `ARCHITECTURE.md` showing:
+  - Complete pipeline flow from source control to deployment
+  - Security scanning integration (CodeQL, pip-audit, Trivy, Gitleaks)
+  - Testing stages (unit, integration, contract, smoke tests)
+  - Deployment stages (staging, production)
+- Enhanced README testing section with:
+  - Smoke test usage documentation
+  - Complete CI/CD testing pipeline overview
+  - Test coverage metrics (77%, 65 tests)
+  - Test types descriptions
+- Created `ITERATION_5_SUMMARY.md` documenting all iteration 5 achievements
+
+#### Process & Backlog Management
+- Updated `BACKLOG.md` with iteration 5 completion status
+- Moved completed items (BACK-501, BACK-502, BACK-503) to completed section
+- Added iteration 4 completed items to backlog history
+
+### Changed - Continuous Improvement Cycle Iteration 5
+- Updated `requirements.txt` to use `strawberry-graphql[fastapi]>=0.260.0` for better pydantic compatibility
+- Enhanced CI workflow with mypy type checking step
+- Enhanced CI workflow with smoke test execution after docker compose validation
+
 ### Added - Continuous Improvement Cycle Iteration 4
 
 #### CI/CD

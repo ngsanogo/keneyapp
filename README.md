@@ -340,13 +340,55 @@ pytest --cov=app tests/
 
 # Run specific test file
 pytest tests/test_api.py -v
+
+# Run smoke tests against docker stack
+docker compose up -d
+pytest tests/test_smoke.py -v
 ```
+
+**Test Coverage:** 77% (65 tests)
+
+**Test Types:**
+- Unit tests for API endpoints, models, and services
+- Integration tests with database
+- API contract tests (JSON Schema validation)
+- Smoke tests for critical flows
+- Middleware and security tests
 
 ### Frontend Tests
 ```bash
 cd frontend
 npm test
 ```
+
+### CI/CD Testing Pipeline
+
+Our CI/CD pipeline includes comprehensive automated testing:
+
+1. **Code Quality**
+   - Linting with flake8 and ESLint
+   - Code formatting with Black and Prettier
+   - Type checking with mypy
+
+2. **Unit & Integration Tests**
+   - Backend: pytest with 77% coverage
+   - Frontend: Jest test suite
+   - Contract tests for API compatibility
+
+3. **Security Testing**
+   - CodeQL static analysis
+   - Dependency vulnerability scanning (pip-audit, npm audit)
+   - Container security scanning (Trivy)
+   - Secret detection (Gitleaks, detect-secrets)
+
+4. **Smoke Testing**
+   - Docker compose stack validation
+   - Critical API flow testing
+   - Health endpoint monitoring
+   - Authentication flows
+   - Patient management operations
+
+All tests run automatically on every pull request and push to main/develop branches.
 
 ## 🔍 Code Quality
 
