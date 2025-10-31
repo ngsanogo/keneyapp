@@ -14,7 +14,58 @@ Each item includes:
 
 ---
 
-## Iteration 3 (Current) - Focus: Automation & Quality
+## Iteration 4 (Current) - Focus: Runtime Reliability
+
+### Critical Priority
+
+#### [BACK-401] CI/CD: Docker Compose smoke tests
+- **Category**: Security
+- **Priority**: Critical
+- **Effort**: S
+- **Status**: Done
+- **Description**: Add a GitHub Actions job that builds the docker-compose stack and performs health checks to catch runtime regressions early.
+- **Acceptance Criteria**:
+  - Job runs on PRs and main/develop pushes
+  - Backend health endpoint successfully polled
+  - Logs surfaced when the backend fails to start
+
+#### [BACK-402] Data Integrity: Tenant-aware seed script
+- **Category**: Tech Debt
+- **Priority**: Critical
+- **Effort**: S
+- **Status**: Done
+- **Description**: Ensure sample data created by `scripts/init_db.py` respects tenant constraints introduced by migrations.
+- **Acceptance Criteria**:
+  - Seed script provisions a default tenant when absent
+  - All seeded entities (users, patients, appointments, prescriptions) carry `tenant_id`
+  - Script remains idempotent and safe to re-run
+
+### High Priority
+
+#### [BACK-403] Security: Align bcrypt with Passlib expectations
+- **Category**: Security
+- **Priority**: High
+- **Effort**: S
+- **Status**: Done
+- **Description**: Pin bcrypt to the latest version compatible with Passlib to avoid runtime import errors in containers.
+- **Acceptance Criteria**:
+  - Dependency conflict resolved (`bcrypt==4.1.2`)
+  - Backend containers start without `__about__` attribute errors
+  - Documented in changelog and dependency policy
+
+#### [BACK-404] Documentation: Multi-tenant seeding guidelines
+- **Category**: Documentation
+- **Priority**: High
+- **Effort**: S
+- **Status**: Done
+- **Description**: Update developer docs to explain tenant-aware seeding expectations and automated workflows.
+- **Acceptance Criteria**:
+  - `docs/DEVELOPMENT.md` includes multi-tenant seeding section
+  - Guidance references CI smoke tests and start script behaviour
+
+---
+
+## Iteration 3 (Completed) - Focus: Automation & Quality
 
 ### Critical Priority
 
@@ -179,6 +230,45 @@ Each item includes:
   - PII fields masked
   - Performance impact < 5ms
   - Configurable log levels
+
+---
+
+## Iteration 5 (Planned) - Focus: Type Safety & Testing Depth
+
+### High Priority
+
+#### [BACK-501] Tooling: Establish mypy baseline
+- **Category**: Tech Debt
+- **Priority**: High
+- **Effort**: M
+- **Status**: Backlog
+- **Description**: Introduce a mypy configuration with gradual strictness and eliminate existing type errors in core modules.
+- **Acceptance Criteria**:
+  - `mypy.ini` committed with targeted module list
+  - CI job executes mypy and fails on regressions
+  - app/core and app/routers pass type checking
+
+#### [BACK-502] Testing: Add API smoke tests for docker stack
+- **Category**: Testing
+- **Priority**: High
+- **Effort**: S
+- **Status**: Backlog
+- **Description**: Build upon the docker compose job to exercise critical API flows (login + patient listing).
+- **Acceptance Criteria**:
+  - pytests or curl scripts executed against running stack
+  - Smoke suite documented and reusable locally
+
+### Medium Priority
+
+#### [BACK-503] Documentation: Architecture & Pipeline diagrams refresh
+- **Category**: Documentation
+- **Priority**: Medium
+- **Effort**: S
+- **Status**: Backlog
+- **Description**: Update architecture diagrams and CI workflow description to reflect new automation steps.
+- **Acceptance Criteria**:
+  - Mermaid diagrams cover docker smoke validation path
+  - README highlights new CI stages
 
 ---
 

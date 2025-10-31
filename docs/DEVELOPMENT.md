@@ -372,6 +372,13 @@ alembic downgrade -1
 - Test migrations on a copy of production data
 - Keep migrations small and focused
 
+### Multi-tenant Seeding
+
+- The `scripts/init_db.py` helper provisions a **default tenant (`slug=default`)** before inserting any sample data. This keeps the seed data aligned with the multi-tenant schema enforced by recent migrations.
+- When adding new fixtures, remember to set `tenant_id` on every model instance (users, patients, appointments, prescriptions, etc.). Failing to do so will trigger NOT NULL violations once migrations have run.
+- You can re-run the seed script safely; it is idempotent and will skip inserting duplicates after the first run.
+- In containerised environments (`./scripts/start_stack.sh` or the CI docker smoke job), the backend container executes `alembic upgrade head` followed by `python -m scripts.init_db` automatically. Manual invocations should follow the same order.
+
 ## Testing Strategy
 
 ### Backend Testing

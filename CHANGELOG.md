@@ -14,13 +14,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgraded GitHub CodeQL actions to v3 and guarded the analysis job against forked pull requests where security events cannot be published.
 - Adopted the latest `actions/setup-python@v5` across workflows for consistent toolchain provisioning.
 - Fixed backend CodeQL job triggering on forked pull requests by gating the workflow on same-repo events only.
+- Added a docker-compose smoke test job that builds the stack, waits for health, and surfaces backend logs on failure.
 
 #### Infrastructure
 - Aligned backend Docker image with the supported Python 3.11 base to match local/runtime environments and ensure prebuilt database drivers are available during builds.
 - Hardened Alembic migrations to no-op when base tables are provisioned later by SQLAlchemy metadata, allowing greenfield environments to bootstrap without schema conflicts.
+- Removed deprecated `version` declaration from `docker-compose.yml` to silence warnings on Compose v2.
 
 #### Frontend
 - Removed legacy default `React` import from the error boundary to restore TypeScript build compatibility with the new JSX transform.
+
+#### Security & Dependencies
+- Pinned `bcrypt` to 4.1.2 to remain compatible with Passlib and avoid runtime attribute errors during container start-up.
+
+#### Documentation
+- Documented tenant-aware seeding expectations and CI automation in `docs/DEVELOPMENT.md`.
 
 ### Added - Continuous Improvement Cycle Iteration 3
 
