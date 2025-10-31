@@ -4,6 +4,8 @@ Tests for the structured logging middleware with correlation IDs.
 
 import json
 import pytest
+import time
+import uuid as uuid_module
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -13,16 +15,18 @@ client = TestClient(app)
 
 def test_correlation_id_added_to_response():
     """Test that correlation ID is added to response headers."""
+    import uuid as uuid_module
+    
     response = client.get("/")
     
     assert "X-Correlation-ID" in response.headers
     correlation_id = response.headers["X-Correlation-ID"]
     
     # Should be a valid UUID format
-    parts = correlation_id.split("-")
-    assert len(parts) == 5
-    assert len(parts[0]) == 8
-    assert len(parts[1]) == 4
+    try:
+        uuid_module.UUID(correlation_id)
+    except ValueError:
+        pytest.fail(f"Invalid UUID format: {correlation_id}")
 
 
 def test_custom_correlation_id_preserved():

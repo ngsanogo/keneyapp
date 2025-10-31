@@ -58,6 +58,7 @@ configobj>=5.0.9
 
 # Testing Coverage
 pytest-cov==4.1.0
+jsonschema==4.23.0
 
 # OAuth2/OIDC Support
 authlib==1.6.5

@@ -11,6 +11,7 @@ backward compatibility. They validate:
 """
 
 import pytest
+import time
 from fastapi.testclient import TestClient
 from jsonschema import validate, ValidationError
 
@@ -122,8 +123,6 @@ class TestHealthEndpointContract:
 
     def test_health_check_response_time(self):
         """Verify health check responds quickly."""
-        import time
-        
         start = time.time()
         response = client.get("/health")
         duration = time.time() - start

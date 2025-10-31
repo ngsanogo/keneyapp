@@ -15,12 +15,8 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-# Configure structured logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(message)s'
-)
-
+# Get logger instance
+# Note: Application-level logging configuration should be done in main.py
 logger = logging.getLogger(__name__)
 
 

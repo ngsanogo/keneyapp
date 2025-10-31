@@ -249,6 +249,11 @@ groups:
     interval: 60s
     rules:
       # Patient operations anomaly
+      # This alert uses statistical anomaly detection:
+      # - Calculate current rate of patient operations (1h window)
+      # - Compare to 7-day historical average
+      # - Alert if difference > 2 standard deviations (statistical significance)
+      # This helps detect both unusual spikes and drops in activity
       - alert: PatientOperationsAnomaly
         expr: |
           abs(rate(patient_operations_total[1h]) - 
@@ -275,7 +280,12 @@ groups:
           description: "No new appointments during business hours may indicate an issue"
           runbook: "https://docs.keneyapp.com/runbooks/no-appointments"
 
-      # Unusual login pattern
+      # Unusual login pattern (potential security issue)
+      # This alert uses statistical anomaly detection for security:
+      # - Calculate current rate of login attempts (1h window)
+      # - Compare to 7-day historical average
+      # - Alert if difference > 3 standard deviations (higher threshold than business metrics)
+      # This helps detect potential brute force attacks or unusual access patterns
       - alert: UnusualLoginPattern
         expr: |
           abs(rate(auth_login_total[1h]) - 
