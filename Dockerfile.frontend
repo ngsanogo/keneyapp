@@ -1,14 +1,17 @@
 # Frontend Dockerfile for KeneyApp
-FROM node:25-alpine
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
 
+# Set environment variable to increase Node memory limit for build
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 # Copy package files
 COPY frontend/package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies using npm ci for reproducible builds
+RUN npm ci --legacy-peer-deps
 
 # Copy frontend code
 COPY frontend/ .
