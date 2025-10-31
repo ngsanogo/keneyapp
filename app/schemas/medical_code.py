@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 # Medical Code Schemas
 class MedicalCodeBase(BaseModel):
     """Base schema for medical codes."""
-    
+
     code_system: str
     code: str
     display: str
@@ -20,12 +20,13 @@ class MedicalCodeBase(BaseModel):
 
 class MedicalCodeCreate(MedicalCodeBase):
     """Schema for creating medical codes."""
+
     pass
 
 
 class MedicalCodeResponse(MedicalCodeBase):
     """Schema for medical code responses."""
-    
+
     id: int
     is_active: int
     created_at: datetime
@@ -38,7 +39,7 @@ class MedicalCodeResponse(MedicalCodeBase):
 # Coding Schema (FHIR-compatible)
 class CodingSchema(BaseModel):
     """FHIR-compatible coding schema."""
-    
+
     system: str = Field(..., description="URI for the code system")
     code: str = Field(..., description="The code value")
     display: Optional[str] = Field(None, description="Human-readable display text")
@@ -47,7 +48,7 @@ class CodingSchema(BaseModel):
 # Condition Schemas
 class ConditionBase(BaseModel):
     """Base schema for conditions."""
-    
+
     clinical_status: str = "active"
     verification_status: str = "confirmed"
     severity: Optional[str] = None
@@ -62,13 +63,13 @@ class ConditionBase(BaseModel):
 
 class ConditionCreate(ConditionBase):
     """Schema for creating conditions."""
-    
+
     patient_id: int
 
 
 class ConditionResponse(ConditionBase):
     """Schema for condition responses."""
-    
+
     id: int
     tenant_id: int
     patient_id: int
@@ -84,7 +85,7 @@ class ConditionResponse(ConditionBase):
 # Observation Schemas
 class ObservationBase(BaseModel):
     """Base schema for observations."""
-    
+
     status: str = "final"
     loinc_code: str
     loinc_display: str
@@ -100,13 +101,13 @@ class ObservationBase(BaseModel):
 
 class ObservationCreate(ObservationBase):
     """Schema for creating observations."""
-    
+
     patient_id: int
 
 
 class ObservationResponse(ObservationBase):
     """Schema for observation responses."""
-    
+
     id: int
     tenant_id: int
     patient_id: int
@@ -122,7 +123,7 @@ class ObservationResponse(ObservationBase):
 # Procedure Schemas
 class ProcedureBase(BaseModel):
     """Base schema for procedures."""
-    
+
     status: str = "completed"
     cpt_code: Optional[str] = None
     cpt_display: Optional[str] = None
@@ -138,13 +139,13 @@ class ProcedureBase(BaseModel):
 
 class ProcedureCreate(ProcedureBase):
     """Schema for creating procedures."""
-    
+
     patient_id: int
 
 
 class ProcedureResponse(ProcedureBase):
     """Schema for procedure responses."""
-    
+
     id: int
     tenant_id: int
     patient_id: int

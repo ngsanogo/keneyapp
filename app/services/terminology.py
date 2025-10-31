@@ -21,9 +21,7 @@ class TerminologyService:
 
     @staticmethod
     def get_code(
-        db: Session,
-        code_system: CodeSystem,
-        code: str
+        db: Session, code_system: CodeSystem, code: str
     ) -> Optional[MedicalCode]:
         """
         Retrieve a medical code from the terminology database.
@@ -36,18 +34,19 @@ class TerminologyService:
         Returns:
             MedicalCode instance or None if not found
         """
-        return db.query(MedicalCode).filter(
-            MedicalCode.code_system == code_system,
-            MedicalCode.code == code,
-            MedicalCode.is_active == 1
-        ).first()
+        return (
+            db.query(MedicalCode)
+            .filter(
+                MedicalCode.code_system == code_system,
+                MedicalCode.code == code,
+                MedicalCode.is_active == 1,
+            )
+            .first()
+        )
 
     @staticmethod
     def search_codes(
-        db: Session,
-        code_system: CodeSystem,
-        search_term: str,
-        limit: int = 20
+        db: Session, code_system: CodeSystem, search_term: str, limit: int = 20
     ) -> List[MedicalCode]:
         """
         Search for medical codes by display text.
@@ -61,18 +60,19 @@ class TerminologyService:
         Returns:
             List of matching MedicalCode instances
         """
-        return db.query(MedicalCode).filter(
-            MedicalCode.code_system == code_system,
-            MedicalCode.display.ilike(f"%{search_term}%"),
-            MedicalCode.is_active == 1
-        ).limit(limit).all()
+        return (
+            db.query(MedicalCode)
+            .filter(
+                MedicalCode.code_system == code_system,
+                MedicalCode.display.ilike(f"%{search_term}%"),
+                MedicalCode.is_active == 1,
+            )
+            .limit(limit)
+            .all()
+        )
 
     @staticmethod
-    def validate_code(
-        db: Session,
-        code_system: CodeSystem,
-        code: str
-    ) -> bool:
+    def validate_code(db: Session, code_system: CodeSystem, code: str) -> bool:
         """
         Validate that a medical code exists in the system.
 
@@ -93,7 +93,7 @@ class TerminologyService:
         code: str,
         display: str,
         definition: Optional[str] = None,
-        parent_code: Optional[str] = None
+        parent_code: Optional[str] = None,
     ) -> MedicalCode:
         """
         Create a new medical code entry.
@@ -115,7 +115,7 @@ class TerminologyService:
             display=display,
             definition=definition,
             parent_code=parent_code,
-            is_active=1
+            is_active=1,
         )
         db.add(medical_code)
         db.commit()
@@ -124,9 +124,7 @@ class TerminologyService:
 
     @staticmethod
     def get_coding_dict(
-        code_system: CodeSystem,
-        code: Optional[str],
-        display: Optional[str]
+        code_system: CodeSystem, code: Optional[str], display: Optional[str]
     ) -> Optional[Dict[str, Any]]:
         """
         Create a FHIR-compatible coding dictionary.
@@ -154,9 +152,11 @@ class TerminologyService:
         }
 
         return {
-            "system": system_uris.get(code_system, f"https://keneyapp.com/{code_system.value}"),
+            "system": system_uris.get(
+                code_system, f"https://keneyapp.com/{code_system.value}"
+            ),
             "code": code,
-            "display": display or code
+            "display": display or code,
         }
 
     @staticmethod
@@ -195,8 +195,14 @@ class TerminologyService:
             ],
             "cpt": [
                 {"code": "99213", "display": "Office visit, established patient"},
-                {"code": "99214", "display": "Office visit, established patient, moderate complexity"},
-                {"code": "93000", "display": "Electrocardiogram, routine ECG with at least 12 leads"},
+                {
+                    "code": "99214",
+                    "display": "Office visit, established patient, moderate complexity",
+                },
+                {
+                    "code": "93000",
+                    "display": "Electrocardiogram, routine ECG with at least 12 leads",
+                },
                 {"code": "80053", "display": "Comprehensive metabolic panel"},
             ],
             "ccam": [
