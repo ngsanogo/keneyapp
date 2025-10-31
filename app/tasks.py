@@ -76,3 +76,33 @@ def cleanup_expired_tokens():
     # TODO: Implement token cleanup logic
     logger.info("Starting expired token cleanup")
     return {"status": "completed"}
+
+
+@celery_app.task(name="collect_business_metrics")
+def collect_business_metrics():
+    """
+    Collect and update business KPI metrics for monitoring.
+
+    This task runs periodically to update Prometheus metrics with
+    current business KPIs such as appointment rates, patient activity, etc.
+    """
+    from app.core.database import SessionLocal
+    from app.services.metrics_collector import collect_all_business_metrics
+
+    db = SessionLocal()
+    try:
+        logger.info("Starting business metrics collection")
+        metrics = collect_all_business_metrics(db)
+        logger.info(
+            "Business metrics collection completed",
+            extra={
+                "daily_active_patients": metrics.get("daily_active_patients", 0),
+                "appointment_metrics": metrics.get("appointment_metrics", {}),
+            },
+        )
+        return {"status": "completed", "metrics": metrics}
+    except Exception as e:
+        logger.error(f"Error collecting business metrics: {str(e)}")
+        return {"status": "failed", "error": str(e)}
+    finally:
+        db.close()

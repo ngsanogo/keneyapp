@@ -1,0 +1,280 @@
+{
+  "dashboard": {
+    "title": "KeneyApp - Business KPI Dashboard",
+    "tags": ["keneyapp", "healthcare", "business-kpi"],
+    "timezone": "utc",
+    "rows": [
+      {
+        "title": "Patient Metrics",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Daily Active Patients",
+            "type": "stat",
+            "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+            "targets": [
+              {
+                "expr": "daily_active_patients",
+                "legendFormat": "Active Patients Today"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "short",
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"value": 0, "color": "red"},
+                    {"value": 50, "color": "yellow"},
+                    {"value": 100, "color": "green"}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": 2,
+            "title": "Patients by Risk Level",
+            "type": "piechart",
+            "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
+            "targets": [
+              {
+                "expr": "patients_by_risk_level",
+                "legendFormat": "{{risk_level}}"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Appointment Metrics",
+        "panels": [
+          {
+            "id": 3,
+            "title": "Appointment Completion Rate",
+            "type": "graph",
+            "gridPos": {"x": 0, "y": 4, "w": 12, "h": 4},
+            "targets": [
+              {
+                "expr": "appointment_completion_rate{time_period=\"day\"}",
+                "legendFormat": "Daily"
+              },
+              {
+                "expr": "appointment_completion_rate{time_period=\"week\"}",
+                "legendFormat": "Weekly"
+              },
+              {
+                "expr": "appointment_completion_rate{time_period=\"month\"}",
+                "legendFormat": "Monthly"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "min": 0,
+                "max": 100
+              }
+            }
+          },
+          {
+            "id": 4,
+            "title": "Appointments by Status",
+            "type": "barchart",
+            "gridPos": {"x": 0, "y": 8, "w": 6, "h": 4},
+            "targets": [
+              {
+                "expr": "appointments_by_status",
+                "legendFormat": "{{status}}"
+              }
+            ]
+          },
+          {
+            "id": 5,
+            "title": "No-Show Rate",
+            "type": "gauge",
+            "gridPos": {"x": 6, "y": 8, "w": 6, "h": 4},
+            "targets": [
+              {
+                "expr": "appointment_no_show_rate{time_period=\"day\"}",
+                "legendFormat": "Daily No-Show %"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "min": 0,
+                "max": 100,
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"value": 0, "color": "green"},
+                    {"value": 10, "color": "yellow"},
+                    {"value": 20, "color": "red"}
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "title": "Prescription Metrics",
+        "panels": [
+          {
+            "id": 6,
+            "title": "Prescription Fulfillment Rate",
+            "type": "graph",
+            "gridPos": {"x": 0, "y": 12, "w": 12, "h": 4},
+            "targets": [
+              {
+                "expr": "prescription_fulfillment_rate{time_period=\"day\"}",
+                "legendFormat": "Daily"
+              },
+              {
+                "expr": "prescription_fulfillment_rate{time_period=\"week\"}",
+                "legendFormat": "Weekly"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "min": 0,
+                "max": 100
+              }
+            }
+          },
+          {
+            "id": 7,
+            "title": "Prescriptions by Status",
+            "type": "barchart",
+            "gridPos": {"x": 0, "y": 16, "w": 6, "h": 4},
+            "targets": [
+              {
+                "expr": "prescriptions_by_status",
+                "legendFormat": "{{status}}"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Security & Compliance",
+        "panels": [
+          {
+            "id": 8,
+            "title": "Authentication Failures",
+            "type": "graph",
+            "gridPos": {"x": 0, "y": 20, "w": 6, "h": 4},
+            "targets": [
+              {
+                "expr": "rate(authentication_failures_total[5m])",
+                "legendFormat": "{{reason}}"
+              }
+            ],
+            "alert": {
+              "name": "High Authentication Failures",
+              "conditions": [
+                {
+                  "evaluator": {
+                    "type": "gt",
+                    "params": [10]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": 9,
+            "title": "Unauthorized Access Attempts",
+            "type": "graph",
+            "gridPos": {"x": 6, "y": 20, "w": 6, "h": 4},
+            "targets": [
+              {
+                "expr": "rate(unauthorized_access_attempts[5m])",
+                "legendFormat": "{{resource_type}}"
+              }
+            ]
+          },
+          {
+            "id": 10,
+            "title": "Audit Log Activity",
+            "type": "graph",
+            "gridPos": {"x": 0, "y": 24, "w": 12, "h": 4},
+            "targets": [
+              {
+                "expr": "rate(audit_log_entries_total[5m])",
+                "legendFormat": "{{action_type}}"
+              }
+            ]
+          },
+          {
+            "id": 11,
+            "title": "Data Export Requests",
+            "type": "stat",
+            "gridPos": {"x": 0, "y": 28, "w": 6, "h": 4},
+            "targets": [
+              {
+                "expr": "sum(data_export_requests_total)",
+                "legendFormat": "Total Exports"
+              }
+            ]
+          },
+          {
+            "id": 12,
+            "title": "Encryption Operations",
+            "type": "graph",
+            "gridPos": {"x": 6, "y": 28, "w": 6, "h": 4},
+            "targets": [
+              {
+                "expr": "rate(encryption_operations_total[5m])",
+                "legendFormat": "{{operation}}"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "System Health",
+        "panels": [
+          {
+            "id": 13,
+            "title": "API Error Rate",
+            "type": "graph",
+            "gridPos": {"x": 0, "y": 32, "w": 12, "h": 4},
+            "targets": [
+              {
+                "expr": "api_error_rate",
+                "legendFormat": "{{error_type}}"
+              }
+            ],
+            "alert": {
+              "name": "High API Error Rate",
+              "conditions": [
+                {
+                  "evaluator": {
+                    "type": "gt",
+                    "params": [5]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "refresh": "30s",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "annotations": {
+      "list": [
+        {
+          "datasource": "Prometheus",
+          "name": "Deployments",
+          "expr": "changes(process_start_time_seconds[5m]) > 0"
+        }
+      ]
+    }
+  }
+}
