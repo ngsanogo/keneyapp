@@ -93,13 +93,9 @@ def collect_business_metrics():
     try:
         logger.info("Starting business metrics collection")
         metrics = collect_all_business_metrics(db)
-        logger.info(
-            "Business metrics collection completed",
-            extra={
-                "daily_active_patients": metrics.get("daily_active_patients", 0),
-                "appointment_metrics": metrics.get("appointment_metrics", {}),
-            },
-        )
+        # Note: Detailed metrics are not logged for HIPAA compliance
+        # Metrics are stored in Prometheus and viewable in Grafana
+        logger.info("Business metrics collection completed successfully")
         return {"status": "completed", "metrics": metrics}
     except Exception as e:
         logger.error("Error collecting business metrics: %s", str(e), exc_info=True)
