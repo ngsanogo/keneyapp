@@ -195,7 +195,9 @@ def collect_prescription_metrics(db: Session) -> Dict[str, Any]:
     # Total prescriptions created weekly
     weekly_total = (
         db.query(func.count(Prescription.id))
-        .filter(Prescription.created_at >= week_ago)
+        .filter(
+            Prescription.created_at >= datetime.combine(week_ago, datetime.min.time())
+        )
         .scalar()
         or 0
     )
@@ -215,23 +217,27 @@ def collect_prescription_metrics(db: Session) -> Dict[str, Any]:
     prescriptions_by_status.labels(status="active").set(active_prescriptions)
     prescriptions_by_status.labels(status="completed").set(completed_prescriptions)
 
-    # Calculate fulfillment rate as percentage with refills (simple metric)
+    # Calculate active prescription rate (prescriptions with remaining refills)
+    # Note: This is a simplified metric. True fulfillment tracking would require
+    # additional status fields in the Prescription model.
     total_prescriptions = active_prescriptions + completed_prescriptions
-    daily_rate = (
+    active_rate = (
         (active_prescriptions / total_prescriptions * 100)
         if total_prescriptions > 0
         else 0
     )
-    weekly_rate = daily_rate  # Same calculation for weekly
 
-    prescription_fulfillment_rate.labels(time_period="day").set(daily_rate)
-    prescription_fulfillment_rate.labels(time_period="week").set(weekly_rate)
+    # Update metrics with active rate (renamed from fulfillment rate for clarity)
+    prescription_fulfillment_rate.labels(time_period="day").set(active_rate)
+    prescription_fulfillment_rate.labels(time_period="week").set(active_rate)
 
     return {
-        "daily_fulfillment_rate": daily_rate,
-        "weekly_fulfillment_rate": weekly_rate,
+        "daily_fulfillment_rate": active_rate,
+        "weekly_fulfillment_rate": active_rate,
         "daily_total": daily_total,
         "weekly_total": weekly_total,
+        "active_prescriptions": active_prescriptions,
+        "completed_prescriptions": completed_prescriptions,
     }
 
 

@@ -102,7 +102,7 @@ def collect_business_metrics():
         )
         return {"status": "completed", "metrics": metrics}
     except Exception as e:
-        logger.error(f"Error collecting business metrics: {str(e)}")
+        logger.error("Error collecting business metrics: %s", str(e), exc_info=True)
         return {"status": "failed", "error": str(e)}
     finally:
         db.close()
