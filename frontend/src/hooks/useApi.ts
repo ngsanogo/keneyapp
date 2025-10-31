@@ -52,13 +52,27 @@ export function useApi<T = any>(): UseApiReturn<T> {
 
       if (error.response) {
         // Server responded with error status
-        errorMessage = error.response.data?.detail || error.response.data?.message || errorMessage;
+        const status = error.response.status;
+        
+        // Map common status codes to user-friendly messages
+        if (status === 401) {
+          errorMessage = 'Authentication required. Please log in again.';
+        } else if (status === 403) {
+          errorMessage = 'You do not have permission to perform this action.';
+        } else if (status === 404) {
+          errorMessage = 'The requested resource was not found.';
+        } else if (status >= 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else {
+          // Only use server message for client errors (400-499)
+          errorMessage = error.response.data?.detail || error.response.data?.message || errorMessage;
+        }
       } else if (error.request) {
         // Request made but no response received
         errorMessage = 'Network error. Please check your connection.';
       } else {
         // Something else happened
-        errorMessage = error.message || errorMessage;
+        errorMessage = 'An unexpected error occurred. Please try again.';
       }
 
       setState({ data: null, loading: false, error: errorMessage });

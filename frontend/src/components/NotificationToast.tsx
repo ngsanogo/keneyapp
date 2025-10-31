@@ -72,23 +72,30 @@ const NotificationToast: React.FC<NotificationToastProps> = ({
     if (onClose) onClose();
   };
 
-  return (
-    <>
-      <style>
-        {`
-          @keyframes slideInRight {
-            from {
-              transform: translateX(100%);
-              opacity: 0;
-            }
-            to {
-              transform: translateX(0);
-              opacity: 1;
-            }
+  // Add animation to document head once
+  React.useEffect(() => {
+    const styleId = 'notification-toast-animations';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
           }
-        `}
-      </style>
-      <div style={toastStyle} role="alert">
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
+
+  return (
+    <div style={toastStyle} role="alert">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span
             style={{
@@ -120,8 +127,7 @@ const NotificationToast: React.FC<NotificationToastProps> = ({
         >
           ×
         </button>
-      </div>
-    </>
+    </div>
   );
 };
 

@@ -20,7 +20,7 @@ def send_appointment_reminder(appointment_id: int, patient_email: str):
     # Implementation placeholder - integrate with email service (SendGrid, SES, etc.)
     # In production, use environment-configured SMTP/API credentials
     # Note: Avoid logging identifiable information for HIPAA compliance
-    logger.info(f"Sending appointment reminder for appointment {appointment_id}")
+    logger.info("Sending appointment reminder")
 
     # Example implementation would be:
     # from app.services.notification import send_email
@@ -45,29 +45,32 @@ def generate_patient_report(patient_id: int):
     from app.models.patient import Patient
 
     # Note: Avoid logging identifiable information for HIPAA compliance
-    logger.info(f"Generating report for patient {patient_id}")
+    logger.info("Generating patient report")
 
     db = SessionLocal()
     try:
         patient = db.query(Patient).filter(Patient.id == patient_id).first()
         if not patient:
-            logger.error(f"Patient {patient_id} not found")
+            logger.error("Patient not found in report generation")
             return {"status": "error", "message": "Patient not found"}
 
         # Generate report data structure
+        from datetime import datetime, timezone
+
         report = {
             "patient_id": patient_id,
             "appointments_count": len(patient.appointments),
             "prescriptions_count": len(patient.prescriptions),
-            "generated_at": "utcnow",
+            "generated_at": datetime.now(timezone.utc).isoformat(),
             # Add more report data as needed
         }
 
-        logger.info(f"Report generated successfully for patient {patient_id}")
+        logger.info("Patient report generated successfully")
         return {"status": "generated", "patient_id": patient_id, "report": report}
-    except Exception as e:
-        logger.error(f"Error generating report: {str(e)}", exc_info=True)
-        return {"status": "error", "message": str(e)}
+    except Exception:
+        logger.error("Error generating report", exc_info=True)
+        db.rollback()
+        return {"status": "error", "message": "Report generation failed"}
     finally:
         db.close()
 
@@ -84,7 +87,7 @@ def check_prescription_interactions(prescription_id: int, medications: list):
     # Implementation placeholder - integrate with drug interaction APIs
     # Consider using: FDA API, RxNorm, DrugBank, or commercial services
     # Note: Avoid logging identifiable information for HIPAA compliance
-    logger.info(f"Checking drug interactions for prescription {prescription_id}")
+    logger.info("Checking drug interactions")
 
     interactions = []
 
@@ -97,7 +100,7 @@ def check_prescription_interactions(prescription_id: int, medications: list):
     #             interactions.append(interaction)
 
     if len(medications) > 1:
-        logger.info(f"Checked {len(medications)} medications for interactions")
+        logger.info("Drug interaction check completed")
 
     return {
         "status": "checked",
@@ -133,10 +136,10 @@ def backup_patient_data():
         #     "-f", f"/backups/{backup_filename}"
         # ])
 
-        logger.info(f"Patient data backup completed: {backup_filename}")
+        logger.info("Patient data backup completed")
         return {"status": "completed", "backup_file": backup_filename}
     except Exception as e:
-        logger.error(f"Backup failed: {str(e)}", exc_info=True)
+        logger.error("Backup operation failed", exc_info=True)
         return {"status": "failed", "error": str(e)}
 
 
@@ -146,6 +149,7 @@ def cleanup_expired_tokens():
     Clean up expired authentication tokens.
     """
     from app.core.database import SessionLocal
+
     # from datetime import datetime, timedelta, timezone
 
     logger.info("Starting expired token cleanup")
