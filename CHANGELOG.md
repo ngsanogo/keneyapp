@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Continuous Improvement Cycle Iteration 4
+
+#### CI/CD
+- Updated Codecov uploads to use the v5 `files` input and tolerate transient failures, restoring backend/frontend job stability.
+- Upgraded GitHub CodeQL actions to v3 and guarded the analysis job against forked pull requests where security events cannot be published.
+- Adopted the latest `actions/setup-python@v5` across workflows for consistent toolchain provisioning.
+
+#### Infrastructure
+- Aligned backend Docker image with the supported Python 3.11 base to match local/runtime environments and ensure prebuilt database drivers are available during builds.
+
 ### Added - Continuous Improvement Cycle Iteration 3
 
 #### Security & Dependencies
