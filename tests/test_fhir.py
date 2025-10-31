@@ -113,7 +113,7 @@ def test_patient_to_fhir(sample_patient):
     assert fhir_patient["address"][0]["text"] == "123 Main St, Boston, MA"
 
     # Check active status
-    assert fhir_patient["active"] == True
+    assert fhir_patient["active"] is True
 
 
 def test_fhir_to_patient():

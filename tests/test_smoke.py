@@ -17,7 +17,6 @@ Usage:
 
 import os
 import time
-from typing import Dict, Any
 
 import pytest
 import requests
