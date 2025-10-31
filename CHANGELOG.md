@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Continuous Improvement Cycle Iteration 3
+
+#### Security & Compliance
+- Hardened `require_roles` to normalize role input (lists or variadic) while preserving implicit `super_admin` access, preventing configuration typos from silently relaxing authorization.
+
+#### Testing
+- Added focused unit coverage for the RBAC dependency to assert list handling, denial behavior, and `super_admin` bypass rules.
+
+#### Tooling & DX
+- Reduced mypy noise around RBAC usage by improving dependency typing, making type-checking output more actionable for developers.
+
 ### Added - Continuous Improvement Cycle Iteration 2
 
 #### Security & Compliance
