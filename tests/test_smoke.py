@@ -23,8 +23,16 @@ import pytest
 import requests
 
 
-BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
-API_BASE = f"{BASE_URL}/api/v1"
+# Configuration for smoke tests - can be overridden via environment variables
+class Config:
+    BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+    API_BASE = f"{BASE_URL}/api/v1"
+    HEALTH_CHECK_RETRIES = 30
+    HEALTH_CHECK_INTERVAL = 1  # seconds
+
+
+BASE_URL = Config.BASE_URL
+API_BASE = Config.API_BASE
 
 
 @pytest.fixture(scope="module")
@@ -33,8 +41,8 @@ def api_client():
     session = requests.Session()
     session.headers.update({"Content-Type": "application/json"})
 
-    # Wait for API to be ready (max 30 seconds)
-    for attempt in range(30):
+    # Wait for API to be ready
+    for attempt in range(Config.HEALTH_CHECK_RETRIES):
         try:
             response = session.get(f"{BASE_URL}/health", timeout=5)
             if response.status_code == 200:
@@ -42,7 +50,7 @@ def api_client():
                 return session
         except requests.exceptions.RequestException:
             pass
-        time.sleep(1)
+        time.sleep(Config.HEALTH_CHECK_INTERVAL)
 
     pytest.fail(f"API at {BASE_URL} did not become ready in time")
 
@@ -169,10 +177,10 @@ class TestPatientManagement:
             json=patient_data,
             headers={"Authorization": f"Bearer {doctor_token}"},
         )
-        assert response.status_code in [
-            200,
-            201,
-        ], f"Failed to create patient: {response.text}"
+        # Expect 201 Created for successful patient creation
+        assert (
+            response.status_code == 201
+        ), f"Expected 201 Created, got {response.status_code}: {response.text}"
         created_patient = response.json()
         assert "id" in created_patient
         patient_id = created_patient["id"]
