@@ -23,7 +23,7 @@ Each item includes:
 - **Priority**: Critical
 - **Effort**: S
 - **Status**: In Progress
-- **Description**: Update Starlette (0.49.1) and Strawberry-GraphQL (0.257.0) to fix known CVEs
+- **Description**: Update Starlette (0.41.2) and Strawberry-GraphQL (0.257.0) to fix known CVEs
 - **Acceptance Criteria**:
   - All dependencies updated to secure versions
   - pip-audit reports 0 vulnerabilities

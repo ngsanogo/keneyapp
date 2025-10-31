@@ -69,7 +69,7 @@ jobs:
 
   backend-security:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head_repo.fork }}
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     permissions:
       security-events: write
       contents: read

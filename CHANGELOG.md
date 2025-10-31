@@ -13,14 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Codecov uploads to use the v5 `files` input and tolerate transient failures, restoring backend/frontend job stability.
 - Upgraded GitHub CodeQL actions to v3 and guarded the analysis job against forked pull requests where security events cannot be published.
 - Adopted the latest `actions/setup-python@v5` across workflows for consistent toolchain provisioning.
+- Fixed backend CodeQL job triggering on forked pull requests by gating the workflow on same-repo events only.
 
 #### Infrastructure
 - Aligned backend Docker image with the supported Python 3.11 base to match local/runtime environments and ensure prebuilt database drivers are available during builds.
+- Hardened Alembic migrations to no-op when base tables are provisioned later by SQLAlchemy metadata, allowing greenfield environments to bootstrap without schema conflicts.
+
+#### Frontend
+- Removed legacy default `React` import from the error boundary to restore TypeScript build compatibility with the new JSX transform.
 
 ### Added - Continuous Improvement Cycle Iteration 3
 
 #### Security & Dependencies
-- Updated Starlette to 0.49.1 to fix CVE (GHSA-7f5h-v6xp-fcq8) - CPU exhaustion vulnerability in FileResponse Range parsing
+- Updated Starlette to 0.41.2 (latest version compatible with FastAPI 0.115.x) including the fix for CVE GHSA-7f5h-v6xp-fcq8 (FileResponse Range parsing CPU exhaustion)
 - Updated Strawberry-GraphQL to 0.257.0 to fix CSRF and type confusion vulnerabilities (PYSEC-2024-171, GHSA-5xh2-23cc-5jc6)
 - Updated FastAPI to 0.115.5 for latest security patches
 - Updated python-multipart to 0.0.12 for security improvements
