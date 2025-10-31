@@ -22,11 +22,11 @@ class Prescription(Base):
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     doctor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     medication_name = Column(String, nullable=False)
-    
+
     # ATC (Anatomical Therapeutic Chemical) classification code
     atc_code = Column(String(50), index=True)
     atc_display = Column(String(500))
-    
+
     dosage = Column(String, nullable=False)
     frequency = Column(String, nullable=False)
     duration = Column(String, nullable=False)

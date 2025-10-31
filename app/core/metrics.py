@@ -132,7 +132,7 @@ encryption_operations_total = Counter(
 )
 
 
-def metrics_endpoint():
+def metrics_endpoint() -> Response:
     """
     Endpoint to expose Prometheus metrics.
 

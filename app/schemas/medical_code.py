@@ -4,7 +4,7 @@ Pydantic schemas for medical codes and clinical data.
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 # Medical Code Schemas
@@ -32,8 +32,7 @@ class MedicalCodeResponse(MedicalCodeBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Coding Schema (FHIR-compatible)
@@ -78,8 +77,7 @@ class ConditionResponse(ConditionBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Observation Schemas
@@ -116,8 +114,7 @@ class ObservationResponse(ObservationBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Procedure Schemas
@@ -153,5 +150,4 @@ class ProcedureResponse(ProcedureBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
