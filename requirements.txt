@@ -1,7 +1,7 @@
 # FastAPI and server
-fastapi==0.115.0
-uvicorn[standard]==0.32.0
-python-multipart==0.0.6
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.12
 
 # Database
 sqlalchemy==2.0.35
@@ -63,9 +63,10 @@ jsonschema==4.23.0
 # OAuth2/OIDC Support
 authlib==1.6.5
 itsdangerous==2.2.0
+starlette==0.49.1
 
 # GraphQL Support
-strawberry-graphql[fastapi]==0.214.0
+strawberry-graphql[fastapi]==0.257.0
 
 # HL7/FHIR Support
 fhir.resources==7.1.0
