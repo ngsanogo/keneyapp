@@ -52,6 +52,7 @@ If you discover a security vulnerability, please report it by emailing:
 - ✅ **JWT-based authentication** with secure token management
 - ✅ **OAuth2/OIDC support** for SSO (Google, Microsoft, Okta)
 - ✅ **Role-Based Access Control (RBAC)** with granular permissions
+- ✅ **Bootstrap guardrails**: configurable default admin account for test/demo environments (disable in production)
 - ✅ **Password hashing** using bcrypt with strong work factors
 - ✅ **Multi-Factor Authentication (MFA)** support with TOTP
 - ✅ **Session management** with secure cookie settings

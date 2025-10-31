@@ -183,6 +183,8 @@ keneyapp/
 
 ## 👥 Demo Accounts
 
+When `ENABLE_BOOTSTRAP_ADMIN=True` (default for local/test), KeneyApp provisions a default tenant and administrators so you can log in immediately. Update or disable these credentials for production deployments.
+
 After running the initialization script, you can log in with these demo accounts:
 
 | Role | Username | Password |

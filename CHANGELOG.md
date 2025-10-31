@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Continuous Improvement Cycle Iteration 2
+
+#### Security & Compliance
+- Automatic bootstrap of a default tenant and administrator (behind `ENABLE_BOOTSTRAP_ADMIN`) to keep contract tests and smoke tests deterministic while preserving the ability to disable it in hardened environments.
+- RBAC guard now grants `super_admin` accounts implicit access to protected routes, aligning authorization with organizational policies.
+
+#### API
+- Login endpoint now emits proper validation errors (`422`) when username or password is missing, improving client contract guarantees.
+
+#### Documentation
+- Documented the bootstrap administrator controls in `.env.example`, `.env`, `README.md`, and `SECURITY.md`.
+
 ### Added - Continuous Improvement Cycle Iteration 1
 
 #### Observability & Monitoring

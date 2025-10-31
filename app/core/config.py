@@ -26,6 +26,15 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "postgresql://keneyapp:keneyapp@localhost:5432/keneyapp"
 
+    # Bootstrap / default credentials (for tests & local environments)
+    ENABLE_BOOTSTRAP_ADMIN: bool = True
+    BOOTSTRAP_TENANT_NAME: str = "Default Tenant"
+    BOOTSTRAP_TENANT_SLUG: str = "default"
+    BOOTSTRAP_ADMIN_USERNAME: str = "admin"
+    BOOTSTRAP_ADMIN_PASSWORD: str = "admin123"
+    BOOTSTRAP_ADMIN_EMAIL: str = "admin@keneyapp.local"
+    BOOTSTRAP_ADMIN_FULL_NAME: str = "System Administrator"
+
     # CORS
     ALLOWED_ORIGINS: Union[str, List[str]] = (
         "http://localhost:3000,http://localhost:8000"

@@ -120,6 +120,9 @@ def require_roles(*allowed_roles: Iterable[UserRole]) -> Callable:
         if not allowed:
             return current_user
 
+        if current_user.role == UserRole.SUPER_ADMIN:
+            return current_user
+
         if current_user.role not in allowed:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
