@@ -26,7 +26,7 @@ jobs:
           --health-retries 5
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -52,7 +52,7 @@ jobs:
         pytest tests/ -v --cov=app --cov-report=xml --cov-report=html --cov-report=term
     
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       with:
         file: ./coverage.xml
         flags: backend
@@ -70,7 +70,7 @@ jobs:
       contents: read
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
@@ -85,10 +85,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Set up Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v6
       with:
         node-version: '18'
         cache: 'npm'
@@ -111,7 +111,7 @@ jobs:
       run: npm test -- --watchAll=false --coverage || true
     
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       with:
         file: ./frontend/coverage/coverage-final.json
         flags: frontend
@@ -134,13 +134,13 @@ jobs:
       packages: write
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     
     - name: Build backend image
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: .
         file: ./Dockerfile
@@ -150,7 +150,7 @@ jobs:
         cache-to: type=gha,mode=max
     
     - name: Build frontend image
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ./frontend
         file: ./Dockerfile.frontend
