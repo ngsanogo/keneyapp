@@ -4,7 +4,7 @@ Business metrics collection service.
 This module provides functions to collect and update business KPIs for monitoring.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
@@ -34,7 +34,7 @@ def collect_daily_active_patients(db: Session) -> int:
     Returns:
         Number of active patients today
     """
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
 
     # Count patients with appointments or prescriptions today
     active_count = (
@@ -58,7 +58,7 @@ def collect_appointment_metrics(db: Session) -> Dict[str, Any]:
     Returns:
         Dictionary with appointment metrics
     """
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
     week_ago = today - timedelta(days=7)
     month_ago = today - timedelta(days=30)
 
@@ -181,7 +181,7 @@ def collect_prescription_metrics(db: Session) -> Dict[str, Any]:
     Returns:
         Dictionary with prescription metrics
     """
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
     week_ago = today - timedelta(days=7)
 
     # Total prescriptions created daily
@@ -288,7 +288,7 @@ def collect_all_business_metrics(db: Session) -> Dict[str, Any]:
         Dictionary with all collected metrics
     """
     metrics = {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "daily_active_patients": collect_daily_active_patients(db),
         "appointment_metrics": collect_appointment_metrics(db),
         "prescription_metrics": collect_prescription_metrics(db),

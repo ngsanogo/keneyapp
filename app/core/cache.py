@@ -4,7 +4,6 @@ Redis caching utilities for performance optimization.
 
 import json
 from typing import Optional, Any
-from datetime import timedelta
 import redis
 from app.core.config import settings
 

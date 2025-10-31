@@ -13,7 +13,7 @@ backward compatibility. They validate:
 import pytest
 import time
 from fastapi.testclient import TestClient
-from jsonschema import validate, ValidationError
+from jsonschema import validate
 
 from app.main import app
 
@@ -78,22 +78,22 @@ class TestRootEndpointContract:
     def test_root_endpoint_structure(self):
         """Verify root endpoint returns expected structure."""
         response = client.get("/")
-        
+
         assert response.status_code == 200
         data = response.json()
-        
+
         # Validate required fields
         assert "name" in data
         assert "version" in data
         assert "status" in data
         assert "docs" in data
-        
+
         # Validate data types
         assert isinstance(data["name"], str)
         assert isinstance(data["version"], str)
         assert isinstance(data["status"], str)
         assert isinstance(data["docs"], str)
-        
+
         # Validate specific values
         assert data["status"] == "running"
         assert data["docs"].startswith("/api/v")
@@ -101,7 +101,7 @@ class TestRootEndpointContract:
     def test_root_endpoint_headers(self):
         """Verify root endpoint includes expected headers."""
         response = client.get("/")
-        
+
         # Check for security headers
         assert "X-Correlation-ID" in response.headers
         assert "X-Content-Type-Options" in response.headers
@@ -114,10 +114,10 @@ class TestHealthEndpointContract:
     def test_health_check_structure(self):
         """Verify health check returns expected structure."""
         response = client.get("/health")
-        
+
         assert response.status_code == 200
         data = response.json()
-        
+
         assert "status" in data
         assert data["status"] == "healthy"
 
@@ -126,7 +126,7 @@ class TestHealthEndpointContract:
         start = time.time()
         response = client.get("/health")
         duration = time.time() - start
-        
+
         assert response.status_code == 200
         assert duration < 1.0  # Should respond in less than 1 second
 
@@ -143,13 +143,13 @@ class TestAuthenticationContract:
                 "password": "admin123"
             }
         )
-        
+
         assert response.status_code == 200
         data = response.json()
-        
+
         # Validate against schema
         validate(instance=data, schema=AUTH_RESPONSE_SCHEMA)
-        
+
         # Additional validations
         assert data["token_type"] == "bearer"
         assert len(data["access_token"]) > 20
@@ -163,10 +163,10 @@ class TestAuthenticationContract:
                 "password": "invalid"
             }
         )
-        
+
         assert response.status_code == 401
         data = response.json()
-        
+
         # Validate error structure
         validate(instance=data, schema=ERROR_RESPONSE_SCHEMA)
         assert isinstance(data["detail"], str)
@@ -180,10 +180,10 @@ class TestAuthenticationContract:
                 "password": "test"
             }
         )
-        
+
         assert response.status_code == 422
         data = response.json()
-        
+
         # Validate error structure
         validate(instance=data, schema=ERROR_RESPONSE_SCHEMA)
 
@@ -203,7 +203,7 @@ class TestPatientEndpointContract:
     def test_list_patients_requires_auth(self):
         """Verify patients endpoint requires authentication."""
         response = client.get("/api/v1/patients")
-        
+
         assert response.status_code == 401
         validate(instance=response.json(), schema=ERROR_RESPONSE_SCHEMA)
 
@@ -213,13 +213,13 @@ class TestPatientEndpointContract:
             "/api/v1/patients",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
-        
+
         assert response.status_code == 200
         data = response.json()
-        
+
         # Should return a list
         assert isinstance(data, list)
-        
+
         # If list has items, validate first item
         if len(data) > 0:
             validate(instance=data[0], schema=PATIENT_RESPONSE_SCHEMA)
@@ -234,12 +234,12 @@ class TestPatientEndpointContract:
                 "last_name": "Test"
             }
         )
-        
+
         assert response.status_code == 422
         data = response.json()
-        
+
         validate(instance=data, schema=ERROR_RESPONSE_SCHEMA)
-        
+
         # Validation errors should be a list
         assert isinstance(data["detail"], list)
         assert len(data["detail"]) > 0
@@ -251,16 +251,16 @@ class TestMetricsEndpointContract:
     def test_metrics_endpoint_format(self):
         """Verify metrics endpoint returns Prometheus format."""
         response = client.get("/metrics")
-        
+
         assert response.status_code == 200
-        
+
         # Prometheus metrics are plain text
         assert "text/plain" in response.headers.get("content-type", "")
-        
+
         # Should contain metrics
         content = response.text
         assert len(content) > 0
-        
+
         # Check for expected metrics
         assert "http_requests_total" in content or "# HELP" in content
 
@@ -277,7 +277,7 @@ class TestAPIVersioning:
             "/api/v1/prescriptions",
             "/api/v1/dashboard/stats",
         ]
-        
+
         for endpoint in endpoints_to_check:
             response = client.get(endpoint)
             # Should not get 404 (endpoint exists)
@@ -301,7 +301,7 @@ class TestCORSHeaders:
                 "Access-Control-Request-Method": "GET"
             }
         )
-        
+
         # Should allow CORS
         assert "access-control-allow-origin" in response.headers
 
@@ -312,7 +312,7 @@ class TestRateLimiting:
     def test_rate_limit_headers(self):
         """Verify rate limit headers are present."""
         response = client.get("/")
-        
+
         # Rate limit headers should be present
         # Note: Actual header names depend on slowapi configuration
         assert response.status_code == 200
@@ -324,19 +324,19 @@ class TestErrorHandling:
     def test_404_error_format(self):
         """Verify 404 errors follow contract."""
         response = client.get("/api/v1/nonexistent")
-        
+
         assert response.status_code == 404
         data = response.json()
-        
+
         validate(instance=data, schema=ERROR_RESPONSE_SCHEMA)
 
     def test_method_not_allowed_format(self):
         """Verify 405 errors follow contract."""
         response = client.patch("/")  # Root doesn't accept PATCH
-        
+
         assert response.status_code == 405
         data = response.json()
-        
+
         validate(instance=data, schema=ERROR_RESPONSE_SCHEMA)
 
 
@@ -346,7 +346,7 @@ class TestResponseHeaders:
     def test_correlation_id_header(self):
         """Verify X-Correlation-ID header is always present."""
         endpoints = ["/", "/health", "/metrics"]
-        
+
         for endpoint in endpoints:
             response = client.get(endpoint)
             assert "X-Correlation-ID" in response.headers
@@ -354,11 +354,11 @@ class TestResponseHeaders:
     def test_security_headers(self):
         """Verify security headers are present."""
         response = client.get("/")
-        
+
         # Check for important security headers
         assert "X-Content-Type-Options" in response.headers
         assert response.headers["X-Content-Type-Options"] == "nosniff"
-        
+
         assert "X-Frame-Options" in response.headers
         assert response.headers["X-Frame-Options"] == "DENY"
 
@@ -379,15 +379,14 @@ class TestDateTimeFormats:
         """Verify datetime fields use ISO 8601 format."""
         # This test would check that all datetime fields across the API
         # use ISO 8601 format (YYYY-MM-DDTHH:MM:SS)
-        
+
         # Example with audit logs
         response = client.get(
             "/api/v1/dashboard/stats",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
-        
+
         if response.status_code == 200:
-            data = response.json()
             # Check that any datetime fields follow ISO 8601
             # This is an example - adjust based on actual response structure
             assert response.status_code == 200
@@ -400,10 +399,10 @@ class TestBackwardCompatibility:
         """Verify no fields have been removed from responses."""
         # This test serves as documentation that removing fields
         # from API responses is a breaking change
-        
+
         response = client.get("/")
         data = response.json()
-        
+
         # These fields must always be present
         required_fields = ["name", "version", "status", "docs"]
         for field in required_fields:
@@ -422,11 +421,11 @@ class TestContentTypeNegotiation:
     def test_json_content_type(self):
         """Verify API returns JSON by default."""
         response = client.get("/")
-        
+
         assert "application/json" in response.headers.get("content-type", "")
 
     def test_metrics_content_type(self):
         """Verify metrics endpoint returns correct content type."""
         response = client.get("/metrics")
-        
+
         assert "text/plain" in response.headers.get("content-type", "")
