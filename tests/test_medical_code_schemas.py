@@ -3,7 +3,7 @@ Tests for medical code schemas.
 """
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from app.schemas.medical_code import (
     MedicalCodeBase,
     MedicalCodeCreate,
@@ -105,7 +105,7 @@ class TestObservationSchemas:
 
     def test_observation_base_with_required_fields(self):
         """Test ObservationBase with required fields."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         observation = ObservationBase(
             loinc_code="8480-6",
             loinc_display="Systolic blood pressure",
@@ -117,7 +117,7 @@ class TestObservationSchemas:
 
     def test_observation_with_quantity_value(self):
         """Test observation with quantity value."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         observation = ObservationBase(
             loinc_code="8480-6",
             loinc_display="Systolic blood pressure",
@@ -133,7 +133,7 @@ class TestObservationSchemas:
 
     def test_observation_create_requires_patient_id(self):
         """Test ObservationCreate requires patient_id."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         observation = ObservationCreate(
             patient_id=456,
             loinc_code="8480-6",
@@ -150,13 +150,13 @@ class TestProcedureSchemas:
 
     def test_procedure_base_defaults(self):
         """Test ProcedureBase with default status."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         procedure = ProcedureBase(performed_datetime=now)
         assert procedure.status == "completed"
 
     def test_procedure_with_cpt_code(self):
         """Test procedure with CPT code."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         procedure = ProcedureBase(
             cpt_code="99213",
             cpt_display="Office visit, established patient",
@@ -167,7 +167,7 @@ class TestProcedureSchemas:
 
     def test_procedure_with_ccam_code(self):
         """Test procedure with CCAM code (French)."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         procedure = ProcedureBase(
             ccam_code="YYYY123",
             ccam_display="Consultation",
@@ -178,7 +178,7 @@ class TestProcedureSchemas:
 
     def test_procedure_with_snomed_code(self):
         """Test procedure with SNOMED CT code."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         procedure = ProcedureBase(
             snomed_code="80146002",
             snomed_display="Appendectomy",
@@ -193,7 +193,7 @@ class TestProcedureSchemas:
 
     def test_procedure_create_requires_patient_id(self):
         """Test ProcedureCreate requires patient_id."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         procedure = ProcedureCreate(
             patient_id=789,
             cpt_code="99213",
@@ -213,7 +213,7 @@ class TestSchemaValidation:
 
     def test_observation_requires_loinc_code(self):
         """Test that LOINC code is required for observations."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         with pytest.raises(Exception):
             ObservationBase(effective_datetime=now)
 
