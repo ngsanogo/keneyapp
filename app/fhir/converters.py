@@ -13,6 +13,7 @@ from fhir.resources.identifier import Identifier
 from app.models.patient import Patient
 from app.models.appointment import Appointment
 from app.models.prescription import Prescription
+from app.services.patient_security import serialize_patient_dict
 
 
 class FHIRConverter:
@@ -29,6 +30,8 @@ class FHIRConverter:
         Returns:
             FHIR Patient resource as dictionary
         """
+        patient_dict = serialize_patient_dict(patient)
+
         fhir_patient = FHIRPatient()
 
         # Identifier
@@ -36,7 +39,7 @@ class FHIRConverter:
             Identifier(
                 **{
                     "system": "https://keneyapp.com/patient-id",
-                    "value": str(patient.id),
+                    "value": str(patient_dict["id"]),
                 }
             )
         ]
@@ -45,8 +48,8 @@ class FHIRConverter:
         fhir_patient.name = [
             HumanName(
                 **{
-                    "family": patient.last_name,
-                    "given": [patient.first_name],
+                    "family": patient_dict["last_name"],
+                    "given": [patient_dict["first_name"]],
                     "use": "official",
                 }
             )
@@ -59,32 +62,48 @@ class FHIRConverter:
             "other": "other",
             "unknown": "unknown",
         }
-        fhir_patient.gender = gender_map.get(patient.gender.lower(), "unknown")
+        fhir_patient.gender = gender_map.get(
+            patient_dict["gender"].lower(), "unknown"
+        )
 
         # Birth date
-        fhir_patient.birthDate = patient.date_of_birth
+        fhir_patient.birthDate = patient_dict["date_of_birth"]
 
         # Contact information
-        if patient.phone:
+        if patient_dict["phone"]:
             fhir_patient.telecom = [
                 ContactPoint(
-                    **{"system": "phone", "value": patient.phone, "use": "mobile"}
+                    **{
+                        "system": "phone",
+                        "value": patient_dict["phone"],
+                        "use": "mobile",
+                    }
                 )
             ]
 
-        if patient.email:
-            if not fhir_patient.telecom:
+        if patient_dict["email"]:
+            if not getattr(fhir_patient, "telecom", None):
                 fhir_patient.telecom = []
             fhir_patient.telecom.append(
                 ContactPoint(
-                    **{"system": "email", "value": patient.email, "use": "home"}
+                    **{
+                        "system": "email",
+                        "value": patient_dict["email"],
+                        "use": "home",
+                    }
                 )
             )
 
         # Address
-        if patient.address:
+        if patient_dict["address"]:
             fhir_patient.address = [
-                Address(**{"use": "home", "text": patient.address, "type": "physical"})
+                Address(
+                    **{
+                        "use": "home",
+                        "text": patient_dict["address"],
+                        "type": "physical",
+                    }
+                )
             ]
 
         # Active status

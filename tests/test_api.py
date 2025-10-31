@@ -15,6 +15,7 @@ from app.core.database import Base, get_db
 from app.core.security import get_password_hash, create_access_token
 from app.models.user import User, UserRole
 from app.models.tenant import Tenant
+from app.models.patient import Patient
 
 # Create an in-memory SQLite database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
@@ -164,6 +165,16 @@ def test_authenticated_patient_workflow():
     data = create_response.json()
     assert data["email"] == patient_payload["email"]
     patient_id = data["id"]
+
+    # Ensure sensitive fields are not stored in plaintext
+    db_obj = TestingSessionLocal()
+    try:
+        stored_patient = db_obj.query(Patient).filter(Patient.id == patient_id).first()
+        assert stored_patient is not None
+        assert stored_patient.medical_history != patient_payload["medical_history"]
+        assert stored_patient.emergency_contact != patient_payload["emergency_contact"]
+    finally:
+        db_obj.close()
 
     list_response = client.get(
         "/api/v1/patients/",

@@ -284,6 +284,8 @@ def test_graphql_create_patient_mutation():
             "gender": "MALE",
             "phone": "+15553334444",
             "email": "george@example.com",
+            "medicalHistory": "Hypertension",
+            "emergencyContact": "Martha Washington",
         }
     }
 
@@ -295,6 +297,14 @@ def test_graphql_create_patient_mutation():
     patient_data = response.json()["data"]["createPatient"]
     assert patient_data["firstName"] == "George"
     assert patient_data["email"] == "george@example.com"
+
+    created_id = int(patient_data["id"])
+
+    with TestingSessionLocal() as session:
+        stored = session.query(Patient).filter(Patient.id == created_id).first()
+        assert stored is not None
+        assert stored.medical_history != variables["input"]["medicalHistory"]
+        assert stored.emergency_contact != variables["input"]["emergencyContact"]
 
     with TestingSessionLocal() as session:
         patients = session.query(Patient).all()

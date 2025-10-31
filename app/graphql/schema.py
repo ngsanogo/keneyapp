@@ -30,6 +30,10 @@ from app.models.appointment import Appointment, AppointmentStatus
 from app.models.patient import Gender, Patient
 from app.models.prescription import Prescription
 from app.models.user import User, UserRole
+from app.services.patient_security import (
+    encrypt_patient_payload,
+    serialize_patient_model,
+)
 
 # GraphQL enums that mirror core application enums
 GenderEnum = strawberry.enum(Gender, name="Gender")
@@ -112,23 +116,25 @@ def to_user_type(user: User) -> "UserType":
 def to_patient_type(patient: Patient) -> "PatientType":
     """Map ORM patient model to GraphQL type."""
 
+    patient_response = serialize_patient_model(patient)
+
     return PatientType(
-        id=patient.id,
-        tenant_id=patient.tenant_id,
-        first_name=patient.first_name,
-        last_name=patient.last_name,
-        date_of_birth=patient.date_of_birth,
-        gender=patient.gender,
-        email=patient.email,
-        phone=patient.phone,
-        address=patient.address,
-        medical_history=patient.medical_history,
-        allergies=patient.allergies,
-        blood_type=patient.blood_type,
-        emergency_contact=patient.emergency_contact,
-        emergency_phone=patient.emergency_phone,
-        created_at=patient.created_at,
-        updated_at=patient.updated_at,
+        id=patient_response.id,
+        tenant_id=patient_response.tenant_id,
+        first_name=patient_response.first_name,
+        last_name=patient_response.last_name,
+        date_of_birth=patient_response.date_of_birth,
+        gender=patient_response.gender,
+        email=patient_response.email,
+        phone=patient_response.phone,
+        address=patient_response.address,
+        medical_history=patient_response.medical_history,
+        allergies=patient_response.allergies,
+        blood_type=patient_response.blood_type,
+        emergency_contact=patient_response.emergency_contact,
+        emergency_phone=patient_response.emergency_phone,
+        created_at=patient_response.created_at,
+        updated_at=patient_response.updated_at,
     )
 
 
@@ -668,20 +674,26 @@ class Mutation:
         )
 
         with get_session(info) as session:
+            encrypted_payload = encrypt_patient_payload(
+                {
+                    "first_name": payload.first_name,
+                    "last_name": payload.last_name,
+                    "date_of_birth": payload.date_of_birth,
+                    "gender": payload.gender,
+                    "email": payload.email,
+                    "phone": payload.phone,
+                    "address": payload.address,
+                    "medical_history": payload.medical_history,
+                    "allergies": payload.allergies,
+                    "blood_type": payload.blood_type,
+                    "emergency_contact": payload.emergency_contact,
+                    "emergency_phone": payload.emergency_phone,
+                }
+            )
+
             patient = Patient(
                 tenant_id=info.context.user.tenant_id,
-                first_name=payload.first_name,
-                last_name=payload.last_name,
-                date_of_birth=payload.date_of_birth,
-                gender=payload.gender,
-                email=payload.email,
-                phone=payload.phone,
-                address=payload.address,
-                medical_history=payload.medical_history,
-                allergies=payload.allergies,
-                blood_type=payload.blood_type,
-                emergency_contact=payload.emergency_contact,
-                emergency_phone=payload.emergency_phone,
+                **encrypted_payload,
             )
 
             session.add(patient)

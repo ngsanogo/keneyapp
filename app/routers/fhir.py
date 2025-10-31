@@ -15,6 +15,7 @@ from app.models.patient import Patient
 from app.models.appointment import Appointment
 from app.models.prescription import Prescription
 from app.fhir.converters import fhir_converter
+from app.services.patient_security import encrypt_patient_payload
 
 router = APIRouter(prefix="/fhir", tags=["FHIR"])
 
@@ -81,7 +82,7 @@ def create_fhir_patient(
         Created FHIR Patient resource
     """
     # Convert FHIR to KeneyApp format
-    patient_data = fhir_converter.fhir_to_patient(fhir_patient)
+    patient_data = encrypt_patient_payload(fhir_converter.fhir_to_patient(fhir_patient))
 
     # Create patient
     patient = Patient(**patient_data, tenant_id=current_user.tenant_id)

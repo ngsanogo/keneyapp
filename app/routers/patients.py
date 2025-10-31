@@ -17,6 +17,11 @@ from app.models.patient import Patient
 from app.models.user import User, UserRole
 from app.schemas.patient import PatientCreate, PatientUpdate, PatientResponse
 from app.tasks import generate_patient_report
+from app.services.patient_security import (
+    encrypt_patient_payload,
+    serialize_patient_dict,
+    serialize_patient_collection,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -71,8 +76,10 @@ def create_patient(
                 detail="Email already registered",
             )
 
+    encrypted_payload = encrypt_patient_payload(patient_data.model_dump())
+
     db_patient = Patient(
-        **patient_data.model_dump(),
+        **encrypted_payload,
         tenant_id=current_user.tenant_id,
     )
     db.add(db_patient)
@@ -92,9 +99,11 @@ def create_patient(
     )
 
     # Cache management
+    serialized_patient = serialize_patient_dict(db_patient)
+
     cache_set(
         f"{PATIENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{db_patient.id}",
-        PatientResponse.model_validate(db_patient).model_dump(mode="json"),
+        serialized_patient,
         expire=PATIENT_DETAIL_TTL_SECONDS,
     )
     cache_clear_pattern(f"{PATIENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
@@ -108,7 +117,7 @@ def create_patient(
     except Exception as exc:  # pragma: no cover - best effort
         logger.warning("Failed to queue patient report generation: %s", exc)
 
-    return db_patient
+    return serialized_patient
 
 
 @router.get("/", response_model=List[PatientResponse])
@@ -159,10 +168,7 @@ def get_patients(
         .limit(limit)
         .all()
     )
-    serialized_patients = [
-        PatientResponse.model_validate(patient).model_dump(mode="json")
-        for patient in patients
-    ]
+    serialized_patients = serialize_patient_collection(patients)
 
     cache_set(cache_key, serialized_patients, expire=PATIENT_LIST_TTL_SECONDS)
 
@@ -259,7 +265,7 @@ def get_patient(
         username=current_user.username,
         request=request,
     )
-    serialized_patient = PatientResponse.model_validate(patient).model_dump(mode="json")
+    serialized_patient = serialize_patient_dict(patient)
     cache_set(cache_key, serialized_patient, expire=PATIENT_DETAIL_TTL_SECONDS)
     return serialized_patient
 
@@ -311,7 +317,7 @@ def update_patient(
         )
 
     # Update only provided fields
-    update_data = patient_data.model_dump(exclude_unset=True)
+    update_data = encrypt_patient_payload(patient_data.model_dump(exclude_unset=True))
     for field, value in update_data.items():
         setattr(patient, field, value)
 
@@ -330,7 +336,7 @@ def update_patient(
         request=request,
     )
 
-    serialized_patient = PatientResponse.model_validate(patient).model_dump(mode="json")
+    serialized_patient = serialize_patient_dict(patient)
     cache_set(
         f"{PATIENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{patient.id}",
         serialized_patient,
