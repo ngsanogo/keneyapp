@@ -1,0 +1,406 @@
+# Prometheus Alert Rules for KeneyApp
+# These rules define alerts for critical system conditions
+
+groups:
+  - name: application_alerts
+    interval: 30s
+    rules:
+      # High error rate
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          component: application
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.instance }}"
+          runbook: "https://docs.keneyapp.com/runbooks/high-error-rate"
+
+      # Slow response time
+      - alert: SlowResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.0
+        for: 10m
+        labels:
+          severity: warning
+          component: application
+        annotations:
+          summary: "API response time is slow"
+          description: "95th percentile response time is {{ $value }}s for {{ $labels.endpoint }}"
+          runbook: "https://docs.keneyapp.com/runbooks/slow-response"
+
+      # Very slow response time (critical)
+      - alert: VerySlowResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 3.0
+        for: 5m
+        labels:
+          severity: critical
+          component: application
+        annotations:
+          summary: "API response time is critically slow"
+          description: "95th percentile response time is {{ $value }}s for {{ $labels.endpoint }}"
+          runbook: "https://docs.keneyapp.com/runbooks/slow-response"
+
+      # Application down
+      - alert: ApplicationDown
+        expr: up{job="keneyapp-backend"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: application
+        annotations:
+          summary: "Application is down"
+          description: "KeneyApp backend instance {{ $labels.instance }} is down"
+          runbook: "https://docs.keneyapp.com/runbooks/application-down"
+
+  - name: database_alerts
+    interval: 30s
+    rules:
+      # High database connections
+      - alert: HighDatabaseConnections
+        expr: database_connections > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High number of database connections"
+          description: "Database has {{ $value }} active connections (>80)"
+          runbook: "https://docs.keneyapp.com/runbooks/high-db-connections"
+
+      # Database connection pool exhausted
+      - alert: DatabaseConnectionPoolExhausted
+        expr: database_connections >= 100
+        for: 2m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Database connection pool exhausted"
+          description: "Database connection pool is at maximum capacity"
+          runbook: "https://docs.keneyapp.com/runbooks/connection-pool-exhausted"
+
+      # Slow database queries
+      - alert: SlowDatabaseQueries
+        expr: rate(database_query_duration_seconds_sum[5m]) / rate(database_query_duration_seconds_count[5m]) > 1.0
+        for: 10m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Database queries are slow"
+          description: "Average query time is {{ $value }}s"
+          runbook: "https://docs.keneyapp.com/runbooks/slow-queries"
+
+      # Database down
+      - alert: DatabaseDown
+        expr: up{job="postgres"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Database is down"
+          description: "PostgreSQL instance {{ $labels.instance }} is down"
+          runbook: "https://docs.keneyapp.com/runbooks/database-down"
+
+  - name: infrastructure_alerts
+    interval: 30s
+    rules:
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value | humanizePercentage }} for {{ $labels.instance }}"
+          runbook: "https://docs.keneyapp.com/runbooks/high-cpu"
+
+      # Critical CPU usage
+      - alert: CriticalCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) > 0.95
+        for: 5m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Critical CPU usage detected"
+          description: "CPU usage is {{ $value | humanizePercentage }} for {{ $labels.instance }}"
+          runbook: "https://docs.keneyapp.com/runbooks/high-cpu"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / process_virtual_memory_max_bytes) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanizePercentage }} for {{ $labels.instance }}"
+          runbook: "https://docs.keneyapp.com/runbooks/high-memory"
+
+      # Container restart
+      - alert: ContainerRestart
+        expr: rate(kube_pod_container_status_restarts_total[15m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "Container is restarting frequently"
+          description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is restarting"
+          runbook: "https://docs.keneyapp.com/runbooks/container-restart"
+
+      # Pod not ready
+      - alert: PodNotReady
+        expr: kube_pod_status_phase{phase!="Running"} > 0
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "Pod is not ready"
+          description: "Pod {{ $labels.pod }} is in {{ $labels.phase }} state"
+          runbook: "https://docs.keneyapp.com/runbooks/pod-not-ready"
+
+  - name: cache_alerts
+    interval: 30s
+    rules:
+      # Low cache hit rate
+      - alert: LowCacheHitRate
+        expr: rate(cache_hits[5m]) / (rate(cache_hits[5m]) + rate(cache_misses[5m])) < 0.7
+        for: 15m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Cache hit rate is low"
+          description: "Cache hit rate is {{ $value | humanizePercentage }}"
+          runbook: "https://docs.keneyapp.com/runbooks/low-cache-hit-rate"
+
+      # Redis memory high
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Redis memory usage is high"
+          description: "Redis is using {{ $value | humanizePercentage }} of available memory"
+          runbook: "https://docs.keneyapp.com/runbooks/redis-memory-high"
+
+      # Redis down
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: cache
+        annotations:
+          summary: "Redis is down"
+          description: "Redis instance {{ $labels.instance }} is down"
+          runbook: "https://docs.keneyapp.com/runbooks/redis-down"
+
+  - name: celery_alerts
+    interval: 30s
+    rules:
+      # High task queue length
+      - alert: HighTaskQueueLength
+        expr: celery_queue_length > 100
+        for: 10m
+        labels:
+          severity: warning
+          component: celery
+        annotations:
+          summary: "Celery task queue is growing"
+          description: "Task queue has {{ $value }} pending tasks"
+          runbook: "https://docs.keneyapp.com/runbooks/high-task-queue"
+
+      # Task failure rate high
+      - alert: HighTaskFailureRate
+        expr: rate(celery_task_failed_total[5m]) / rate(celery_task_total[5m]) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: celery
+        annotations:
+          summary: "High Celery task failure rate"
+          description: "Task failure rate is {{ $value | humanizePercentage }}"
+          runbook: "https://docs.keneyapp.com/runbooks/high-task-failure"
+
+      # No active workers
+      - alert: NoActiveCeleryWorkers
+        expr: celery_workers_active == 0
+        for: 5m
+        labels:
+          severity: critical
+          component: celery
+        annotations:
+          summary: "No active Celery workers"
+          description: "There are no active Celery workers to process background tasks"
+          runbook: "https://docs.keneyapp.com/runbooks/no-celery-workers"
+
+  - name: business_metrics_alerts
+    interval: 60s
+    rules:
+      # Patient operations anomaly
+      # This alert uses statistical anomaly detection:
+      # - Calculate current rate of patient operations (1h window)
+      # - Compare to 7-day historical average
+      # - Alert if difference > 2 standard deviations (statistical significance)
+      # This helps detect both unusual spikes and drops in activity
+      - alert: PatientOperationsAnomaly
+        expr: |
+          abs(rate(patient_operations_total[1h]) - 
+          avg_over_time(rate(patient_operations_total[1h])[7d:1h])) > 
+          2 * stddev_over_time(rate(patient_operations_total[1h])[7d:1h])
+        for: 30m
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "Unusual patient operations volume"
+          description: "Patient operations are significantly different from normal patterns"
+          runbook: "https://docs.keneyapp.com/runbooks/operations-anomaly"
+
+      # No appointments created (during business hours)
+      - alert: NoAppointmentsCreated
+        expr: increase(appointment_bookings_total[1h]) == 0 and hour() >= 8 and hour() <= 17
+        for: 2h
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "No appointments created in the last 2 hours"
+          description: "No new appointments during business hours may indicate an issue"
+          runbook: "https://docs.keneyapp.com/runbooks/no-appointments"
+
+      # Unusual login pattern (potential security issue)
+      # This alert uses statistical anomaly detection for security:
+      # - Calculate current rate of login attempts (1h window)
+      # - Compare to 7-day historical average
+      # - Alert if difference > 3 standard deviations (higher threshold than business metrics)
+      # This helps detect potential brute force attacks or unusual access patterns
+      - alert: UnusualLoginPattern
+        expr: |
+          abs(rate(auth_login_total[1h]) - 
+          avg_over_time(rate(auth_login_total[1h])[7d:1h])) > 
+          3 * stddev_over_time(rate(auth_login_total[1h])[7d:1h])
+        for: 30m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "Unusual login pattern detected"
+          description: "Login rate is significantly different from normal patterns"
+          runbook: "https://docs.keneyapp.com/runbooks/unusual-login"
+
+  - name: security_alerts
+    interval: 30s
+    rules:
+      # High authentication failure rate
+      - alert: HighAuthenticationFailureRate
+        expr: rate(auth_failed_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Authentication failure rate is {{ $value }} per second"
+          runbook: "https://docs.keneyapp.com/runbooks/high-auth-failures"
+
+      # Potential brute force attack
+      - alert: PotentialBruteForceAttack
+        expr: rate(auth_failed_total[1m]) > 1
+        for: 2m
+        labels:
+          severity: critical
+          component: security
+        annotations:
+          summary: "Potential brute force attack detected"
+          description: "Excessive authentication failures from {{ $labels.source_ip }}"
+          runbook: "https://docs.keneyapp.com/runbooks/brute-force-attack"
+
+      # Unauthorized access attempts
+      - alert: UnauthorizedAccessAttempts
+        expr: rate(http_requests_total{status="403"}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "High rate of unauthorized access attempts"
+          description: "Rate of 403 responses is {{ $value }} per second"
+          runbook: "https://docs.keneyapp.com/runbooks/unauthorized-access"
+
+  - name: compliance_alerts
+    interval: 1h
+    rules:
+      # Audit log not being written
+      - alert: AuditLogNotWritten
+        expr: increase(audit_log_entries_total[1h]) == 0
+        for: 2h
+        labels:
+          severity: critical
+          component: compliance
+        annotations:
+          summary: "Audit logs are not being written"
+          description: "No audit log entries in the last 2 hours - compliance issue"
+          runbook: "https://docs.keneyapp.com/runbooks/audit-log-issue"
+
+      # Certificate expiring soon
+      - alert: CertificateExpiringSoon
+        expr: (ssl_certificate_expiry_seconds < 30 * 24 * 3600)
+        for: 1h
+        labels:
+          severity: warning
+          component: compliance
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "Certificate {{ $labels.domain }} expires in {{ $value | humanizeDuration }}"
+          runbook: "https://docs.keneyapp.com/runbooks/certificate-expiry"
+
+      # Certificate expired
+      - alert: CertificateExpired
+        expr: ssl_certificate_expiry_seconds < 0
+        for: 1m
+        labels:
+          severity: critical
+          component: compliance
+        annotations:
+          summary: "SSL certificate has expired"
+          description: "Certificate {{ $labels.domain }} has expired"
+          runbook: "https://docs.keneyapp.com/runbooks/certificate-expired"
+
+  - name: data_quality_alerts
+    interval: 1h
+    rules:
+      # Data validation errors increasing
+      - alert: HighDataValidationErrors
+        expr: rate(data_validation_errors_total[1h]) > 0.01
+        for: 2h
+        labels:
+          severity: warning
+          component: data_quality
+        annotations:
+          summary: "High rate of data validation errors"
+          description: "Data validation errors are at {{ $value }} per second"
+          runbook: "https://docs.keneyapp.com/runbooks/validation-errors"
+
+      # Duplicate patient records detected
+      - alert: DuplicatePatientRecords
+        expr: increase(duplicate_patient_records_detected[1h]) > 0
+        for: 1h
+        labels:
+          severity: warning
+          component: data_quality
+        annotations:
+          summary: "Duplicate patient records detected"
+          description: "{{ $value }} duplicate patient records found"
+          runbook: "https://docs.keneyapp.com/runbooks/duplicate-records"
