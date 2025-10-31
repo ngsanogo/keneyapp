@@ -13,12 +13,12 @@ from app.core.encryption import (
 def test_encrypt_decrypt_basic():
     """Test basic encryption and decryption."""
     plaintext = "Sensitive medical data"
-    
+
     # Encrypt
     encrypted = encrypt_sensitive_data(plaintext)
     assert encrypted != plaintext
     assert len(encrypted) > len(plaintext)
-    
+
     # Decrypt
     decrypted = decrypt_sensitive_data(encrypted)
     assert decrypted == plaintext
@@ -28,7 +28,7 @@ def test_encrypt_decrypt_empty_string():
     """Test encryption with empty string."""
     encrypted = encryption.encrypt("")
     assert encrypted == ""
-    
+
     decrypted = encryption.decrypt("")
     assert decrypted == ""
 
@@ -36,10 +36,10 @@ def test_encrypt_decrypt_empty_string():
 def test_encrypt_decrypt_unicode():
     """Test encryption with unicode characters."""
     plaintext = "Patient allergies: 🥜 nuts, 🥚 eggs"
-    
+
     encrypted = encrypt_sensitive_data(plaintext)
     decrypted = decrypt_sensitive_data(encrypted)
-    
+
     assert decrypted == plaintext
 
 
@@ -55,16 +55,16 @@ def test_encrypt_patient_data():
         "address": "123 Main St",
         "email": "john@example.com",  # Not encrypted
     }
-    
+
     encrypted = encrypt_patient_data(patient_data)
-    
+
     # Check that sensitive fields are encrypted
     assert encrypted["medical_history"] != patient_data["medical_history"]
     assert encrypted["allergies"] != patient_data["allergies"]
     assert encrypted["emergency_contact"] != patient_data["emergency_contact"]
     assert encrypted["emergency_phone"] != patient_data["emergency_phone"]
     assert encrypted["address"] != patient_data["address"]
-    
+
     # Check that non-sensitive fields are not encrypted
     assert encrypted["first_name"] == patient_data["first_name"]
     assert encrypted["last_name"] == patient_data["last_name"]
@@ -82,13 +82,13 @@ def test_decrypt_patient_data():
         "emergency_phone": "+15551234567",
         "address": "123 Main St",
     }
-    
+
     # Encrypt
     encrypted = encrypt_patient_data(original_data)
-    
+
     # Decrypt
     decrypted = decrypt_patient_data(encrypted)
-    
+
     # Verify all sensitive fields are correctly decrypted
     assert decrypted["medical_history"] == original_data["medical_history"]
     assert decrypted["allergies"] == original_data["allergies"]
@@ -112,13 +112,13 @@ def test_decrypt_field_none():
 def test_encryption_unique_ciphertext():
     """Test that same plaintext produces different ciphertext (due to nonce)."""
     plaintext = "Test data"
-    
+
     encrypted1 = encrypt_sensitive_data(plaintext)
     encrypted2 = encrypt_sensitive_data(plaintext)
-    
+
     # Different ciphertexts (different nonces)
     assert encrypted1 != encrypted2
-    
+
     # But same plaintext when decrypted
     assert decrypt_sensitive_data(encrypted1) == plaintext
     assert decrypt_sensitive_data(encrypted2) == plaintext

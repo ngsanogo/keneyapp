@@ -24,9 +24,7 @@ engine = create_engine(
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,
 )
-TestingSessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=engine
-)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 def override_get_db():
@@ -102,7 +100,11 @@ def _authenticate_user(role: UserRole = UserRole.ADMIN):
     """Create and authenticate a user, returning the auth header."""
     user, password = _create_user(role=role)
     token = create_access_token(
-        data={"sub": user.username, "role": user.role.value, "tenant_id": user.tenant_id},
+        data={
+            "sub": user.username,
+            "role": user.role.value,
+            "tenant_id": user.tenant_id,
+        },
     )
     return {"Authorization": f"Bearer {token}"}, user
 
