@@ -5,7 +5,8 @@ Provides helpers for authentication, authorization,
 and role-based access control across the API.
 """
 
-from typing import Callable, Iterable, Optional
+from collections.abc import Iterable as IterableABC
+from typing import Callable, Optional, Union
 from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
@@ -81,7 +82,7 @@ def get_current_active_user(
     return current_user
 
 
-def require_roles(*allowed_roles: Iterable[UserRole]) -> Callable:
+def require_roles(*roles: Union[UserRole, IterableABC[UserRole]]) -> Callable:
     """
     Factory returning a dependency that enforces role-based access control.
 
@@ -92,16 +93,13 @@ def require_roles(*allowed_roles: Iterable[UserRole]) -> Callable:
         Dependency callable that yields the current user when authorized.
     """
 
-    # Flatten single iterable passed in (require_roles([UserRole.ADMIN, ...]))
-    first = allowed_roles[0] if allowed_roles else None
-    if (
-        len(allowed_roles) == 1
-        and isinstance(first, Iterable)
-        and not isinstance(first, (str, UserRole))
-    ):
-        allowed = set(first)
-    else:
-        allowed = set(allowed_roles)
+    allowed: set[UserRole] = set()
+
+    for entry in roles:
+        if isinstance(entry, UserRole):
+            allowed.add(entry)
+        else:
+            allowed.update(role for role in entry)
 
     def role_guard(
         request: Request,
