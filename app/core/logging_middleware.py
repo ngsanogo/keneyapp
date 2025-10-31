@@ -67,7 +67,7 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
             self._log_request_error(request, correlation_id, duration, e)
             raise
 
-    def _log_request_start(self, request: Request, correlation_id: str):
+    def _log_request_start(self, request: Request, correlation_id: str) -> None:
         """Log structured request start information."""
         log_data = {
             "event": "request_start",
@@ -81,7 +81,7 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
 
     def _log_request_end(
         self, request: Request, response: Response, correlation_id: str, duration: float
-    ):
+    ) -> None:
         """Log structured request completion information."""
         log_data = {
             "event": "request_complete",
@@ -96,7 +96,7 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
 
     def _log_request_error(
         self, request: Request, correlation_id: str, duration: float, error: Exception
-    ):
+    ) -> None:
         """Log structured request error information."""
         log_data = {
             "event": "request_error",

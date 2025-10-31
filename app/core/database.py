@@ -2,8 +2,9 @@
 Database configuration and session management for KeneyApp.
 """
 
+from typing import Generator
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker, declarative_base, Session
 
 from app.core.config import settings
 
@@ -17,7 +18,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
-def get_db():
+def get_db() -> Generator[Session, None, None]:
     """
     Dependency function to get database session.
     Yields a database session and ensures it's closed after use.

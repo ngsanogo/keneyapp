@@ -2,7 +2,7 @@
 Audit logging utilities for GDPR/HIPAA compliance.
 """
 
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from fastapi import Request
 from sqlalchemy.orm import Session
 
@@ -19,7 +19,7 @@ def log_audit_event(
     resource_id: Optional[int] = None,
     details: Optional[Dict[str, Any]] = None,
     request: Optional[Request] = None,
-):
+) -> None:
     """
     Log an audit event to the database.
 
@@ -65,7 +65,7 @@ def get_audit_logs(
     resource_type: Optional[str] = None,
     action: Optional[str] = None,
     limit: int = 100,
-):
+) -> List[AuditLog]:
     """
     Retrieve audit logs with optional filtering.
 
