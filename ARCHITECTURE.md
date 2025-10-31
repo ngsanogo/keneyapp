@@ -55,6 +55,103 @@ graph TB
     WORKER --> FLOWER
 ```
 
+## CI/CD Pipeline Architecture
+
+```mermaid
+graph LR
+    subgraph "Source Control"
+        GIT[GitHub Repository]
+    end
+    
+    subgraph "CI Pipeline - GitHub Actions"
+        TRIGGER[Push/PR Trigger]
+        LINT[Linting & Formatting]
+        TYPE[Type Checking - mypy]
+        TEST[Unit Tests]
+        SECURITY[Security Scans]
+        SMOKE[Docker Smoke Tests]
+        BUILD[Docker Build]
+    end
+    
+    subgraph "Security Scanning"
+        CODEQL[CodeQL Analysis]
+        PIPAUDIT[pip-audit]
+        TRIVY[Trivy Container Scan]
+        GITLEAKS[Gitleaks Secret Scan]
+    end
+    
+    subgraph "Deployment"
+        STAGING[Staging Environment]
+        PROD[Production Environment]
+    end
+    
+    GIT --> TRIGGER
+    TRIGGER --> LINT
+    LINT --> TYPE
+    TYPE --> TEST
+    TEST --> SECURITY
+    SECURITY --> SMOKE
+    SMOKE --> BUILD
+    
+    SECURITY --> CODEQL
+    SECURITY --> PIPAUDIT
+    SECURITY --> TRIVY
+    SECURITY --> GITLEAKS
+    
+    BUILD --> STAGING
+    STAGING --> PROD
+```
+
+### CI/CD Pipeline Stages
+
+1. **Code Quality Checks**
+   - Black code formatting verification
+   - Flake8 linting (critical errors only)
+   - mypy type checking (gradual typing)
+   - Frontend ESLint and Prettier checks
+
+2. **Testing**
+   - Backend unit tests with pytest (77% coverage)
+   - Frontend unit tests with Jest
+   - API contract tests (JSON Schema validation)
+   - Docker compose smoke tests (critical API flows)
+
+3. **Security Scanning**
+   - CodeQL static analysis (Python & TypeScript)
+   - pip-audit for Python dependency vulnerabilities
+   - npm audit for Node.js dependency vulnerabilities
+   - Trivy container security scanning
+   - Gitleaks secret detection
+   - detect-secrets baseline verification
+
+4. **Docker Build & Smoke Testing**
+   - Build backend and frontend containers
+   - Start full docker compose stack
+   - Wait for health endpoints
+   - Execute smoke test suite:
+     - Health checks
+     - Authentication flow
+     - Patient management
+     - Appointment listing
+     - Dashboard statistics
+     - Access control verification
+
+5. **Deployment** (on main/develop branches)
+   - Build and tag Docker images
+   - Push to container registry
+   - Deploy to staging environment
+   - Run automated smoke tests
+   - Promote to production (manual approval)
+
+### Continuous Improvement Cycle Integration
+
+The CI/CD pipeline supports the continuous improvement methodology:
+- Automated weekly security scans (Monday 9 AM UTC)
+- All PRs trigger full pipeline validation
+- Security findings uploaded to GitHub Security tab
+- Coverage reports tracked over time
+- Performance regression detection (planned)
+
 ## Technology Stack
 
 ### Backend

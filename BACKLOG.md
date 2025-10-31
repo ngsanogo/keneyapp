@@ -233,7 +233,7 @@ Each item includes:
 
 ---
 
-## Iteration 5 (Planned) - Focus: Type Safety & Testing Depth
+## Iteration 5 (Current) - Focus: Type Safety & Testing Depth
 
 ### High Priority
 
@@ -241,22 +241,22 @@ Each item includes:
 - **Category**: Tech Debt
 - **Priority**: High
 - **Effort**: M
-- **Status**: Backlog
+- **Status**: Done
 - **Description**: Introduce a mypy configuration with gradual strictness and eliminate existing type errors in core modules.
 - **Acceptance Criteria**:
-  - `mypy.ini` committed with targeted module list
-  - CI job executes mypy and fails on regressions
-  - app/core and app/routers pass type checking
+  - ✅ `mypy.ini` committed with targeted module list
+  - ✅ CI job executes mypy and fails on regressions
+  - ✅ app/core and app/routers pass type checking
 
 #### [BACK-502] Testing: Add API smoke tests for docker stack
 - **Category**: Testing
 - **Priority**: High
 - **Effort**: S
-- **Status**: Backlog
+- **Status**: Done
 - **Description**: Build upon the docker compose job to exercise critical API flows (login + patient listing).
 - **Acceptance Criteria**:
-  - pytests or curl scripts executed against running stack
-  - Smoke suite documented and reusable locally
+  - ✅ pytests or curl scripts executed against running stack
+  - ✅ Smoke suite documented and reusable locally
 
 ### Medium Priority
 
@@ -264,15 +264,30 @@ Each item includes:
 - **Category**: Documentation
 - **Priority**: Medium
 - **Effort**: S
-- **Status**: Backlog
+- **Status**: Done
 - **Description**: Update architecture diagrams and CI workflow description to reflect new automation steps.
 - **Acceptance Criteria**:
-  - Mermaid diagrams cover docker smoke validation path
-  - README highlights new CI stages
+  - ✅ Mermaid diagrams cover docker smoke validation path
+  - ✅ README highlights new CI stages
 
 ---
 
 ## Completed Items
+
+### Iteration 5 (Completed)
+- [BACK-501] ✅ Established mypy baseline with gradual typing
+- [BACK-502] ✅ Added comprehensive API smoke tests for docker stack
+- [BACK-503] ✅ Updated architecture diagrams with CI/CD pipeline
+
+### Iteration 4 (Completed)
+- [BACK-401] ✅ CI/CD: Docker Compose smoke tests
+- [BACK-402] ✅ Data Integrity: Tenant-aware seed script
+- [BACK-403] ✅ Security: Align bcrypt with Passlib expectations
+- [BACK-404] ✅ Documentation: Multi-tenant seeding guidelines
+
+### Iteration 3 (Completed)
+- [BACK-301] ✅ Security: Update vulnerable dependencies
+- [BACK-302] ✅ CI/CD: Integrate automated security scanning
 
 ### Iteration 2 (Completed)
 - [BACK-201] ✅ Bootstrap admin and tenant configuration
