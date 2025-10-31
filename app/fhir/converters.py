@@ -62,9 +62,7 @@ class FHIRConverter:
             "other": "other",
             "unknown": "unknown",
         }
-        fhir_patient.gender = gender_map.get(
-            patient_dict["gender"].lower(), "unknown"
-        )
+        fhir_patient.gender = gender_map.get(patient_dict["gender"].lower(), "unknown")
 
         # Birth date
         fhir_patient.birthDate = patient_dict["date_of_birth"]
