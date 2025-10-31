@@ -19,7 +19,7 @@ from app.core.metrics import (
     patients_by_risk_level,
 )
 from app.models.patient import Patient
-from app.models.appointment import Appointment
+from app.models.appointment import Appointment, AppointmentStatus
 from app.models.prescription import Prescription
 from app.models.audit_log import AuditLog
 
@@ -84,7 +84,8 @@ def collect_appointment_metrics(db: Session) -> Dict[str, Any]:
         db.query(func.count(Appointment.id))
         .filter(
             and_(
-                Appointment.appointment_date >= today, Appointment.status == "completed"
+                Appointment.appointment_date >= today,
+                Appointment.status == AppointmentStatus.COMPLETED,
             )
         )
         .scalar()
@@ -107,7 +108,7 @@ def collect_appointment_metrics(db: Session) -> Dict[str, Any]:
         .filter(
             and_(
                 Appointment.appointment_date >= week_ago,
-                Appointment.status == "completed",
+                Appointment.status == AppointmentStatus.COMPLETED,
             )
         )
         .scalar()
@@ -132,7 +133,7 @@ def collect_appointment_metrics(db: Session) -> Dict[str, Any]:
         .filter(
             and_(
                 Appointment.appointment_date >= month_ago,
-                Appointment.status == "completed",
+                Appointment.status == AppointmentStatus.COMPLETED,
             )
         )
         .scalar()
@@ -148,7 +149,10 @@ def collect_appointment_metrics(db: Session) -> Dict[str, Any]:
     daily_no_show = (
         db.query(func.count(Appointment.id))
         .filter(
-            and_(Appointment.appointment_date >= today, Appointment.status == "no_show")
+            and_(
+                Appointment.appointment_date >= today,
+                Appointment.status == AppointmentStatus.NO_SHOW,
+            )
         )
         .scalar()
         or 0
@@ -180,37 +184,15 @@ def collect_prescription_metrics(db: Session) -> Dict[str, Any]:
     today = datetime.utcnow().date()
     week_ago = today - timedelta(days=7)
 
-    # Prescriptions by status
-    status_counts = (
-        db.query(Prescription.status, func.count(Prescription.id))
-        .group_by(Prescription.status)
-        .all()
-    )
-
-    for status, count in status_counts:
-        prescriptions_by_status.labels(status=status).set(count)
-
-    # Fulfillment rate - daily
+    # Total prescriptions created daily
     daily_total = (
         db.query(func.count(Prescription.id))
-        .filter(Prescription.created_at >= today)
+        .filter(Prescription.created_at >= datetime.combine(today, datetime.min.time()))
         .scalar()
         or 0
     )
 
-    daily_fulfilled = (
-        db.query(func.count(Prescription.id))
-        .filter(
-            and_(Prescription.created_at >= today, Prescription.status == "completed")
-        )
-        .scalar()
-        or 0
-    )
-
-    daily_rate = (daily_fulfilled / daily_total * 100) if daily_total > 0 else 0
-    prescription_fulfillment_rate.labels(time_period="day").set(daily_rate)
-
-    # Fulfillment rate - weekly
+    # Total prescriptions created weekly
     weekly_total = (
         db.query(func.count(Prescription.id))
         .filter(Prescription.created_at >= week_ago)
@@ -218,23 +200,38 @@ def collect_prescription_metrics(db: Session) -> Dict[str, Any]:
         or 0
     )
 
-    weekly_fulfilled = (
-        db.query(func.count(Prescription.id))
-        .filter(
-            and_(
-                Prescription.created_at >= week_ago, Prescription.status == "completed"
-            )
-        )
-        .scalar()
+    # Count prescriptions by refill status (has refills = active, no refills = completed)
+    active_prescriptions = (
+        db.query(func.count(Prescription.id)).filter(Prescription.refills > 0).scalar()
         or 0
     )
 
-    weekly_rate = (weekly_fulfilled / weekly_total * 100) if weekly_total > 0 else 0
+    completed_prescriptions = (
+        db.query(func.count(Prescription.id)).filter(Prescription.refills == 0).scalar()
+        or 0
+    )
+
+    # Update Prometheus metrics
+    prescriptions_by_status.labels(status="active").set(active_prescriptions)
+    prescriptions_by_status.labels(status="completed").set(completed_prescriptions)
+
+    # Calculate fulfillment rate as percentage with refills (simple metric)
+    total_prescriptions = active_prescriptions + completed_prescriptions
+    daily_rate = (
+        (active_prescriptions / total_prescriptions * 100)
+        if total_prescriptions > 0
+        else 0
+    )
+    weekly_rate = daily_rate  # Same calculation for weekly
+
+    prescription_fulfillment_rate.labels(time_period="day").set(daily_rate)
     prescription_fulfillment_rate.labels(time_period="week").set(weekly_rate)
 
     return {
         "daily_fulfillment_rate": daily_rate,
         "weekly_fulfillment_rate": weekly_rate,
+        "daily_total": daily_total,
+        "weekly_total": weekly_total,
     }
 
 
