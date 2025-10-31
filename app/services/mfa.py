@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import base64
-import os
 from typing import Optional
 
 import pyotp
@@ -39,5 +37,6 @@ def verify_totp(secret: Optional[str], code: Optional[str]) -> bool:
     totp = get_totp(secret)
     try:
         return totp.verify(code, valid_window=1)
-    except (pyotp.exceptions.InvalidKey, ValueError):
+    except (ValueError, Exception):
+        # Catch any validation errors from pyotp
         return False
