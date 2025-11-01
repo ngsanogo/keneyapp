@@ -1,7 +1,7 @@
 # FastAPI and server
-fastapi==0.115.5
+fastapi==0.115.6
 uvicorn[standard]==0.32.1
-python-multipart==0.0.12
+python-multipart==0.0.18
 
 # Database
 sqlalchemy==2.0.35
@@ -9,7 +9,7 @@ alembic==1.16.5
 psycopg2-binary==2.9.9
 
 # Security
-python-jose[cryptography]==3.3.0
+python-jose[cryptography]==3.4.0
 passlib[bcrypt]==1.7.4
 bcrypt==4.1.2
 
@@ -63,7 +63,7 @@ jsonschema==4.23.0
 # OAuth2/OIDC Support
 authlib==1.6.5
 itsdangerous==2.2.0
-starlette==0.41.2
+# starlette version controlled by fastapi dependency
 
 # GraphQL Support
 strawberry-graphql[fastapi]>=0.260.0
