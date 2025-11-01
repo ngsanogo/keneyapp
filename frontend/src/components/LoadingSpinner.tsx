@@ -1,4 +1,4 @@
-import React from 'react';
+import { CSSProperties } from 'react';
 
 interface LoadingSpinnerProps {
   size?: 'small' | 'medium' | 'large';
@@ -10,11 +10,11 @@ interface LoadingSpinnerProps {
  * LoadingSpinner component to display loading states throughout the application.
  * Provides a consistent loading experience with optional size and message customization.
  */
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+const LoadingSpinner = ({
   size = 'medium',
   message = 'Loading...',
   fullScreen = false,
-}) => {
+}: LoadingSpinnerProps) => {
   const sizeMap = {
     small: '24px',
     medium: '48px',
@@ -23,7 +23,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   const spinnerSize = sizeMap[size];
 
-  const spinnerStyle: React.CSSProperties = {
+  const spinnerStyle: CSSProperties = {
     border: '4px solid #f3f3f3',
     borderTop: '4px solid #007bff',
     borderRadius: '50%',
@@ -32,7 +32,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     animation: 'spin 1s linear infinite',
   };
 
-  const containerStyle: React.CSSProperties = fullScreen
+  const containerStyle: CSSProperties = fullScreen
     ? {
         position: 'fixed',
         top: 0,

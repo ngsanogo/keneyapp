@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -9,7 +8,7 @@ import AppointmentsPage from './pages/AppointmentsPage';
 import PrescriptionsPage from './pages/PrescriptionsPage';
 import './App.css';
 
-const App: React.FC = () => {
+const App = () => {
   return (
     <ErrorBoundary>
       <AuthProvider>

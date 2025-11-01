@@ -70,7 +70,7 @@ jobs:
     - name: Check for security vulnerabilities
       run: |
         pip install pip-audit
-        pip-audit --desc --require-hashes || echo "Note: pip-audit found vulnerabilities. Review and address them."
+        pip-audit --desc || echo "Note: pip-audit found vulnerabilities. Review and address them."
 
   backend-security:
     runs-on: ubuntu-latest

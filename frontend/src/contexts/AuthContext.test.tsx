@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from './AuthContext';
 import axios from 'axios';
@@ -7,7 +7,7 @@ import axios from 'axios';
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-const wrapper = ({ children }: { children: React.ReactNode }) => (
+const wrapper = ({ children }: { children: ReactNode }) => (
   <AuthProvider>{children}</AuthProvider>
 );
 
