@@ -1,0 +1,38 @@
+# CODEOWNERS file for KeneyApp
+# This file defines code ownership for the repository
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+# Unless a later match takes precedence, these owners will be requested for review
+*       @ISData-consulting
+
+# Backend code
+/app/                   @ISData-consulting
+/tests/                 @ISData-consulting
+requirements.txt        @ISData-consulting
+alembic.ini            @ISData-consulting
+/alembic/              @ISData-consulting
+
+# Frontend code
+/frontend/             @ISData-consulting
+
+# Infrastructure and DevOps
+/k8s/                  @ISData-consulting
+/terraform/            @ISData-consulting
+/monitoring/           @ISData-consulting
+docker-compose*.yml    @ISData-consulting
+Dockerfile*            @ISData-consulting
+.github/workflows/     @ISData-consulting
+
+# Documentation
+*.md                   @ISData-consulting
+/docs/                 @ISData-consulting
+
+# Configuration files
+.github/               @ISData-consulting
+Makefile               @ISData-consulting
+sonar-project.properties @ISData-consulting
+
+# Security-sensitive files
+SECURITY.md            @ISData-consulting
+.github/workflows/security-scan.yml @ISData-consulting
