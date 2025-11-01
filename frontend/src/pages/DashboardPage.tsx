@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
@@ -13,7 +13,7 @@ interface DashboardStats {
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-const DashboardPage: React.FC = () => {
+const DashboardPage = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const { isAuthenticated, token } = useAuth();
   const navigate = useNavigate();

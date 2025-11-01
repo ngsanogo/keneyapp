@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import ErrorBoundary from './ErrorBoundary';
 
@@ -40,9 +39,13 @@ describe('ErrorBoundary Component', () => {
   });
 
   test('displays error details when error occurs in development mode', () => {
-    // Set NODE_ENV to development to show error details
+    // Mock process.env for this test
     const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'development';
+    Object.defineProperty(process.env, 'NODE_ENV', {
+      value: 'development',
+      writable: true,
+      configurable: true,
+    });
 
     render(
       <ErrorBoundary>
@@ -54,6 +57,10 @@ describe('ErrorBoundary Component', () => {
     expect(screen.getByText(/Error Details/i)).toBeInTheDocument();
 
     // Restore original env
-    process.env.NODE_ENV = originalEnv;
+    Object.defineProperty(process.env, 'NODE_ENV', {
+      value: originalEnv,
+      writable: true,
+      configurable: true,
+    });
   });
 });

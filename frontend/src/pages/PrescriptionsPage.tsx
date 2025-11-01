@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
@@ -16,7 +16,7 @@ interface Prescription {
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-const PrescriptionsPage: React.FC = () => {
+const PrescriptionsPage = () => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const { isAuthenticated, token } = useAuth();
   const navigate = useNavigate();

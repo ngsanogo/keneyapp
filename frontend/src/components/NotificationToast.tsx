@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -13,12 +13,12 @@ interface NotificationToastProps {
  * NotificationToast component for displaying temporary notifications.
  * Automatically dismisses after the specified duration.
  */
-const NotificationToast: React.FC<NotificationToastProps> = ({
+const NotificationToast = ({
   message,
   type = 'info',
   duration = 5000,
   onClose,
-}) => {
+}: NotificationToastProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {

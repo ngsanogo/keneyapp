@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
@@ -15,7 +15,7 @@ interface Appointment {
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-const AppointmentsPage: React.FC = () => {
+const AppointmentsPage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const { isAuthenticated, token } = useAuth();
   const navigate = useNavigate();
