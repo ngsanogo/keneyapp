@@ -34,7 +34,10 @@ class Appointment(Base):
     doctor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     appointment_date = Column(DateTime, nullable=False, index=True)
     duration_minutes = Column(Integer, default=30)
-    status = Column(Enum(AppointmentStatus), default=AppointmentStatus.SCHEDULED)
+    status = Column(
+        Enum(AppointmentStatus, values_callable=lambda x: [e.value for e in x]),
+        default=AppointmentStatus.SCHEDULED
+    )
     reason = Column(String, nullable=False)
     notes = Column(Text)
     created_at = Column(
