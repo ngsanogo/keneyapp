@@ -37,6 +37,8 @@ def upgrade() -> None:
     op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
     
     # Create patients table (without tenant_id initially, will be added in migration 003)
+    # Note: email is nullable but has a unique constraint; migration 003 will drop this
+    # constraint and add a composite unique constraint on (tenant_id, email)
     op.create_table(
         'patients',
         sa.Column('id', sa.Integer(), nullable=False),
@@ -52,11 +54,11 @@ def upgrade() -> None:
         sa.Column('blood_type', sa.String(length=5), nullable=True),
         sa.Column('emergency_contact', sa.String(), nullable=True),
         sa.Column('emergency_phone', sa.String(), nullable=True),
-        sa.PrimaryKeyConstraint('id')
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('email', name='patients_email_key')
     )
     op.create_index(op.f('ix_patients_id'), 'patients', ['id'], unique=False)
     op.create_index(op.f('ix_patients_email'), 'patients', ['email'], unique=False)
-    op.create_unique_constraint('patients_email_key', 'patients', ['email'])
     
     # Create appointments table (without tenant_id initially, will be added in migration 003)
     op.create_table(
@@ -107,7 +109,6 @@ def downgrade() -> None:
     op.drop_table('appointments')
     
     # Drop patients table
-    op.drop_constraint('patients_email_key', 'patients', type_='unique')
     op.drop_index(op.f('ix_patients_email'), table_name='patients')
     op.drop_index(op.f('ix_patients_id'), table_name='patients')
     op.drop_table('patients')
@@ -118,7 +119,8 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_table('users')
     
-    # Drop enums
-    op.execute('DROP TYPE appointmentstatus')
-    op.execute('DROP TYPE gender')
-    op.execute('DROP TYPE userrole')
+    # Drop enums (SQLAlchemy handles enum cleanup when dropping tables automatically)
+    # We explicitly drop them here to be thorough
+    op.execute('DROP TYPE IF EXISTS appointmentstatus')
+    op.execute('DROP TYPE IF EXISTS gender')
+    op.execute('DROP TYPE IF EXISTS userrole')
