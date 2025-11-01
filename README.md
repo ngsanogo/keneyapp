@@ -1,5 +1,12 @@
 # KeneyApp
 
+[![CI](https://github.com/ISData-consulting/keneyapp/actions/workflows/ci.yml/badge.svg)](https://github.com/ISData-consulting/keneyapp/actions/workflows/ci.yml)
+[![Security Scan](https://github.com/ISData-consulting/keneyapp/actions/workflows/security-scan.yml/badge.svg)](https://github.com/ISData-consulting/keneyapp/actions/workflows/security-scan.yml)
+[![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![React](https://img.shields.io/badge/react-18.0+-blue.svg)](https://react.dev/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 KeneyApp is a modern healthcare data management platform built with **Python**, **React (TypeScript)**, and **PostgreSQL**. It provides an end-to-end system for managing patient records, appointments, prescriptions, and hospital workflows.
 
 ## 🏥 Features
