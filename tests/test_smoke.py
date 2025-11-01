@@ -21,6 +21,9 @@ import time
 import pytest
 import requests
 
+# Mark all tests in this module as smoke tests
+pytestmark = pytest.mark.smoke
+
 
 # Configuration for smoke tests - can be overridden via environment variables
 class Config:
