@@ -17,14 +17,8 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Create userrole enum
-    op.execute("CREATE TYPE userrole AS ENUM ('admin', 'doctor', 'nurse', 'receptionist')")
-    
-    # Create gender enum
-    op.execute("CREATE TYPE gender AS ENUM ('male', 'female', 'other')")
-    
-    # Create appointmentstatus enum
-    op.execute("CREATE TYPE appointmentstatus AS ENUM ('scheduled', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show')")
+    # The enums are automatically created by SQLAlchemy when the tables are created,
+    # so we don't need to explicitly create them here
     
     # Create users table (without tenant_id initially, will be added in migration 003)
     op.create_table(
