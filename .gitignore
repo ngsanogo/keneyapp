@@ -221,3 +221,12 @@ yarn-error.log*
 # Environment files
 .env
 .env.local
+
+# Temporary work files (summaries, reports, plans, checklists)
+*_SUMMARY.md
+*_REPORT.md
+*_PLAN.md
+*_CHECKLIST.md
+*_COMPLETE.md
+ITERATION_*.md
+BACKLOG.md
