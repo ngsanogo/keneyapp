@@ -63,12 +63,9 @@ class ErrorBoundary extends Component<Props, State> {
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
           }}
         >
-          <h1 style={{ color: '#dc3545', marginBottom: '20px' }}>
-            Oops! Something went wrong
-          </h1>
+          <h1 style={{ color: '#dc3545', marginBottom: '20px' }}>Oops! Something went wrong</h1>
           <p style={{ color: '#6c757d', marginBottom: '20px' }}>
-            We're sorry for the inconvenience. An error has occurred in the
-            application.
+            We're sorry for the inconvenience. An error has occurred in the application.
           </p>
           {process.env.NODE_ENV === 'development' && this.state.error && (
             <details style={{ textAlign: 'left', marginTop: '20px' }}>

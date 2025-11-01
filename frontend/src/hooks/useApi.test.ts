@@ -4,7 +4,7 @@ import { useApi } from './useApi';
 describe('useApi Hook', () => {
   test('returns correct initial state', () => {
     const { result } = renderHook(() => useApi());
-    
+
     expect(result.current.data).toBeNull();
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeNull();

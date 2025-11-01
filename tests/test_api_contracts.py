@@ -26,8 +26,8 @@ AUTH_RESPONSE_SCHEMA = {
     "required": ["access_token", "token_type"],
     "properties": {
         "access_token": {"type": "string", "minLength": 1},
-        "token_type": {"type": "string", "enum": ["bearer"]}
-    }
+        "token_type": {"type": "string", "enum": ["bearer"]},
+    },
 }
 
 # JSON Schema for patient response
@@ -42,8 +42,8 @@ PATIENT_RESPONSE_SCHEMA = {
         "gender": {"type": "string", "enum": ["male", "female", "other"]},
         "email": {"type": ["string", "null"]},
         "phone": {"type": ["string", "null"]},
-        "address": {"type": ["string", "null"]}
-    }
+        "address": {"type": ["string", "null"]},
+    },
 }
 
 # JSON Schema for error response
@@ -62,13 +62,13 @@ ERROR_RESPONSE_SCHEMA = {
                         "properties": {
                             "loc": {"type": "array"},
                             "msg": {"type": "string"},
-                            "type": {"type": "string"}
-                        }
-                    }
-                }
+                            "type": {"type": "string"},
+                        },
+                    },
+                },
             ]
         }
-    }
+    },
 }
 
 
@@ -137,11 +137,7 @@ class TestAuthenticationContract:
     def test_login_success_contract(self):
         """Verify successful login response structure."""
         response = client.post(
-            "/api/v1/auth/login",
-            data={
-                "username": "admin",
-                "password": "admin123"
-            }
+            "/api/v1/auth/login", data={"username": "admin", "password": "admin123"}
         )
 
         assert response.status_code == 200
@@ -157,11 +153,7 @@ class TestAuthenticationContract:
     def test_login_failure_contract(self):
         """Verify failed login response structure."""
         response = client.post(
-            "/api/v1/auth/login",
-            data={
-                "username": "invalid",
-                "password": "invalid"
-            }
+            "/api/v1/auth/login", data={"username": "invalid", "password": "invalid"}
         )
 
         assert response.status_code == 401
@@ -175,10 +167,7 @@ class TestAuthenticationContract:
         """Verify validation error response structure."""
         response = client.post(
             "/api/v1/auth/login",
-            data={
-                "username": "",  # Invalid: empty username
-                "password": "test"
-            }
+            data={"username": "", "password": "test"},  # Invalid: empty username
         )
 
         assert response.status_code == 422
@@ -195,8 +184,7 @@ class TestPatientEndpointContract:
     def auth_token(self):
         """Get authentication token for tests."""
         response = client.post(
-            "/api/v1/auth/login",
-            data={"username": "admin", "password": "admin123"}
+            "/api/v1/auth/login", data={"username": "admin", "password": "admin123"}
         )
         return response.json()["access_token"]
 
@@ -210,8 +198,7 @@ class TestPatientEndpointContract:
     def test_list_patients_contract(self, auth_token):
         """Verify patients list response structure."""
         response = client.get(
-            "/api/v1/patients",
-            headers={"Authorization": f"Bearer {auth_token}"}
+            "/api/v1/patients", headers={"Authorization": f"Bearer {auth_token}"}
         )
 
         assert response.status_code == 200
@@ -229,10 +216,7 @@ class TestPatientEndpointContract:
         response = client.post(
             "/api/v1/patients",
             headers={"Authorization": f"Bearer {auth_token}"},
-            json={
-                "first_name": "",  # Invalid: empty
-                "last_name": "Test"
-            }
+            json={"first_name": "", "last_name": "Test"},  # Invalid: empty
         )
 
         assert response.status_code == 422
@@ -298,8 +282,8 @@ class TestCORSHeaders:
             "/api/v1/patients",
             headers={
                 "Origin": "http://localhost:3000",
-                "Access-Control-Request-Method": "GET"
-            }
+                "Access-Control-Request-Method": "GET",
+            },
         )
 
         # Should allow CORS
@@ -370,8 +354,7 @@ class TestDateTimeFormats:
     def auth_token(self):
         """Get authentication token for tests."""
         response = client.post(
-            "/api/v1/auth/login",
-            data={"username": "admin", "password": "admin123"}
+            "/api/v1/auth/login", data={"username": "admin", "password": "admin123"}
         )
         return response.json()["access_token"]
 
@@ -382,8 +365,7 @@ class TestDateTimeFormats:
 
         # Example with audit logs
         response = client.get(
-            "/api/v1/dashboard/stats",
-            headers={"Authorization": f"Bearer {auth_token}"}
+            "/api/v1/dashboard/stats", headers={"Authorization": f"Bearer {auth_token}"}
         )
 
         if response.status_code == 200:

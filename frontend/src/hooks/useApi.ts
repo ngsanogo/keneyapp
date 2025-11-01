@@ -53,7 +53,7 @@ export function useApi<T = any>(): UseApiReturn<T> {
       if (error.response) {
         // Server responded with error status
         const status = error.response.status;
-        
+
         // Map common status codes to user-friendly messages
         if (status === 401) {
           errorMessage = 'Authentication required. Please log in again.';
@@ -65,7 +65,8 @@ export function useApi<T = any>(): UseApiReturn<T> {
           errorMessage = 'Server error. Please try again later.';
         } else {
           // Only use server message for client errors (400-499)
-          errorMessage = error.response.data?.detail || error.response.data?.message || errorMessage;
+          errorMessage =
+            error.response.data?.detail || error.response.data?.message || errorMessage;
         }
       } else if (error.request) {
         // Request made but no response received

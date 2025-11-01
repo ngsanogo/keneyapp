@@ -104,7 +104,9 @@ def test_graphql_basic_queries_with_auth():
     user = _create_user(tenant=tenant)
     headers = _auth_headers(user)
 
-    hello_response = client.post("/graphql", json={"query": "{ hello }"}, headers=headers)
+    hello_response = client.post(
+        "/graphql", json={"query": "{ hello }"}, headers=headers
+    )
     assert hello_response.status_code == 200
     assert hello_response.json()["data"]["hello"] == "Hello from KeneyApp GraphQL API!"
 

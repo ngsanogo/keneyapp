@@ -44,7 +44,7 @@ describe('App Component', () => {
   });
 
   test('wraps app with AuthProvider', () => {
-    const { container } = render(<App />);
-    expect(container.querySelector('.app')).toBeInTheDocument();
+    render(<App />);
+    expect(screen.getByText('Login Page')).toBeInTheDocument();
   });
 });
