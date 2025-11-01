@@ -1,8 +1,21 @@
 # KeneyApp Architecture Documentation
 
+[![CI](https://github.com/ISData-consulting/keneyapp/actions/workflows/ci.yml/badge.svg)](https://github.com/ISData-consulting/keneyapp/actions/workflows/ci.yml)
+
 ## System Overview
 
 KeneyApp is a world-class healthcare management platform designed for GDPR/HIPAA compliance, high performance, and enterprise scalability.
+
+## Table of Contents
+
+1. [System Overview](#system-overview)
+2. [Architecture Diagram](#architecture-diagram)
+3. [Component Details](#component-details)
+4. [Data Flow](#data-flow)
+5. [Security Architecture](#security-architecture)
+6. [Scalability](#scalability)
+7. [Technology Stack](#technology-stack)
+8. [Design Principles](#design-principles)
 
 ## Architecture Diagram
 
