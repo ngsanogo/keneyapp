@@ -34,7 +34,7 @@ class Appointment(Base):
     doctor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     appointment_date = Column(DateTime, nullable=False, index=True)
     duration_minutes = Column(Integer, default=30)
-    status = Column(Enum(AppointmentStatus), default=AppointmentStatus.SCHEDULED)
+    status: AppointmentStatus = Column(Enum(AppointmentStatus), default=AppointmentStatus.SCHEDULED)  # type: ignore[assignment]
     reason = Column(String, nullable=False)
     notes = Column(Text)
     created_at = Column(

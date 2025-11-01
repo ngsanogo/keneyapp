@@ -27,7 +27,7 @@ def list_users(
     current_admin: User = Depends(
         require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
     ),
-):
+) -> List[User]:
     """Return the full user directory (admin only)."""
 
     query = db.query(User)
@@ -43,7 +43,7 @@ def get_user(
     current_admin: User = Depends(
         require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
     ),
-):
+) -> User:
     """Retrieve a single user."""
 
     query = db.query(User).filter(User.id == user_id)
@@ -66,7 +66,7 @@ def update_user_status(
     current_admin: User = Depends(
         require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
     ),
-):
+) -> User:
     """Update activation or lock status for a user."""
 
     query = db.query(User).filter(User.id == user_id)
@@ -79,12 +79,12 @@ def update_user_status(
         )
 
     if payload.is_active is not None:
-        user.is_active = payload.is_active
+        user.is_active = payload.is_active  # type: ignore[assignment]
 
     if payload.is_locked is not None:
-        user.is_locked = payload.is_locked
+        user.is_locked = payload.is_locked  # type: ignore[assignment]
         if not payload.is_locked:
-            user.failed_login_attempts = 0
+            user.failed_login_attempts = 0  # type: ignore[assignment]
 
     db.commit()
     db.refresh(user)
@@ -93,10 +93,10 @@ def update_user_status(
         db=db,
         action="UPDATE",
         resource_type="user",
-        resource_id=user.id,
+        resource_id=int(user.id),  # type: ignore[arg-type]
         status="success",
-        user_id=current_admin.id,
-        username=current_admin.username,
+        user_id=int(current_admin.id),  # type: ignore[arg-type]
+        username=str(current_admin.username),  # type: ignore[arg-type]
         details={"operation": "status_update", "target": user.username},
         request=request,
     )

@@ -43,7 +43,7 @@ class Patient(Base):
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     date_of_birth = Column(Date, nullable=False)
-    gender = Column(Enum(Gender), nullable=False)
+    gender: Gender = Column(Enum(Gender), nullable=False)  # type: ignore[assignment]
     email = Column(String, index=True)
     phone = Column(String, nullable=False)
     address = Column(Text)

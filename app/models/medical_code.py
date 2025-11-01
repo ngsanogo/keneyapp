@@ -42,7 +42,7 @@ class MedicalCode(Base):
     __tablename__ = "medical_codes"
 
     id = Column(Integer, primary_key=True, index=True)
-    code_system = Column(Enum(CodeSystem), nullable=False, index=True)
+    code_system: CodeSystem = Column(Enum(CodeSystem), nullable=False, index=True)  # type: ignore[assignment]
     code = Column(String(50), nullable=False, index=True)
     display = Column(String(500), nullable=False)
     definition = Column(Text)

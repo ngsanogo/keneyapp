@@ -32,7 +32,7 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
-    role = Column(Enum(UserRole), nullable=False, default=UserRole.RECEPTIONIST)
+    role: UserRole = Column(Enum(UserRole), nullable=False, default=UserRole.RECEPTIONIST)  # type: ignore[assignment]
     is_active = Column(Boolean, default=True)
     is_locked = Column(Boolean, nullable=False, default=False)
     failed_login_attempts = Column(Integer, nullable=False, default=0)

@@ -89,7 +89,7 @@ def check_prescription_interactions(prescription_id: int, medications: list):
     # Note: Avoid logging identifiable information for HIPAA compliance
     logger.info("Checking drug interactions")
 
-    interactions = []
+    interactions: list[dict] = []
 
     # Placeholder logic - in production, call external API or database
     # Example:
