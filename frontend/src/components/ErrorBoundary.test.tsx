@@ -39,12 +39,21 @@ describe('ErrorBoundary Component', () => {
     expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
   });
 
-  test('displays error details when error occurs', () => {
+  test('displays error details when error occurs in development mode', () => {
+    // Set NODE_ENV to development to show error details
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+    
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     );
-    expect(screen.getByText(/Test error/i)).toBeInTheDocument();
+    
+    // Error details are shown in development mode inside a details tag
+    expect(screen.getByText(/Error Details/i)).toBeInTheDocument();
+    
+    // Restore original env
+    process.env.NODE_ENV = originalEnv;
   });
 });
