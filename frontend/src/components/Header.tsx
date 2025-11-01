@@ -23,8 +23,7 @@ const Header: React.FC = () => {
       <div className="header-actions">
         {user && !loading && (
           <span className="header-user">
-            {user.fullName}{' '}
-            <span className="header-role">({user.role.replace('_', ' ')})</span>
+            {user.fullName} <span className="header-role">({user.role.replace('_', ' ')})</span>
           </span>
         )}
         <button onClick={handleLogout} className="btn btn-secondary">

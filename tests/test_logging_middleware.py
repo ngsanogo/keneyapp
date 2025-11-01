@@ -30,10 +30,7 @@ def test_custom_correlation_id_preserved():
     """Test that custom correlation ID from request is preserved."""
     custom_id = "test-correlation-id-12345"
 
-    response = client.get(
-        "/",
-        headers={"X-Correlation-ID": custom_id}
-    )
+    response = client.get("/", headers={"X-Correlation-ID": custom_id})
 
     assert response.headers["X-Correlation-ID"] == custom_id
 
@@ -72,14 +69,8 @@ def test_multiple_requests_with_same_correlation_id():
     """Test that the same correlation ID can be used across requests."""
     custom_id = "shared-correlation-id"
 
-    response1 = client.get(
-        "/health",
-        headers={"X-Correlation-ID": custom_id}
-    )
-    response2 = client.get(
-        "/",
-        headers={"X-Correlation-ID": custom_id}
-    )
+    response1 = client.get("/health", headers={"X-Correlation-ID": custom_id})
+    response2 = client.get("/", headers={"X-Correlation-ID": custom_id})
 
     assert response1.headers["X-Correlation-ID"] == custom_id
     assert response2.headers["X-Correlation-ID"] == custom_id

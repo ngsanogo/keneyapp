@@ -22,6 +22,27 @@ const NotificationToast: React.FC<NotificationToastProps> = ({
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
+    // Add animation styles to document head once on mount
+    const styleId = 'notification-toast-animations';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Set up auto-dismiss timer
     const timer = setTimeout(() => {
       setIsVisible(false);
       if (onClose) onClose();
@@ -72,61 +93,39 @@ const NotificationToast: React.FC<NotificationToastProps> = ({
     if (onClose) onClose();
   };
 
-  // Add animation to document head once
-  React.useEffect(() => {
-    const styleId = 'notification-toast-animations';
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement('style');
-      style.id = styleId;
-      style.textContent = `
-        @keyframes slideInRight {
-          from {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
-      `;
-      document.head.appendChild(style);
-    }
-  }, []);
-
   return (
     <div style={toastStyle} role="alert">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span
-            style={{
-              fontSize: '20px',
-              fontWeight: 'bold',
-              width: '24px',
-              height: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            {iconMap[type]}
-          </span>
-          <span style={{ flex: 1 }}>{message}</span>
-        </div>
-        <button
-          onClick={handleClose}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <span
           style={{
-            background: 'none',
-            border: 'none',
-            color: colors.text,
             fontSize: '20px',
-            cursor: 'pointer',
-            padding: '0 8px',
-            marginLeft: '12px',
+            fontWeight: 'bold',
+            width: '24px',
+            height: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-          aria-label="Close notification"
         >
-          ×
-        </button>
+          {iconMap[type]}
+        </span>
+        <span style={{ flex: 1 }}>{message}</span>
+      </div>
+      <button
+        onClick={handleClose}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: colors.text,
+          fontSize: '20px',
+          cursor: 'pointer',
+          padding: '0 8px',
+          marginLeft: '12px',
+        }}
+        aria-label="Close notification"
+      >
+        ×
+      </button>
     </div>
   );
 };

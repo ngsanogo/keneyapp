@@ -127,9 +127,7 @@ class TestAuthenticationFlow:
         )
         assert response.status_code in [401, 422]
 
-    def test_get_current_user(
-        self, api_client: requests.Session, admin_token: str
-    ):
+    def test_get_current_user(self, api_client: requests.Session, admin_token: str):
         """Test retrieving current user profile."""
         response = api_client.get(
             f"{API_BASE}/auth/me",
@@ -145,9 +143,7 @@ class TestAuthenticationFlow:
 class TestPatientManagement:
     """Test patient management flows."""
 
-    def test_list_patients(
-        self, api_client: requests.Session, doctor_token: str
-    ):
+    def test_list_patients(self, api_client: requests.Session, doctor_token: str):
         """Test listing patients as a doctor."""
         response = api_client.get(
             f"{API_BASE}/patients/",
@@ -198,9 +194,7 @@ class TestPatientManagement:
 class TestAppointmentFlow:
     """Test appointment management flows."""
 
-    def test_list_appointments(
-        self, api_client: requests.Session, doctor_token: str
-    ):
+    def test_list_appointments(self, api_client: requests.Session, doctor_token: str):
         """Test listing appointments as a doctor."""
         response = api_client.get(
             f"{API_BASE}/appointments/",
@@ -214,9 +208,7 @@ class TestAppointmentFlow:
 class TestDashboard:
     """Test dashboard and statistics."""
 
-    def test_dashboard_stats(
-        self, api_client: requests.Session, admin_token: str
-    ):
+    def test_dashboard_stats(self, api_client: requests.Session, admin_token: str):
         """Test retrieving dashboard statistics."""
         response = api_client.get(
             f"{API_BASE}/dashboard/stats",
