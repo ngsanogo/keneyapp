@@ -231,3 +231,6 @@ yarn-error.log*
 *_COMPLETE.md
 ITERATION_*.md
 BACKLOG.md
+
+# Exception: Keep the comprehensive repository analysis report
+!REPOSITORY_ANALYSIS_REPORT.md
