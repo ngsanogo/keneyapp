@@ -21,8 +21,8 @@ const NotificationToast: React.FC<NotificationToastProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(true);
 
-  // Add animation to document head once
-  React.useEffect(() => {
+  useEffect(() => {
+    // Add animation styles to document head once on mount
     const styleId = 'notification-toast-animations';
     if (!document.getElementById(styleId)) {
       const style = document.createElement('style');
@@ -41,9 +41,8 @@ const NotificationToast: React.FC<NotificationToastProps> = ({
       `;
       document.head.appendChild(style);
     }
-  }, []);
 
-  useEffect(() => {
+    // Set up auto-dismiss timer
     const timer = setTimeout(() => {
       setIsVisible(false);
       if (onClose) onClose();
