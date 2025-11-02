@@ -33,9 +33,9 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
     role = Column(
-        Enum(UserRole, name='userrole', values_callable=lambda x: [e.value for e in x]),
+        Enum(UserRole, name="userrole", values_callable=lambda x: [e.value for e in x]),
         nullable=False,
-        default=UserRole.RECEPTIONIST
+        default=UserRole.RECEPTIONIST,
     )
     is_active = Column(Boolean, default=True)
     is_locked = Column(Boolean, nullable=False, default=False)

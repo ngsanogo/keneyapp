@@ -142,6 +142,8 @@ keneyapp/
 
 ## 🚀 Quick Start
 
+> **📖 For complete build instructions**, see [BUILD.md](BUILD.md)
+
 ### Option 1: Docker Compose (Recommended)
 
 1. **Clone the repository**
@@ -543,10 +545,13 @@ We welcome contributions! Please read our contribution guidelines before submitt
 ```bash
 # Quick setup with Makefile
 make setup          # Install dependencies and hooks
+make build          # Build the application with tests
 make dev            # Start development servers
 make test           # Run tests
 make lint           # Check code quality
 ```
+
+See [BUILD.md](BUILD.md) for comprehensive build instructions.
 
 **Contribution Process:**
 1. Fork the repository
@@ -562,6 +567,7 @@ make lint           # Check code quality
 Comprehensive documentation available in the `docs/` directory:
 
 ### Getting Started
+- **[Build Guide](BUILD.md)** - Comprehensive build instructions and troubleshooting
 - **[Development Guide](docs/DEVELOPMENT.md)** - Complete development setup and workflow
 - **[API Reference](docs/API_REFERENCE.md)** - Full API documentation with examples
 - **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment instructions

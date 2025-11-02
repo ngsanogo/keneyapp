@@ -44,8 +44,8 @@ class Patient(Base):
     last_name = Column(String, nullable=False)
     date_of_birth = Column(Date, nullable=False)
     gender = Column(
-        Enum(Gender, name='gender', values_callable=lambda x: [e.value for e in x]),
-        nullable=False
+        Enum(Gender, name="gender", values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
     )
     email = Column(String, index=True)
     phone = Column(String, nullable=False)

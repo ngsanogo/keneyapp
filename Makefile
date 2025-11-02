@@ -21,6 +21,11 @@ help:
 	@echo "  make test            Run all tests"
 	@echo "  make test-cov        Run tests with coverage"
 	@echo ""
+	@echo "Build Commands:"
+	@echo "  make build           Full build with tests (no Docker)"
+	@echo "  make build-full      Full build with tests and Docker images"
+	@echo "  make build-quick     Quick build without tests"
+	@echo ""
 	@echo "Docker Commands:"
 	@echo "  make docker-up       Start all services with Docker Compose"
 	@echo "  make docker-down     Stop all Docker services"
@@ -136,12 +141,16 @@ dev-frontend:
 
 # Build targets
 build:
-	@echo "Building application..."
-	@echo "Building backend..."
-	# Backend doesn't need build step
-	@echo "Building frontend..."
-	cd frontend && npm run build
-	@echo "✅ Build complete!"
+	@echo "Running full build process..."
+	@./scripts/build.sh --no-docker
+
+build-full:
+	@echo "Running full build with Docker images..."
+	@./scripts/build.sh
+
+build-quick:
+	@echo "Running quick build (skip tests)..."
+	@./scripts/build.sh --quick --no-docker
 
 # Docker commands
 docker-up:
