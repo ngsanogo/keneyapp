@@ -43,9 +43,13 @@ class MedicalCode(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     code_system = Column(
-        Enum(CodeSystem, name='codesystem', values_callable=lambda x: [e.value for e in x]),
+        Enum(
+            CodeSystem,
+            name="codesystem",
+            values_callable=lambda x: [e.value for e in x],
+        ),
         nullable=False,
-        index=True
+        index=True,
     )
     code = Column(String(50), nullable=False, index=True)
     display = Column(String(500), nullable=False)
