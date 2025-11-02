@@ -94,11 +94,10 @@ def test_tenant(db: Session) -> Tenant:
     """Crée un tenant de test par défaut"""
     tenant = Tenant(
         name="Test Medical Center",
-        code="TEST001",
-        status="active",
+        slug="test-medical-001",
+        is_active=True,
         contact_email="admin@testmedical.com",
-        contact_phone="+1234567890",
-        address="123 Test Street"
+        configuration={}
     )
     db.add(tenant)
     db.commit()
@@ -111,9 +110,10 @@ def other_tenant(db: Session) -> Tenant:
     """Crée un second tenant pour tester l'isolation"""
     tenant = Tenant(
         name="Other Clinic",
-        code="OTHER001",
-        status="active",
-        contact_email="admin@otherclinic.com"
+        slug="other-clinic-002",
+        is_active=True,
+        contact_email="admin@otherclinic.com",
+        configuration={}
     )
     db.add(tenant)
     db.commit()

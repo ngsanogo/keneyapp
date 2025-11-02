@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+ENV/
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+.tox/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# CI/CD
+.github/
+
+# Terraform
+terraform/
+
+# Kubernetes
+k8s/
+
+# Monitoring configs (not needed in image)
+monitoring/
+
+# Node
+node_modules/
+npm-debug.log
+frontend/.next/
+frontend/build/
+frontend/dist/
+
+# Temporary files
+*.log
+tmp/
+temp/
