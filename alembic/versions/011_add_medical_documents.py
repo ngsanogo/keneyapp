@@ -44,23 +44,26 @@ def upgrade() -> None:
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('filename', sa.String(length=500), nullable=False),
         sa.Column('original_filename', sa.String(length=500), nullable=False),
-        sa.Column('document_type', sa.Enum(
+        sa.Column('document_type', postgresql.ENUM(
             'lab_result', 'imaging', 'prescription', 'consultation_note',
             'vaccination_record', 'insurance', 'id_document', 'other',
-            name='documenttype'
+            name='documenttype',
+            create_type=False
         ), nullable=False),
-        sa.Column('document_format', sa.Enum(
+        sa.Column('document_format', postgresql.ENUM(
             'pdf', 'jpeg', 'png', 'dicom', 'docx', 'txt',
-            name='documentformat'
+            name='documentformat',
+            create_type=False
         ), nullable=False),
         sa.Column('mime_type', sa.String(length=100), nullable=False),
         sa.Column('file_size', sa.BigInteger(), nullable=False),
         sa.Column('storage_path', sa.String(length=1000), nullable=False),
         sa.Column('storage_type', sa.String(length=50), nullable=True),
         sa.Column('checksum', sa.String(length=64), nullable=False),
-        sa.Column('status', sa.Enum(
+        sa.Column('status', postgresql.ENUM(
             'uploading', 'processing', 'ready', 'failed', 'archived',
-            name='documentstatus'
+            name='documentstatus',
+            create_type=False
         ), nullable=False),
         sa.Column('processing_error', sa.Text(), nullable=True),
         sa.Column('ocr_text', sa.Text(), nullable=True),
@@ -74,8 +77,8 @@ def upgrade() -> None:
         sa.Column('is_sensitive', sa.Boolean(), nullable=True),
         sa.Column('encryption_key_id', sa.String(length=255), nullable=True),
         sa.Column('tenant_id', sa.String(length=255), nullable=False),
-        sa.Column('created_at', sa.DateTime(), nullable=False),
-        sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('NOW()')),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('NOW()')),
         sa.Column('deleted_at', sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], ondelete='CASCADE'),

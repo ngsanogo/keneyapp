@@ -14,6 +14,9 @@ from app.models.medical_code import (
     Observation,
     Procedure,
 )
+from app.models.message import Message
+from app.models.medical_document import MedicalDocument
+from app.models.medical_record_share import MedicalRecordShare
 
 __all__ = [
     "User",
@@ -27,4 +30,7 @@ __all__ = [
     "Condition",
     "Observation",
     "Procedure",
+    "Message",
+    "MedicalDocument",
+    "MedicalRecordShare",
 ]

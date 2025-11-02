@@ -68,7 +68,7 @@ itsdangerous==2.2.0
 # starlette version controlled by fastapi dependency
 
 # GraphQL Support
-strawberry-graphql[fastapi]>=0.284.1
+strawberry-graphql[fastapi]>=0.283.0
 
 # HL7/FHIR Support
 fhir.resources==7.1.0

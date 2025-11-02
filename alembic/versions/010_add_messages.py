@@ -1,7 +1,7 @@
 """Add messages table for secure messaging
 
 Revision ID: 010_add_messages
-Revises: 009_add_modules
+Revises: b9b286850b0d
 Create Date: 2025-11-02
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '010_add_messages'
-down_revision = '009_add_modules'
+down_revision = 'b9b286850b0d'
 branch_labels = None
 depends_on = None
 
@@ -30,13 +30,22 @@ def upgrade() -> None:
         sa.Column('receiver_id', sa.Integer(), nullable=False),
         sa.Column('encrypted_content', sa.Text(), nullable=False),
         sa.Column('subject', sa.String(length=255), nullable=True),
-        sa.Column('status', sa.Enum('sent', 'delivered', 'read', 'failed', name='messagestatus'), nullable=False),
+        # Use existing ENUM type if already created (avoid duplicate creation errors)
+        sa.Column(
+            'status',
+            postgresql.ENUM(
+                'sent', 'delivered', 'read', 'failed',
+                name='messagestatus',
+                create_type=False
+            ),
+            nullable=False
+        ),
         sa.Column('is_urgent', sa.Boolean(), nullable=True),
         sa.Column('attachment_ids', sa.Text(), nullable=True),
         sa.Column('thread_id', sa.String(length=255), nullable=True),
         sa.Column('reply_to_id', sa.Integer(), nullable=True),
         sa.Column('tenant_id', sa.String(length=255), nullable=False),
-        sa.Column('created_at', sa.DateTime(), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('NOW()')),
         sa.Column('read_at', sa.DateTime(), nullable=True),
         sa.Column('deleted_by_sender', sa.Boolean(), nullable=True),
         sa.Column('deleted_by_receiver', sa.Boolean(), nullable=True),

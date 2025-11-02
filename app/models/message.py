@@ -55,8 +55,8 @@ class Message(Base):
     deleted_by_receiver = Column(Boolean, default=False)
     
     # Relationships
-    sender = relationship("User", foreign_keys=[sender_id], back_populates="sent_messages")
-    receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_messages")
+    sender = relationship("User", foreign_keys=[sender_id], backref="sent_messages")
+    receiver = relationship("User", foreign_keys=[receiver_id], backref="received_messages")
     replies = relationship("Message", backref="parent_message", remote_side=[id])
 
     def __repr__(self):

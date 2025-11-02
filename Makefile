@@ -84,19 +84,51 @@ lint:
 # Testing
 test:
 	@echo "Running backend tests..."
-	pytest tests/ -v
+	pytest tests/ -v -m "not slow and not smoke"
 	@echo "Running frontend tests..."
 	cd frontend && npm test -- --watchAll=false
 	@echo "✅ All tests passed!"
 
 test-cov:
 	@echo "Running backend tests with coverage..."
-	pytest tests/ -v --cov=app --cov-report=html --cov-report=term
-	@echo "Running frontend tests with coverage..."
+	pytest tests/ -v --cov=app --cov-report=html --cov-report=term-missing --cov-report=xml -m "not slow and not smoke"
+	@echo "Running frontend tests..."
 	cd frontend && npm test -- --watchAll=false --coverage
 	@echo "✅ Coverage reports generated!"
 	@echo "Backend coverage: htmlcov/index.html"
 	@echo "Frontend coverage: frontend/coverage/lcov-report/index.html"
+
+test-all:
+	@echo "🧪 Running ALL tests (including slow and integration)..."
+	@./scripts/run_all_tests.sh
+
+test-v3:
+	@echo "🧪 Running v3.0 tests only..."
+	pytest tests/test_messages.py tests/test_documents.py tests/test_shares.py tests/test_comprehensive_v3.py -v
+
+test-fast:
+	@echo "⚡ Running fast tests only..."
+	@./scripts/run_all_tests.sh --fast
+
+test-parallel:
+	@echo "🚀 Running tests in parallel..."
+	@./scripts/run_all_tests.sh --parallel
+
+test-unit:
+	@echo "🔬 Running unit tests only..."
+	pytest tests/ -v -m "unit"
+
+test-integration:
+	@echo "🔗 Running integration tests..."
+	pytest tests/ -v -m "integration"
+
+test-security:
+	@echo "🔒 Running security tests..."
+	pytest tests/ -v -m "security"
+
+test-performance:
+	@echo "⚡ Running performance tests..."
+	pytest tests/ -v -m "performance and slow"
 
 # Security checks
 security:

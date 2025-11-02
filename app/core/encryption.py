@@ -138,6 +138,17 @@ def decrypt_sensitive_data(encrypted_data: str) -> str:
     return encryption.decrypt(encrypted_data)
 
 
+# Backward-compatible wrappers used by services; optional context is ignored for now
+def encrypt_data(plaintext: str, context: Optional[dict] = None) -> str:
+    """Encrypt data with optional context (reserved for future key scoping)."""
+    return encrypt_sensitive_data(plaintext)
+
+
+def decrypt_data(encrypted_data: str, context: Optional[dict] = None) -> str:
+    """Decrypt data with optional context (reserved for future key scoping)."""
+    return decrypt_sensitive_data(encrypted_data)
+
+
 def encrypt_patient_data(data: dict) -> dict:
     """
     Encrypt sensitive fields in patient data.
@@ -203,6 +214,8 @@ __all__ = [
     "encryption",
     "encrypt_sensitive_data",
     "decrypt_sensitive_data",
+    "encrypt_data",
+    "decrypt_data",
     "encrypt_patient_data",
     "decrypt_patient_data",
 ]

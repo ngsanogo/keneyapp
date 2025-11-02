@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal, engine, Base
+# Import all models to ensure mappers are registered before create_all / queries
+import app.models  # noqa: F401
 from app.core.security import get_password_hash
 from app.models.user import User, UserRole
 from app.models.patient import Patient, Gender

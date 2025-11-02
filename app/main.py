@@ -9,6 +9,8 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
+# Ensure all models are imported and registered before metadata operations
+import app.models  # noqa: F401
 from app.core.database import engine, Base
 from app.core.rate_limit import limiter
 from app.core.middleware import MetricsMiddleware, SecurityHeadersMiddleware

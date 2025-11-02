@@ -18,19 +18,7 @@ depends_on = None
 
 def upgrade() -> None:
     """Create medical_record_shares table for controlled sharing."""
-    # Create enums
-    share_scope = postgresql.ENUM(
-        'full_record', 'appointments_only', 'prescriptions_only',
-        'documents_only', 'custom',
-        name='sharescope', create_type=True
-    )
-    share_scope.create(op.get_bind(), checkfirst=True)
-    
-    share_status = postgresql.ENUM(
-        'active', 'expired', 'revoked', 'used',
-        name='sharestatus', create_type=True
-    )
-    share_status.create(op.get_bind(), checkfirst=True)
+    # Enums will be created automatically by SQLAlchemy when creating the table
     
     # Create medical_record_shares table
     op.create_table(
@@ -39,32 +27,34 @@ def upgrade() -> None:
         sa.Column('patient_id', sa.Integer(), nullable=False),
         sa.Column('shared_by_user_id', sa.Integer(), nullable=False),
         sa.Column('share_token', sa.String(length=255), nullable=False),
-        sa.Column('scope', sa.Enum(
+        sa.Column('scope', postgresql.ENUM(
             'full_record', 'appointments_only', 'prescriptions_only',
             'documents_only', 'custom',
-            name='sharescope'
+            name='sharescope',
+            create_type=False
         ), nullable=False),
         sa.Column('custom_resources', sa.Text(), nullable=True),
         sa.Column('recipient_email', sa.String(length=255), nullable=True),
         sa.Column('recipient_name', sa.String(length=255), nullable=True),
         sa.Column('access_pin', sa.String(length=10), nullable=True),
-        sa.Column('status', sa.Enum(
+        sa.Column('status', postgresql.ENUM(
             'active', 'expired', 'revoked', 'used',
-            name='sharestatus'
+            name='sharestatus',
+            create_type=False
         ), nullable=False),
-        sa.Column('expires_at', sa.DateTime(), nullable=False),
+        sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
         sa.Column('access_count', sa.Integer(), nullable=False),
         sa.Column('max_access_count', sa.Integer(), nullable=True),
-        sa.Column('last_accessed_at', sa.DateTime(), nullable=True),
+    sa.Column('last_accessed_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('last_accessed_ip', sa.String(length=50), nullable=True),
         sa.Column('purpose', sa.Text(), nullable=True),
         sa.Column('notes', sa.Text(), nullable=True),
         sa.Column('consent_given', sa.Boolean(), nullable=False),
-        sa.Column('consent_date', sa.DateTime(), nullable=False),
+    sa.Column('consent_date', sa.DateTime(timezone=True), nullable=False),
         sa.Column('tenant_id', sa.String(length=255), nullable=False),
-        sa.Column('created_at', sa.DateTime(), nullable=False),
-        sa.Column('updated_at', sa.DateTime(), nullable=False),
-        sa.Column('revoked_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('NOW()')),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('NOW()')),
+    sa.Column('revoked_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('revoked_by_user_id', sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], ondelete='CASCADE'),
