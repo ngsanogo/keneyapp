@@ -18,8 +18,20 @@ depends_on = None
 
 def upgrade() -> None:
     """Create medical_record_shares table for controlled sharing."""
-    # Enums will be created automatically by SQLAlchemy when creating the table
-    
+    # Explicitly create PostgreSQL ENUM types before using them in table columns
+    share_scope = postgresql.ENUM(
+        'full_record', 'appointments_only', 'prescriptions_only',
+        'documents_only', 'custom',
+        name='sharescope'
+    )
+    share_scope.create(op.get_bind(), checkfirst=True)
+
+    share_status = postgresql.ENUM(
+        'active', 'expired', 'revoked', 'used',
+        name='sharestatus'
+    )
+    share_status.create(op.get_bind(), checkfirst=True)
+
     # Create medical_record_shares table
     op.create_table(
         'medical_record_shares',
@@ -27,21 +39,12 @@ def upgrade() -> None:
         sa.Column('patient_id', sa.Integer(), nullable=False),
         sa.Column('shared_by_user_id', sa.Integer(), nullable=False),
         sa.Column('share_token', sa.String(length=255), nullable=False),
-        sa.Column('scope', postgresql.ENUM(
-            'full_record', 'appointments_only', 'prescriptions_only',
-            'documents_only', 'custom',
-            name='sharescope',
-            create_type=False
-        ), nullable=False),
+        sa.Column('scope', share_scope, nullable=False),
         sa.Column('custom_resources', sa.Text(), nullable=True),
         sa.Column('recipient_email', sa.String(length=255), nullable=True),
         sa.Column('recipient_name', sa.String(length=255), nullable=True),
         sa.Column('access_pin', sa.String(length=10), nullable=True),
-        sa.Column('status', postgresql.ENUM(
-            'active', 'expired', 'revoked', 'used',
-            name='sharestatus',
-            create_type=False
-        ), nullable=False),
+        sa.Column('status', share_status, nullable=False),
         sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
         sa.Column('access_count', sa.Integer(), nullable=False),
         sa.Column('max_access_count', sa.Integer(), nullable=True),

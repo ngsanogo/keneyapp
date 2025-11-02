@@ -14,6 +14,7 @@ from app.core.config import settings
 from app import models as app_models  # noqa: F401
 from app.core.database import engine, Base
 from app.core.rate_limit import limiter
+import os
 from app.core.middleware import MetricsMiddleware, SecurityHeadersMiddleware
 from app.core.logging_middleware import CorrelationIdMiddleware
 from app.core.metrics import metrics_endpoint
@@ -57,9 +58,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Configure rate limiting
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
+# Configure rate limiting (can be disabled via env var ENABLE_RATE_LIMITING=false)
+if os.getenv("ENABLE_RATE_LIMITING", "true").lower() in {"1", "true", "yes"}:
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 
 # Add custom middleware
 app.add_middleware(CorrelationIdMiddleware)
