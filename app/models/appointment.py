@@ -35,7 +35,7 @@ class Appointment(Base):
     appointment_date = Column(DateTime, nullable=False, index=True)
     duration_minutes = Column(Integer, default=30)
     status = Column(
-        Enum(AppointmentStatus, values_callable=lambda x: [e.value for e in x]),
+        Enum(AppointmentStatus, name='appointmentstatus', values_callable=lambda x: [e.value for e in x]),
         default=AppointmentStatus.SCHEDULED
     )
     reason = Column(String, nullable=False)
