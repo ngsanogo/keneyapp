@@ -43,6 +43,25 @@ async def lifespan(app: FastAPI):
 
     if os.getenv("TESTING", "false").lower() not in {"1", "true", "yes"}:
         Base.metadata.create_all(bind=engine)
+
+    # Configure or disable rate limiting based on current environment
+    enable_rl = os.getenv("ENABLE_RATE_LIMITING", "true").lower() in {"1", "true", "yes"}
+    if enable_rl:
+        app.state.disable_rate_limit = False
+        app.state.limiter = limiter
+        app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
+    else:
+        app.state.disable_rate_limit = True
+        # Ensure limiter is disabled in app state and remove any handler
+        if hasattr(app.state, "limiter"):
+            try:
+                delattr(app.state, "limiter")
+            except Exception:
+                pass
+        try:
+            app.exception_handlers.pop(RateLimitExceeded, None)  # type: ignore[arg-type]
+        except Exception:
+            pass
     yield
     # Shutdown: cleanup if needed
 
@@ -57,11 +76,6 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_PREFIX}/openapi.json",
     lifespan=lifespan,
 )
-
-# Configure rate limiting (can be disabled via env var ENABLE_RATE_LIMITING=false)
-if os.getenv("ENABLE_RATE_LIMITING", "true").lower() in {"1", "true", "yes"}:
-    app.state.limiter = limiter
-    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 
 # Add custom middleware
 app.add_middleware(CorrelationIdMiddleware)
