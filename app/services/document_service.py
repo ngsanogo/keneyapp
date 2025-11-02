@@ -2,22 +2,25 @@
 Medical document storage and management service.
 Supports local filesystem and S3-compatible storage.
 """
+
 import os
 import hashlib
 import uuid
 import json
-import mimetypes
-from typing import Optional, BinaryIO, List, Tuple
+from typing import Optional, List, Tuple
 from pathlib import Path
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from fastapi import UploadFile, HTTPException, status
 
-from app.models.medical_document import MedicalDocument, DocumentType, DocumentFormat, DocumentStatus
+from app.models.medical_document import (
+    MedicalDocument,
+    DocumentType,
+    DocumentFormat,
+    DocumentStatus,
+)
 from app.models.patient import Patient
-from app.schemas.medical_document import DocumentUpload, DocumentResponse, DocumentStats
-from app.core.config import settings
+from app.schemas.medical_document import DocumentUpload, DocumentStats
 from app.core.audit import log_audit_event
 from fastapi import Request
 
@@ -33,7 +36,7 @@ ALLOWED_MIME_TYPES = {
     "application/dicom",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "text/plain"
+    "text/plain",
 }
 
 
@@ -51,7 +54,7 @@ def detect_document_format(mime_type: str) -> DocumentFormat:
         "image/png": DocumentFormat.PNG,
         "application/dicom": DocumentFormat.DICOM,
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document": DocumentFormat.DOCX,
-        "text/plain": DocumentFormat.TXT
+        "text/plain": DocumentFormat.TXT,
     }
     return mime_format_map.get(mime_type, DocumentFormat.PDF)
 
@@ -61,18 +64,22 @@ def calculate_file_checksum(file_data: bytes) -> str:
     return hashlib.sha256(file_data).hexdigest()
 
 
-def generate_secure_filename(original_filename: str, tenant_id: str, patient_id: int) -> Tuple[str, str]:
+def generate_secure_filename(
+    original_filename: str, tenant_id: str, patient_id: int
+) -> Tuple[str, str]:
     """Generate secure unique filename and storage path."""
     # Extract extension
     ext = Path(original_filename).suffix.lower()
-    
+
     # Generate unique filename
     unique_id = uuid.uuid4().hex
     secure_filename = f"{tenant_id}_{patient_id}_{unique_id}{ext}"
-    
+
     # Organize by tenant and patient
-    storage_path = os.path.join(UPLOAD_DIR, str(tenant_id), str(patient_id), secure_filename)
-    
+    storage_path = os.path.join(
+        UPLOAD_DIR, str(tenant_id), str(patient_id), secure_filename
+    )
+
     return secure_filename, storage_path
 
 
@@ -80,14 +87,14 @@ async def save_file_to_local_storage(file: UploadFile, storage_path: str) -> int
     """Save uploaded file to local storage."""
     # Create directory if needed
     Path(storage_path).parent.mkdir(parents=True, exist_ok=True)
-    
+
     # Write file
     file_size = 0
     with open(storage_path, "wb") as buffer:
         content = await file.read()
         file_size = len(content)
         buffer.write(content)
-    
+
     return file_size
 
 
@@ -97,7 +104,7 @@ def validate_file(file: UploadFile) -> None:
     if file.content_type not in ALLOWED_MIME_TYPES:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"File type not allowed. Supported types: {', '.join(ALLOWED_MIME_TYPES)}"
+            detail=f"File type not allowed. Supported types: {', '.join(ALLOWED_MIME_TYPES)}",
         )
 
 
@@ -107,72 +114,77 @@ async def upload_document(
     metadata: DocumentUpload,
     user_id: int,
     tenant_id: str,
-    request: Optional[Request] = None
+    request: Optional[Request] = None,
 ) -> MedicalDocument:
     """
     Upload and store a medical document.
     """
     # Initialize storage
     init_storage_directory()
-    
+
     # Validate file
     validate_file(file)
-    
+
     # Verify patient exists and belongs to tenant
-    patient = db.query(Patient).filter(
-        Patient.id == metadata.patient_id,
-        Patient.tenant_id == tenant_id
-    ).first()
-    
+    patient = (
+        db.query(Patient)
+        .filter(Patient.id == metadata.patient_id, Patient.tenant_id == tenant_id)
+        .first()
+    )
+
     if not patient:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Patient not found or access denied"
+            detail="Patient not found or access denied",
         )
-    
+
     # Generate secure filename and path
     secure_filename, storage_path = generate_secure_filename(
         file.filename, tenant_id, metadata.patient_id
     )
-    
+
     # Read file content for checksum
     content = await file.read()
     file_size = len(content)
-    
+
     # Validate file size
     if file_size > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"File too large. Maximum size: {MAX_FILE_SIZE / (1024*1024):.1f} MB"
+            detail=f"File too large. Maximum size: {MAX_FILE_SIZE / (1024*1024):.1f} MB",
         )
-    
+
     # Calculate checksum
     checksum = calculate_file_checksum(content)
-    
+
     # Check for duplicate (same checksum for same patient)
-    existing = db.query(MedicalDocument).filter(
-        MedicalDocument.patient_id == metadata.patient_id,
-        MedicalDocument.checksum == checksum,
-        MedicalDocument.deleted_at.is_(None)
-    ).first()
-    
+    existing = (
+        db.query(MedicalDocument)
+        .filter(
+            MedicalDocument.patient_id == metadata.patient_id,
+            MedicalDocument.checksum == checksum,
+            MedicalDocument.deleted_at.is_(None),
+        )
+        .first()
+    )
+
     if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Document already exists (duplicate detected)"
+            detail="Document already exists (duplicate detected)",
         )
-    
+
     # Save file to storage
     Path(storage_path).parent.mkdir(parents=True, exist_ok=True)
     with open(storage_path, "wb") as buffer:
         buffer.write(content)
-    
+
     # Detect format
     document_format = detect_document_format(file.content_type)
-    
+
     # Convert tags to JSON
     tags_json = json.dumps(metadata.tags) if metadata.tags else None
-    
+
     # Create database record
     document = MedicalDocument(
         filename=secure_filename,
@@ -192,13 +204,13 @@ async def upload_document(
         description=metadata.description,
         tags=tags_json,
         is_sensitive=metadata.is_sensitive,
-        tenant_id=tenant_id
+        tenant_id=tenant_id,
     )
-    
+
     db.add(document)
     db.commit()
     db.refresh(document)
-    
+
     # Audit log
     if request:
         log_audit_event(
@@ -211,27 +223,24 @@ async def upload_document(
                 "patient_id": metadata.patient_id,
                 "document_type": metadata.document_type.value,
                 "file_size": file_size,
-                "filename": file.filename
+                "filename": file.filename,
             },
-            request=request
+            request=request,
         )
-    
+
     return document
 
 
 def get_document(
-    db: Session,
-    document_id: int,
-    tenant_id: str,
-    user_id: Optional[int] = None
+    db: Session, document_id: int, tenant_id: str, user_id: Optional[int] = None
 ) -> Optional[MedicalDocument]:
     """Get document by ID with tenant validation."""
     query = db.query(MedicalDocument).filter(
         MedicalDocument.id == document_id,
         MedicalDocument.tenant_id == tenant_id,
-        MedicalDocument.deleted_at.is_(None)
+        MedicalDocument.deleted_at.is_(None),
     )
-    
+
     return query.first()
 
 
@@ -241,19 +250,24 @@ def get_patient_documents(
     tenant_id: str,
     document_type: Optional[DocumentType] = None,
     skip: int = 0,
-    limit: int = 50
+    limit: int = 50,
 ) -> List[MedicalDocument]:
     """Get all documents for a patient."""
     query = db.query(MedicalDocument).filter(
         MedicalDocument.patient_id == patient_id,
         MedicalDocument.tenant_id == tenant_id,
-        MedicalDocument.deleted_at.is_(None)
+        MedicalDocument.deleted_at.is_(None),
     )
-    
+
     if document_type:
         query = query.filter(MedicalDocument.document_type == document_type)
-    
-    return query.order_by(MedicalDocument.created_at.desc()).offset(skip).limit(limit).all()
+
+    return (
+        query.order_by(MedicalDocument.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def delete_document(
@@ -261,19 +275,19 @@ def delete_document(
     document_id: int,
     tenant_id: str,
     user_id: int,
-    request: Optional[Request] = None
+    request: Optional[Request] = None,
 ) -> bool:
     """Soft delete a document."""
     document = get_document(db, document_id, tenant_id)
-    
+
     if not document:
         return False
-    
+
     # Soft delete
     document.deleted_at = datetime.now(timezone.utc)
     document.status = DocumentStatus.ARCHIVED
     db.commit()
-    
+
     # Audit log
     if request:
         log_audit_event(
@@ -283,9 +297,9 @@ def delete_document(
             resource_type="medical_document",
             resource_id=str(document.id),
             details={"patient_id": document.patient_id, "soft_delete": True},
-            request=request
+            request=request,
         )
-    
+
     return True
 
 
@@ -294,43 +308,44 @@ def get_document_file_path(document: MedicalDocument) -> str:
     return document.storage_path
 
 
-def get_document_stats(db: Session, tenant_id: str, patient_id: Optional[int] = None) -> DocumentStats:
+def get_document_stats(
+    db: Session, tenant_id: str, patient_id: Optional[int] = None
+) -> DocumentStats:
     """Get document storage statistics."""
     query = db.query(MedicalDocument).filter(
-        MedicalDocument.tenant_id == tenant_id,
-        MedicalDocument.deleted_at.is_(None)
+        MedicalDocument.tenant_id == tenant_id, MedicalDocument.deleted_at.is_(None)
     )
-    
+
     if patient_id:
         query = query.filter(MedicalDocument.patient_id == patient_id)
-    
+
     documents = query.all()
-    
+
     total_size = sum(doc.file_size for doc in documents)
-    
+
     # Count by type
     by_type = {}
     for doc in documents:
         doc_type = doc.document_type.value
         by_type[doc_type] = by_type.get(doc_type, 0) + 1
-    
+
     # Count by format
     by_format = {}
     for doc in documents:
         doc_format = doc.document_format.value
         by_format[doc_format] = by_format.get(doc_format, 0) + 1
-    
+
     # Count by status
     by_status = {}
     for doc in documents:
         doc_status = doc.status.value
         by_status[doc_status] = by_status.get(doc_status, 0) + 1
-    
+
     return DocumentStats(
         total_documents=len(documents),
         total_size_bytes=total_size,
         total_size_mb=round(total_size / (1024 * 1024), 2),
         by_type=by_type,
         by_format=by_format,
-        by_status=by_status
+        by_status=by_status,
     )

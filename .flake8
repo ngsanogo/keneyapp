@@ -19,6 +19,10 @@ exclude =
 # Select error codes
 select = E,F,W,C90
 # Ignore specific errors that conflict with Black
-ignore = E203,E266,E501,W503
+ignore = E203,E266,E501,W503,W293
 # McCabe complexity
 max-complexity = 10
+
+# Test-specific relaxations
+per-file-ignores =
+    tests/*: F401

@@ -1,6 +1,7 @@
 """
 Pydantic schemas for medical record sharing.
 """
+
 from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
@@ -10,20 +11,34 @@ from app.models.medical_record_share import ShareScope, ShareStatus
 
 class ShareCreate(BaseModel):
     """Schema for creating a new share."""
+
     patient_id: int = Field(..., description="Patient ID to share")
     scope: ShareScope = Field(..., description="Scope of data to share")
-    custom_resources: Optional[dict] = Field(None, description="Custom resource selection for CUSTOM scope")
-    recipient_email: Optional[EmailStr] = Field(None, description="Optional: restrict access to this email")
-    recipient_name: Optional[str] = Field(None, max_length=255, description="Name of recipient")
-    expires_in_hours: int = Field(24, ge=1, le=720, description="Validity duration in hours (1h - 30 days)")
-    max_access_count: Optional[int] = Field(None, ge=1, description="Maximum number of accesses allowed")
+    custom_resources: Optional[dict] = Field(
+        None, description="Custom resource selection for CUSTOM scope"
+    )
+    recipient_email: Optional[EmailStr] = Field(
+        None, description="Optional: restrict access to this email"
+    )
+    recipient_name: Optional[str] = Field(
+        None, max_length=255, description="Name of recipient"
+    )
+    expires_in_hours: int = Field(
+        24, ge=1, le=720, description="Validity duration in hours (1h - 30 days)"
+    )
+    max_access_count: Optional[int] = Field(
+        None, ge=1, description="Maximum number of accesses allowed"
+    )
     require_pin: bool = Field(False, description="Require PIN for access")
-    purpose: Optional[str] = Field(None, max_length=500, description="Purpose of sharing")
+    purpose: Optional[str] = Field(
+        None, max_length=500, description="Purpose of sharing"
+    )
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
 
 
 class ShareResponse(BaseModel):
     """Schema for share response."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -51,6 +66,7 @@ class ShareResponse(BaseModel):
 
 class ShareSummary(BaseModel):
     """Lightweight share summary."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -65,12 +81,14 @@ class ShareSummary(BaseModel):
 
 class ShareAccessRequest(BaseModel):
     """Schema for accessing shared record."""
+
     token: str = Field(..., description="Share access token")
     pin: Optional[str] = Field(None, description="Access PIN if required")
 
 
 class ShareAccessLog(BaseModel):
     """Log entry for share access."""
+
     share_id: int
     accessed_at: datetime
     accessed_by_ip: str
@@ -80,6 +98,7 @@ class ShareAccessLog(BaseModel):
 
 class SharedMedicalRecord(BaseModel):
     """Shared medical record data."""
+
     patient: dict  # Patient info (limited)
     appointments: Optional[List[dict]] = None
     prescriptions: Optional[List[dict]] = None

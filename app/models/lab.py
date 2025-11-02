@@ -29,15 +29,22 @@ class LabResult(Base):
     result_value = Column(String(255), nullable=False)
     units = Column(String(50), nullable=True)
     reference_range = Column(String(255), nullable=True)
-    status = Column(String(50), nullable=False, default="final")  # e.g., pending|final|corrected
+    status = Column(
+        String(50), nullable=False, default="final"
+    )  # e.g., pending|final|corrected
     notes = Column(Text, nullable=True)
 
     collected_at = Column(DateTime(timezone=True), nullable=True)
     reported_at = Column(DateTime(timezone=True), nullable=True)
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )
 
     # Relationships

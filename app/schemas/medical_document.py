@@ -1,6 +1,7 @@
 """
 Pydantic schemas for medical documents.
 """
+
 from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, Field, ConfigDict
@@ -10,10 +11,15 @@ from app.models.medical_document import DocumentType, DocumentFormat, DocumentSt
 
 class DocumentUpload(BaseModel):
     """Schema for document upload metadata."""
+
     patient_id: int = Field(..., description="Patient ID this document belongs to")
     document_type: DocumentType = Field(..., description="Type of medical document")
-    description: Optional[str] = Field(None, max_length=1000, description="Document description")
-    tags: Optional[List[str]] = Field(None, description="Document tags for categorization")
+    description: Optional[str] = Field(
+        None, max_length=1000, description="Document description"
+    )
+    tags: Optional[List[str]] = Field(
+        None, description="Document tags for categorization"
+    )
     appointment_id: Optional[int] = Field(None, description="Related appointment ID")
     prescription_id: Optional[int] = Field(None, description="Related prescription ID")
     is_sensitive: bool = Field(True, description="Mark as sensitive/PHI")
@@ -21,6 +27,7 @@ class DocumentUpload(BaseModel):
 
 class DocumentMetadata(BaseModel):
     """Schema for updating document metadata."""
+
     description: Optional[str] = None
     tags: Optional[List[str]] = None
     document_type: Optional[DocumentType] = None
@@ -28,6 +35,7 @@ class DocumentMetadata(BaseModel):
 
 class DocumentResponse(BaseModel):
     """Schema for document response."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -57,6 +65,7 @@ class DocumentResponse(BaseModel):
 
 class DocumentSummary(BaseModel):
     """Lightweight document summary."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -72,6 +81,7 @@ class DocumentSummary(BaseModel):
 
 class DocumentDownloadUrl(BaseModel):
     """Temporary download URL for document."""
+
     document_id: int
     download_url: str
     expires_at: datetime
@@ -80,6 +90,7 @@ class DocumentDownloadUrl(BaseModel):
 
 class DocumentStats(BaseModel):
     """Document storage statistics."""
+
     total_documents: int
     total_size_bytes: int
     total_size_mb: float

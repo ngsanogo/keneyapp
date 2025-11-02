@@ -9,6 +9,7 @@ Fixtures réutilisables pour tous les tests:
 - Clients API
 - Données de test
 """
+
 import pytest
 import os
 from typing import Generator
@@ -29,22 +30,23 @@ from app.core.security import get_password_hash
 # DATABASE FIXTURES
 # ============================================================================
 
+
 @pytest.fixture(scope="function")
 def db_engine():
     """Crée un moteur de base de données en mémoire pour les tests"""
     SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
-    
+
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL,
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    
+
     # Créer toutes les tables
     Base.metadata.create_all(bind=engine)
-    
+
     yield engine
-    
+
     # Cleanup
     Base.metadata.drop_all(bind=engine)
 
@@ -53,13 +55,11 @@ def db_engine():
 def db(db_engine) -> Generator[Session, None, None]:
     """Crée une session de base de données pour un test"""
     TestingSessionLocal = sessionmaker(
-        autocommit=False,
-        autoflush=False,
-        bind=db_engine
+        autocommit=False, autoflush=False, bind=db_engine
     )
-    
+
     session = TestingSessionLocal()
-    
+
     try:
         yield session
     finally:
@@ -70,24 +70,25 @@ def db(db_engine) -> Generator[Session, None, None]:
 @pytest.fixture(scope="function")
 def client(db: Session) -> Generator[TestClient, None, None]:
     """Crée un client de test FastAPI avec override de la DB"""
-    
+
     def override_get_db():
         try:
             yield db
         finally:
             pass
-    
+
     app.dependency_overrides[get_db] = override_get_db
-    
+
     with TestClient(app) as test_client:
         yield test_client
-    
+
     app.dependency_overrides.clear()
 
 
 # ============================================================================
 # TENANT FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 def test_tenant(db: Session) -> Tenant:
@@ -97,7 +98,7 @@ def test_tenant(db: Session) -> Tenant:
         slug="test-medical-001",
         is_active=True,
         contact_email="admin@testmedical.com",
-        configuration={}
+        configuration={},
     )
     db.add(tenant)
     db.commit()
@@ -113,7 +114,7 @@ def other_tenant(db: Session) -> Tenant:
         slug="other-clinic-002",
         is_active=True,
         contact_email="admin@otherclinic.com",
-        configuration={}
+        configuration={},
     )
     db.add(tenant)
     db.commit()
@@ -124,6 +125,7 @@ def other_tenant(db: Session) -> Tenant:
 # ============================================================================
 # USER FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 def test_super_admin(db: Session, test_tenant) -> User:
@@ -138,7 +140,7 @@ def test_super_admin(db: Session, test_tenant) -> User:
         hashed_password=get_password_hash("superadmin123"),
         status="active",
         is_active=True,
-        is_superuser=True
+        is_superuser=True,
     )
     db.add(user)
     db.commit()
@@ -158,7 +160,7 @@ def test_admin(db: Session, test_tenant) -> User:
         tenant_id=test_tenant.id,
         hashed_password=get_password_hash("admin123"),
         status="active",
-        is_active=True
+        is_active=True,
     )
     db.add(user)
     db.commit()
@@ -180,7 +182,7 @@ def test_doctor(db: Session, test_tenant) -> User:
         status="active",
         is_active=True,
         phone="+1234567891",
-        specialization="General Practitioner"
+        specialization="General Practitioner",
     )
     db.add(user)
     db.commit()
@@ -201,7 +203,7 @@ def test_doctor_2(db: Session, test_tenant) -> User:
         hashed_password=get_password_hash("doctor123"),
         status="active",
         is_active=True,
-        specialization="Cardiologist"
+        specialization="Cardiologist",
     )
     db.add(user)
     db.commit()
@@ -221,7 +223,7 @@ def test_nurse(db: Session, test_tenant) -> User:
         tenant_id=test_tenant.id,
         hashed_password=get_password_hash("nurse123"),
         status="active",
-        is_active=True
+        is_active=True,
     )
     db.add(user)
     db.commit()
@@ -241,7 +243,7 @@ def test_receptionist(db: Session, test_tenant) -> User:
         tenant_id=test_tenant.id,
         hashed_password=get_password_hash("receptionist123"),
         status="active",
-        is_active=True
+        is_active=True,
     )
     db.add(user)
     db.commit()
@@ -252,6 +254,7 @@ def test_receptionist(db: Session, test_tenant) -> User:
 # ============================================================================
 # PATIENT FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 def test_patient(db: Session, test_tenant) -> Patient:
@@ -269,7 +272,7 @@ def test_patient(db: Session, test_tenant) -> Patient:
         blood_type="A+",
         allergies=["Penicillin"],
         emergency_contact_name="Bob Doe",
-        emergency_contact_phone="+1234567893"
+        emergency_contact_phone="+1234567893",
     )
     db.add(patient)
     db.commit()
@@ -289,7 +292,7 @@ def test_patient_2(db: Session, test_tenant) -> Patient:
         phone="+1234567894",
         tenant_id=test_tenant.id,
         status="active",
-        blood_type="O+"
+        blood_type="O+",
     )
     db.add(patient)
     db.commit()
@@ -301,7 +304,7 @@ def test_patient_2(db: Session, test_tenant) -> Patient:
 def test_patients_bulk(db: Session, test_tenant) -> list[Patient]:
     """Crée 10 patients pour les tests en masse"""
     patients = []
-    
+
     for i in range(10):
         patient = Patient(
             first_name=f"Patient{i}",
@@ -310,22 +313,23 @@ def test_patients_bulk(db: Session, test_tenant) -> list[Patient]:
             gender="male" if i % 2 == 0 else "female",
             email=f"patient{i}@test.com",
             tenant_id=test_tenant.id,
-            status="active"
+            status="active",
         )
         db.add(patient)
         patients.append(patient)
-    
+
     db.commit()
-    
+
     for patient in patients:
         db.refresh(patient)
-    
+
     return patients
 
 
 # ============================================================================
 # AUTHENTICATION FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 def auth_headers_super_admin(test_super_admin) -> dict:
@@ -334,7 +338,7 @@ def auth_headers_super_admin(test_super_admin) -> dict:
     # Pour les tests, utiliser un mock
     return {
         "Authorization": f"Bearer mock_token_superadmin_{test_super_admin.id}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
 
@@ -343,7 +347,7 @@ def auth_headers_admin(test_admin) -> dict:
     """Headers d'authentification pour admin"""
     return {
         "Authorization": f"Bearer mock_token_admin_{test_admin.id}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
 
@@ -352,7 +356,7 @@ def auth_headers_doctor(test_doctor) -> dict:
     """Headers d'authentification pour médecin"""
     return {
         "Authorization": f"Bearer mock_token_doctor_{test_doctor.id}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
 
@@ -361,7 +365,7 @@ def auth_headers_doctor_2(test_doctor_2) -> dict:
     """Headers d'authentification pour second médecin"""
     return {
         "Authorization": f"Bearer mock_token_doctor2_{test_doctor_2.id}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
 
@@ -370,7 +374,7 @@ def auth_headers_nurse(test_nurse) -> dict:
     """Headers d'authentification pour infirmière"""
     return {
         "Authorization": f"Bearer mock_token_nurse_{test_nurse.id}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
 
@@ -379,13 +383,14 @@ def auth_headers_receptionist(test_receptionist) -> dict:
     """Headers d'authentification pour réceptionniste"""
     return {
         "Authorization": f"Bearer mock_token_receptionist_{test_receptionist.id}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
 
 # ============================================================================
 # FILE FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 def sample_pdf_bytes() -> bytes:
@@ -431,24 +436,26 @@ startxref
 def sample_image_png_bytes() -> bytes:
     """Retourne des bytes d'une image PNG 1x1 pixel"""
     # PNG 1x1 transparent
-    return b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
+    return b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
 
 
 @pytest.fixture
 def sample_image_jpeg_bytes() -> bytes:
     """Retourne des bytes d'une image JPEG minimale"""
     # JPEG minimal
-    return b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xdb\x00C\x00\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.\' ",#\x1c\x1c(7),01444\x1f\'9=82<.342\xff\xc0\x00\x0b\x08\x00\x01\x00\x01\x01\x01\x11\x00\xff\xc4\x00\x1f\x00\x00\x01\x05\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\xff\xc4\x00\xb5\x10\x00\x02\x01\x03\x03\x02\x04\x03\x05\x05\x04\x04\x00\x00\x01}\x01\x02\x03\x00\x04\x11\x05\x12!1A\x06\x13Qa\x07"q\x142\x81\x91\xa1\x08#B\xb1\xc1\x15R\xd1\xf0$3br\x82\t\n\x16\x17\x18\x19\x1a%&\'()*456789:CDEFGHIJSTUVWXYZcdefghijstuvwxyz\x83\x84\x85\x86\x87\x88\x89\x8a\x92\x93\x94\x95\x96\x97\x98\x99\x9a\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xff\xda\x00\x08\x01\x01\x00\x00?\x00\xfb\xff\xd9'
+    return b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xdb\x00C\x00\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.' \",#\x1c\x1c(7),01444\x1f'9=82<.342\xff\xc0\x00\x0b\x08\x00\x01\x00\x01\x01\x01\x11\x00\xff\xc4\x00\x1f\x00\x00\x01\x05\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\xff\xc4\x00\xb5\x10\x00\x02\x01\x03\x03\x02\x04\x03\x05\x05\x04\x04\x00\x00\x01}\x01\x02\x03\x00\x04\x11\x05\x12!1A\x06\x13Qa\x07\"q\x142\x81\x91\xa1\x08#B\xb1\xc1\x15R\xd1\xf0$3br\x82\t\n\x16\x17\x18\x19\x1a%&'()*456789:CDEFGHIJSTUVWXYZcdefghijstuvwxyz\x83\x84\x85\x86\x87\x88\x89\x8a\x92\x93\x94\x95\x96\x97\x98\x99\x9a\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xff\xda\x00\x08\x01\x01\x00\x00?\x00\xfb\xff\xd9"
 
 
 # ============================================================================
 # UTILITY FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def mock_email_service():
     """Mock du service d'envoi d'email"""
     from unittest.mock import MagicMock
+
     mock = MagicMock()
     mock.send_email.return_value = True
     return mock
@@ -458,6 +465,7 @@ def mock_email_service():
 def mock_sms_service():
     """Mock du service d'envoi de SMS"""
     from unittest.mock import MagicMock
+
     mock = MagicMock()
     mock.send_sms.return_value = True
     return mock
@@ -467,6 +475,7 @@ def mock_sms_service():
 def mock_celery_task():
     """Mock pour les tâches Celery"""
     from unittest.mock import MagicMock
+
     mock = MagicMock()
     mock.delay.return_value = MagicMock(id="mock-task-id")
     return mock
@@ -495,28 +504,29 @@ def setup_test_environment(monkeypatch, temp_upload_dir):
 # PERFORMANCE FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def benchmark_timer():
     """Fixture pour mesurer les performances"""
     import time
-    
+
     class BenchmarkTimer:
         def __init__(self):
             self.start_time = None
             self.end_time = None
-        
+
         def start(self):
             self.start_time = time.time()
-        
+
         def stop(self):
             self.end_time = time.time()
-        
+
         @property
         def elapsed(self):
             if self.start_time and self.end_time:
                 return self.end_time - self.start_time
             return None
-    
+
     return BenchmarkTimer()
 
 
@@ -524,26 +534,17 @@ def benchmark_timer():
 # MARKERS CONFIGURATION
 # ============================================================================
 
+
 def pytest_configure(config):
     """Configure les markers personnalisés"""
     config.addinivalue_line(
         "markers", "slow: marque les tests lents (deselect with '-m \"not slow\"')"
     )
-    config.addinivalue_line(
-        "markers", "integration: marque les tests d'intégration"
-    )
-    config.addinivalue_line(
-        "markers", "unit: marque les tests unitaires"
-    )
-    config.addinivalue_line(
-        "markers", "api: marque les tests d'API"
-    )
-    config.addinivalue_line(
-        "markers", "security: marque les tests de sécurité"
-    )
-    config.addinivalue_line(
-        "markers", "performance: marque les tests de performance"
-    )
+    config.addinivalue_line("markers", "integration: marque les tests d'intégration")
+    config.addinivalue_line("markers", "unit: marque les tests unitaires")
+    config.addinivalue_line("markers", "api: marque les tests d'API")
+    config.addinivalue_line("markers", "security: marque les tests de sécurité")
+    config.addinivalue_line("markers", "performance: marque les tests de performance")
     config.addinivalue_line(
         "markers", "smoke: smoke tests that require a running server"
     )
@@ -553,19 +554,23 @@ def pytest_configure(config):
 # HOOKS
 # ============================================================================
 
+
 def pytest_collection_modifyitems(config, items):
     """Modifie les items de collection pour ajouter automatiquement des markers"""
     for item in items:
         # Ajouter marker 'unit' par défaut si aucun autre marker
-        if not any(marker in item.keywords for marker in ['integration', 'api', 'slow', 'performance']):
+        if not any(
+            marker in item.keywords
+            for marker in ["integration", "api", "slow", "performance"]
+        ):
             item.add_marker(pytest.mark.unit)
-        
+
         # Marquer automatiquement les tests contenant 'api' dans le nom
-        if 'api' in item.nodeid.lower() or 'endpoint' in item.nodeid.lower():
+        if "api" in item.nodeid.lower() or "endpoint" in item.nodeid.lower():
             item.add_marker(pytest.mark.api)
-        
+
         # Marquer les tests de sécurité
-        if 'security' in item.nodeid.lower() or 'auth' in item.nodeid.lower():
+        if "security" in item.nodeid.lower() or "auth" in item.nodeid.lower():
             item.add_marker(pytest.mark.security)
 
 
