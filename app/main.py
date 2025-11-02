@@ -37,8 +37,11 @@ from app.graphql.schema import create_graphql_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifespan events."""
-    # Startup: Initialize database tables
-    Base.metadata.create_all(bind=engine)
+    # Startup: Initialize database tables (skip in tests to avoid external DB connects)
+    import os
+
+    if os.getenv("TESTING", "false").lower() not in {"1", "true", "yes"}:
+        Base.metadata.create_all(bind=engine)
     yield
     # Shutdown: cleanup if needed
 
