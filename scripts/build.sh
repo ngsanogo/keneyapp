@@ -83,6 +83,10 @@ echo ""
 
 # Step 2: Install Backend Dependencies
 echo -e "${YELLOW}[2/8] Installing backend dependencies...${NC}"
+# Recommend using a virtual environment
+if [ -z "${VIRTUAL_ENV:-}" ]; then
+    echo -e "${YELLOW}  ⚠ Not running in a virtual environment. Consider using: python3 -m venv .venv && source .venv/bin/activate${NC}"
+fi
 if ! pip install -r requirements.txt > /dev/null 2>&1; then
     echo -e "${RED}ERROR: Failed to install backend dependencies${NC}"
     exit 1
@@ -95,10 +99,12 @@ echo -e "${YELLOW}[3/8] Running backend code quality checks...${NC}"
 
 # Formatting check
 echo "  - Checking code formatting with Black..."
-if ! black --check app tests > /dev/null 2>&1; then
+BLACK_OUTPUT=$(black --check app tests 2>&1)
+if [ $? -ne 0 ]; then
     echo -e "${YELLOW}  ⚠ Code formatting issues detected. Running Black...${NC}"
-    black app tests
-    echo -e "${GREEN}  ✓ Code formatted${NC}"
+    FORMATTED_FILES=$(echo "$BLACK_OUTPUT" | grep "would reformat" | wc -l)
+    black app tests > /dev/null 2>&1
+    echo -e "${GREEN}  ✓ Code formatted (${FORMATTED_FILES} file(s) changed)${NC}"
 else
     echo -e "${GREEN}  ✓ Code formatting passed${NC}"
 fi
@@ -124,12 +130,15 @@ echo ""
 # Step 4: Backend Tests
 if [ "$SKIP_TESTS" = false ]; then
     echo -e "${YELLOW}[4/8] Running backend tests...${NC}"
-    if ! pytest tests/ -v -m "not smoke" --tb=short > /tmp/backend_test_results.txt 2>&1; then
+    BACKEND_TEST_LOG=$(mktemp)
+    if ! pytest tests/ -v -m "not smoke" --tb=short > "$BACKEND_TEST_LOG" 2>&1; then
         echo -e "${RED}ERROR: Backend tests failed${NC}"
-        tail -30 /tmp/backend_test_results.txt
+        tail -30 "$BACKEND_TEST_LOG"
+        rm -f "$BACKEND_TEST_LOG"
         exit 1
     fi
-    TEST_COUNT=$(grep -oP '\d+ passed' /tmp/backend_test_results.txt | head -1 || echo "0 passed")
+    TEST_COUNT=$(grep -o '[0-9]\+ passed' "$BACKEND_TEST_LOG" | head -1 || echo "0 passed")
+    rm -f "$BACKEND_TEST_LOG"
     echo -e "${GREEN}✓ Backend tests passed (${TEST_COUNT})${NC}"
     echo ""
 else
@@ -173,12 +182,15 @@ echo ""
 # Step 7: Frontend Tests and Build
 if [ "$SKIP_TESTS" = false ]; then
     echo -e "${YELLOW}[7/8] Running frontend tests...${NC}"
-    if ! npm test -- --watchAll=false > /tmp/frontend_test_results.txt 2>&1; then
+    FRONTEND_TEST_LOG=$(mktemp)
+    if ! npm test -- --watchAll=false > "$FRONTEND_TEST_LOG" 2>&1; then
         echo -e "${RED}ERROR: Frontend tests failed${NC}"
-        tail -30 /tmp/frontend_test_results.txt
+        tail -30 "$FRONTEND_TEST_LOG"
+        rm -f "$FRONTEND_TEST_LOG"
         exit 1
     fi
-    TEST_COUNT=$(grep -oP 'Tests:\s+\d+' /tmp/frontend_test_results.txt | head -1 || echo "Tests: 0")
+    TEST_COUNT=$(grep -o 'Tests:[[:space:]]*[0-9]\+' "$FRONTEND_TEST_LOG" | head -1 || echo "Tests: 0")
+    rm -f "$FRONTEND_TEST_LOG"
     echo -e "${GREEN}✓ Frontend tests passed (${TEST_COUNT})${NC}"
     echo ""
 else
@@ -200,19 +212,23 @@ if [ "$NO_DOCKER" = false ] && command -v docker &> /dev/null; then
     echo -e "${YELLOW}[8/8] Building Docker images...${NC}"
     
     echo "  - Building backend image..."
-    if docker build -t keneyapp-backend:latest -f Dockerfile . > /tmp/docker_backend_build.log 2>&1; then
+    BACKEND_DOCKER_LOG=$(mktemp)
+    if docker build -t keneyapp-backend:latest -f Dockerfile . > "$BACKEND_DOCKER_LOG" 2>&1; then
         echo -e "${GREEN}  ✓ Backend image built${NC}"
+        rm -f "$BACKEND_DOCKER_LOG"
     else
         echo -e "${YELLOW}  ⚠ Backend Docker build failed (non-critical)${NC}"
-        echo "  See /tmp/docker_backend_build.log for details"
+        echo "  See $BACKEND_DOCKER_LOG for details"
     fi
     
     echo "  - Building frontend image..."
-    if docker build -t keneyapp-frontend:latest -f Dockerfile.frontend . > /tmp/docker_frontend_build.log 2>&1; then
+    FRONTEND_DOCKER_LOG=$(mktemp)
+    if docker build -t keneyapp-frontend:latest -f Dockerfile.frontend . > "$FRONTEND_DOCKER_LOG" 2>&1; then
         echo -e "${GREEN}  ✓ Frontend image built${NC}"
+        rm -f "$FRONTEND_DOCKER_LOG"
     else
         echo -e "${YELLOW}  ⚠ Frontend Docker build failed (non-critical)${NC}"
-        echo "  See /tmp/docker_frontend_build.log for details"
+        echo "  See $FRONTEND_DOCKER_LOG for details"
     fi
 else
     if [ "$NO_DOCKER" = true ]; then
