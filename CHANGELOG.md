@@ -7,6 +7,168 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2025-11-02 - Complete Medical Record System 🏥
+
+### Added - Major Features
+
+#### 💬 Secure Messaging System
+- End-to-end encrypted messaging between patients and healthcare providers
+- Message encryption with AES-256-GCM at rest
+- Threaded conversations with automatic grouping
+- Read/unread status tracking
+- Urgent message flagging
+- Document attachments support
+- Soft delete functionality per user
+- API endpoints: `/api/v1/messages/`
+- New model: `Message` with encryption support
+- Migration: `010_add_messages.py`
+- Rate limiting: 30 sends/min, 60 reads/min
+- Full audit logging of all message operations
+
+#### 📄 Medical Document Management
+- Complete document storage system for medical files
+- Supported formats: PDF, JPEG, PNG, DICOM, DOCX, TXT
+- Document types: lab results, imaging, prescriptions, consultation notes, vaccination records, insurance, ID documents
+- Features:
+  - Secure file upload with 50 MB limit
+  - SHA-256 checksum for integrity verification
+  - Duplicate detection
+  - Local and S3-compatible storage
+  - OCR-ready infrastructure
+  - Rich metadata (description, tags, associations)
+  - Soft delete with archival
+- API endpoints: `/api/v1/documents/`
+- New model: `MedicalDocument` with comprehensive metadata
+- Migration: `011_add_medical_documents.py`
+- Rate limiting: 20 uploads/min, 30 downloads/min
+- Full audit logging of uploads and downloads
+
+#### 🔔 Automated Notification System
+- Multi-channel notifications (Email + SMS)
+- Notification types:
+  - Appointment reminders (24h advance)
+  - Lab results availability
+  - Prescription renewal reminders (7 days advance)
+  - Vaccination reminders
+  - New message notifications
+- Email support: SMTP (Gmail, SendGrid, AWS SES)
+- SMS support: Twilio integration
+- Celery background tasks:
+  - `send_upcoming_appointment_reminders` (daily)
+  - `send_lab_results_notifications` (on-demand)
+  - `send_prescription_renewal_reminders` (daily)
+  - `send_new_message_notification` (on-demand)
+- New service: `NotificationService` with unified interface
+- Configurable via environment variables
+
+#### 🔗 Controlled Medical Record Sharing
+- Temporary secure sharing with time-limited tokens
+- Features:
+  - Secure random tokens (secrets.token_urlsafe)
+  - Optional 6-digit PIN protection
+  - Configurable expiration (1h - 30 days)
+  - Access count limits
+  - Email restrictions
+  - IP tracking and audit logging
+- Sharing scopes:
+  - `full_record`: Complete medical history
+  - `appointments_only`: Appointments only
+  - `prescriptions_only`: Prescriptions only
+  - `documents_only`: Documents only
+  - `custom`: Custom resource selection
+- Use cases: External consultations, emergencies, insurance claims, family access
+- API endpoints: `/api/v1/shares/` (including public access endpoint)
+- New model: `MedicalRecordShare` with consent tracking
+- Migration: `012_add_medical_record_shares.py`
+- Rate limiting: 10 shares/hour, 20 accesses/hour
+- Patient consent required for all shares
+
+### Added - Dependencies
+- `twilio==9.3.7` - SMS notifications via Twilio
+- `python-magic==0.4.27` - MIME type detection for documents
+- `Pillow==11.0.0` - Image processing for medical imaging
+
+### Added - Database Migrations
+- `010_add_messages.py` - Messages table with encryption support
+- `011_add_medical_documents.py` - Medical documents storage table
+- `012_add_medical_record_shares.py` - Medical record sharing system
+
+### Added - API Endpoints
+
+**Messaging**
+- `POST /api/v1/messages/` - Send encrypted message
+- `GET /api/v1/messages/` - List messages (inbox + sent)
+- `GET /api/v1/messages/stats` - Messaging statistics
+- `GET /api/v1/messages/conversation/{user_id}` - Full conversation
+- `GET /api/v1/messages/{id}` - Message details (auto-mark as read)
+- `POST /api/v1/messages/{id}/read` - Mark as read
+- `DELETE /api/v1/messages/{id}` - Soft delete
+
+**Documents**
+- `POST /api/v1/documents/upload` - Upload medical document
+- `GET /api/v1/documents/patient/{id}` - Patient's documents
+- `GET /api/v1/documents/stats` - Storage statistics
+- `GET /api/v1/documents/{id}` - Document metadata
+- `GET /api/v1/documents/{id}/download` - Download file
+- `PATCH /api/v1/documents/{id}` - Update metadata
+- `DELETE /api/v1/documents/{id}` - Archive document
+
+**Sharing**
+- `POST /api/v1/shares/` - Create share link
+- `GET /api/v1/shares/` - List user's shares
+- `POST /api/v1/shares/access` - Access shared record (public)
+- `GET /api/v1/shares/{id}` - Share details
+- `DELETE /api/v1/shares/{id}` - Revoke share
+
+### Added - Documentation
+- `docs/NEW_FEATURES_V3.md` - Complete guide to all new features
+- `docs/QUICK_START_V3.md` - Quick start guide for developers
+- Updated API documentation with new endpoints
+- Added usage examples for all features
+
+### Security - Enhanced
+- ✅ Message encryption at rest (AES-256-GCM)
+- ✅ Document integrity verification (SHA-256)
+- ✅ Secure random tokens for sharing (secrets.token_urlsafe)
+- ✅ PIN protection for shared records
+- ✅ Comprehensive audit logging for all PHI access
+- ✅ Rate limiting on all new endpoints
+- ✅ RGPD/HIPAA/HDS compliance maintained
+- ✅ No PHI in logs or error messages
+- ✅ IP tracking for shared record access
+
+### Changed
+- Enhanced `User` model with message relationships
+- Enhanced `Patient` model with document relationship
+- Updated `app/main.py` to include new routers
+- Extended Celery tasks with notification jobs
+- Updated `requirements.txt` with new dependencies
+
+### Performance
+- Optimized database indexes for messages, documents, and shares
+- Composite indexes for common query patterns
+- Redis caching ready for document metadata
+- Async file upload processing
+
+### Compliance
+- Full RGPD compliance with consent tracking
+- HIPAA-compliant audit trails
+- HDS-ready architecture
+- Patient data portability support
+- Right to erasure (soft deletes)
+
+### Roadmap - Completed
+- ✅ Secure messaging system
+- ✅ Medical document management
+- ✅ Automated notifications
+- ✅ Controlled record sharing
+
+### Roadmap - Q2 2026
+- 📊 Advanced analytics and professional dashboards
+- 💳 Payment integration (Stripe/PayPal)
+- 📹 Telemedicine module (WebRTC/Twilio Video)
+- 📱 React Native mobile app
+
 ## [2.0.0] - 2024-10-31 - Production Release 🚀
 
 ### Added - Production Finalization

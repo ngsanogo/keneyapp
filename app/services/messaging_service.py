@@ -1,0 +1,298 @@
+"""
+Secure messaging service with E2E encryption.
+"""
+from typing import List, Optional, Tuple
+from sqlalchemy.orm import Session
+from sqlalchemy import or_, and_, func
+from datetime import datetime, timezone
+import json
+import uuid
+
+from app.models.message import Message, MessageStatus
+from app.models.user import User
+from app.schemas.message import MessageCreate, MessageResponse, MessageSummary, ConversationThread, MessageStats
+from app.core.encryption import encrypt_data, decrypt_data
+from app.core.audit import log_audit_event
+from fastapi import Request
+
+
+def generate_thread_id(user1_id: int, user2_id: int) -> str:
+    """Generate consistent thread ID for two users."""
+    # Sort IDs to ensure consistency regardless of who initiates
+    sorted_ids = sorted([user1_id, user2_id])
+    return f"thread_{sorted_ids[0]}_{sorted_ids[1]}_{uuid.uuid4().hex[:8]}"
+
+
+def get_or_create_thread_id(db: Session, sender_id: int, receiver_id: int, reply_to_id: Optional[int] = None) -> str:
+    """Get existing thread ID or create new one."""
+    if reply_to_id:
+        # Get thread from parent message
+        parent = db.query(Message).filter(Message.id == reply_to_id).first()
+        if parent and parent.thread_id:
+            return parent.thread_id
+    
+    # Check for existing thread between users
+    existing = db.query(Message).filter(
+        or_(
+            and_(Message.sender_id == sender_id, Message.receiver_id == receiver_id),
+            and_(Message.sender_id == receiver_id, Message.receiver_id == sender_id)
+        )
+    ).first()
+    
+    if existing and existing.thread_id:
+        return existing.thread_id
+    
+    # Create new thread
+    return generate_thread_id(sender_id, receiver_id)
+
+
+def encrypt_message_content(content: str, tenant_id: str) -> str:
+    """Encrypt message content."""
+    return encrypt_data(content, context={"type": "message", "tenant": tenant_id})
+
+
+def decrypt_message_content(encrypted_content: str, tenant_id: str) -> str:
+    """Decrypt message content."""
+    return decrypt_data(encrypted_content, context={"type": "message", "tenant": tenant_id})
+
+
+def create_message(
+    db: Session,
+    message_data: MessageCreate,
+    sender_id: int,
+    tenant_id: str,
+    request: Optional[Request] = None
+) -> Message:
+    """Create a new encrypted message."""
+    # Encrypt content
+    encrypted_content = encrypt_message_content(message_data.content, tenant_id)
+    
+    # Get or create thread ID
+    thread_id = get_or_create_thread_id(
+        db, 
+        sender_id, 
+        message_data.receiver_id, 
+        message_data.reply_to_id
+    )
+    
+    # Convert attachment IDs to JSON
+    attachment_ids_json = json.dumps(message_data.attachment_ids) if message_data.attachment_ids else None
+    
+    # Create message
+    message = Message(
+        sender_id=sender_id,
+        receiver_id=message_data.receiver_id,
+        encrypted_content=encrypted_content,
+        subject=message_data.subject,
+        is_urgent=message_data.is_urgent,
+        attachment_ids=attachment_ids_json,
+        thread_id=thread_id,
+        reply_to_id=message_data.reply_to_id,
+        tenant_id=tenant_id,
+        status=MessageStatus.SENT
+    )
+    
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+    
+    # Audit log
+    if request:
+        log_audit_event(
+            db=db,
+            user_id=sender_id,
+            action="CREATE",
+            resource_type="message",
+            resource_id=str(message.id),
+            details={"receiver_id": message_data.receiver_id, "urgent": message_data.is_urgent},
+            request=request
+        )
+    
+    return message
+
+
+def get_message(db: Session, message_id: int, user_id: int, tenant_id: str) -> Optional[Message]:
+    """Get a message if user is sender or receiver."""
+    message = db.query(Message).filter(
+        Message.id == message_id,
+        Message.tenant_id == tenant_id,
+        or_(Message.sender_id == user_id, Message.receiver_id == user_id),
+        or_(Message.deleted_by_sender == False, Message.deleted_by_receiver == False)
+    ).first()
+    
+    return message
+
+
+def mark_message_as_read(
+    db: Session,
+    message_id: int,
+    user_id: int,
+    tenant_id: str,
+    request: Optional[Request] = None
+) -> Optional[Message]:
+    """Mark message as read by receiver."""
+    message = get_message(db, message_id, user_id, tenant_id)
+    
+    if message and message.receiver_id == user_id and not message.read_at:
+        message.status = MessageStatus.READ
+        message.read_at = datetime.now(timezone.utc)
+        db.commit()
+        db.refresh(message)
+        
+        # Audit log
+        if request:
+            log_audit_event(
+                db=db,
+                user_id=user_id,
+                action="READ",
+                resource_type="message",
+                resource_id=str(message.id),
+                details={"sender_id": message.sender_id},
+                request=request
+            )
+    
+    return message
+
+
+def get_user_messages(
+    db: Session,
+    user_id: int,
+    tenant_id: str,
+    skip: int = 0,
+    limit: int = 50,
+    unread_only: bool = False
+) -> List[Message]:
+    """Get messages for a user (inbox + sent)."""
+    query = db.query(Message).filter(
+        Message.tenant_id == tenant_id,
+        or_(Message.sender_id == user_id, Message.receiver_id == user_id)
+    )
+    
+    # Filter by deleted status
+    query = query.filter(
+        or_(
+            and_(Message.sender_id == user_id, Message.deleted_by_sender == False),
+            and_(Message.receiver_id == user_id, Message.deleted_by_receiver == False)
+        )
+    )
+    
+    if unread_only:
+        query = query.filter(
+            Message.receiver_id == user_id,
+            Message.read_at.is_(None)
+        )
+    
+    return query.order_by(Message.created_at.desc()).offset(skip).limit(limit).all()
+
+
+def get_conversation(
+    db: Session,
+    user_id: int,
+    other_user_id: int,
+    tenant_id: str,
+    skip: int = 0,
+    limit: int = 100
+) -> List[Message]:
+    """Get all messages in a conversation between two users."""
+    return db.query(Message).filter(
+        Message.tenant_id == tenant_id,
+        or_(
+            and_(Message.sender_id == user_id, Message.receiver_id == other_user_id),
+            and_(Message.sender_id == other_user_id, Message.receiver_id == user_id)
+        )
+    ).order_by(Message.created_at.asc()).offset(skip).limit(limit).all()
+
+
+def delete_message(
+    db: Session,
+    message_id: int,
+    user_id: int,
+    tenant_id: str,
+    request: Optional[Request] = None
+) -> bool:
+    """Soft delete message for user."""
+    message = get_message(db, message_id, user_id, tenant_id)
+    
+    if not message:
+        return False
+    
+    # Soft delete based on user role
+    if message.sender_id == user_id:
+        message.deleted_by_sender = True
+    if message.receiver_id == user_id:
+        message.deleted_by_receiver = True
+    
+    db.commit()
+    
+    # Audit log
+    if request:
+        log_audit_event(
+            db=db,
+            user_id=user_id,
+            action="DELETE",
+            resource_type="message",
+            resource_id=str(message.id),
+            details={"soft_delete": True},
+            request=request
+        )
+    
+    return True
+
+
+def get_message_stats(db: Session, user_id: int, tenant_id: str) -> MessageStats:
+    """Get messaging statistics for user."""
+    total = db.query(func.count(Message.id)).filter(
+        Message.tenant_id == tenant_id,
+        or_(Message.sender_id == user_id, Message.receiver_id == user_id)
+    ).scalar() or 0
+    
+    unread = db.query(func.count(Message.id)).filter(
+        Message.tenant_id == tenant_id,
+        Message.receiver_id == user_id,
+        Message.read_at.is_(None),
+        Message.deleted_by_receiver == False
+    ).scalar() or 0
+    
+    urgent = db.query(func.count(Message.id)).filter(
+        Message.tenant_id == tenant_id,
+        Message.receiver_id == user_id,
+        Message.is_urgent == True,
+        Message.read_at.is_(None),
+        Message.deleted_by_receiver == False
+    ).scalar() or 0
+    
+    conversations = db.query(func.count(func.distinct(Message.thread_id))).filter(
+        Message.tenant_id == tenant_id,
+        or_(Message.sender_id == user_id, Message.receiver_id == user_id)
+    ).scalar() or 0
+    
+    return MessageStats(
+        total_messages=total,
+        unread_messages=unread,
+        urgent_messages=urgent,
+        conversations=conversations
+    )
+
+
+def serialize_message(message: Message, tenant_id: str) -> dict:
+    """Serialize message with decrypted content."""
+    decrypted_content = decrypt_message_content(message.encrypted_content, tenant_id)
+    attachment_ids = json.loads(message.attachment_ids) if message.attachment_ids else None
+    
+    return {
+        "id": message.id,
+        "sender_id": message.sender_id,
+        "receiver_id": message.receiver_id,
+        "subject": message.subject,
+        "content": decrypted_content,
+        "status": message.status,
+        "is_urgent": message.is_urgent,
+        "attachment_ids": attachment_ids,
+        "thread_id": message.thread_id,
+        "reply_to_id": message.reply_to_id,
+        "tenant_id": message.tenant_id,
+        "created_at": message.created_at,
+        "read_at": message.read_at,
+        "deleted_by_sender": message.deleted_by_sender,
+        "deleted_by_receiver": message.deleted_by_receiver
+    }

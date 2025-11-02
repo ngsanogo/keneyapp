@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import AddPatientForm from '../components/AddPatientForm';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
@@ -19,6 +20,8 @@ const PatientsPage = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const { isAuthenticated, token } = useAuth();
   const navigate = useNavigate();
+
+  const [showAdd, setShowAdd] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -47,10 +50,11 @@ const PatientsPage = () => {
       <Header />
       <div className="container">
         <h1>Patients</h1>
-
+        <button className="btn btn-primary" style={{marginBottom: '1rem'}} onClick={() => setShowAdd(true)}>
+          Add Patient
+        </button>
         <div className="card">
           <h2>Patient List</h2>
-
           {patients.length === 0 ? (
             <p>No patients found.</p>
           ) : (
@@ -80,6 +84,13 @@ const PatientsPage = () => {
             </table>
           )}
         </div>
+        {showAdd && (
+          <AddPatientForm
+            token={token!}
+            onAdd={patient => setPatients([patient, ...patients])}
+            onClose={() => setShowAdd(false)}
+          />
+        )}
       </div>
     </div>
   );

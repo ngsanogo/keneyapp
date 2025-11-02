@@ -58,3 +58,5 @@ class User(Base):
     tenant = relationship(Tenant, back_populates="users")
     appointments = relationship("Appointment", back_populates="doctor")
     prescriptions = relationship("Prescription", back_populates="doctor")
+    sent_messages = relationship("Message", foreign_keys="Message.sender_id", back_populates="sender")
+    received_messages = relationship("Message", foreign_keys="Message.receiver_id", back_populates="receiver")

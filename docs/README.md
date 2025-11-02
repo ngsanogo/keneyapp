@@ -56,6 +56,10 @@ Welcome to the KeneyApp documentation! This directory contains comprehensive gui
 | [Integration Plan](INTEGRATION_PLAN.md) | Third-party integration guidelines |
 | [Continuous Improvement](CONTINUOUS_IMPROVEMENT.md) | Continuous improvement process and methodology |
 | [New Features](NEW_FEATURES.md) | Documentation of v2.0 enterprise features |
+| [Patterns: New Resource Scaffold](patterns/new_resource_scaffold.md) | Step-by-step template to add a REST resource (RBAC, tenancy, PHI, caching, audit) |
+| [Patterns: GraphQL Extension](patterns/graphql_extension.md) | How to extend schema/resolvers with tenancy and RBAC |
+| [Checklist: PHI Logging](patterns/phi_logging_checklist.md) | Do/Don'ts for logging without PHI leaks |
+| [Guide: Cache Keys](patterns/cache_keys.md) | Key families, TTLs, and invalidation triggers |
 
 ## 🗂️ Documentation Structure
 
@@ -136,6 +140,7 @@ docs/
 - **Architecture**: [ARCHITECTURE.md](../ARCHITECTURE.md)
 - **Governance**: [GOVERNANCE.md](../GOVERNANCE.md)
 - **Support**: [SUPPORT.md](../SUPPORT.md)
+- **AI Commit Checklist**: [.github/ai-commit-checklist.md](../.github/ai-commit-checklist.md)
 
 ## 🆕 Recently Updated
 

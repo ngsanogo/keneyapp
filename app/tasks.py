@@ -199,3 +199,178 @@ def collect_business_metrics():
         return {"status": "failed", "error": str(e)}
     finally:
         db.close()
+
+
+@celery_app.task(name="send_upcoming_appointment_reminders")
+def send_upcoming_appointment_reminders():
+    """
+    Send reminders for appointments happening in the next 24 hours.
+    Runs daily to notify patients.
+    """
+    from app.core.database import SessionLocal
+    from app.models.appointment import Appointment
+    from app.services.notification_service import NotificationService
+    from datetime import datetime, timedelta, timezone
+
+    logger.info("Starting upcoming appointment reminders")
+
+    db = SessionLocal()
+    try:
+        # Get appointments for next 24 hours
+        now = datetime.now(timezone.utc)
+        tomorrow = now + timedelta(days=1)
+        
+        appointments = db.query(Appointment).filter(
+            Appointment.appointment_date >= now,
+            Appointment.appointment_date <= tomorrow,
+            Appointment.status == "scheduled"
+        ).all()
+        
+        sent_count = 0
+        for appt in appointments:
+            if appt.patient and appt.patient.email:
+                NotificationService.send_appointment_reminder(
+                    patient_email=appt.patient.email,
+                    patient_name=f"{appt.patient.first_name} {appt.patient.last_name}",
+                    appointment_date=appt.appointment_date,
+                    doctor_name=appt.doctor.full_name if appt.doctor else "votre médecin",
+                    phone=appt.patient.phone
+                )
+                sent_count += 1
+        
+        logger.info(f"Sent {sent_count} appointment reminders")
+        return {"status": "completed", "reminders_sent": sent_count}
+        
+    except Exception as e:
+        logger.error(f"Error sending appointment reminders: {str(e)}", exc_info=True)
+        return {"status": "failed", "error": str(e)}
+    finally:
+        db.close()
+
+
+@celery_app.task(name="send_lab_results_notifications")
+def send_lab_results_notifications(document_id: int, patient_id: int):
+    """
+    Notify patient when lab results are uploaded.
+    
+    Args:
+        document_id: ID of the uploaded document
+        patient_id: ID of the patient
+    """
+    from app.core.database import SessionLocal
+    from app.models.patient import Patient
+    from app.models.medical_document import MedicalDocument
+    from app.services.notification_service import NotificationService
+
+    logger.info("Sending lab results notification")
+
+    db = SessionLocal()
+    try:
+        patient = db.query(Patient).filter(Patient.id == patient_id).first()
+        document = db.query(MedicalDocument).filter(MedicalDocument.id == document_id).first()
+        
+        if patient and document and patient.email:
+            NotificationService.send_lab_results_notification(
+                patient_email=patient.email,
+                patient_name=f"{patient.first_name} {patient.last_name}",
+                test_name=document.description or "analyse médicale",
+                phone=patient.phone
+            )
+            logger.info("Lab results notification sent")
+            return {"status": "sent", "patient_id": patient_id}
+        
+        return {"status": "skipped", "reason": "Patient or document not found"}
+        
+    except Exception as e:
+        logger.error(f"Error sending lab results notification: {str(e)}", exc_info=True)
+        return {"status": "failed", "error": str(e)}
+    finally:
+        db.close()
+
+
+@celery_app.task(name="send_prescription_renewal_reminders")
+def send_prescription_renewal_reminders():
+    """
+    Send reminders for prescriptions expiring in the next 7 days.
+    Runs daily.
+    """
+    from app.core.database import SessionLocal
+    from app.models.prescription import Prescription
+    from app.services.notification_service import NotificationService
+    from datetime import datetime, timedelta, timezone
+
+    logger.info("Starting prescription renewal reminders")
+
+    db = SessionLocal()
+    try:
+        # Get prescriptions expiring in next 7 days
+        now = datetime.now(timezone.utc)
+        next_week = now + timedelta(days=7)
+        
+        prescriptions = db.query(Prescription).filter(
+            Prescription.refill_date >= now,
+            Prescription.refill_date <= next_week
+        ).all()
+        
+        sent_count = 0
+        for presc in prescriptions:
+            if presc.patient and presc.patient.email:
+                NotificationService.send_prescription_renewal_reminder(
+                    patient_email=presc.patient.email,
+                    patient_name=f"{presc.patient.first_name} {presc.patient.last_name}",
+                    medication_name=presc.medication_name,
+                    expiry_date=presc.refill_date,
+                    phone=presc.patient.phone
+                )
+                sent_count += 1
+        
+        logger.info(f"Sent {sent_count} prescription renewal reminders")
+        return {"status": "completed", "reminders_sent": sent_count}
+        
+    except Exception as e:
+        logger.error(f"Error sending prescription reminders: {str(e)}", exc_info=True)
+        return {"status": "failed", "error": str(e)}
+    finally:
+        db.close()
+
+
+@celery_app.task(name="send_new_message_notification")
+def send_new_message_notification(message_id: int, receiver_id: int):
+    """
+    Notify user of new message.
+    
+    Args:
+        message_id: ID of the message
+        receiver_id: ID of the receiver
+    """
+    from app.core.database import SessionLocal
+    from app.models.user import User
+    from app.models.message import Message
+    from app.services.notification_service import NotificationService
+
+    logger.info("Sending new message notification")
+
+    db = SessionLocal()
+    try:
+        receiver = db.query(User).filter(User.id == receiver_id).first()
+        message = db.query(Message).filter(Message.id == message_id).first()
+        
+        if receiver and message and receiver.email:
+            sender = db.query(User).filter(User.id == message.sender_id).first()
+            
+            NotificationService.send_new_message_notification(
+                recipient_email=receiver.email,
+                recipient_name=receiver.full_name,
+                sender_name=sender.full_name if sender else "Un utilisateur",
+                message_subject=message.subject
+            )
+            logger.info("New message notification sent")
+            return {"status": "sent", "receiver_id": receiver_id}
+        
+        return {"status": "skipped", "reason": "Receiver or message not found"}
+        
+    except Exception as e:
+        logger.error(f"Error sending message notification: {str(e)}", exc_info=True)
+        return {"status": "failed", "error": str(e)}
+    finally:
+        db.close()

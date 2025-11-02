@@ -75,3 +75,10 @@ fhir.resources==7.1.0
 
 # Additional Encryption
 pycryptodome==3.23.0
+
+# Notifications
+twilio==9.3.7  # SMS notifications
+
+# File processing
+python-magic==0.4.27  # MIME type detection
+Pillow==11.0.0  # Image processing

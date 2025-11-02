@@ -69,3 +69,4 @@ class Patient(Base):
     appointments = relationship("Appointment", back_populates="patient")
     prescriptions = relationship("Prescription", back_populates="patient")
     tenant = relationship(Tenant, back_populates="patients")
+    documents = relationship("MedicalDocument", back_populates="patient")

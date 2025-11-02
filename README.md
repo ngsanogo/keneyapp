@@ -26,6 +26,15 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 - ✅ **Medical Terminologies**: ICD-11, SNOMED CT, LOINC, ATC, CPT/CCAM coding support
 - ✅ **Cloud Deployment**: Terraform scripts for AWS, Azure, and GCP
 
+### 🚀 New in v3.0 - Complete Medical Record System
+- 💬 **Secure Messaging**: End-to-end encrypted patient-doctor communication with threaded conversations
+- 📄 **Document Management**: Complete medical document storage (lab results, imaging, prescriptions, vaccination records)
+- 🔔 **Automated Notifications**: Multi-channel alerts (email, SMS) for appointments, results, and prescription renewals
+- 🔗 **Controlled Sharing**: Temporary secure links for sharing medical records with external providers
+- 📊 **Advanced Analytics**: Professional dashboards with patient tracking and KPI metrics (coming Q2 2026)
+- 💳 **Payment Integration**: Stripe/PayPal for telemedicine consultations (coming Q2 2026)
+- 📹 **Telemedicine Module**: WebRTC video consultations with recording (coming Q2 2026)
+
 ### Security & Compliance
 - ✅ **GDPR/HIPAA/HDS compliant architecture**
 - ✅ JWT-based authentication + OAuth2/OIDC

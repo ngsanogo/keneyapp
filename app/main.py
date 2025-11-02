@@ -24,6 +24,9 @@ from app.routers import (
     fhir,
     oauth,
     tenants,
+    messages,
+    documents,
+    shares,
 )
 from app.graphql.schema import create_graphql_router
 
@@ -76,6 +79,9 @@ app.include_router(users.router, prefix=settings.API_V1_PREFIX)
 app.include_router(fhir.router, prefix=settings.API_V1_PREFIX)
 app.include_router(oauth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(tenants.router, prefix=settings.API_V1_PREFIX)
+app.include_router(messages.router, prefix=settings.API_V1_PREFIX)
+app.include_router(documents.router, prefix=settings.API_V1_PREFIX)
+app.include_router(shares.router, prefix=settings.API_V1_PREFIX)
 
 # Include GraphQL router
 graphql_router = create_graphql_router()
