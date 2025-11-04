@@ -38,6 +38,7 @@ Welcome to the KeneyApp documentation! This directory contains comprehensive gui
 |----------|-------------|
 | [FHIR Guide](FHIR_GUIDE.md) | HL7 FHIR R4 interoperability implementation |
 | [Medical Terminologies](MEDICAL_TERMINOLOGIES.md) | ICD-11, SNOMED CT, LOINC, ATC, CPT/CCAM coding standards |
+| [DMI Architecture Alignment](DMI_ARCHITECTURE_ALIGNMENT.md) | Alignment of target DMI architecture with current system and migration plan |
 
 ### Testing & Quality
 

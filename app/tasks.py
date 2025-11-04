@@ -4,6 +4,8 @@ Celery background tasks for asynchronous processing.
 
 import logging
 from app.core.celery_app import celery_app
+import json
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +64,6 @@ def generate_patient_report(patient_id: int):
             "appointments_count": len(patient.appointments),
             "prescriptions_count": len(patient.prescriptions),
             "generated_at": datetime.now(timezone.utc).isoformat(),
-            # Add more report data as needed
         }
 
         logger.info("Patient report generated successfully")
@@ -73,6 +74,37 @@ def generate_patient_report(patient_id: int):
         return {"status": "error", "message": "Report generation failed"}
     finally:
         db.close()
+
+@celery_app.task(name="deliver_subscription_webhook")
+def deliver_subscription_webhook(subscription_id: int, resource: dict):
+    """Deliver a FHIR resource to a subscription webhook endpoint.
+
+    Best-effort delivery with short timeout. Errors are logged but not raised.
+    """
+    from app.core.database import SessionLocal
+    from app.models.subscription import Subscription
+
+    db = SessionLocal()
+    try:
+        sub = db.query(Subscription).filter(Subscription.id == subscription_id).first()
+        if not sub:
+            logger.error("Subscription %s not found for webhook delivery", subscription_id)
+            return {"status": "error", "reason": "subscription_not_found"}
+
+        headers = {"Content-Type": sub.payload or "application/fhir+json"}
+        try:
+            # Use json param to ensure proper serialization
+            resp = requests.post(sub.endpoint, json=resource, headers=headers, timeout=5)
+            logger.info("Delivered webhook to %s status=%s", sub.endpoint, resp.status_code)
+            return {"status": "ok", "http_status": resp.status_code}
+        except Exception as exc:  # pragma: no cover - best effort
+            logger.warning("Webhook delivery failed for subscription %s: %s", subscription_id, exc)
+            return {"status": "error", "reason": str(exc)}
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
 
 
 @celery_app.task(name="check_prescription_interactions")

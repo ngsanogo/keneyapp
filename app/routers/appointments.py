@@ -22,6 +22,8 @@ from app.schemas.appointment import (
     AppointmentResponse,
 )
 from app.tasks import send_appointment_reminder
+from app.fhir.converters import fhir_converter
+from app.services.subscription_events import publish_event
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +109,13 @@ def create_appointment(
         },
         request=request,
     )
+
+    # Publish FHIR Subscription event (Appointment create)
+    try:
+        fhir_res = fhir_converter.appointment_to_fhir(db_appointment)
+        publish_event(db, current_user.tenant_id, "Appointment", fhir_res)
+    except Exception as exc:  # pragma: no cover - best effort
+        logger.warning("Failed to publish appointment create event: %s", exc)
 
     return db_appointment
 
@@ -357,6 +366,13 @@ def update_appointment(
     cache_clear_pattern(f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
 
+    # Publish FHIR Subscription event (Appointment update)
+    try:
+        fhir_res = fhir_converter.appointment_to_fhir(appointment)
+        publish_event(db, current_user.tenant_id, "Appointment", fhir_res)
+    except Exception as exc:  # pragma: no cover - best effort
+        logger.warning("Failed to publish appointment update event: %s", exc)
+
     return serialized
 
 
@@ -421,3 +437,14 @@ def delete_appointment(
     cache_clear_pattern(
         f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{appointment_id}"
     )
+
+    # Publish FHIR Subscription event (Appointment delete)
+    try:
+        publish_event(
+            db,
+            current_user.tenant_id,
+            "Appointment",
+            {"resourceType": "Appointment", "id": str(appointment_id), "deleted": True},
+        )
+    except Exception as exc:  # pragma: no cover - best effort
+        logger.warning("Failed to publish appointment delete event: %s", exc)

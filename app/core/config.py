@@ -65,6 +65,14 @@ class Settings(BaseSettings):
     OKTA_DOMAIN: str = ""
     APP_URL: str = "http://localhost:8000"
 
+    # OpenTelemetry / Observability
+    OTEL_ENABLED: bool = False
+    OTEL_EXPORTER_TYPE: str = "console"  # "otlp", "jaeger", or "console"
+    OTEL_EXPORTER_ENDPOINT: str = ""  # e.g., "localhost:4317" for OTLP or "localhost:6831" for Jaeger
+    OTEL_SERVICE_NAME: str = "keneyapp"
+    OTEL_SERVICE_VERSION: str = "1.0.0"
+    ENVIRONMENT: str = "development"
+
     # ------------------------------------------------------------------
     # Validators to coerce empty-string envs to sensible defaults
     # ------------------------------------------------------------------
@@ -189,6 +197,41 @@ class Settings(BaseSettings):
             return "System Administrator"
         return v
 
+    @field_validator("OTEL_ENABLED", mode="before")
+    @classmethod
+    def _coerce_otel_enabled(cls, v):
+        if v in ("", None):
+            return False
+        return v
+
+    @field_validator("OTEL_EXPORTER_TYPE", mode="before")
+    @classmethod
+    def _coerce_otel_exporter_type(cls, v):
+        if v in ("", None):
+            return "console"
+        return v
+
+    @field_validator("OTEL_SERVICE_NAME", mode="before")
+    @classmethod
+    def _coerce_otel_service_name(cls, v):
+        if v in ("", None):
+            return "keneyapp"
+        return v
+
+    @field_validator("OTEL_SERVICE_VERSION", mode="before")
+    @classmethod
+    def _coerce_otel_service_version(cls, v):
+        if v in ("", None):
+            return "1.0.0"
+        return v
+
+    @field_validator("ENVIRONMENT", mode="before")
+    @classmethod
+    def _coerce_environment(cls, v):
+        if v in ("", None):
+            return "development"
+        return v
+
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=True, extra="allow"
     )
@@ -215,6 +258,11 @@ _EMPTY_OVERRIDES = [
     "BOOTSTRAP_TENANT_NAME",
     "BOOTSTRAP_ADMIN_EMAIL",
     "BOOTSTRAP_ADMIN_FULL_NAME",
+    "OTEL_ENABLED",
+    "OTEL_EXPORTER_TYPE",
+    "OTEL_SERVICE_NAME",
+    "OTEL_SERVICE_VERSION",
+    "ENVIRONMENT",
 ]
 
 for _key in _EMPTY_OVERRIDES:

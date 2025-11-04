@@ -17,6 +17,8 @@ from app.models.patient import Patient
 from app.models.user import User, UserRole
 from app.schemas.patient import PatientCreate, PatientUpdate, PatientResponse
 from app.tasks import generate_patient_report
+from app.fhir.converters import fhir_converter
+from app.services.subscription_events import publish_event
 from app.services.patient_security import (
     encrypt_patient_payload,
     serialize_patient_dict,
@@ -116,6 +118,13 @@ def create_patient(
         generate_patient_report.delay(db_patient.id)
     except Exception as exc:  # pragma: no cover - best effort
         logger.warning("Failed to queue patient report generation: %s", exc)
+
+    # Publish FHIR Subscription event (Patient create)
+    try:
+        fhir_res = fhir_converter.patient_to_fhir(db_patient)
+        publish_event(db, current_user.tenant_id, "Patient", fhir_res)
+    except Exception as exc:  # pragma: no cover - best effort
+        logger.warning("Failed to publish patient create event: %s", exc)
 
     return serialized_patient
 
@@ -352,6 +361,13 @@ def update_patient(
     except Exception as exc:  # pragma: no cover - best effort
         logger.warning("Failed to queue patient report generation: %s", exc)
 
+    # Publish FHIR Subscription event (Patient update)
+    try:
+        fhir_res = fhir_converter.patient_to_fhir(patient)
+        publish_event(db, current_user.tenant_id, "Patient", fhir_res)
+    except Exception as exc:  # pragma: no cover - best effort
+        logger.warning("Failed to publish patient update event: %s", exc)
+
     return serialized_patient
 
 
@@ -417,3 +433,14 @@ def delete_patient(
     )
 
     patient_operations_total.labels(operation="delete").inc()
+
+    # Publish FHIR Subscription event (Patient delete)
+    try:
+        publish_event(
+            db,
+            current_user.tenant_id,
+            "Patient",
+            {"resourceType": "Patient", "id": str(patient_id), "deleted": True},
+        )
+    except Exception as exc:  # pragma: no cover - best effort
+        logger.warning("Failed to publish patient delete event: %s", exc)

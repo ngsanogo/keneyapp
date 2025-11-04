@@ -1,3 +1,91 @@
+"""Terminology service: validate and translate medical codes with caching.
+
+Uses the local MedicalCode reference table for validation/display and
+provides a simple passthrough translate when systems are identical.
+Future: connect to external terminology servers and extend mappings.
+"""
+
+from typing import Any, Dict, Optional
+from sqlalchemy.orm import Session
+
+from app.core.cache import cache_get, cache_set
+from app.models.medical_code import MedicalCode, CodeSystem
+
+
+def _cache_key_validate(system: str, code: str) -> str:
+    return f"terminology:validate:{system}:{code}"
+
+
+def _cache_key_translate(system_from: str, code_from: str, system_to: str) -> str:
+    return f"terminology:translate:{system_from}:{code_from}:{system_to}"
+
+
+def validate_code(db: Session, *, system: str, code: str) -> Dict[str, Any]:
+    """Validate a code in a given code system using local reference table.
+
+    Args:
+        db: SQLAlchemy session
+        system: code system (icd11|snomed_ct|loinc|atc|cpt|ccam|dicom)
+        code: code value
+
+    Returns:
+        Dict with keys: is_valid(bool), system(str), code(str), display(Optional[str])
+    """
+    ck = _cache_key_validate(system, code)
+    cached = cache_get(ck)
+    if cached is not None:
+        return cached
+
+    q = (
+        db.query(MedicalCode)
+        .filter(MedicalCode.code_system == system, MedicalCode.code == code, MedicalCode.is_active == 1)
+        .first()
+    )
+
+    result: Dict[str, Any] = {
+        "is_valid": q is not None,
+        "system": system,
+        "code": code,
+        "display": q.display if q else None,
+    }
+    # cache 24h
+    cache_set(ck, result, expire=24 * 3600)
+    return result
+
+
+def translate_code(
+    db: Session, *, system_from: str, code_from: str, system_to: str
+) -> Dict[str, Any]:
+    """Translate a code from one system to another.
+
+    For now, supports identity mapping when systems are equal.
+    Placeholder for future terminology server mapping.
+    """
+    ck = _cache_key_translate(system_from, code_from, system_to)
+    cached = cache_get(ck)
+    if cached is not None:
+        return cached
+
+    if system_from == system_to:
+        # Validate and return as-is
+        v = validate_code(db, system=system_from, code=code_from)
+        result = {
+            "found": v["is_valid"],
+            "source": {"system": system_from, "code": code_from, "display": v.get("display")},
+            "target": {"system": system_to, "code": code_from, "display": v.get("display")},
+        }
+        cache_set(ck, result, expire=24 * 3600)
+        return result
+
+    # No cross-system mapping available yet
+    result = {
+        "found": False,
+        "source": {"system": system_from, "code": code_from},
+        "target": {"system": system_to, "code": None},
+        "message": "No mapping available",
+    }
+    cache_set(ck, result, expire=3600)
+    return result
 """
 Medical Terminology Service.
 

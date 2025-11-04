@@ -300,6 +300,49 @@ CREATE TABLE procedures (
 
 ## API Usage Examples
 
+### Terminology Utilities
+
+#### Validate a Code
+
+```http
+GET /api/v1/terminology/validate?system=loinc&code=8480-6
+Authorization: Bearer {token}
+```
+
+Response
+```json
+{
+  "is_valid": true,
+  "system": "loinc",
+  "code": "8480-6",
+  "display": "Systolic blood pressure"
+}
+```
+
+#### Translate a Code
+
+```http
+POST /api/v1/terminology/translate
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "system_from": "icd11",
+  "code_from": "2E65",
+  "system_to": "snomed_ct"
+}
+```
+
+Response (placeholder when mapping is not available):
+```json
+{
+  "found": false,
+  "source": {"system": "icd11", "code": "2E65"},
+  "target": {"system": "snomed_ct", "code": null},
+  "message": "No mapping available"
+}
+```
+
 ### Creating a Condition with ICD-11 and SNOMED CT Codes
 
 ```python

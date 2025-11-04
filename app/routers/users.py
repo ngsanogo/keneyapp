@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.audit import log_audit_event
 from app.core.database import get_db
 from app.core.dependencies import require_roles
+from app.core.rate_limit import limiter
 from app.core.security import get_password_hash
 from app.models.user import User, UserRole
 from app.schemas.user import (
@@ -22,7 +23,9 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("/", response_model=List[UserResponse])
+@limiter.limit("60/minute")
 def list_users(
+    request: Request,
     db: Session = Depends(get_db),
     current_admin: User = Depends(
         require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
@@ -37,8 +40,10 @@ def list_users(
 
 
 @router.get("/{user_id}", response_model=UserResponse)
+@limiter.limit("60/minute")
 def get_user(
     user_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_admin: User = Depends(
         require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
@@ -58,6 +63,7 @@ def get_user(
 
 
 @router.patch("/{user_id}/status", response_model=UserResponse)
+@limiter.limit("30/minute")
 def update_user_status(
     user_id: int,
     payload: UserStatusUpdate,
@@ -105,6 +111,7 @@ def update_user_status(
 
 
 @router.patch("/{user_id}/role", response_model=UserResponse)
+@limiter.limit("30/minute")
 def update_user_role(
     user_id: int,
     payload: UserRoleUpdate,
@@ -145,6 +152,7 @@ def update_user_role(
 
 
 @router.post("/{user_id}/reset-password", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("10/minute")
 def reset_user_password(
     user_id: int,
     payload: UserPasswordReset,

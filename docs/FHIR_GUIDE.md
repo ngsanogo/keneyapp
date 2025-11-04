@@ -11,18 +11,44 @@ KeneyApp implements HL7 FHIR (Fast Healthcare Interoperability Resources) versio
 - Contact details
 - Medical identifiers
 - FHIR R4 compliant
+- **Operations**: read, create, search-type
 
 ### Appointment Resource
 - Scheduling information
 - Participant references
 - Status tracking
 - FHIR R4 compliant
+- **Operations**: read, search-type
 
 ### MedicationRequest Resource
 - Prescription details
 - Dosage instructions
-- Medication references
+- Medication references (ATC coding)
 - FHIR R4 compliant
+- **Operations**: read
+
+### Observation Resource
+- Clinical measurements and vital signs
+- Laboratory results
+- LOINC coding for observation types
+- Reference ranges and interpretation
+- FHIR R4 compliant
+- **Operations**: read, search-type
+
+### Condition Resource
+- Patient diagnoses and clinical conditions
+- ICD-11 and SNOMED CT coding
+- Clinical and verification status
+- Onset and abatement tracking
+- FHIR R4 compliant
+- **Operations**: read, search-type
+
+### Procedure Resource
+- Medical procedures and interventions
+- CPT, CCAM, and SNOMED CT coding
+- Performer and timing information
+- FHIR R4 compliant
+- **Operations**: read, search-type
 
 ## API Endpoints
 
@@ -56,6 +82,15 @@ GET /api/v1/fhir/metadata
 ```
 
 ### Patient Operations
+
+#### Search Patients
+
+```http
+GET /api/v1/fhir/Patient?name={text}&family={text}&given={text}&birthdate=YYYY-MM-DD&_count=20&_page=1
+Authorization: Bearer {token}
+```
+
+Returns a FHIR Bundle (type=searchset) with matching Patient resources.
 
 #### Get Patient (FHIR Format)
 
@@ -128,6 +163,15 @@ Content-Type: application/json
 
 ### Appointment Operations
 
+#### Search Appointments
+
+```http
+GET /api/v1/fhir/Appointment?patient={patientId}&date=YYYY-MM-DD&status={status}&_count=20&_page=1
+Authorization: Bearer {token}
+```
+
+Returns a FHIR Bundle (type=searchset) with matching Appointment resources.
+
 #### Get Appointment (FHIR Format)
 
 ```http
@@ -171,6 +215,228 @@ Authorization: Bearer {token}
 
 ```http
 GET /api/v1/fhir/MedicationRequest/{prescription_id}
+Authorization: Bearer {token}
+```
+
+### Observation Operations
+
+#### Search Observations
+
+Search for clinical observations and lab results.
+
+```http
+GET /api/v1/fhir/Observation?patient={patientId}&code={loincCode}&date=YYYY-MM-DD&status={status}&_count=20&_page=1
+Authorization: Bearer {token}
+```
+
+**Parameters:**
+- `patient`: Patient ID reference
+- `code`: LOINC code (e.g., `8480-6` for systolic blood pressure)
+- `date`: Effective date (YYYY-MM-DD)
+- `status`: Observation status (`registered`, `preliminary`, `final`, `amended`)
+
+**Response (Bundle):**
+```json
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 2,
+  "link": [
+    {"relation": "self", "url": "https://api.example.com/api/v1/fhir/Observation?patient=123&_page=1&_count=20"},
+    {"relation": "first", "url": "https://api.example.com/api/v1/fhir/Observation?patient=123&_page=1&_count=20"}
+  ],
+  "entry": [
+    {
+      "fullUrl": "https://api.example.com/api/v1/fhir/Observation/1",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "1",
+        "status": "final",
+        "code": {
+          "coding": [{
+            "system": "http://loinc.org",
+            "code": "8480-6",
+            "display": "Systolic blood pressure"
+          }],
+          "text": "Systolic blood pressure"
+        },
+        "subject": {"reference": "Patient/123"},
+        "effectiveDateTime": "2024-01-15T10:30:00Z",
+        "valueQuantity": {
+          "value": 120.0,
+          "unit": "mmHg"
+        },
+        "referenceRange": [{
+          "low": {"value": 90.0},
+          "high": {"value": 130.0}
+        }],
+        "interpretation": [{
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+            "code": "NORMAL",
+            "display": "normal"
+          }]
+        }]
+      },
+      "search": {"mode": "match"}
+    }
+  ]
+}
+```
+
+#### Get Observation (FHIR Format)
+
+```http
+GET /api/v1/fhir/Observation/{observation_id}
+Authorization: Bearer {token}
+```
+
+**Response:**
+```json
+{
+  "resourceType": "Observation",
+  "id": "1",
+  "status": "final",
+  "code": {
+    "coding": [{
+      "system": "http://loinc.org",
+      "code": "2339-0",
+      "display": "Glucose [Mass/volume] in Blood"
+    }],
+    "text": "Glucose [Mass/volume] in Blood"
+  },
+  "subject": {"reference": "Patient/123"},
+  "effectiveDateTime": "2024-01-15T10:30:00Z",
+  "valueQuantity": {
+    "value": 95.0,
+    "unit": "mg/dL"
+  },
+  "referenceRange": [{
+    "low": {"value": 70.0},
+    "high": {"value": 100.0}
+  }]
+}
+```
+
+### Condition Operations
+
+#### Search Conditions
+
+Search for patient diagnoses and conditions.
+
+```http
+GET /api/v1/fhir/Condition?patient={patientId}&code={code}&clinical-status={status}&_count=20&_page=1
+Authorization: Bearer {token}
+```
+
+**Parameters:**
+- `patient`: Patient ID reference
+- `code`: ICD-11 or SNOMED CT code (e.g., `5A11` for Type 2 diabetes)
+- `clinical-status`: Clinical status (`active`, `resolved`, etc.)
+
+**Response (Bundle):**
+```json
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 1,
+  "entry": [{
+    "fullUrl": "https://api.example.com/api/v1/fhir/Condition/1",
+    "resource": {
+      "resourceType": "Condition",
+      "id": "1",
+      "clinicalStatus": {
+        "coding": [{
+          "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+          "code": "active"
+        }]
+      },
+      "verificationStatus": {
+        "coding": [{
+          "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code": "confirmed"
+        }]
+      },
+      "code": {
+        "coding": [{
+          "system": "http://id.who.int/icd/release/11/mms",
+          "code": "5A11",
+          "display": "Type 2 diabetes mellitus"
+        }]
+      },
+      "subject": {"reference": "Patient/123"},
+      "onsetDateTime": "2022-01-01T00:00:00Z",
+      "recordedDate": "2022-01-01T00:00:00Z"
+    },
+    "search": {"mode": "match"}
+  }]
+}
+```
+
+#### Get Condition (FHIR Format)
+
+```http
+GET /api/v1/fhir/Condition/{condition_id}
+Authorization: Bearer {token}
+```
+
+### Procedure Operations
+
+#### Search Procedures
+
+Search for medical procedures and interventions.
+
+```http
+GET /api/v1/fhir/Procedure?patient={patientId}&code={code}&date=YYYY-MM-DD&_count=20&_page=1
+Authorization: Bearer {token}
+```
+
+**Parameters:**
+- `patient`: Patient ID reference
+- `code`: CPT, CCAM, or SNOMED CT code (e.g., `99213` for office visit)
+- `date`: Performed date (YYYY-MM-DD)
+
+**Response (Bundle):**
+```json
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 1,
+  "entry": [{
+    "fullUrl": "https://api.example.com/api/v1/fhir/Procedure/1",
+    "resource": {
+      "resourceType": "Procedure",
+      "id": "1",
+      "status": "completed",
+      "code": {
+        "coding": [
+          {
+            "system": "http://www.ama-assn.org/go/cpt",
+            "code": "99213",
+            "display": "Office visit, established patient"
+          },
+          {
+            "system": "http://www.ccam.fr",
+            "code": "YYYY001",
+            "display": "Consultation de médecine générale"
+          }
+        ]
+      },
+      "subject": {"reference": "Patient/123"},
+      "performedDateTime": "2024-01-15T14:00:00Z",
+      "performer": [{
+        "actor": {"reference": "Practitioner/456"}
+      }]
+    },
+    "search": {"mode": "match"}
+  }]
+}
+```
+
+#### Get Procedure (FHIR Format)
+
+```http
+GET /api/v1/fhir/Procedure/{procedure_id}
 Authorization: Bearer {token}
 ```
 
@@ -249,6 +515,80 @@ Authorization: Bearer {token}
 | patient_id | subject.reference | Patient/{id} |
 | doctor_id | requester.reference | Practitioner/{id} |
 
+## Error Handling
+
+All FHIR endpoints return HL7 FHIR **OperationOutcome** resources for error responses.
+
+### Error Response Format
+
+```json
+{
+  "resourceType": "OperationOutcome",
+  "issue": [{
+    "severity": "error",
+    "code": "not-found",
+    "diagnostics": "Patient not found"
+  }]
+}
+```
+
+### Common Error Codes
+
+| HTTP Status | FHIR Code | Meaning |
+|------------|-----------|---------|
+| 400 | `invalid` | Invalid request format or parameters |
+| 401 | `unauthorized` | Missing or invalid authentication |
+| 403 | `forbidden` | Insufficient permissions |
+| 404 | `not-found` | Resource not found |
+| 409 | `conflict` | Resource conflict (e.g., duplicate) |
+| 422 | `processing` | Validation error |
+| 429 | `throttled` | Rate limit exceeded |
+
+### ETag and Versioning
+
+Read operations return an `ETag` header for resource versioning:
+
+```http
+GET /api/v1/fhir/Patient/123
+Authorization: Bearer {token}
+
+HTTP/1.1 200 OK
+ETag: W/"Patient/123-1642512000.0"
+Content-Type: application/fhir+json
+```
+
+Use the `ETag` for conditional updates (future support for `PUT` with `If-Match`).
+
+## Pagination and Search
+
+### HATEOAS Links
+
+Search results include HATEOAS paging links:
+
+```json
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 50,
+  "link": [
+    {"relation": "self", "url": "...?_page=2&_count=20"},
+    {"relation": "first", "url": "...?_page=1&_count=20"},
+    {"relation": "previous", "url": "...?_page=1&_count=20"},
+    {"relation": "next", "url": "...?_page=3&_count=20"},
+    {"relation": "last", "url": "...?_page=3&_count=20"}
+  ],
+  "entry": [...]
+}
+```
+
+### Standard Search Parameters
+
+All search endpoints support:
+- `_count`: Items per page (default: 20, max: 100)
+- `_page`: Page number (1-indexed)
+
+Resource-specific search parameters are documented in each resource's search endpoint.
+
 ## Integration Examples
 
 ### Python Client
@@ -272,6 +612,16 @@ response = requests.get(
 
 fhir_patient = response.json()
 print(f"Patient: {fhir_patient['name'][0]['given'][0]} {fhir_patient['name'][0]['family']}")
+
+# Search observations for a patient
+response = requests.get(
+    f"{BASE_URL}/Observation",
+    params={"patient": 123, "code": "8480-6", "_count": 10},
+    headers=headers
+)
+
+bundle = response.json()
+print(f"Found {bundle['total']} observations")
 
 # Create patient from FHIR resource
 new_patient = {

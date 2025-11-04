@@ -84,3 +84,12 @@ twilio==9.3.7  # SMS notifications
 # File processing
 python-magic==0.4.27  # MIME type detection
 Pillow==11.0.0  # Image processing
+
+# Observability / Tracing
+opentelemetry-api>=1.24.0
+opentelemetry-sdk>=1.24.0
+opentelemetry-exporter-otlp>=1.24.0
+opentelemetry-instrumentation-fastapi>=0.44b0
+opentelemetry-instrumentation-sqlalchemy>=0.44b0
+opentelemetry-instrumentation-redis>=0.44b0
+opentelemetry-exporter-jaeger==1.21.0

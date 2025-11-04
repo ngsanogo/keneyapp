@@ -17,6 +17,8 @@ from app.models.prescription import Prescription
 from app.models.user import User, UserRole
 from app.schemas.prescription import PrescriptionCreate, PrescriptionResponse
 from app.tasks import check_prescription_interactions
+from app.fhir.converters import fhir_converter
+from app.services.subscription_events import publish_event
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +100,12 @@ def create_prescription(
         },
         request=request,
     )
+    # Publish FHIR Subscription event (MedicationRequest create)
+    try:
+        fhir_res = fhir_converter.prescription_to_fhir(db_prescription)
+        publish_event(db, current_user.tenant_id, "MedicationRequest", fhir_res)
+    except Exception as exc:  # pragma: no cover - best effort
+        logger.warning("Failed to publish medicationrequest create event: %s", exc)
 
     return db_prescription
 
@@ -390,3 +398,14 @@ def delete_prescription(
         f"{PRESCRIPTION_PATIENT_CACHE_PREFIX}:{current_user.tenant_id}:{prescription.patient_id}"
     )
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
+
+    # Publish FHIR Subscription event (MedicationRequest delete)
+    try:
+        publish_event(
+            db,
+            current_user.tenant_id,
+            "MedicationRequest",
+            {"resourceType": "MedicationRequest", "id": str(prescription_id), "deleted": True},
+        )
+    except Exception as exc:  # pragma: no cover - best effort
+        logger.warning("Failed to publish medicationrequest delete event: %s", exc)
