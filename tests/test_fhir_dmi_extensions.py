@@ -27,7 +27,7 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 Base.metadata.create_all(bind=engine)
 
 
-def override_get_db():
+def _override_get_db():
     try:
         db = TestingSessionLocal()
         yield db
@@ -35,8 +35,15 @@ def override_get_db():
         db.close()
 
 
-app.dependency_overrides[get_db] = override_get_db
-client = TestClient(app)
+@pytest.fixture
+def client():
+    """Test client with DB override isolated per-test to avoid cross-test clearing."""
+    app.dependency_overrides[get_db] = _override_get_db
+    try:
+        with TestClient(app) as test_client:
+            yield test_client
+    finally:
+        app.dependency_overrides.pop(get_db, None)
 
 
 @pytest.fixture
@@ -72,8 +79,7 @@ def doctor(db, tenant):
         email="doctor@test.com",
         username="doctor",
         hashed_password=get_password_hash("password"),
-        first_name="Dr",
-        last_name="Smith",
+        full_name="Dr Smith",
         role=UserRole.DOCTOR,
         is_active=True,
     )
@@ -87,7 +93,7 @@ def doctor(db, tenant):
 def auth_headers(doctor):
     """Generate auth headers for a doctor."""
     token = create_access_token(
-        data={"sub": doctor.email, "tenant_id": doctor.tenant_id, "role": doctor.role.value}
+        data={"sub": doctor.username, "tenant_id": doctor.tenant_id, "role": doctor.role.value}
     )
     return {"Authorization": f"Bearer {token}"}
 
@@ -114,7 +120,7 @@ def patient(db, tenant):
 class TestObservationFHIR:
     """Test FHIR Observation endpoints."""
 
-    def test_get_observation(self, db, tenant, patient, doctor, auth_headers):
+    def test_get_observation(self, client, db, tenant, patient, doctor, auth_headers):
         """Test GET /fhir/Observation/{id}."""
         obs = Observation(
             tenant_id=tenant.id,
@@ -138,7 +144,7 @@ class TestObservationFHIR:
         assert data["code"]["coding"][0]["code"] == "8480-6"
         assert "ETag" in response.headers
 
-    def test_search_observations(self, db, tenant, patient, doctor, auth_headers):
+    def test_search_observations(self, client, db, tenant, patient, doctor, auth_headers):
         """Test GET /fhir/Observation with search params."""
         obs1 = Observation(
             tenant_id=tenant.id,
@@ -184,7 +190,7 @@ class TestObservationFHIR:
         assert data["total"] == 1
         assert data["entry"][0]["resource"]["code"]["coding"][0]["code"] == "8480-6"
 
-    def test_observation_not_found(self, auth_headers):
+    def test_observation_not_found(self, client, auth_headers):
         """Test 404 returns FHIR OperationOutcome."""
         response = client.get("/api/v1/fhir/Observation/99999", headers=auth_headers)
         assert response.status_code == 404
@@ -196,7 +202,7 @@ class TestObservationFHIR:
 class TestConditionFHIR:
     """Test FHIR Condition endpoints."""
 
-    def test_get_condition(self, db, tenant, patient, doctor, auth_headers):
+    def test_get_condition(self, client, db, tenant, patient, doctor, auth_headers):
         """Test GET /fhir/Condition/{id}."""
         condition = Condition(
             tenant_id=tenant.id,
@@ -222,7 +228,7 @@ class TestConditionFHIR:
         assert data["code"]["coding"][0]["code"] == "5A11"
         assert "ETag" in response.headers
 
-    def test_search_conditions(self, db, tenant, patient, doctor, auth_headers):
+    def test_search_conditions(self, client, db, tenant, patient, doctor, auth_headers):
         """Test GET /fhir/Condition with search params."""
         cond1 = Condition(
             tenant_id=tenant.id,
@@ -265,7 +271,7 @@ class TestConditionFHIR:
 class TestProcedureFHIR:
     """Test FHIR Procedure endpoints."""
 
-    def test_get_procedure(self, db, tenant, patient, doctor, auth_headers):
+    def test_get_procedure(self, client, db, tenant, patient, doctor, auth_headers):
         """Test GET /fhir/Procedure/{id}."""
         procedure = Procedure(
             tenant_id=tenant.id,
@@ -290,7 +296,7 @@ class TestProcedureFHIR:
         assert data["id"] == str(procedure.id)
         assert data["code"]["coding"][0]["code"] == "99213"
 
-    def test_search_procedures(self, db, tenant, patient, doctor, auth_headers):
+    def test_search_procedures(self, client, db, tenant, patient, doctor, auth_headers):
         """Test GET /fhir/Procedure with search params."""
         proc = Procedure(
             tenant_id=tenant.id,
@@ -322,7 +328,7 @@ class TestProcedureFHIR:
 class TestFHIRPagination:
     """Test FHIR search pagination and HATEOAS links."""
 
-    def test_pagination_links(self, db, tenant, patient, doctor, auth_headers):
+    def test_pagination_links(self, client, db, tenant, patient, doctor, auth_headers):
         """Test that bundle includes correct paging links."""
         # Create 25 observations (more than default page size of 20)
         for i in range(25):

@@ -1,3 +1,6 @@
+"""Basic app endpoints tests."""
+
+# flake8: noqa: E402
 import os
 
 # Ensure TESTING mode to avoid real DB initialization in app lifespan

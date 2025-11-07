@@ -21,7 +21,6 @@ from app.core.errors import validation_exception_handler, generic_exception_hand
 from app import models as app_models  # noqa: F401
 from app.core.database import engine, Base
 from app.core.rate_limit import limiter
-import os
 from app.core.middleware import MetricsMiddleware, SecurityHeadersMiddleware
 from app.core.logging_middleware import CorrelationIdMiddleware
 from app.core.metrics import metrics_endpoint
@@ -40,6 +39,7 @@ from app.routers import (
     shares,
     terminology,
     subscriptions,
+    lab,
 )
 from app.graphql.schema import create_graphql_router
 from app.fhir.utils import operation_outcome
@@ -121,6 +121,7 @@ app.include_router(documents.router, prefix=settings.API_V1_PREFIX)
 app.include_router(shares.router, prefix=settings.API_V1_PREFIX)
 app.include_router(terminology.router, prefix=settings.API_V1_PREFIX)
 app.include_router(subscriptions.router, prefix=settings.API_V1_PREFIX)
+app.include_router(lab.router, prefix=settings.API_V1_PREFIX)
 
 # Include GraphQL router
 graphql_router = create_graphql_router()

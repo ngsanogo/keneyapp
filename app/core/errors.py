@@ -38,13 +38,18 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     """Return structured 422 for request validation errors with correlation ID."""
     # Convert pydantic/fastapi validation errors into a simpler list
     error_list = exc.errors() if hasattr(exc, "errors") else None
-    return _base_error_envelope(
-        request,
-        status_code=422,
-        error="validation_error",
-        message="Request validation failed.",
-        details=error_list,
-    )
+    # Backward-compatible shape: include top-level "detail" expected by legacy clients/tests
+    cid = get_correlation_id(request)
+    body = {
+        "detail": error_list,
+        "error": {
+            "type": "validation_error",
+            "message": "Request validation failed.",
+            "details": error_list,
+        },
+        "correlation_id": cid,
+    }
+    return JSONResponse(status_code=422, content=body)
 
 
 async def generic_exception_handler(request: Request, exc: Exception):

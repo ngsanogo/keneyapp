@@ -1,3 +1,6 @@
+"""Tests for FHIR utility helpers."""
+
+# flake8: noqa: E402
 import os
 
 os.environ["TESTING"] = "true"

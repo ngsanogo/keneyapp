@@ -1,3 +1,6 @@
+"""Tests for correlation ID middleware headers."""
+
+# flake8: noqa: E402
 import os
 
 os.environ["TESTING"] = "true"

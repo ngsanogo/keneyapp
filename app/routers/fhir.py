@@ -4,7 +4,7 @@ Provides HL7 FHIR-compliant endpoints for healthcare interoperability.
 """
 
 from typing import Dict, Any, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Request, status, Query, Response
+from fastapi import APIRouter, Depends, Request, status, Query, Response
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import cast, String
@@ -620,7 +620,7 @@ def search_fhir_procedure(
 
 @router.post("/", status_code=status.HTTP_200_OK)
 @limiter.limit("20/minute")
-def fhir_bundle_transaction(
+def fhir_bundle_transaction(  # noqa: C901
     bundle: Dict[str, Any],
     request: Request,
     db: Session = Depends(get_db),

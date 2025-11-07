@@ -1,14 +1,19 @@
 import pytest
-pytestmark = pytest.mark.skip(reason="Auth fixtures required; enable when test auth is configured")
 from fastapi.testclient import TestClient
 from app.main import app
 
+pytestmark = pytest.mark.skip(
+    reason="Auth fixtures required; enable when test auth is configured"
+)
+
 client = TestClient(app)
+
 
 @pytest.fixture
 def auth_headers():
     # Replace with a valid token for your test environment
     return {"Authorization": "Bearer test-token"}
+
 
 def test_fhir_bundle_batch_success(auth_headers):
     # Assumes patient with id 1 exists for test
@@ -28,6 +33,7 @@ def test_fhir_bundle_batch_success(auth_headers):
     assert data["entry"][0]["response"]["status"] == "200 OK"
     assert data["entry"][0]["resource"]["resourceType"] == "Patient"
 
+
 def test_fhir_bundle_batch_not_found(auth_headers):
     bundle = {
         "resourceType": "Bundle",
@@ -42,6 +48,7 @@ def test_fhir_bundle_batch_not_found(auth_headers):
     assert data["resourceType"] == "OperationOutcome"
     assert "not found" in data["issue"][0]["diagnostics"].lower()
 
+
 def test_fhir_bundle_batch_invalid_type(auth_headers):
     bundle = {
         "resourceType": "Bundle",
@@ -53,6 +60,7 @@ def test_fhir_bundle_batch_invalid_type(auth_headers):
     data = response.json()
     assert data["resourceType"] == "OperationOutcome"
     assert "only batch bundle supported" in data["issue"][0]["diagnostics"].lower()
+
 
 def test_fhir_bundle_batch_unsupported_method(auth_headers):
     bundle = {

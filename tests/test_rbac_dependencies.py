@@ -1,3 +1,6 @@
+"""RBAC dependencies behavior tests."""
+
+# flake8: noqa: E402
 import os
 
 os.environ["TESTING"] = "true"

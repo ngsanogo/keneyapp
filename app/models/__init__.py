@@ -17,6 +17,7 @@ from app.models.medical_code import (
 from app.models.message import Message
 from app.models.medical_document import MedicalDocument
 from app.models.medical_record_share import MedicalRecordShare
+from app.models.lab import LabResult, LabTestType, LabTestCriterion
 
 __all__ = [
     "User",
@@ -33,4 +34,7 @@ __all__ = [
     "Message",
     "MedicalDocument",
     "MedicalRecordShare",
+    "LabResult",
+    "LabTestType",
+    "LabTestCriterion",
 ]

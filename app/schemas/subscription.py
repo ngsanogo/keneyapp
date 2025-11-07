@@ -1,13 +1,14 @@
-from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, AnyHttpUrl, Field
 from pydantic import ConfigDict
+
 
 class SubscriptionCreate(BaseModel):
     reason: str = Field(..., max_length=255)
     criteria: str = Field(..., max_length=255)
     endpoint: AnyHttpUrl
     payload: Optional[str] = "application/fhir+json"
+
 
 class SubscriptionResponse(BaseModel):
     id: int

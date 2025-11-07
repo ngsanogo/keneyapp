@@ -46,6 +46,10 @@ def test_log_audit_event():
     """Test logging an audit event."""
     db = TestingSessionLocal()
 
+    # Ensure a clean slate in case prior operations wrote to this in-memory DB
+    db.query(AuditLog).delete()
+    db.commit()
+
     log_audit_event(
         db=db,
         action="CREATE",

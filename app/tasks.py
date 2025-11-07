@@ -4,7 +4,6 @@ Celery background tasks for asynchronous processing.
 
 import logging
 from app.core.celery_app import celery_app
-import json
 import requests
 
 logger = logging.getLogger(__name__)
@@ -74,6 +73,7 @@ def generate_patient_report(patient_id: int):
         return {"status": "error", "message": "Report generation failed"}
     finally:
         db.close()
+
 
 @celery_app.task(name="deliver_subscription_webhook")
 def deliver_subscription_webhook(subscription_id: int, resource: dict):
