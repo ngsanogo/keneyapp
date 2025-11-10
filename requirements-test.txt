@@ -13,7 +13,7 @@ pytest-alembic==0.12.1
 faker==33.1.0  # Génération de données de test
 
 # Time mocking
-freezegun==1.5.1
+freezegun==1.5.5
 time-machine==2.19.0
 
 # Coverage reporting
