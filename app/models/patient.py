@@ -55,6 +55,11 @@ class Patient(Base):
     blood_type = Column(String(5))
     emergency_contact = Column(String)
     emergency_phone = Column(String)
+    
+    # French Healthcare Identifiers
+    ins_number = Column(String(15), index=True, unique=False)  # INS format: 1YYMMSSNNNCCCXX (15 digits)
+    social_security_number = Column(String(15), index=True)  # NIR: 13 digits + 2 key digits
+    
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
