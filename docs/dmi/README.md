@@ -95,7 +95,7 @@ Ce dossier contient la documentation complète pour le développement et le dép
 
 ---
 
-### 8. [Plan de Livraison](08_DELIVERY_PLAN.md) 🚀
+### 8. [Plan de Livraison](08_DELIVERY_ROADMAP.md) 🚀
 **Contenu** :
 - Roadmap 18 mois (MVP 6 mois, V1 6 mois, V2 6 mois)
 - Sprint planning détaillé (24 sprints)
@@ -116,7 +116,7 @@ Ce dossier contient la documentation complète pour le développement et le dép
 1. Commencer par **01_VISION_PRODUCT.md** (vision, KPIs, roadmap)
 2. Valider les **02_PERSONAS_PARCOURS.md** avec équipes métier
 3. Prioriser les **03_USER_STORIES_GHERKIN.md** par sprint
-4. Suivre l'avancement avec **08_DELIVERY_PLAN.md**
+4. Suivre l'avancement avec **08_DELIVERY_ROADMAP.md**
 
 ### Pour Développeurs Backend
 1. Étudier **05_DATA_DICTIONARY.md** (modèle de données)
@@ -137,10 +137,10 @@ Ce dossier contient la documentation complète pour le développement et le dép
 4. Vérifier conformité **05_DATA_DICTIONARY.md** (qualité données)
 
 ### Pour Architecte / Tech Lead
-1. Valider l'architecture dans **08_DELIVERY_PLAN.md**
+1. Valider l'architecture dans **08_DELIVERY_ROADMAP.md**
 2. Définir les standards **05_DATA_DICTIONARY.md** + **06_OPENAPI_SPECS.md**
 3. Implémenter la sécurité **04_RBAC_ABAC_SECURITY.md**
-4. Coordonner les sprints selon **08_DELIVERY_PLAN.md**
+4. Coordonner les sprints selon **08_DELIVERY_ROADMAP.md**
 
 ## 📊 Standards et Conformité
 
@@ -223,7 +223,7 @@ Ce dossier contient la documentation complète pour le développement et le dép
 
 ### Étape 1 : Lecture Rapide
 1. Lire **01_VISION_PRODUCT.md** (30 min)
-2. Parcourir **08_DELIVERY_PLAN.md** section Timeline (15 min)
+2. Parcourir **08_DELIVERY_ROADMAP.md** section Timeline (15 min)
 3. Survoler les autres documents (titres + résumés)
 
 ### Étape 2 : Approfondir par Rôle
