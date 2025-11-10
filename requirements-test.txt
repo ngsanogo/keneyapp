@@ -9,7 +9,7 @@ pytest-xdist==3.6.1  # Tests parallèles
 requests-mock==1.12.1
 
 # Database testing
-pytest-alembic==0.11.1
+pytest-alembic==0.12.1
 faker==33.1.0  # Génération de données de test
 
 # Time mocking
