@@ -9,6 +9,7 @@ Matching rule (minimal):
 
 Future: support search-style criteria (e.g., Patient?identifier=..., Appointment?patient=...).
 """
+
 from typing import Dict, Iterable
 import logging
 
@@ -20,7 +21,9 @@ from app.tasks import deliver_subscription_webhook
 logger = logging.getLogger(__name__)
 
 
-def _find_matching_subscriptions(db: Session, tenant_id: int, resource_type: str) -> Iterable[Subscription]:
+def _find_matching_subscriptions(
+    db: Session, tenant_id: int, resource_type: str
+) -> Iterable[Subscription]:
     return (
         db.query(Subscription)
         .filter(
@@ -32,7 +35,9 @@ def _find_matching_subscriptions(db: Session, tenant_id: int, resource_type: str
     )
 
 
-def publish_event(db: Session, tenant_id: int, resource_type: str, fhir_resource: Dict) -> None:
+def publish_event(
+    db: Session, tenant_id: int, resource_type: str, fhir_resource: Dict
+) -> None:
     """Publish a resource change event to all matching subscriptions.
 
     Args:
@@ -47,6 +52,10 @@ def publish_event(db: Session, tenant_id: int, resource_type: str, fhir_resource
             try:
                 deliver_subscription_webhook.delay(sub.id, fhir_resource)
             except Exception as exc:  # pragma: no cover - best effort
-                logger.warning("Failed to queue webhook delivery for subscription %s: %s", sub.id, exc)
+                logger.warning(
+                    "Failed to queue webhook delivery for subscription %s: %s",
+                    sub.id,
+                    exc,
+                )
     except Exception as exc:  # pragma: no cover - defensive
         logger.error("Unexpected error while publishing subscription events: %s", exc)

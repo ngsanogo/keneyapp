@@ -16,10 +16,8 @@ from app.exceptions import (
     InvalidAgeForTestError,
     InvalidGenderForTestError,
     InvalidStateTransitionError,
-    LabResultNotFoundError,
     LabResultAlreadyValidatedError,
     CannotValidateOwnResultError,
-    LabTestTypeNotFoundError,
     raise_if_not_found,
 )
 
@@ -69,9 +67,7 @@ class LabValidationService:
             gender_map = {"male": "m", "female": "f"}
             patient_gender_code = gender_map.get(patient.gender.value)
             if patient_gender_code != test_type.gender:
-                raise InvalidGenderForTestError(
-                    patient.gender.value, test_type.gender
-                )
+                raise InvalidGenderForTestError(patient.gender.value, test_type.gender)
 
         # Check age constraints
         patient_age = self.calculate_age_years(patient.date_of_birth)
@@ -222,7 +218,7 @@ class LabValidationService:
             .filter(
                 LabTestType.code == code,
                 LabTestType.tenant_id == tenant_id,
-                LabTestType.active == True,
+                LabTestType.active.is_(True),
             )
             .first()
         )

@@ -26,7 +26,9 @@ def test_login_inactive_user_forbidden(client: TestClient, db: Session):
     user = _get_admin(db)
     if not user:
         # Trigger bootstrap creation by calling login once
-        client.post("/api/v1/auth/login", data={"username": "admin", "password": "admin123"})
+        client.post(
+            "/api/v1/auth/login", data={"username": "admin", "password": "admin123"}
+        )
         user = _get_admin(db)
     assert user is not None
 
@@ -44,7 +46,9 @@ def test_login_inactive_user_forbidden(client: TestClient, db: Session):
 def test_login_inactive_tenant_forbidden(client: TestClient, db: Session):
     user = _get_admin(db)
     if not user:
-        client.post("/api/v1/auth/login", data={"username": "admin", "password": "admin123"})
+        client.post(
+            "/api/v1/auth/login", data={"username": "admin", "password": "admin123"}
+        )
         user = _get_admin(db)
     assert user is not None
 
@@ -62,7 +66,9 @@ def test_login_inactive_tenant_forbidden(client: TestClient, db: Session):
 def test_login_lockout_after_failed_attempts(client: TestClient, db: Session):
     user = _get_admin(db)
     if not user:
-        client.post("/api/v1/auth/login", data={"username": "admin", "password": "admin123"})
+        client.post(
+            "/api/v1/auth/login", data={"username": "admin", "password": "admin123"}
+        )
         user = _get_admin(db)
     assert user is not None
 
@@ -86,16 +92,15 @@ def test_login_lockout_after_failed_attempts(client: TestClient, db: Session):
         "/api/v1/auth/login", data={"username": "admin", "password": "admin123"}
     )
     assert locked.status_code == 403
-    assert (
-        locked.json()["detail"]
-        == "Account locked due to failed login attempts"
-    )
+    assert locked.json()["detail"] == "Account locked due to failed login attempts"
 
 
 def test_mfa_disable_invalid_code(client: TestClient, db: Session):
     user = _get_admin(db)
     if not user:
-        client.post("/api/v1/auth/login", data={"username": "admin", "password": "admin123"})
+        client.post(
+            "/api/v1/auth/login", data={"username": "admin", "password": "admin123"}
+        )
         user = _get_admin(db)
     assert user is not None
 
@@ -128,7 +133,9 @@ def test_mfa_disable_invalid_code(client: TestClient, db: Session):
 def test_mfa_activate_without_setup(client: TestClient, db: Session):
     user = _get_admin(db)
     if not user:
-        client.post("/api/v1/auth/login", data={"username": "admin", "password": "admin123"})
+        client.post(
+            "/api/v1/auth/login", data={"username": "admin", "password": "admin123"}
+        )
         user = _get_admin(db)
     assert user is not None
 

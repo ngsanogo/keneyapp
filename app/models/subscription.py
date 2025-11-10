@@ -27,7 +27,9 @@ class Subscription(Base):
         default=SubscriptionStatus.requested,
     )
     reason = Column(String(255), nullable=False)
-    criteria = Column(String(255), nullable=False)  # e.g., "Appointment?patient=123" or resource type
+    criteria = Column(
+        String(255), nullable=False
+    )  # e.g., "Appointment?patient=123" or resource type
     channel_type = Column(
         Enum(SubscriptionChannelType, name="subscriptionchanneltype"),
         nullable=False,
@@ -35,7 +37,12 @@ class Subscription(Base):
     )
     endpoint = Column(String(512), nullable=False)  # webhook URL
     payload = Column(String(128), nullable=True, default="application/fhir+json")
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )

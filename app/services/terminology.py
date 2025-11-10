@@ -38,7 +38,11 @@ def validate_code(db: Session, *, system: str, code: str) -> Dict[str, Any]:
 
     q = (
         db.query(MedicalCode)
-        .filter(MedicalCode.code_system == system, MedicalCode.code == code, MedicalCode.is_active == 1)
+        .filter(
+            MedicalCode.code_system == system,
+            MedicalCode.code == code,
+            MedicalCode.is_active == 1,
+        )
         .first()
     )
 
@@ -71,8 +75,16 @@ def translate_code(
         v = validate_code(db, system=system_from, code=code_from)
         result = {
             "found": v["is_valid"],
-            "source": {"system": system_from, "code": code_from, "display": v.get("display")},
-            "target": {"system": system_to, "code": code_from, "display": v.get("display")},
+            "source": {
+                "system": system_from,
+                "code": code_from,
+                "display": v.get("display"),
+            },
+            "target": {
+                "system": system_to,
+                "code": code_from,
+                "display": v.get("display"),
+            },
         }
         cache_set(ck, result, expire=24 * 3600)
         return result

@@ -26,7 +26,7 @@ _tracer_provider: Optional[TracerProvider] = None
 
 def setup_tracing() -> None:
     """Initialize OpenTelemetry tracing with configured exporters.
-    
+
     Configuration is controlled via environment variables:
     - OTEL_ENABLED: Enable/disable tracing (default: false)
     - OTEL_EXPORTER_TYPE: Exporter type - "otlp", "jaeger", or "console" (default: "console")
@@ -63,7 +63,9 @@ def setup_tracing() -> None:
             )
             exporter = ConsoleSpanExporter()
         else:
-            logger.info(f"Configuring OTLP exporter to {settings.OTEL_EXPORTER_ENDPOINT}")
+            logger.info(
+                f"Configuring OTLP exporter to {settings.OTEL_EXPORTER_ENDPOINT}"
+            )
             exporter = OTLPSpanExporter(endpoint=settings.OTEL_EXPORTER_ENDPOINT)
 
     elif exporter_type == "jaeger":
@@ -113,7 +115,7 @@ def setup_tracing() -> None:
 
 def instrument_app(app) -> None:
     """Instrument FastAPI application and dependencies with OpenTelemetry.
-    
+
     Args:
         app: FastAPI application instance to instrument
     """
@@ -128,6 +130,7 @@ def instrument_app(app) -> None:
     # Instrument SQLAlchemy (database queries)
     try:
         from app.core.database import engine
+
         SQLAlchemyInstrumentor().instrument(engine=engine)
         logger.info("Instrumented SQLAlchemy engine")
     except Exception as e:
@@ -143,13 +146,13 @@ def instrument_app(app) -> None:
 
 def get_tracer(name: str = __name__):
     """Get a tracer instance for manual span creation.
-    
+
     Args:
         name: Tracer name, typically __name__ of the calling module
-        
+
     Returns:
         Tracer instance for creating spans
-        
+
     Example:
         >>> from app.core.tracing import get_tracer
         >>> tracer = get_tracer(__name__)

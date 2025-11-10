@@ -28,10 +28,10 @@ def test_create_patient_success(db, test_tenant):
         email="john.doe@test.com",
         phone="+1234567890",
     )
-    
+
     patient = service.create_patient(patient_data, test_tenant.id)
     db.commit()
-    
+
     assert patient.id is not None
     assert patient.first_name == "John"
     assert patient.last_name == "Doe"
@@ -49,15 +49,15 @@ def test_create_patient_duplicate_email(db, test_tenant):
         email="duplicate@test.com",
         phone="+1234567891",
     )
-    
+
     # Create first patient
     service.create_patient(patient_data, test_tenant.id)
     db.commit()
-    
+
     # Attempt to create second patient with same email
     with pytest.raises(DuplicateResourceError) as exc_info:
         service.create_patient(patient_data, test_tenant.id)
-    
+
     assert "duplicate@test.com" in str(exc_info.value.detail)
 
 
@@ -87,7 +87,7 @@ def test_get_patient_by_id(db, test_tenant):
 def test_get_patient_not_found(db, test_tenant):
     """Test that getting non-existent patient raises error."""
     service = PatientService(db)
-    
+
     with pytest.raises(PatientNotFoundError):
         service.get_by_id(99999, test_tenant.id)
 
@@ -95,7 +95,7 @@ def test_get_patient_not_found(db, test_tenant):
 def test_get_patient_wrong_tenant(db, test_tenant, other_tenant):
     """Test that accessing patient from different tenant raises error."""
     service = PatientService(db)
-    
+
     # Create patient in test_tenant
     patient_data = PatientCreate(
         first_name="Tenant1",
@@ -107,7 +107,7 @@ def test_get_patient_wrong_tenant(db, test_tenant, other_tenant):
     )
     patient = service.create_patient(patient_data, test_tenant.id)
     db.commit()
-    
+
     # Try to access from other_tenant
     with pytest.raises(PatientNotFoundError):
         service.get_by_id(patient.id, other_tenant.id)
@@ -146,7 +146,7 @@ def test_update_patient_success(db, test_tenant):
 def test_update_patient_email_conflict(db, test_tenant):
     """Test that updating to duplicate email raises error."""
     service = PatientService(db)
-    
+
     # Create two patients
     patient1_data = PatientCreate(
         first_name="Patient",
@@ -156,8 +156,8 @@ def test_update_patient_email_conflict(db, test_tenant):
         email="patient1@test.com",
         phone="+1111111111",
     )
-    patient1 = service.create_patient(patient1_data, test_tenant.id)
-    
+    service.create_patient(patient1_data, test_tenant.id)
+
     patient2_data = PatientCreate(
         first_name="Patient",
         last_name="Two",
@@ -168,10 +168,10 @@ def test_update_patient_email_conflict(db, test_tenant):
     )
     patient2 = service.create_patient(patient2_data, test_tenant.id)
     db.commit()
-    
+
     # Try to update patient2 email to patient1's email
     update_data = PatientUpdate(email="patient1@test.com")
-    
+
     with pytest.raises(DuplicateResourceError):
         service.update_patient(patient2.id, update_data, test_tenant.id)
 
@@ -205,7 +205,7 @@ def test_delete_patient(db, test_tenant):
 def test_list_patients(db, test_tenant):
     """Test listing patients with pagination."""
     service = PatientService(db)
-    
+
     # Create multiple patients
     for i in range(5):
         patient_data = PatientCreate(
@@ -218,15 +218,15 @@ def test_list_patients(db, test_tenant):
         )
         service.create_patient(patient_data, test_tenant.id)
     db.commit()
-    
+
     # List all
     patients = service.list_patients(test_tenant.id, skip=0, limit=10)
     assert len(patients) == 5
-    
+
     # Test pagination
     patients_page1 = service.list_patients(test_tenant.id, skip=0, limit=2)
     assert len(patients_page1) == 2
-    
+
     patients_page2 = service.list_patients(test_tenant.id, skip=2, limit=2)
     assert len(patients_page2) == 2
 
@@ -234,9 +234,9 @@ def test_list_patients(db, test_tenant):
 def test_count_patients(db, test_tenant):
     """Test counting patients."""
     service = PatientService(db)
-    
+
     initial_count = service.count_patients(test_tenant.id)
-    
+
     # Create a patient
     patient_data = PatientCreate(
         first_name="Count",
@@ -248,7 +248,7 @@ def test_count_patients(db, test_tenant):
     )
     service.create_patient(patient_data, test_tenant.id)
     db.commit()
-    
+
     new_count = service.count_patients(test_tenant.id)
     assert new_count == initial_count + 1
 
@@ -256,7 +256,7 @@ def test_count_patients(db, test_tenant):
 def test_search_patients(db, test_tenant):
     """Test searching patients by name or email."""
     service = PatientService(db)
-    
+
     # Create test patients
     patients_data = [
         PatientCreate(
@@ -284,24 +284,24 @@ def test_search_patients(db, test_tenant):
             phone="+3333333333",
         ),
     ]
-    
+
     for pd in patients_data:
         service.create_patient(pd, test_tenant.id)
     db.commit()
-    
+
     # Search by last name
     results = service.search_patients(test_tenant.id, "Smith")
     assert len(results) == 2
-    
+
     # Search by first name
     results = service.search_patients(test_tenant.id, "Alice")
     assert len(results) == 1
     assert results[0].first_name == "Alice"
-    
+
     # Search by email
     results = service.search_patients(test_tenant.id, "charlie@")
     assert len(results) == 1
-    
+
     # Search with no results
     results = service.search_patients(test_tenant.id, "Nonexistent")
     assert len(results) == 0

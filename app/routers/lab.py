@@ -25,7 +25,9 @@ DASHBOARD_PATTERN = "dashboard:*"
 router = APIRouter(prefix="/lab-test-types", tags=["lab"])
 
 
-@router.post("/", response_model=LabTestTypeResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=LabTestTypeResponse, status_code=status.HTTP_201_CREATED
+)
 @limiter.limit("10/minute")
 def create_lab_test_type(
     payload: LabTestTypeCreate,
@@ -36,11 +38,16 @@ def create_lab_test_type(
     # Uniqueness per tenant
     exists = (
         db.query(LabTestType)
-        .filter(LabTestType.tenant_id == current_user.tenant_id, LabTestType.code == payload.code)
+        .filter(
+            LabTestType.tenant_id == current_user.tenant_id,
+            LabTestType.code == payload.code,
+        )
         .first()
     )
     if exists:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Code already exists")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Code already exists"
+        )
 
     entity = LabTestType(tenant_id=current_user.tenant_id, **payload.model_dump())
     db.add(entity)
@@ -60,7 +67,9 @@ def create_lab_test_type(
     )
 
     data = LabTestTypeResponse.model_validate(entity).model_dump(mode="json")
-    cache_set(f"{DETAIL_KEY}:{current_user.tenant_id}:{entity.id}", data, expire=DETAIL_TTL)
+    cache_set(
+        f"{DETAIL_KEY}:{current_user.tenant_id}:{entity.id}", data, expire=DETAIL_TTL
+    )
     cache_clear_pattern(f"{LIST_KEY}:{current_user.tenant_id}:*")
     cache_clear_pattern(DASHBOARD_PATTERN)
     return data
@@ -74,7 +83,9 @@ def list_lab_test_types(
     limit: int = 100,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
+        require_roles(
+            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
+        )
     ),
 ):
     key = f"{LIST_KEY}:{current_user.tenant_id}:{skip}:{limit}"
@@ -89,7 +100,9 @@ def list_lab_test_types(
         .limit(min(100, max(1, limit)))
         .all()
     )
-    data = [LabTestTypeResponse.model_validate(x).model_dump(mode="json") for x in items]
+    data = [
+        LabTestTypeResponse.model_validate(x).model_dump(mode="json") for x in items
+    ]
     cache_set(key, data, expire=LIST_TTL)
     return data
 
@@ -101,7 +114,9 @@ def get_lab_test_type(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
+        require_roles(
+            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
+        )
     ),
 ):
     key = f"{DETAIL_KEY}:{current_user.tenant_id}:{id}"
@@ -157,7 +172,9 @@ def update_lab_test_type(
     )
 
     data = LabTestTypeResponse.model_validate(entity).model_dump(mode="json")
-    cache_set(f"{DETAIL_KEY}:{current_user.tenant_id}:{entity.id}", data, expire=DETAIL_TTL)
+    cache_set(
+        f"{DETAIL_KEY}:{current_user.tenant_id}:{entity.id}", data, expire=DETAIL_TTL
+    )
     cache_clear_pattern(f"{LIST_KEY}:{current_user.tenant_id}:*")
     cache_clear_pattern(DASHBOARD_PATTERN)
     return data

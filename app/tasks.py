@@ -88,17 +88,25 @@ def deliver_subscription_webhook(subscription_id: int, resource: dict):
     try:
         sub = db.query(Subscription).filter(Subscription.id == subscription_id).first()
         if not sub:
-            logger.error("Subscription %s not found for webhook delivery", subscription_id)
+            logger.error(
+                "Subscription %s not found for webhook delivery", subscription_id
+            )
             return {"status": "error", "reason": "subscription_not_found"}
 
         headers = {"Content-Type": sub.payload or "application/fhir+json"}
         try:
             # Use json param to ensure proper serialization
-            resp = requests.post(sub.endpoint, json=resource, headers=headers, timeout=5)
-            logger.info("Delivered webhook to %s status=%s", sub.endpoint, resp.status_code)
+            resp = requests.post(
+                sub.endpoint, json=resource, headers=headers, timeout=5
+            )
+            logger.info(
+                "Delivered webhook to %s status=%s", sub.endpoint, resp.status_code
+            )
             return {"status": "ok", "http_status": resp.status_code}
         except Exception as exc:  # pragma: no cover - best effort
-            logger.warning("Webhook delivery failed for subscription %s: %s", subscription_id, exc)
+            logger.warning(
+                "Webhook delivery failed for subscription %s: %s", subscription_id, exc
+            )
             return {"status": "error", "reason": str(exc)}
     finally:
         try:

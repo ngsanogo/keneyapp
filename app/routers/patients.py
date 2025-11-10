@@ -16,7 +16,6 @@ from app.core.database import get_db
 from app.core.dependencies import require_roles
 from app.core.metrics import patient_operations_total
 from app.core.rate_limit import limiter
-from app.models.patient import Patient
 from app.models.user import User, UserRole
 from app.schemas.patient import PatientCreate, PatientUpdate, PatientResponse
 from app.fhir.converters import fhir_converter
@@ -29,7 +28,6 @@ from app.services.patient_service import PatientService
 from app.exceptions import (
     PatientNotFoundError,
     DuplicateResourceError,
-    TenantMismatchError,
 )
 
 logger = logging.getLogger(__name__)
@@ -70,7 +68,7 @@ def create_patient(
         Created patient record
     """
     service = PatientService(db)
-    
+
     try:
         db_patient = service.create_patient(patient_data, current_user.tenant_id)
         db.commit()
@@ -289,7 +287,9 @@ def update_patient(
     """
     service = PatientService(db)
     try:
-        patient = service.update_patient(patient_id, patient_data, current_user.tenant_id)
+        patient = service.update_patient(
+            patient_id, patient_data, current_user.tenant_id
+        )
         db.commit()
     except PatientNotFoundError:
         log_audit_event(
@@ -331,7 +331,9 @@ def update_patient(
         status="success",
         user_id=current_user.id,
         username=current_user.username,
-        details={"updated_fields": list(patient_data.model_dump(exclude_unset=True).keys())},
+        details={
+            "updated_fields": list(patient_data.model_dump(exclude_unset=True).keys())
+        },
         request=request,
     )
 

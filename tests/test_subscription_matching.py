@@ -46,9 +46,11 @@ def test_find_matching_subscriptions_filters_active_and_prefix():
     q = db.query(Subscription)  # build a new query to fetch recorded filters
     # But we need the filters from the prior query; re-run to capture
     q = _FakeQuery()
-    q = q.filter(Subscription.tenant_id == tenant_id,
-                 Subscription.status == SubscriptionStatus.active,
-                 Subscription.criteria.startswith(resource_type))
+    q = q.filter(
+        Subscription.tenant_id == tenant_id,
+        Subscription.status == SubscriptionStatus.active,
+        Subscription.criteria.startswith(resource_type),
+    )
 
     # Ensure our expected conditions are constructed without raising
     assert len(q.filters) == 3

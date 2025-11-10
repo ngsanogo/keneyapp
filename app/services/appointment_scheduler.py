@@ -8,20 +8,15 @@ and availability management.
 from datetime import datetime, timedelta
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from sqlalchemy import and_
 
 from app.models.appointment import Appointment, AppointmentStatus
 from app.models.user import User
 from app.models.patient import Patient
 from app.schemas.appointment import AppointmentCreate, AppointmentUpdate
 from app.exceptions import (
-    AppointmentNotFoundError,
     AppointmentConflictError,
-    PatientNotFoundError,
-    UserNotFoundError,
-    TenantMismatchError,
     raise_if_not_found,
-    raise_if_tenant_mismatch,
 )
 
 
@@ -82,11 +77,13 @@ class AppointmentSchedulerService:
         # Build query for overlapping appointments
         query = self.db.query(Appointment).filter(
             Appointment.doctor_id == doctor_id,
-            Appointment.status.in_([
-                AppointmentStatus.SCHEDULED,
-                AppointmentStatus.CONFIRMED,
-                AppointmentStatus.IN_PROGRESS,
-            ]),
+            Appointment.status.in_(
+                [
+                    AppointmentStatus.SCHEDULED,
+                    AppointmentStatus.CONFIRMED,
+                    AppointmentStatus.IN_PROGRESS,
+                ]
+            ),
             # Overlap condition: (start < other_end) AND (end > other_start)
             and_(
                 Appointment.appointment_date < end_time,
@@ -130,11 +127,13 @@ class AppointmentSchedulerService:
 
         query = self.db.query(Appointment).filter(
             Appointment.patient_id == patient_id,
-            Appointment.status.in_([
-                AppointmentStatus.SCHEDULED,
-                AppointmentStatus.CONFIRMED,
-                AppointmentStatus.IN_PROGRESS,
-            ]),
+            Appointment.status.in_(
+                [
+                    AppointmentStatus.SCHEDULED,
+                    AppointmentStatus.CONFIRMED,
+                    AppointmentStatus.IN_PROGRESS,
+                ]
+            ),
             and_(
                 Appointment.appointment_date < end_time,
                 Appointment.appointment_date
@@ -171,17 +170,25 @@ class AppointmentSchedulerService:
             UserNotFoundError: If doctor doesn't exist
         """
         # Validate patient exists
-        patient = self.db.query(Patient).filter(
-            Patient.id == appointment_data.patient_id,
-            Patient.tenant_id == tenant_id,
-        ).first()
+        patient = (
+            self.db.query(Patient)
+            .filter(
+                Patient.id == appointment_data.patient_id,
+                Patient.tenant_id == tenant_id,
+            )
+            .first()
+        )
         raise_if_not_found(patient, "Patient")
 
         # Validate doctor exists
-        doctor = self.db.query(User).filter(
-            User.id == appointment_data.doctor_id,
-            User.tenant_id == tenant_id,
-        ).first()
+        doctor = (
+            self.db.query(User)
+            .filter(
+                User.id == appointment_data.doctor_id,
+                User.tenant_id == tenant_id,
+            )
+            .first()
+        )
         raise_if_not_found(doctor, "Doctor")
 
         # Check doctor availability
@@ -241,10 +248,15 @@ class AppointmentSchedulerService:
         update_dict = appointment_data.model_dump(exclude_unset=True)
 
         # If changing doctor, date, or duration, check conflicts
-        if any(k in update_dict for k in ["doctor_id", "appointment_date", "duration_minutes"]):
+        if any(
+            k in update_dict
+            for k in ["doctor_id", "appointment_date", "duration_minutes"]
+        ):
             new_doctor_id = update_dict.get("doctor_id", appointment.doctor_id)
             new_date = update_dict.get("appointment_date", appointment.appointment_date)
-            new_duration = update_dict.get("duration_minutes", appointment.duration_minutes)
+            new_duration = update_dict.get(
+                "duration_minutes", appointment.duration_minutes
+            )
 
             # Check doctor availability
             if not self.check_doctor_availability(
@@ -347,8 +359,6 @@ class AppointmentSchedulerService:
         )
 
         if not include_cancelled:
-            query = query.filter(
-                Appointment.status != AppointmentStatus.CANCELLED
-            )
+            query = query.filter(Appointment.status != AppointmentStatus.CANCELLED)
 
         return query.order_by(Appointment.appointment_date.desc()).all()

@@ -68,7 +68,9 @@ class Settings(BaseSettings):
     # OpenTelemetry / Observability
     OTEL_ENABLED: bool = False
     OTEL_EXPORTER_TYPE: str = "console"  # "otlp", "jaeger", or "console"
-    OTEL_EXPORTER_ENDPOINT: str = ""  # e.g., "localhost:4317" for OTLP or "localhost:6831" for Jaeger
+    OTEL_EXPORTER_ENDPOINT: str = (
+        ""  # e.g., "localhost:4317" for OTLP or "localhost:6831" for Jaeger
+    )
     OTEL_SERVICE_NAME: str = "keneyapp"
     OTEL_SERVICE_VERSION: str = "1.0.0"
     ENVIRONMENT: str = "development"
@@ -131,14 +133,14 @@ class Settings(BaseSettings):
         if v in ("", None):
             return "KeneyApp"
         return v
-    
+
     @field_validator("APP_VERSION", mode="before")
     @classmethod
     def _coerce_app_version(cls, v):
         if v in ("", None):
             return "1.0.0"
         return v
-    
+
     @field_validator("API_V1_PREFIX", mode="before")
     @classmethod
     def _coerce_api_prefix(cls, v):

@@ -20,9 +20,7 @@ def test_fhir_bundle_batch_success(auth_headers):
     bundle = {
         "resourceType": "Bundle",
         "type": "batch",
-        "entry": [
-            {"request": {"method": "GET", "url": "Patient/1"}}
-        ]
+        "entry": [{"request": {"method": "GET", "url": "Patient/1"}}],
     }
     response = client.post("/fhir/", json=bundle, headers=auth_headers)
     assert response.status_code == 200
@@ -38,9 +36,7 @@ def test_fhir_bundle_batch_not_found(auth_headers):
     bundle = {
         "resourceType": "Bundle",
         "type": "batch",
-        "entry": [
-            {"request": {"method": "GET", "url": "Patient/999999"}}
-        ]
+        "entry": [{"request": {"method": "GET", "url": "Patient/999999"}}],
     }
     response = client.post("/fhir/", json=bundle, headers=auth_headers)
     assert response.status_code == 404
@@ -50,11 +46,7 @@ def test_fhir_bundle_batch_not_found(auth_headers):
 
 
 def test_fhir_bundle_batch_invalid_type(auth_headers):
-    bundle = {
-        "resourceType": "Bundle",
-        "type": "transaction",
-        "entry": []
-    }
+    bundle = {"resourceType": "Bundle", "type": "transaction", "entry": []}
     response = client.post("/fhir/", json=bundle, headers=auth_headers)
     assert response.status_code == 400
     data = response.json()
@@ -66,9 +58,7 @@ def test_fhir_bundle_batch_unsupported_method(auth_headers):
     bundle = {
         "resourceType": "Bundle",
         "type": "batch",
-        "entry": [
-            {"request": {"method": "POST", "url": "Patient/1"}}
-        ]
+        "entry": [{"request": {"method": "POST", "url": "Patient/1"}}],
     }
     response = client.post("/fhir/", json=bundle, headers=auth_headers)
     assert response.status_code == 400

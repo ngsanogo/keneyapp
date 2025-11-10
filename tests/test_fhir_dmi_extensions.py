@@ -93,7 +93,11 @@ def doctor(db, tenant):
 def auth_headers(doctor):
     """Generate auth headers for a doctor."""
     token = create_access_token(
-        data={"sub": doctor.username, "tenant_id": doctor.tenant_id, "role": doctor.role.value}
+        data={
+            "sub": doctor.username,
+            "tenant_id": doctor.tenant_id,
+            "role": doctor.role.value,
+        }
     )
     return {"Authorization": f"Bearer {token}"}
 
@@ -136,7 +140,9 @@ class TestObservationFHIR:
         db.commit()
         db.refresh(obs)
 
-        response = client.get(f"/api/v1/fhir/Observation/{obs.id}", headers=auth_headers)
+        response = client.get(
+            f"/api/v1/fhir/Observation/{obs.id}", headers=auth_headers
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["resourceType"] == "Observation"
@@ -144,7 +150,9 @@ class TestObservationFHIR:
         assert data["code"]["coding"][0]["code"] == "8480-6"
         assert "ETag" in response.headers
 
-    def test_search_observations(self, client, db, tenant, patient, doctor, auth_headers):
+    def test_search_observations(
+        self, client, db, tenant, patient, doctor, auth_headers
+    ):
         """Test GET /fhir/Observation with search params."""
         obs1 = Observation(
             tenant_id=tenant.id,

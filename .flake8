@@ -26,3 +26,4 @@ max-complexity = 10
 # Test-specific relaxations
 per-file-ignores =
     tests/*: F401
+    tests/test_e2e_integration.py: C901

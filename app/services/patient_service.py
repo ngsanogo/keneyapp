@@ -14,7 +14,6 @@ from app.schemas.patient import PatientCreate, PatientUpdate
 from app.exceptions import (
     PatientNotFoundError,
     DuplicateResourceError,
-    TenantMismatchError,
     raise_if_not_found,
     raise_if_tenant_mismatch,
 )
@@ -99,9 +98,11 @@ class PatientService:
         Returns:
             Total patient count
         """
-        return self.db.query(func.count(Patient.id)).filter(
-            Patient.tenant_id == tenant_id
-        ).scalar()
+        return (
+            self.db.query(func.count(Patient.id))
+            .filter(Patient.tenant_id == tenant_id)
+            .scalar()
+        )
 
     def create_patient(self, patient_data: PatientCreate, tenant_id: int) -> Patient:
         """
@@ -125,7 +126,7 @@ class PatientService:
 
         # Encrypt sensitive fields before persistence
         encrypted_payload = encrypt_patient_payload(patient_data.model_dump())
-        
+
         # Create patient
         patient = Patient(**encrypted_payload, tenant_id=tenant_id)
         self.db.add(patient)
@@ -201,21 +202,13 @@ class PatientService:
             PatientNotFoundError: If patient doesn't exist
             TenantMismatchError: If patient belongs to different tenant
         """
-        patient = (
-            self.db.query(Patient)
-            .filter(Patient.id == patient_id)
-            .first()
-        )
+        patient = self.db.query(Patient).filter(Patient.id == patient_id).first()
         raise_if_not_found(patient, "Patient")
         raise_if_tenant_mismatch(patient.tenant_id, user_tenant_id)
         return patient
 
     def search_patients(
-        self,
-        tenant_id: int,
-        query: str,
-        skip: int = 0,
-        limit: int = 100
+        self, tenant_id: int, query: str, skip: int = 0, limit: int = 100
     ) -> List[Patient]:
         """
         Search patients by name or email.
@@ -238,7 +231,7 @@ class PatientService:
                     Patient.first_name.ilike(search_pattern)
                     | Patient.last_name.ilike(search_pattern)
                     | Patient.email.ilike(search_pattern)
-                )
+                ),
             )
             .offset(skip)
             .limit(min(100, max(1, limit)))

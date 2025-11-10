@@ -405,7 +405,11 @@ def delete_prescription(
             db,
             current_user.tenant_id,
             "MedicationRequest",
-            {"resourceType": "MedicationRequest", "id": str(prescription_id), "deleted": True},
+            {
+                "resourceType": "MedicationRequest",
+                "id": str(prescription_id),
+                "deleted": True,
+            },
         )
     except Exception as exc:  # pragma: no cover - best effort
         logger.warning("Failed to publish medicationrequest delete event: %s", exc)

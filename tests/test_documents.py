@@ -28,7 +28,13 @@ def test_documents_full_flow(
     sample_pdf_bytes: bytes,
 ):
     # Arrange: create tenant, doctor user, and patient matching current models
-    tenant = Tenant(name="Acme Health", slug="acme", is_active=True, contact_email="ops@acme.tld", configuration={})
+    tenant = Tenant(
+        name="Acme Health",
+        slug="acme",
+        is_active=True,
+        contact_email="ops@acme.tld",
+        configuration={},
+    )
     db.add(tenant)
     db.commit()
     db.refresh(tenant)

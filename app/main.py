@@ -55,7 +55,11 @@ async def lifespan(app: FastAPI):
         Base.metadata.create_all(bind=engine)
 
     # Configure or disable rate limiting based on current environment
-    enable_rl = os.getenv("ENABLE_RATE_LIMITING", "true").lower() in {"1", "true", "yes"}
+    enable_rl = os.getenv("ENABLE_RATE_LIMITING", "true").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
     if enable_rl:
         app.state.disable_rate_limit = False
         app.state.limiter = limiter

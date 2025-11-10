@@ -21,7 +21,7 @@ def test_fhir_rbac_403_insufficient_permissions():
     # Attempt to access a FHIR endpoint without proper auth
     # Since we don't have a valid token, this will be 401 first
     # But we can test the RBAC logic directly
-    
+
     # For a more direct test, we'd need to create a valid token with wrong role
     # For now, verify 401 returns FHIR OperationOutcome for FHIR paths
     resp = client.get("/api/v1/fhir/Patient/999")
@@ -47,7 +47,7 @@ def test_require_roles_decorator_accepts_iterable():
     # This tests the factory logic but doesn't require a full request
     guard1 = require_roles(UserRole.ADMIN, UserRole.DOCTOR)
     guard2 = require_roles([UserRole.NURSE, UserRole.RECEPTIONIST])
-    
+
     # Both should return callables
     assert callable(guard1)
     assert callable(guard2)

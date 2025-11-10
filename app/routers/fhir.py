@@ -69,7 +69,9 @@ def get_fhir_patient(
 
     # Weak ETag based on last update
     if getattr(patient, "updated_at", None):
-        response.headers["ETag"] = f'W/"Patient/{patient.id}-{patient.updated_at.timestamp()}"'
+        response.headers["ETag"] = (
+            f'W/"Patient/{patient.id}-{patient.updated_at.timestamp()}"'
+        )
 
     return fhir_converter.patient_to_fhir(patient)
 
@@ -114,7 +116,9 @@ def search_fhir_patient(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST)
+        require_roles(
+            UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST
+        )
     ),
     name: Optional[str] = Query(None, description="Search in family or given"),
     family: Optional[str] = Query(None, description="Family name"),
@@ -129,7 +133,9 @@ def search_fhir_patient(
     # Basic parameters mapping
     if name:
         like = f"%{name}%"
-        query = query.filter((Patient.first_name.ilike(like)) | (Patient.last_name.ilike(like)))
+        query = query.filter(
+            (Patient.first_name.ilike(like)) | (Patient.last_name.ilike(like))
+        )
     if family:
         query = query.filter(Patient.last_name.ilike(f"%{family}%"))
     if given:
@@ -142,13 +148,22 @@ def search_fhir_patient(
 
     # Pagination
     offset = (_page - 1) * _count
-    patients: List[Patient] = query.order_by(Patient.id.asc()).offset(offset).limit(_count).all()
+    patients: List[Patient] = (
+        query.order_by(Patient.id.asc()).offset(offset).limit(_count).all()
+    )
 
     # Convert to FHIR and bundle
     fhir_list = [fhir_converter.patient_to_fhir(p) for p in patients]
-    base_url = str(request.base_url).rstrip("/") + request.url.path  # /api/v1/fhir/Patient
+    base_url = (
+        str(request.base_url).rstrip("/") + request.url.path
+    )  # /api/v1/fhir/Patient
     base_url = base_url.rsplit("/", 1)[0]  # /api/v1/fhir
-    query_params = {"name": name, "family": family, "given": given, "birthdate": birthdate}
+    query_params = {
+        "name": name,
+        "family": family,
+        "given": given,
+        "birthdate": birthdate,
+    }
     bundle = make_search_bundle(
         base_url=base_url,
         resource_type="Patient",
@@ -203,7 +218,9 @@ def get_fhir_appointment(
 
     # Weak ETag based on last update
     if getattr(appointment, "updated_at", None):
-        response.headers["ETag"] = f'W/"Appointment/{appointment.id}-{appointment.updated_at.timestamp()}"'
+        response.headers["ETag"] = (
+            f'W/"Appointment/{appointment.id}-{appointment.updated_at.timestamp()}"'
+        )
 
     return fhir_converter.appointment_to_fhir(appointment)
 
@@ -248,7 +265,9 @@ def get_fhir_medication_request(
 
     # Weak ETag based on last update
     if getattr(prescription, "updated_at", None):
-        response.headers["ETag"] = f'W/"MedicationRequest/{prescription.id}-{prescription.updated_at.timestamp()}"'
+        response.headers["ETag"] = (
+            f'W/"MedicationRequest/{prescription.id}-{prescription.updated_at.timestamp()}"'
+        )
 
     return fhir_converter.prescription_to_fhir(prescription)
 
@@ -280,7 +299,11 @@ def get_fhir_capability_statement(request: Request):
                 "resource": [
                     {
                         "type": "Patient",
-                        "interaction": [{"code": "read"}, {"code": "create"}, {"code": "search-type"}],
+                        "interaction": [
+                            {"code": "read"},
+                            {"code": "create"},
+                            {"code": "search-type"},
+                        ],
                         "searchParam": [
                             {"name": "name", "type": "string"},
                             {"name": "family", "type": "string"},
@@ -338,7 +361,9 @@ def search_fhir_appointment(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST)
+        require_roles(
+            UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST
+        )
     ),
     patient: Optional[int] = Query(None, description="Patient ID reference"),
     date: Optional[str] = Query(None, description="YYYY-MM-DD (filters by day)"),
@@ -347,20 +372,26 @@ def search_fhir_appointment(
     _page: int = Query(1, ge=1),
 ):
     """FHIR Appointment search (subset)."""
-    query = db.query(Appointment).filter(Appointment.tenant_id == current_user.tenant_id)
+    query = db.query(Appointment).filter(
+        Appointment.tenant_id == current_user.tenant_id
+    )
 
     if patient is not None:
         query = query.filter(Appointment.patient_id == patient)
     if date:
         # Filter by same calendar day (simplified); relies on database casting
         # This is a minimal approach; for production use proper range filtering
-        query = query.filter(cast(Appointment.appointment_date, String).like(f"{date}%"))
+        query = query.filter(
+            cast(Appointment.appointment_date, String).like(f"{date}%")
+        )
     if status:
         query = query.filter(Appointment.status == status)
 
     total = query.count()
     offset = (_page - 1) * _count
-    appts: List[Appointment] = query.order_by(Appointment.id.asc()).offset(offset).limit(_count).all()
+    appts: List[Appointment] = (
+        query.order_by(Appointment.id.asc()).offset(offset).limit(_count).all()
+    )
 
     fhir_list = [fhir_converter.appointment_to_fhir(a) for a in appts]
     base_url = str(request.base_url).rstrip("/") + request.url.path
@@ -406,7 +437,9 @@ def get_fhir_observation(
         )
 
     if getattr(obs, "updated_at", None):
-        response.headers["ETag"] = f'W/"Observation/{obs.id}-{obs.updated_at.timestamp()}"'
+        response.headers["ETag"] = (
+            f'W/"Observation/{obs.id}-{obs.updated_at.timestamp()}"'
+        )
 
     return fhir_converter.observation_to_fhir(obs)
 
@@ -427,20 +460,26 @@ def search_fhir_observation(
     _page: int = Query(1, ge=1),
 ):
     """FHIR Observation search (subset)."""
-    query = db.query(ObservationModel).filter(ObservationModel.tenant_id == current_user.tenant_id)
+    query = db.query(ObservationModel).filter(
+        ObservationModel.tenant_id == current_user.tenant_id
+    )
 
     if patient is not None:
         query = query.filter(ObservationModel.patient_id == patient)
     if code:
         query = query.filter(ObservationModel.loinc_code == code)
     if date:
-        query = query.filter(cast(ObservationModel.effective_datetime, String).like(f"{date}%"))
+        query = query.filter(
+            cast(ObservationModel.effective_datetime, String).like(f"{date}%")
+        )
     if status:
         query = query.filter(ObservationModel.status == status)
 
     total = query.count()
     offset = (_page - 1) * _count
-    obs_list: List[ObservationModel] = query.order_by(ObservationModel.id.asc()).offset(offset).limit(_count).all()
+    obs_list: List[ObservationModel] = (
+        query.order_by(ObservationModel.id.asc()).offset(offset).limit(_count).all()
+    )
 
     fhir_list = [fhir_converter.observation_to_fhir(o) for o in obs_list]
     base_url = str(request.base_url).rstrip("/") + request.url.path
@@ -486,7 +525,9 @@ def get_fhir_condition(
         )
 
     if getattr(condition, "updated_at", None):
-        response.headers["ETag"] = f'W/"Condition/{condition.id}-{condition.updated_at.timestamp()}"'
+        response.headers["ETag"] = (
+            f'W/"Condition/{condition.id}-{condition.updated_at.timestamp()}"'
+        )
 
     return fhir_converter.condition_to_fhir(condition)
 
@@ -501,29 +542,43 @@ def search_fhir_condition(
     ),
     patient: Optional[int] = Query(None, description="Patient ID reference"),
     code: Optional[str] = Query(None, description="ICD-11 or SNOMED CT code token"),
-    clinical_status: Optional[str] = Query(None, alias="clinical-status", description="Clinical status token (active, resolved, etc.)"),
+    clinical_status: Optional[str] = Query(
+        None,
+        alias="clinical-status",
+        description="Clinical status token (active, resolved, etc.)",
+    ),
     _count: int = Query(20, ge=1, le=100),
     _page: int = Query(1, ge=1),
 ):
     """FHIR Condition search (subset)."""
-    query = db.query(ConditionModel).filter(ConditionModel.tenant_id == current_user.tenant_id)
+    query = db.query(ConditionModel).filter(
+        ConditionModel.tenant_id == current_user.tenant_id
+    )
 
     if patient is not None:
         query = query.filter(ConditionModel.patient_id == patient)
     if code:
         # Search in both icd11_code and snomed_code
-        query = query.filter((ConditionModel.icd11_code == code) | (ConditionModel.snomed_code == code))
+        query = query.filter(
+            (ConditionModel.icd11_code == code) | (ConditionModel.snomed_code == code)
+        )
     if clinical_status:
         query = query.filter(ConditionModel.clinical_status == clinical_status)
 
     total = query.count()
     offset = (_page - 1) * _count
-    conditions: List[ConditionModel] = query.order_by(ConditionModel.id.asc()).offset(offset).limit(_count).all()
+    conditions: List[ConditionModel] = (
+        query.order_by(ConditionModel.id.asc()).offset(offset).limit(_count).all()
+    )
 
     fhir_list = [fhir_converter.condition_to_fhir(c) for c in conditions]
     base_url = str(request.base_url).rstrip("/") + request.url.path
     base_url = base_url.rsplit("/", 1)[0]
-    query_params = {"patient": patient, "code": code, "clinical-status": clinical_status}
+    query_params = {
+        "patient": patient,
+        "code": code,
+        "clinical-status": clinical_status,
+    }
     bundle = make_search_bundle(
         base_url=base_url,
         resource_type="Condition",
@@ -564,7 +619,9 @@ def get_fhir_procedure(
         )
 
     if getattr(procedure, "updated_at", None):
-        response.headers["ETag"] = f'W/"Procedure/{procedure.id}-{procedure.updated_at.timestamp()}"'
+        response.headers["ETag"] = (
+            f'W/"Procedure/{procedure.id}-{procedure.updated_at.timestamp()}"'
+        )
 
     return fhir_converter.procedure_to_fhir(procedure)
 
@@ -584,7 +641,9 @@ def search_fhir_procedure(
     _page: int = Query(1, ge=1),
 ):
     """FHIR Procedure search (subset)."""
-    query = db.query(ProcedureModel).filter(ProcedureModel.tenant_id == current_user.tenant_id)
+    query = db.query(ProcedureModel).filter(
+        ProcedureModel.tenant_id == current_user.tenant_id
+    )
 
     if patient is not None:
         query = query.filter(ProcedureModel.patient_id == patient)
@@ -596,11 +655,15 @@ def search_fhir_procedure(
             | (ProcedureModel.snomed_code == code)
         )
     if date:
-        query = query.filter(cast(ProcedureModel.performed_datetime, String).like(f"{date}%"))
+        query = query.filter(
+            cast(ProcedureModel.performed_datetime, String).like(f"{date}%")
+        )
 
     total = query.count()
     offset = (_page - 1) * _count
-    procedures: List[ProcedureModel] = query.order_by(ProcedureModel.id.asc()).offset(offset).limit(_count).all()
+    procedures: List[ProcedureModel] = (
+        query.order_by(ProcedureModel.id.asc()).offset(offset).limit(_count).all()
+    )
 
     fhir_list = [fhir_converter.procedure_to_fhir(p) for p in procedures]
     base_url = str(request.base_url).rstrip("/") + request.url.path
@@ -624,7 +687,11 @@ def fhir_bundle_transaction(  # noqa: C901
     bundle: Dict[str, Any],
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]))
+    current_user: User = Depends(
+        require_roles(
+            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
+        )
+    ),
 ):
     """
     Minimal FHIR Bundle transaction endpoint (batch GET only).
@@ -650,65 +717,123 @@ def fhir_bundle_transaction(  # noqa: C901
         # Only support Patient, Appointment, Observation, Condition, Procedure, MedicationRequest
         if url.startswith("Patient/"):
             patient_id = url.split("/")[1]
-            patient = db.query(Patient).filter(Patient.id == patient_id, Patient.tenant_id == current_user.tenant_id).first()
+            patient = (
+                db.query(Patient)
+                .filter(
+                    Patient.id == patient_id,
+                    Patient.tenant_id == current_user.tenant_id,
+                )
+                .first()
+            )
             if not patient:
                 return JSONResponse(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    content=operation_outcome("not-found", f"Patient {patient_id} not found"),
+                    content=operation_outcome(
+                        "not-found", f"Patient {patient_id} not found"
+                    ),
                 )
             resource = fhir_converter.patient_to_fhir(patient)
         elif url.startswith("Appointment/"):
             appointment_id = url.split("/")[1]
-            appointment = db.query(Appointment).filter(Appointment.id == appointment_id, Appointment.tenant_id == current_user.tenant_id).first()
+            appointment = (
+                db.query(Appointment)
+                .filter(
+                    Appointment.id == appointment_id,
+                    Appointment.tenant_id == current_user.tenant_id,
+                )
+                .first()
+            )
             if not appointment:
                 return JSONResponse(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    content=operation_outcome("not-found", f"Appointment {appointment_id} not found"),
+                    content=operation_outcome(
+                        "not-found", f"Appointment {appointment_id} not found"
+                    ),
                 )
             resource = fhir_converter.appointment_to_fhir(appointment)
         elif url.startswith("Observation/"):
             obs_id = url.split("/")[1]
-            obs = db.query(ObservationModel).filter(ObservationModel.id == obs_id, ObservationModel.tenant_id == current_user.tenant_id).first()
+            obs = (
+                db.query(ObservationModel)
+                .filter(
+                    ObservationModel.id == obs_id,
+                    ObservationModel.tenant_id == current_user.tenant_id,
+                )
+                .first()
+            )
             if not obs:
                 return JSONResponse(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    content=operation_outcome("not-found", f"Observation {obs_id} not found"),
+                    content=operation_outcome(
+                        "not-found", f"Observation {obs_id} not found"
+                    ),
                 )
             resource = fhir_converter.observation_to_fhir(obs)
         elif url.startswith("Condition/"):
             cond_id = url.split("/")[1]
-            cond = db.query(ConditionModel).filter(ConditionModel.id == cond_id, ConditionModel.tenant_id == current_user.tenant_id).first()
+            cond = (
+                db.query(ConditionModel)
+                .filter(
+                    ConditionModel.id == cond_id,
+                    ConditionModel.tenant_id == current_user.tenant_id,
+                )
+                .first()
+            )
             if not cond:
                 return JSONResponse(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    content=operation_outcome("not-found", f"Condition {cond_id} not found"),
+                    content=operation_outcome(
+                        "not-found", f"Condition {cond_id} not found"
+                    ),
                 )
             resource = fhir_converter.condition_to_fhir(cond)
         elif url.startswith("Procedure/"):
             proc_id = url.split("/")[1]
-            proc = db.query(ProcedureModel).filter(ProcedureModel.id == proc_id, ProcedureModel.tenant_id == current_user.tenant_id).first()
+            proc = (
+                db.query(ProcedureModel)
+                .filter(
+                    ProcedureModel.id == proc_id,
+                    ProcedureModel.tenant_id == current_user.tenant_id,
+                )
+                .first()
+            )
             if not proc:
                 return JSONResponse(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    content=operation_outcome("not-found", f"Procedure {proc_id} not found"),
+                    content=operation_outcome(
+                        "not-found", f"Procedure {proc_id} not found"
+                    ),
                 )
             resource = fhir_converter.procedure_to_fhir(proc)
         elif url.startswith("MedicationRequest/"):
             rx_id = url.split("/")[1]
-            rx = db.query(Prescription).filter(Prescription.id == rx_id, Prescription.tenant_id == current_user.tenant_id).first()
+            rx = (
+                db.query(Prescription)
+                .filter(
+                    Prescription.id == rx_id,
+                    Prescription.tenant_id == current_user.tenant_id,
+                )
+                .first()
+            )
             if not rx:
                 return JSONResponse(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    content=operation_outcome("not-found", f"MedicationRequest {rx_id} not found"),
+                    content=operation_outcome(
+                        "not-found", f"MedicationRequest {rx_id} not found"
+                    ),
                 )
             resource = fhir_converter.prescription_to_fhir(rx)
         else:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                content=operation_outcome("not-supported", f"Resource {url} not supported in batch"),
+                content=operation_outcome(
+                    "not-supported", f"Resource {url} not supported in batch"
+                ),
             )
-        responses.append({
-            "response": {"status": "200 OK"},
-            "resource": resource,
-        })
+        responses.append(
+            {
+                "response": {"status": "200 OK"},
+                "resource": resource,
+            }
+        )
     return {"resourceType": "Bundle", "type": "batch-response", "entry": responses}

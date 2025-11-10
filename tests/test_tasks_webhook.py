@@ -27,7 +27,9 @@ def test_deliver_subscription_webhook_success(monkeypatch):
     from app import tasks
 
     # Fake subscription row
-    sub = types.SimpleNamespace(id=1, endpoint="https://example.org/hook", payload="application/fhir+json")
+    sub = types.SimpleNamespace(
+        id=1, endpoint="https://example.org/hook", payload="application/fhir+json"
+    )
 
     # Patch SessionLocal factory in the database module to return our fake DB
     import app.core.database as dbmod
@@ -51,7 +53,9 @@ def test_deliver_subscription_webhook_success(monkeypatch):
 
     monkeypatch.setitem(tasks.__dict__, "requests", types.SimpleNamespace(post=_post))
 
-    result = tasks.deliver_subscription_webhook(subscription_id=1, resource={"resourceType": "Patient"})
+    result = tasks.deliver_subscription_webhook(
+        subscription_id=1, resource={"resourceType": "Patient"}
+    )
     assert result["status"] == "ok"
     assert result["http_status"] == 202
 
