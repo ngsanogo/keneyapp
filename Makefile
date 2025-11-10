@@ -137,6 +137,18 @@ security:
 	cd frontend && npm audit
 	@echo "✅ Security checks complete!"
 
+security-full:
+	@echo "🔒 Running comprehensive security scans..."
+	@echo "1. Python security with Bandit..."
+	bandit -r app -f screen
+	@echo "2. Dependency vulnerabilities..."
+	pip-audit --strict
+	@echo "3. Frontend vulnerabilities..."
+	cd frontend && npm audit --audit-level=moderate
+	@echo "4. Secret detection..."
+	pre-commit run detect-secrets --all-files
+	@echo "✅ Full security scan complete!"
+
 # Database operations
 db-migrate:
 	@echo "Running database migrations..."
@@ -231,3 +243,132 @@ ci:
 	@make security
 	@make build
 	@echo "✅ CI simulation complete!"
+
+# Pre-commit hooks
+hooks-install:
+	@echo "Installing pre-commit hooks..."
+	pre-commit install --install-hooks
+	@echo "✅ Hooks installed!"
+
+hooks-run:
+	@echo "Running pre-commit hooks on all files..."
+	pre-commit run --all-files
+	@echo "✅ Hooks executed!"
+
+hooks-update:
+	@echo "Updating pre-commit hooks..."
+	pre-commit autoupdate
+	@echo "✅ Hooks updated!"
+
+# E2E Tests with Playwright
+e2e-install:
+	@echo "Installing Playwright..."
+	npm install -D @playwright/test
+	npx playwright install --with-deps
+	@echo "✅ Playwright installed!"
+
+e2e-test:
+	@echo "Running E2E tests..."
+	npx playwright test
+	@echo "✅ E2E tests complete!"
+
+e2e-ui:
+	@echo "Opening Playwright UI..."
+	npx playwright test --ui
+
+e2e-report:
+	@echo "Opening test report..."
+	npx playwright show-report
+
+# Performance testing
+perf-baseline:
+	@echo "Running performance baseline tests with Locust..."
+	locust -f tests/performance/test_load.py --host=http://localhost:8000 \
+		--users 100 --spawn-rate 10 --run-time 5m --headless \
+		--csv=results/baseline_$(shell date +%Y%m%d_%H%M%S)
+	@echo "✅ Performance baseline captured!"
+
+perf-ui:
+	@echo "Starting Locust UI for interactive performance testing..."
+	@echo "Access at: http://localhost:8089"
+	locust -f tests/performance/test_load.py --host=http://localhost:8000
+
+# Documentation
+docs-api:
+	@echo "Generating API documentation..."
+	python -c "from app.main import app; import json; json.dump(app.openapi(), open('docs/api/openapi.json', 'w'), indent=2)"
+	@echo "✅ API docs generated at docs/api/openapi.json"
+
+docs-db:
+	@echo "Generating database schema documentation..."
+	python scripts/generate_db_docs.py > docs/database/schema.md
+	@echo "✅ Database docs generated at docs/database/schema.md"
+
+docs-serve:
+	@echo "Serving documentation locally..."
+	@echo "Access at: http://localhost:8080"
+	cd docs && python -m http.server 8080
+
+# Environment validation
+validate-env:
+	@echo "Validating environment configuration..."
+	./scripts/validate_env.sh
+	@echo "✅ Environment validation complete!"
+
+# Quality analysis with SonarQube (local)
+sonar-local:
+	@echo "Running SonarQube analysis (requires SonarQube server)..."
+	sonar-scanner \
+		-Dsonar.projectKey=keneyapp \
+		-Dsonar.sources=. \
+		-Dsonar.host.url=http://localhost:9000 \
+		-Dsonar.login=$(SONAR_TOKEN)
+
+# Release management
+release-prepare:
+	@echo "Preparing release..."
+	@echo "1. Checking git status..."
+	git status
+	@echo "2. Running full test suite..."
+	@make test-all
+	@echo "3. Running security scans..."
+	@make security-full
+	@echo "4. Validating environment..."
+	@make validate-env
+	@echo "✅ Release preparation complete - ready to tag and deploy!"
+
+release-dry-run:
+	@echo "Running semantic-release in dry-run mode..."
+	npx semantic-release --dry-run
+
+changelog-generate:
+	@echo "Generating changelog..."
+	git-cliff --output CHANGELOG.md
+	@echo "✅ Changelog updated!"
+
+# Container operations
+container-scan:
+	@echo "Scanning containers for vulnerabilities..."
+	docker build -t keneyapp-backend:latest .
+	trivy image keneyapp-backend:latest
+	@echo "✅ Container scan complete!"
+
+# Monitoring & Observability
+metrics-export:
+	@echo "Exporting Prometheus metrics..."
+	curl -s http://localhost:8000/metrics > metrics_$(shell date +%Y%m%d_%H%M%S).txt
+	@echo "✅ Metrics exported!"
+
+# All-in-one commands
+full-check:
+	@echo "🔍 Running comprehensive quality checks..."
+	@make hooks-run
+	@make lint
+	@make test-cov
+	@make security-full
+	@make validate-env
+	@echo "✅ All checks passed!"
+
+fresh-start: clean install install-dev install-hooks db-reset
+	@echo "🚀 Fresh start complete - ready to develop!"
+
