@@ -234,7 +234,7 @@ Ce dossier contient la documentation complète pour le développement et le dép
 - **DevOps** : 08, 06, 04
 
 ### Étape 3 : Planifier
-1. Constituer équipe (voir 08_DELIVERY_PLAN.md)
+1. Constituer équipe (voir 08_DELIVERY_ROADMAP.md)
 2. Setup environnements
 3. Lancer Sprint 1 (Identito-vigilance)
 
