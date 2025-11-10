@@ -32,7 +32,7 @@ jobs:
     - uses: actions/checkout@v5
     
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.11'
         cache: 'pip'
@@ -169,7 +169,7 @@ jobs:
         curl -sf http://localhost:8000/api/v1/docs > /dev/null
     
     - name: Set up Python for smoke tests
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.11'
     
