@@ -73,7 +73,7 @@ Before any production deployment:
 
 **Framework**: pytest with pytest-asyncio
 
-**Coverage**: 77% (155 tests)
+**Coverage**: 77% (159 tests, 155 passing, 4 expected failures)
 
 **Test Types**:
 
