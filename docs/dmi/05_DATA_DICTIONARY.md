@@ -8,7 +8,7 @@
 |-------|------|----------|-------------|--------------|---------------|---------|
 | **id** | UUID | 36 | Oui | - | UUID v4 valide | `550e8400-e29b-41d4-a716-446655440000` |
 | **ipp** | String | 9 | Oui | - | Unique, numérique, clé Luhn | `123456780` |
-| **ins** | String | 15 | Oui* | - | Format INS valide, clé contrôle | `1 84 12 75 123 456 78` |
+| **ins** | String | 15 | Oui* | - | 15 chiffres, format INS valide, clé contrôle (espaces pour affichage uniquement) | `184127512345678` (stocké), `1 84 12 75 123 456 78` (affichage) |
 | **ins_status** | Enum | - | Oui | `VALIDATED`, `PROVISOIRE`, `UNKNOWN` | - | `VALIDATED` |
 | **nom** | String | 50 | Oui | - | Majuscules, sans accents | `MARTIN` |
 | **nom_naissance** | String | 50 | Non | - | Majuscules, sans accents | `DUPONT` |
