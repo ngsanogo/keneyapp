@@ -60,6 +60,18 @@ class PatientCreate(PatientBase):
     pass
 
 
+class PatientUpdate(BaseModel):
+    """Schema for updating an existing patient."""
+
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    date_of_birth: Optional[date] = None
+    gender: Optional[Gender] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    medical_history: Optional[str] = None
+    allergies: Optional[str] = None
     blood_type: Optional[str] = None
     emergency_contact: Optional[str] = None
     emergency_phone: Optional[str] = None

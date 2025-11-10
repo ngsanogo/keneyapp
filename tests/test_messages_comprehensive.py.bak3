@@ -29,7 +29,7 @@ class TestMessageEncryption:
     def test_encrypt_message_content(self):
         """Test encrypting message content."""
         original = "Résultats d'analyses disponibles"
-        encrypted = encrypt_data(original, context={"type": "message"})
+        encrypted = encrypt_data(original, context="messages")
         
         assert encrypted != original
         assert encrypted is not None
@@ -38,16 +38,16 @@ class TestMessageEncryption:
     def test_decrypt_message_content(self):
         """Test decrypting message content."""
         original = "Votre ordonnance est prête"
-        encrypted = encrypt_data(original, context={"type": "message"})
-        decrypted = decrypt_data(encrypted, context={"type": "message"})
+        encrypted = encrypt_data(original, context="messages")
+        decrypted = decrypt_data(encrypted, context="messages")
         
         assert decrypted == original
 
     def test_encryption_uniqueness(self):
         """Test that same content produces different ciphertexts."""
         content = "Message confidentiel"
-        encrypted1 = encrypt_data(content, context={"type": "message"})
-        encrypted2 = encrypt_data(content, context={"type": "message"})
+        encrypted1 = encrypt_data(content, context="messages")
+        encrypted2 = encrypt_data(content, context="messages")
         
         assert encrypted1 != encrypted2  # Nonce ensures uniqueness
 
@@ -242,7 +242,7 @@ class TestMessageReadStatus:
             sender_id=1,
             receiver_id=2,
             subject="Test",
-            encrypted_content=encrypt_data("Test content", context={"type": "message"}),
+            encrypted_content=encrypt_data("Test content", context="messages"),
             status=MessageStatus.DELIVERED,
             tenant_id=1
         )
@@ -298,7 +298,7 @@ class TestSoftDelete:
             sender_id=1,
             receiver_id=2,
             subject="Test",
-            encrypted_content=encrypt_data("Content", context={"type": "message"}),
+            encrypted_content=encrypt_data("Content", context="messages"),
             status=MessageStatus.DELIVERED,
             deleted_by_sender=True,
             deleted_by_receiver=False,
@@ -357,7 +357,7 @@ class TestMessageSecurity:
         from app.core.encryption import encrypt_data
         
         original_content = "Contenu sensible médical"
-        encrypted = encrypt_data(original_content, context={"type": "message"})
+        encrypted = encrypt_data(original_content, context="messages")
         
         message = Message(
             sender_id=1,

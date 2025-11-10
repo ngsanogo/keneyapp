@@ -34,7 +34,7 @@ def get_or_create_thread_id(
         # Get thread from parent message
         parent = db.query(Message).filter(Message.id == reply_to_id).first()
         if parent and parent.thread_id:
-            return parent.thread_id
+            return str(parent.thread_id)
 
     # Check for existing thread between users
     existing = (

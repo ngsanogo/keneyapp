@@ -29,7 +29,7 @@ class TestMessageEncryption:
     def test_encrypt_message_content(self):
         """Test encrypting message content."""
         original = "Résultats d'analyses disponibles"
-        encrypted = encrypt_data(original, context={"type": "message"})
+        encrypted = encrypt_field(original, context="messages")
         
         assert encrypted != original
         assert encrypted is not None
@@ -38,16 +38,16 @@ class TestMessageEncryption:
     def test_decrypt_message_content(self):
         """Test decrypting message content."""
         original = "Votre ordonnance est prête"
-        encrypted = encrypt_data(original, context={"type": "message"})
-        decrypted = decrypt_data(encrypted, context={"type": "message"})
+        encrypted = encrypt_field(original, context="messages")
+        decrypted = decrypt_field(encrypted, context="messages")
         
         assert decrypted == original
 
     def test_encryption_uniqueness(self):
         """Test that same content produces different ciphertexts."""
         content = "Message confidentiel"
-        encrypted1 = encrypt_data(content, context={"type": "message"})
-        encrypted2 = encrypt_data(content, context={"type": "message"})
+        encrypted1 = encrypt_field(content, context="messages")
+        encrypted2 = encrypt_field(content, context="messages")
         
         assert encrypted1 != encrypted2  # Nonce ensures uniqueness
 
@@ -236,13 +236,13 @@ class TestMessageReadStatus:
         """Test that read_at timestamp is set correctly."""
         # Create message in DB
         from app.models.message import Message
-        from app.core.encryption import encrypt_data
+        from app.core.encryption import encrypt_field
         
         message = Message(
             sender_id=1,
             receiver_id=2,
             subject="Test",
-            encrypted_content=encrypt_data("Test content", context={"type": "message"}),
+            encrypted_content=encrypt_field("Test content", context="messages"),
             status=MessageStatus.DELIVERED,
             tenant_id=1
         )
@@ -292,13 +292,13 @@ class TestSoftDelete:
     def test_soft_delete_does_not_affect_receiver(self, db_session: Session):
         """Test that soft delete by sender doesn't affect receiver."""
         from app.models.message import Message
-        from app.core.encryption import encrypt_data
+        from app.core.encryption import encrypt_field
         
         message = Message(
             sender_id=1,
             receiver_id=2,
             subject="Test",
-            encrypted_content=encrypt_data("Content", context={"type": "message"}),
+            encrypted_content=encrypt_field("Content", context="messages"),
             status=MessageStatus.DELIVERED,
             deleted_by_sender=True,
             deleted_by_receiver=False,
@@ -354,10 +354,10 @@ class TestMessageSecurity:
     def test_message_content_encrypted_in_db(self, db_session: Session):
         """Test that message content is encrypted in database."""
         from app.models.message import Message
-        from app.core.encryption import encrypt_data
+        from app.core.encryption import encrypt_field
         
         original_content = "Contenu sensible médical"
-        encrypted = encrypt_data(original_content, context={"type": "message"})
+        encrypted = encrypt_field(original_content, context="messages")
         
         message = Message(
             sender_id=1,
