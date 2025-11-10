@@ -351,6 +351,8 @@ Celery handles asynchronous operations:
 
 ## Deployment Architecture
 
+> **📖 For comprehensive deployment strategies and procedures, see [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md)**
+
 ### Development Environment
 - Docker Compose for local development
 - Hot-reload for rapid iteration
@@ -364,6 +366,27 @@ Celery handles asynchronous operations:
 - SSL/TLS termination at ingress
 - Health checks and auto-recovery
 - Rolling updates with zero downtime
+
+### Deployment Patterns
+
+KeneyApp supports multiple deployment strategies for zero-downtime releases:
+
+1. **Rolling Deployment** (Default for staging)
+   - Gradual pod replacement
+   - Zero downtime
+   - Automatic rollback on health check failure
+
+2. **Blue-Green Deployment** (Production)
+   - Two identical environments
+   - Instant traffic switching
+   - Quick rollback capability
+
+3. **Canary Deployment** (Gradual production rollout)
+   - Progressive traffic migration (5% → 25% → 50% → 100%)
+   - Real-world validation with limited risk
+   - Early issue detection
+
+See [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) for detailed procedures, rollback plans, and best practices.
 
 ### High Availability
 - Multiple backend replicas
