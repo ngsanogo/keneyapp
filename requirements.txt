@@ -79,7 +79,7 @@ fhir.resources==7.1.0
 pycryptodome==3.23.0
 
 # Notifications
-twilio==9.3.7  # SMS notifications
+twilio==9.8.5  # SMS notifications
 
 # File processing
 python-magic==0.4.27  # MIME type detection
