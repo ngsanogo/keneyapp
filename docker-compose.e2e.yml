@@ -1,0 +1,135 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: keneyapp
+      POSTGRES_PASSWORD: keneyapp_test_pass
+      POSTGRES_DB: keneyapp_test
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keneyapp"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - e2e_test_network
+
+  # Redis for caching and Celery
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - e2e_test_network
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      # Database
+      DATABASE_URL: postgresql://keneyapp:keneyapp_test_pass@db:5432/keneyapp_test
+      
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      
+      # Security
+      SECRET_KEY: e2e_test_secret_key_change_in_production_12345
+      ENCRYPTION_KEY: e2e_test_encryption_key_32_bytes_exactly_123456789012
+      
+      # App Config
+      ENVIRONMENT: testing
+      DEBUG: "false"
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8000
+      
+      # Features
+      ENABLE_RATE_LIMITING: "true"
+      ENABLE_BOOTSTRAP_ADMIN: "true"
+      
+      # Monitoring
+      ENABLE_TRACING: "true"
+      ENABLE_METRICS: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - e2e_test_network
+    volumes:
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+
+  # Celery Worker
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A app.core.celery_app worker --loglevel=info
+    environment:
+      DATABASE_URL: postgresql://keneyapp:keneyapp_test_pass@db:5432/keneyapp_test
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      SECRET_KEY: e2e_test_secret_key_change_in_production_12345
+      ENCRYPTION_KEY: e2e_test_encryption_key_32_bytes_exactly_123456789012
+      ENVIRONMENT: testing
+    depends_on:
+      - db
+      - redis
+      - backend
+    networks:
+      - e2e_test_network
+
+  # E2E Test Runner
+  e2e_tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.e2e
+    environment:
+      API_BASE_URL: http://backend:8000
+      WAIT_FOR_BACKEND: "true"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - e2e_test_network
+    volumes:
+      - ./logs:/app/logs
+      - ./test_results:/app/test_results
+    command: >
+      sh -c "
+        echo '⏳ Waiting for backend to be fully ready...' &&
+        sleep 10 &&
+        echo '🚀 Starting E2E Integration Tests...' &&
+        python -m pytest tests/test_e2e_integration.py -v --tb=short --junit-xml=test_results/e2e_results.xml &&
+        echo '✅ E2E Tests Complete! Check logs/e2e_integration_results.json for details'
+      "
+
+networks:
+  e2e_test_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

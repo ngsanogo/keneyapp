@@ -18,6 +18,7 @@ from app.exceptions import (
     raise_if_not_found,
     raise_if_tenant_mismatch,
 )
+from app.services.patient_security import encrypt_patient_payload
 
 
 class PatientService:
@@ -104,7 +105,7 @@ class PatientService:
 
     def create_patient(self, patient_data: PatientCreate, tenant_id: int) -> Patient:
         """
-        Create a new patient with validation.
+        Create a new patient with validation and encryption.
 
         Args:
             patient_data: Patient creation data
@@ -122,8 +123,11 @@ class PatientService:
             if existing:
                 raise DuplicateResourceError("Patient", patient_data.email)
 
+        # Encrypt sensitive fields before persistence
+        encrypted_payload = encrypt_patient_payload(patient_data.model_dump())
+        
         # Create patient
-        patient = Patient(**patient_data.model_dump(), tenant_id=tenant_id)
+        patient = Patient(**encrypted_payload, tenant_id=tenant_id)
         self.db.add(patient)
         self.db.flush()  # Get ID without committing
         return patient
@@ -132,7 +136,7 @@ class PatientService:
         self, patient_id: int, patient_data: PatientUpdate, tenant_id: int
     ) -> Patient:
         """
-        Update an existing patient.
+        Update an existing patient with encryption.
 
         Args:
             patient_id: Patient ID
@@ -156,8 +160,11 @@ class PatientService:
             if existing and existing.id != patient_id:
                 raise DuplicateResourceError("Patient", update_dict["email"])
 
+        # Encrypt sensitive fields if present
+        encrypted_update = encrypt_patient_payload(update_dict)
+
         # Update fields
-        for field, value in update_dict.items():
+        for field, value in encrypted_update.items():
             setattr(patient, field, value)
 
         self.db.flush()

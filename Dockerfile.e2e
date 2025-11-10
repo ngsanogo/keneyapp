@@ -1,0 +1,32 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies and curl for health checks
+RUN apt-get update && apt-get install -y \
+    gcc \
+    postgresql-client \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt requirements-test.txt ./
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-test.txt
+
+# Install additional test dependencies
+RUN pip install --no-cache-dir pytest-timeout pytest-xdist requests
+
+# Copy application code
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p logs test_results uploads
+
+# Set Python path
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Default command (can be overridden in docker-compose)
+CMD ["python", "-m", "pytest", "tests/test_e2e_integration.py", "-v"]

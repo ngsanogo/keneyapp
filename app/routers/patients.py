@@ -1,5 +1,8 @@
 """
 Patient management router for CRUD operations on patient records.
+
+Refactored to use service layer for business logic while keeping
+HTTP/platform concerns (audit, cache, metrics, FHIR events) in router.
 """
 
 import logging
@@ -16,13 +19,17 @@ from app.core.rate_limit import limiter
 from app.models.patient import Patient
 from app.models.user import User, UserRole
 from app.schemas.patient import PatientCreate, PatientUpdate, PatientResponse
-from app.tasks import generate_patient_report
 from app.fhir.converters import fhir_converter
 from app.services.subscription_events import publish_event
 from app.services.patient_security import (
-    encrypt_patient_payload,
     serialize_patient_dict,
     serialize_patient_collection,
+)
+from app.services.patient_service import PatientService
+from app.exceptions import (
+    PatientNotFoundError,
+    DuplicateResourceError,
+    TenantMismatchError,
 )
 
 logger = logging.getLogger(__name__)
@@ -62,31 +69,26 @@ def create_patient(
     Returns:
         Created patient record
     """
-    # Check if email already exists
-    if patient_data.email:
-        existing = (
-            db.query(Patient)
-            .filter(
-                Patient.email == patient_data.email,
-                Patient.tenant_id == current_user.tenant_id,
-            )
-            .first()
+    service = PatientService(db)
+    
+    try:
+        db_patient = service.create_patient(patient_data, current_user.tenant_id)
+        db.commit()
+    except DuplicateResourceError as exc:
+        log_audit_event(
+            db=db,
+            action="CREATE",
+            resource_type="patient",
+            status="failure",
+            user_id=current_user.id,
+            username=current_user.username,
+            details={"reason": "duplicate_email", "email": patient_data.email},
+            request=request,
         )
-        if existing:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered",
-            )
-
-    encrypted_payload = encrypt_patient_payload(patient_data.model_dump())
-
-    db_patient = Patient(
-        **encrypted_payload,
-        tenant_id=current_user.tenant_id,
-    )
-    db.add(db_patient)
-    db.commit()
-    db.refresh(db_patient)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc.detail),
+        )
 
     log_audit_event(
         db=db,
@@ -112,12 +114,6 @@ def create_patient(
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
 
     patient_operations_total.labels(operation="create").inc()
-
-    # Trigger background patient report generation
-    try:
-        generate_patient_report.delay(db_patient.id)
-    except Exception as exc:  # pragma: no cover - best effort
-        logger.warning("Failed to queue patient report generation: %s", exc)
 
     # Publish FHIR Subscription event (Patient create)
     try:
@@ -170,13 +166,8 @@ def get_patients(
         )
         return cached_patients
 
-    patients = (
-        db.query(Patient)
-        .filter(Patient.tenant_id == current_user.tenant_id)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    service = PatientService(db)
+    patients = service.list_patients(current_user.tenant_id, skip=skip, limit=limit)
     serialized_patients = serialize_patient_collection(patients)
 
     cache_set(cache_key, serialized_patients, expire=PATIENT_LIST_TTL_SECONDS)
@@ -240,15 +231,10 @@ def get_patient(
         )
         return cached_patient
 
-    patient = (
-        db.query(Patient)
-        .filter(
-            Patient.id == patient_id,
-            Patient.tenant_id == current_user.tenant_id,
-        )
-        .first()
-    )
-    if not patient:
+    service = PatientService(db)
+    try:
+        patient = service.get_by_id(patient_id, current_user.tenant_id)
+    except PatientNotFoundError:
         log_audit_event(
             db=db,
             action="READ",
@@ -301,15 +287,11 @@ def update_patient(
     Returns:
         Updated patient record
     """
-    patient = (
-        db.query(Patient)
-        .filter(
-            Patient.id == patient_id,
-            Patient.tenant_id == current_user.tenant_id,
-        )
-        .first()
-    )
-    if not patient:
+    service = PatientService(db)
+    try:
+        patient = service.update_patient(patient_id, patient_data, current_user.tenant_id)
+        db.commit()
+    except PatientNotFoundError:
         log_audit_event(
             db=db,
             action="UPDATE",
@@ -324,14 +306,22 @@ def update_patient(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
         )
-
-    # Update only provided fields
-    update_data = encrypt_patient_payload(patient_data.model_dump(exclude_unset=True))
-    for field, value in update_data.items():
-        setattr(patient, field, value)
-
-    db.commit()
-    db.refresh(patient)
+    except DuplicateResourceError as exc:
+        log_audit_event(
+            db=db,
+            action="UPDATE",
+            resource_type="patient",
+            resource_id=patient_id,
+            status="failure",
+            user_id=current_user.id,
+            username=current_user.username,
+            details={"reason": "duplicate_email"},
+            request=request,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc.detail),
+        )
 
     log_audit_event(
         db=db,
@@ -341,7 +331,7 @@ def update_patient(
         status="success",
         user_id=current_user.id,
         username=current_user.username,
-        details={"updated_fields": list(update_data.keys())},
+        details={"updated_fields": list(patient_data.model_dump(exclude_unset=True).keys())},
         request=request,
     )
 
@@ -355,11 +345,6 @@ def update_patient(
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
 
     patient_operations_total.labels(operation="update").inc()
-
-    try:
-        generate_patient_report.delay(patient.id)
-    except Exception as exc:  # pragma: no cover - best effort
-        logger.warning("Failed to queue patient report generation: %s", exc)
 
     # Publish FHIR Subscription event (Patient update)
     try:
@@ -388,15 +373,11 @@ def delete_patient(
         db: Database session
         current_user: Authenticated user performing the operation
     """
-    patient = (
-        db.query(Patient)
-        .filter(
-            Patient.id == patient_id,
-            Patient.tenant_id == current_user.tenant_id,
-        )
-        .first()
-    )
-    if not patient:
+    service = PatientService(db)
+    try:
+        service.delete_patient(patient_id, current_user.tenant_id)
+        db.commit()
+    except PatientNotFoundError:
         log_audit_event(
             db=db,
             action="DELETE",
@@ -412,14 +393,11 @@ def delete_patient(
             status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
         )
 
-    db.delete(patient)
-    db.commit()
-
     log_audit_event(
         db=db,
         action="DELETE",
         resource_type="patient",
-        resource_id=patient.id,
+        resource_id=patient_id,
         status="success",
         user_id=current_user.id,
         username=current_user.username,

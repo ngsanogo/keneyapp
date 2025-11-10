@@ -378,6 +378,24 @@ LIMIT 100;
 
 ## 🧪 Testing
 
+### End-to-End (E2E) Integration Tests ⭐ NEW
+```bash
+# Run complete E2E test suite in Docker
+./scripts/run_e2e_tests.sh
+```
+
+**Comprehensive testing** covering:
+- ✅ Authentication (all user roles)
+- ✅ Patient CRUD workflows with PHI encryption
+- ✅ RBAC enforcement
+- ✅ Cache validation
+- ✅ GraphQL API
+- ✅ Prometheus metrics
+
+**Automated analysis** with performance metrics, failure investigation, and recommendations.
+
+📖 **Documentation:** [E2E Testing Guide](docs/E2E_TESTING.md) | [Quick Reference](docs/E2E_TESTING_QUICK_REF.md)
+
 ### Backend Tests
 ```bash
 # Run all tests
@@ -394,7 +412,7 @@ docker compose up -d
 pytest tests/test_smoke.py -v
 ```
 
-**Test Coverage:** 77% (65 tests)
+**Test Coverage:** 75% (155/159 tests passing)
 
 **Test Types:**
 - Unit tests for API endpoints, models, and services
@@ -402,6 +420,7 @@ pytest tests/test_smoke.py -v
 - API contract tests (JSON Schema validation)
 - Smoke tests for critical flows
 - Middleware and security tests
+- E2E integration tests in Docker
 
 ### Frontend Tests
 ```bash
