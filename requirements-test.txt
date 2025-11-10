@@ -14,7 +14,7 @@ faker==33.1.0  # Génération de données de test
 
 # Time mocking
 freezegun==1.5.1
-time-machine==2.16.0
+time-machine==2.19.0
 
 # Coverage reporting
 pytest-html==4.1.1  # Rapports HTML
