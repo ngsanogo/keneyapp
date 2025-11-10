@@ -17,7 +17,7 @@ from app.models.tenant import Tenant
 from app.schemas.appointment import AppointmentCreate, AppointmentUpdate
 from app.exceptions import (
     AppointmentConflictError,
-    PatientNotFoundError,
+    ResourceNotFoundError,
 )
 
 
@@ -102,7 +102,7 @@ def test_create_appointment_patient_not_found(
         reason="Test reason",
     )
 
-    with pytest.raises(PatientNotFoundError):
+    with pytest.raises(ResourceNotFoundError):
         appointment_service.create_appointment(appt_data, test_tenant.id)
 
 
@@ -225,6 +225,7 @@ def test_cancel_appointment(
         doctor_id=test_doctor.id,
         appointment_date=appointment_date,
         duration_minutes=30,
+        reason="Cancellation test",
     )
     appt = appointment_service.create_appointment(appt_data, test_tenant.id)
     db.commit()
@@ -248,14 +249,13 @@ def test_get_appointment_by_id(
         doctor_id=test_doctor.id,
         appointment_date=appointment_date,
         duration_minutes=30,
+        reason="Retrieval test",
     )
     created = appointment_service.create_appointment(appt_data, test_tenant.id)
     db.commit()
 
     # Retrieve appointment
-    retrieved = appointment_service.get_appointment_by_id(
-        created.id, test_tenant.id
-    )
+    retrieved = appointment_service.get_by_id(created.id, test_tenant.id)
 
     assert retrieved is not None
     assert retrieved.id == created.id
@@ -297,8 +297,8 @@ def test_check_patient_availability(
     is_available = appointment_service.check_patient_availability(
         test_patient.id,
         appointment_date,
-        appointment_date + timedelta(minutes=30),
-        test_tenant.id,
+        30,  # duration_minutes
+        tenant_id=test_tenant.id,
     )
     assert is_available is True
 
@@ -313,12 +313,12 @@ def test_check_patient_availability(
     appointment_service.create_appointment(appt_data, test_tenant.id)
     db.commit()
 
-    # Patient should not be available during appointment
+    # Patient should not be available during overlapping time
     is_available = appointment_service.check_patient_availability(
         test_patient.id,
-        appointment_date + timedelta(minutes=15),
-        appointment_date + timedelta(minutes=45),
-        test_tenant.id,
+        appointment_date + timedelta(minutes=15),  # Overlaps with existing
+        30,  # duration_minutes
+        tenant_id=test_tenant.id,
     )
     assert is_available is False
 
@@ -333,8 +333,8 @@ def test_check_doctor_availability(
     is_available = appointment_service.check_doctor_availability(
         test_doctor.id,
         appointment_date,
-        appointment_date + timedelta(minutes=30),
-        test_tenant.id,
+        30,  # duration_minutes
+        tenant_id=test_tenant.id,
     )
     assert is_available is True
 
@@ -349,12 +349,12 @@ def test_check_doctor_availability(
     appointment_service.create_appointment(appt_data, test_tenant.id)
     db.commit()
 
-    # Doctor should not be available during appointment
+    # Doctor should not be available during overlapping time
     is_available = appointment_service.check_doctor_availability(
         test_doctor.id,
-        appointment_date + timedelta(minutes=15),
-        appointment_date + timedelta(minutes=45),
-        test_tenant.id,
+        appointment_date + timedelta(minutes=15),  # Overlaps with existing
+        30,  # duration_minutes
+        tenant_id=test_tenant.id,
     )
     assert is_available is False
 
@@ -375,7 +375,6 @@ def test_appointment_tenant_isolation(
     appt = appointment_service.create_appointment(appt_data, test_tenant.id)
     db.commit()
 
-    # Try to access from different tenant
-    retrieved = appointment_service.get_appointment_by_id(appt.id, tenant_id=999)
-
-    assert retrieved is None  # Should not be accessible from other tenant
+    # Try to access from different tenant - should raise ResourceNotFoundError
+    with pytest.raises(ResourceNotFoundError):
+        appointment_service.get_by_id(appt.id, tenant_id=999)

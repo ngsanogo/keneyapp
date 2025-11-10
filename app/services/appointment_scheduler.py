@@ -8,7 +8,7 @@ and availability management.
 from datetime import datetime, timedelta
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 
 from app.models.appointment import Appointment, AppointmentStatus
 from app.models.user import User
@@ -74,7 +74,8 @@ class AppointmentSchedulerService:
         """
         end_time = start_time + timedelta(minutes=duration_minutes)
 
-        # Build query for overlapping appointments
+        # Build query for potentially overlapping appointments
+        # We'll check overlap logic in Python to avoid SQLAlchemy type issues
         query = self.db.query(Appointment).filter(
             Appointment.doctor_id == doctor_id,
             Appointment.status.in_(
@@ -84,13 +85,6 @@ class AppointmentSchedulerService:
                     AppointmentStatus.IN_PROGRESS,
                 ]
             ),
-            # Overlap condition: (start < other_end) AND (end > other_start)
-            and_(
-                Appointment.appointment_date < end_time,
-                Appointment.appointment_date
-                + timedelta(minutes=Appointment.duration_minutes)
-                > start_time,
-            ),
         )
 
         if tenant_id:
@@ -99,8 +93,15 @@ class AppointmentSchedulerService:
         if exclude_appointment_id:
             query = query.filter(Appointment.id != exclude_appointment_id)
 
-        conflicting = query.first()
-        return conflicting is None
+        # Get all potentially conflicting appointments and check in Python
+        appointments = query.all()
+        for appt in appointments:
+            appt_end = appt.appointment_date + timedelta(minutes=appt.duration_minutes)
+            # Overlap condition: (start < other_end) AND (end > other_start)
+            if start_time < appt_end and end_time > appt.appointment_date:
+                return False
+        
+        return True
 
     def check_patient_availability(
         self,
@@ -125,6 +126,7 @@ class AppointmentSchedulerService:
         """
         end_time = start_time + timedelta(minutes=duration_minutes)
 
+        # Build query for potentially overlapping appointments
         query = self.db.query(Appointment).filter(
             Appointment.patient_id == patient_id,
             Appointment.status.in_(
@@ -134,12 +136,6 @@ class AppointmentSchedulerService:
                     AppointmentStatus.IN_PROGRESS,
                 ]
             ),
-            and_(
-                Appointment.appointment_date < end_time,
-                Appointment.appointment_date
-                + timedelta(minutes=Appointment.duration_minutes)
-                > start_time,
-            ),
         )
 
         if tenant_id:
@@ -148,8 +144,15 @@ class AppointmentSchedulerService:
         if exclude_appointment_id:
             query = query.filter(Appointment.id != exclude_appointment_id)
 
-        conflicting = query.first()
-        return conflicting is None
+        # Get all potentially conflicting appointments and check in Python
+        appointments = query.all()
+        for appt in appointments:
+            appt_end = appt.appointment_date + timedelta(minutes=appt.duration_minutes)
+            # Overlap condition: (start < other_end) AND (end > other_start)
+            if start_time < appt_end and end_time > appt.appointment_date:
+                return False
+        
+        return True
 
     def create_appointment(
         self, appointment_data: AppointmentCreate, tenant_id: int
