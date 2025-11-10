@@ -1,19 +1,25 @@
 """
 Data encryption utilities for KeneyApp.
-Provides encryption at rest for sensitive patient data using AES-256.
+Provides encryption at rest for sensitive patient data using AES-256-GCM.
+
+Uses the modern 'cryptography' library (FIPS 140-2 compliant, actively maintained).
+Migrated from deprecated PyCrypto library for security and compliance.
 """
 
 from typing import Optional
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
-from Crypto.Protocol.KDF import PBKDF2
 import base64
+import os
+
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
 
 from app.core.config import settings
 
 
 class DataEncryption:
-    """Handle encryption and decryption of sensitive data."""
+    """Handle encryption and decryption of sensitive data using AES-256-GCM."""
 
     def __init__(self, key: Optional[str] = None):
         """
@@ -23,13 +29,19 @@ class DataEncryption:
             key: Encryption key (defaults to SECRET_KEY from settings)
         """
         self.key = key or settings.SECRET_KEY
-        # Derive a 32-byte key using PBKDF2
-        self.derived_key = PBKDF2(
-            self.key.encode("utf-8"),
-            b"keneyapp-salt",  # Salt for key derivation
-            dkLen=32,
-            count=100000,
+        
+        # Derive a 32-byte key using PBKDF2-HMAC-SHA256
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=b"keneyapp-salt",  # Salt for key derivation
+            iterations=100000,
+            backend=default_backend(),
         )
+        self.derived_key = kdf.derive(self.key.encode("utf-8"))
+        
+        # Create AESGCM instance for encryption/decryption
+        self.aesgcm = AESGCM(self.derived_key)
 
     def encrypt(self, plaintext: str) -> str:
         """
@@ -40,22 +52,24 @@ class DataEncryption:
 
         Returns:
             Base64-encoded encrypted data with nonce
+
+        Raises:
+            ValueError: If encryption fails
         """
         if not plaintext:
             return plaintext
 
         try:
-            # Generate random nonce
-            nonce = get_random_bytes(12)
+            # Generate random 96-bit nonce (12 bytes) for GCM
+            nonce = os.urandom(12)
 
-            # Create AES cipher in GCM mode
-            cipher = AES.new(self.derived_key, AES.MODE_GCM, nonce=nonce)
+            # Encrypt using AESGCM (automatically handles tag)
+            ciphertext = self.aesgcm.encrypt(
+                nonce, plaintext.encode("utf-8"), None
+            )
 
-            # Encrypt and get authentication tag
-            ciphertext, tag = cipher.encrypt_and_digest(plaintext.encode("utf-8"))
-
-            # Combine nonce + tag + ciphertext and encode as base64
-            encrypted_data = nonce + tag + ciphertext
+            # Combine nonce + ciphertext (tag is embedded) and encode as base64
+            encrypted_data = nonce + ciphertext
             return base64.b64encode(encrypted_data).decode("utf-8")
 
         except Exception as e:
@@ -70,6 +84,9 @@ class DataEncryption:
 
         Returns:
             Decrypted plaintext
+
+        Raises:
+            ValueError: If decryption or authentication fails
         """
         if not encrypted_data:
             return encrypted_data
@@ -78,16 +95,12 @@ class DataEncryption:
             # Decode base64
             encrypted_bytes = base64.b64decode(encrypted_data.encode("utf-8"))
 
-            # Extract nonce (12 bytes), tag (16 bytes), and ciphertext
+            # Extract nonce (12 bytes) and ciphertext (includes embedded tag)
             nonce = encrypted_bytes[:12]
-            tag = encrypted_bytes[12:28]
-            ciphertext = encrypted_bytes[28:]
+            ciphertext = encrypted_bytes[12:]
 
-            # Create AES cipher in GCM mode
-            cipher = AES.new(self.derived_key, AES.MODE_GCM, nonce=nonce)
-
-            # Decrypt and verify authentication tag
-            plaintext = cipher.decrypt_and_verify(ciphertext, tag)
+            # Decrypt using AESGCM (automatically verifies tag)
+            plaintext = self.aesgcm.decrypt(nonce, ciphertext, None)
 
             return plaintext.decode("utf-8")
 

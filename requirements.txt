@@ -50,7 +50,7 @@ slowapi==0.1.9
 prometheus-client==0.23.1
 
 # Additional Security
-cryptography==44.0.3
+cryptography>=46.0.3  # Modern, actively maintained (replaces pycryptodome)
 pyotp==2.9.0
 certifi>=2024.7.4
 jinja2>=3.1.4
@@ -75,10 +75,7 @@ strawberry-graphql[fastapi]>=0.257.0
 # HL7/FHIR Support
 fhir.resources==7.1.0
 
-# Additional Encryption
-pycryptodome==3.23.0
-
-# Notifications
+# File processing (removed pycryptodome - using cryptography instead)
 twilio==9.8.5  # SMS notifications
 
 # File processing
