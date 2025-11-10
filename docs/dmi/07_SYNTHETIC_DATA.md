@@ -51,7 +51,7 @@ Les données synthétiques sont essentielles pour :
 {
   "id": "patient-001-diabete",
   "ipp": "100000018",
-  "ins": "299120175012399",
+  "ins": "299120175012399", // Format: 1AAMMJJDDDCCCKK (15 characters, intentionally invalid for security)
   "ins_status": "PROVISOIRE",
   "nom": "DUBOIS",
   "prenom": "François",
