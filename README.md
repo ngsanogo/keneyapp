@@ -600,6 +600,13 @@ Comprehensive documentation available in the `docs/` directory:
 - **[API Reference](docs/API_REFERENCE.md)** - Full API documentation with examples
 - **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment instructions
 
+### Technology & Planning
+- **[Technology Choices](docs/TECHNOLOGY_CHOICES.md)** - Technology stack justification and decisions
+- **[Deployment Strategies](docs/DEPLOYMENT_STRATEGIES.md)** - Blue-Green, Canary, and Rolling deployment procedures
+- **[Testing Strategy](docs/TESTING_STRATEGY.md)** - Comprehensive testing approach and validation
+- **[Maintenance Plan](docs/MAINTENANCE_PLAN.md)** - Ongoing support and continuous improvement
+- **[Indicative Planning](docs/INDICATIVE_PLANNING.md)** - Development roadmap and milestones
+
 ### Advanced Features
 - **[OAuth Guide](docs/OAUTH_GUIDE.md)** - OAuth2/OIDC authentication setup
 - **[Encryption Guide](docs/ENCRYPTION_GUIDE.md)** - Data encryption implementation
