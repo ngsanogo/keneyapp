@@ -53,7 +53,7 @@ def get_or_create_thread_id(
     )
 
     if existing and existing.thread_id:
-        return existing.thread_id
+        return str(existing.thread_id)
 
     # Create new thread
     return generate_thread_id(sender_id, receiver_id)
@@ -117,7 +117,7 @@ def create_message(
             user_id=sender_id,
             action="CREATE",
             resource_type="message",
-            resource_id=str(message.id),
+            resource_id=int(message.id) if message.id else None,
             details={
                 "receiver_id": message_data.receiver_id,
                 "urgent": message_data.is_urgent,
@@ -160,8 +160,8 @@ def mark_message_as_read(
     message = get_message(db, message_id, user_id, tenant_id)
 
     if message and message.receiver_id == user_id and not message.read_at:
-        message.status = MessageStatus.READ
-        message.read_at = datetime.now(timezone.utc)
+        setattr(message, "status", MessageStatus.READ)
+        setattr(message, "read_at", datetime.now(timezone.utc))
         db.commit()
         db.refresh(message)
 
@@ -172,7 +172,7 @@ def mark_message_as_read(
                 user_id=user_id,
                 action="READ",
                 resource_type="message",
-                resource_id=str(message.id),
+                resource_id=int(message.id) if message.id else None,
                 details={"sender_id": message.sender_id},
                 request=request,
             )
@@ -255,9 +255,9 @@ def delete_message(
 
     # Soft delete based on user role
     if message.sender_id == user_id:
-        message.deleted_by_sender = True
+        setattr(message, "deleted_by_sender", True)
     if message.receiver_id == user_id:
-        message.deleted_by_receiver = True
+        setattr(message, "deleted_by_receiver", True)
 
     db.commit()
 
@@ -268,7 +268,7 @@ def delete_message(
             user_id=user_id,
             action="DELETE",
             resource_type="message",
-            resource_id=str(message.id),
+            resource_id=int(message.id) if message.id else None,
             details={"soft_delete": True},
             request=request,
         )
@@ -333,9 +333,11 @@ def get_message_stats(db: Session, user_id: int, tenant_id: str) -> MessageStats
 
 def serialize_message(message: Message, tenant_id: str) -> dict:
     """Serialize message with decrypted content."""
-    decrypted_content = decrypt_message_content(message.encrypted_content, tenant_id)
+    encrypted_content_str = str(message.encrypted_content)
+    decrypted_content = decrypt_message_content(encrypted_content_str, tenant_id)
+    attachment_ids_str = str(message.attachment_ids) if message.attachment_ids else None
     attachment_ids = (
-        json.loads(message.attachment_ids) if message.attachment_ids else None
+        json.loads(attachment_ids_str) if attachment_ids_str else None
     )
 
     return {

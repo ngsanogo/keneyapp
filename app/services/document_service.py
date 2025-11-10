@@ -139,8 +139,9 @@ async def upload_document(
         )
 
     # Generate secure filename and path
+    filename = file.filename or "unnamed_file"
     secure_filename, storage_path = generate_secure_filename(
-        file.filename, tenant_id, metadata.patient_id
+        filename, tenant_id, metadata.patient_id
     )
 
     # Read file content for checksum
@@ -180,7 +181,8 @@ async def upload_document(
         buffer.write(content)
 
     # Detect format
-    document_format = detect_document_format(file.content_type)
+    content_type = file.content_type or "application/octet-stream"
+    document_format = detect_document_format(content_type)
 
     # Convert tags to JSON
     tags_json = json.dumps(metadata.tags) if metadata.tags else None
@@ -218,7 +220,7 @@ async def upload_document(
             user_id=user_id,
             action="CREATE",
             resource_type="medical_document",
-            resource_id=str(document.id),
+            resource_id=int(document.id) if document.id else None,
             details={
                 "patient_id": metadata.patient_id,
                 "document_type": metadata.document_type.value,
@@ -284,8 +286,8 @@ def delete_document(
         return False
 
     # Soft delete
-    document.deleted_at = datetime.now(timezone.utc)
-    document.status = DocumentStatus.ARCHIVED
+    setattr(document, "deleted_at", datetime.now(timezone.utc))
+    setattr(document, "status", DocumentStatus.ARCHIVED)
     db.commit()
 
     # Audit log
@@ -295,7 +297,7 @@ def delete_document(
             user_id=user_id,
             action="DELETE",
             resource_type="medical_document",
-            resource_id=str(document.id),
+            resource_id=int(document.id) if document.id else None,
             details={"patient_id": document.patient_id, "soft_delete": True},
             request=request,
         )
@@ -305,7 +307,7 @@ def delete_document(
 
 def get_document_file_path(document: MedicalDocument) -> str:
     """Get the file system path for a document."""
-    return document.storage_path
+    return str(document.storage_path)
 
 
 def get_document_stats(
@@ -324,19 +326,19 @@ def get_document_stats(
     total_size = sum(doc.file_size for doc in documents)
 
     # Count by type
-    by_type = {}
+    by_type: dict[str, int] = {}
     for doc in documents:
         doc_type = doc.document_type.value
         by_type[doc_type] = by_type.get(doc_type, 0) + 1
 
     # Count by format
-    by_format = {}
+    by_format: dict[str, int] = {}
     for doc in documents:
         doc_format = doc.document_format.value
         by_format[doc_format] = by_format.get(doc_format, 0) + 1
 
     # Count by status
-    by_status = {}
+    by_status: dict[str, int] = {}
     for doc in documents:
         doc_status = doc.status.value
         by_status[doc_status] = by_status.get(doc_status, 0) + 1

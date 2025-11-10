@@ -57,7 +57,7 @@ jobs:
         DATABASE_URL: postgresql://keneyapp:keneyapp@localhost:5432/keneyapp_test
         SECRET_KEY: test-secret-key-for-ci-only
       run: |
-        pytest tests/ -v -m "not smoke" --cov=app --cov-report=xml --cov-report=html --cov-report=term
+        pytest tests/ -v -m "not smoke" --cov=app --cov-report=xml --cov-report=html --cov-report=term --cov-fail-under=70
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
@@ -70,7 +70,7 @@ jobs:
     - name: Check for security vulnerabilities
       run: |
         pip install pip-audit
-        pip-audit --desc || echo "Note: pip-audit found vulnerabilities. Review and address them."
+        pip-audit --desc --strict
 
   backend-security:
     runs-on: ubuntu-latest
@@ -113,15 +113,15 @@ jobs:
     
     - name: Check formatting
       working-directory: ./frontend
-      run: npm run format:check || true
+      run: npm run format:check
     
     - name: Run linting
       working-directory: ./frontend
-      run: npm run lint || true
+      run: npm run lint
     
     - name: Run tests with coverage
       working-directory: ./frontend
-      run: npm test -- --watchAll=false --coverage || true
+      run: npm test -- --watchAll=false --coverage
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5

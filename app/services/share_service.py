@@ -84,7 +84,7 @@ def create_share(
             user_id=user_id,
             action="CREATE",
             resource_type="medical_record_share",
-            resource_id=str(share.id),
+            resource_id=int(share.id) if share.id else None,
             details={
                 "patient_id": share_data.patient_id,
                 "scope": share_data.scope.value,
@@ -142,7 +142,7 @@ def validate_and_access_share(
             share.expires_at < datetime.now(timezone.utc)
             and share.status == ShareStatus.ACTIVE
         ):
-            share.status = ShareStatus.EXPIRED
+            setattr(share, "status", ShareStatus.EXPIRED)
             db.commit()
 
         raise HTTPException(
@@ -151,13 +151,14 @@ def validate_and_access_share(
         )
 
     # Record access
-    share.access_count += 1
-    share.last_accessed_at = datetime.now(timezone.utc)
-    share.last_accessed_ip = ip_address
+    current_count: int = int(share.access_count)
+    setattr(share, "access_count", current_count + 1)
+    setattr(share, "last_accessed_at", datetime.now(timezone.utc))
+    setattr(share, "last_accessed_ip", ip_address)
 
     # Mark as used if max access reached
     if share.max_access_count and share.access_count >= share.max_access_count:
-        share.status = ShareStatus.USED
+        setattr(share, "status", ShareStatus.USED)
 
     db.commit()
     db.refresh(share)
@@ -166,10 +167,10 @@ def validate_and_access_share(
     if request:
         log_audit_event(
             db=db,
-            user_id=share.shared_by_user_id,
+            user_id=int(share.shared_by_user_id),
             action="READ",
             resource_type="medical_record_share",
-            resource_id=str(share.id),
+            resource_id=int(share.id) if share.id else None,
             details={
                 "patient_id": share.patient_id,
                 "access_count": share.access_count,
@@ -324,9 +325,9 @@ def revoke_share(
     if not share:
         return False
 
-    share.status = ShareStatus.REVOKED
-    share.revoked_at = datetime.now(timezone.utc)
-    share.revoked_by_user_id = user_id
+    setattr(share, "status", ShareStatus.REVOKED)
+    setattr(share, "revoked_at", datetime.now(timezone.utc))
+    setattr(share, "revoked_by_user_id", user_id)
     db.commit()
 
     # Audit log
@@ -336,7 +337,7 @@ def revoke_share(
             user_id=user_id,
             action="DELETE",
             resource_type="medical_record_share",
-            resource_id=str(share.id),
+            resource_id=int(share.id) if share.id else None,
             details={"patient_id": share.patient_id, "revoked": True},
             request=request,
         )
