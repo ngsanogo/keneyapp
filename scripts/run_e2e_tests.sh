@@ -62,7 +62,7 @@ echo ""
 # Show service status
 echo ""
 echo "📊 Service Status:"
-docker compose -f docker compose.e2e.yml ps
+docker compose -f docker-compose.e2e.yml ps
 
 # Run E2E tests
 echo ""
@@ -72,7 +72,7 @@ echo ""
 
 # Run tests and capture exit code
 set +e
-docker compose -f docker compose.e2e.yml run --rm e2e_tests
+docker compose -f docker-compose.e2e.yml run --rm e2e_tests
 TEST_EXIT_CODE=$?
 set -e
 
@@ -164,7 +164,7 @@ if [ $TEST_EXIT_CODE -ne 0 ]; then
     echo ""
     echo -e "${RED}❌ Tests Failed! Showing backend logs...${NC}"
     echo "─────────────────────────────────────────────────────────────"
-    docker compose -f docker compose.e2e.yml logs --tail=50 backend
+    docker compose -f docker-compose.e2e.yml logs --tail=50 backend
     echo "─────────────────────────────────────────────────────────────"
 fi
 
@@ -174,15 +174,15 @@ read -p "🧹 Clean up Docker containers? (y/n) " -n 1 -r
 echo ""
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "🧹 Cleaning up..."
-    docker compose -f docker compose.e2e.yml down -v
+    docker compose -f docker-compose.e2e.yml down -v
     echo -e "${GREEN}✅ Cleanup complete${NC}"
 else
     echo "⚠️  Containers still running. To inspect:"
-    echo "   docker compose -f docker compose.e2e.yml logs backend"
-    echo "   docker compose -f docker compose.e2e.yml exec backend /bin/bash"
+    echo "   docker compose -f docker-compose.e2e.yml logs backend"
+    echo "   docker compose -f docker-compose.e2e.yml exec backend /bin/bash"
     echo ""
     echo "To stop later:"
-    echo "   docker compose -f docker compose.e2e.yml down -v"
+    echo "   docker compose -f docker-compose.e2e.yml down -v"
 fi
 
 echo ""

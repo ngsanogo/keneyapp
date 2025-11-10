@@ -1,0 +1,46 @@
+{
+  "test_run_id": "2025-11-10T19:44:25.358756",
+  "start_time": "2025-11-10T19:44:25.358766",
+  "end_time": "2025-11-10T19:44:25.383632",
+  "total_duration_seconds": 0.024866,
+  "tests": [],
+  "summary": {
+    "total": 0,
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0
+  },
+  "errors": [
+    {
+      "test": "Authentication: Super Admin",
+      "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/v1/auth/login (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10e67c910>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "traceback": null,
+      "timestamp": "2025-11-10T19:44:25.370303"
+    },
+    {
+      "test": "Authentication: Admin",
+      "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/v1/auth/login (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10e73d700>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "traceback": null,
+      "timestamp": "2025-11-10T19:44:25.373569"
+    },
+    {
+      "test": "Authentication: Doctor",
+      "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/v1/auth/login (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10e67c9d0>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "traceback": null,
+      "timestamp": "2025-11-10T19:44:25.375573"
+    },
+    {
+      "test": "Authentication: Nurse",
+      "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/v1/auth/login (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10e789070>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "traceback": null,
+      "timestamp": "2025-11-10T19:44:25.377290"
+    },
+    {
+      "test": "Authentication: Receptionist",
+      "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/v1/auth/login (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10e789a00>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "traceback": null,
+      "timestamp": "2025-11-10T19:44:25.379135"
+    }
+  ],
+  "performance_metrics": {}
+}

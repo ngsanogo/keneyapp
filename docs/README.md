@@ -45,7 +45,11 @@ Welcome to the KeneyApp documentation! This directory contains comprehensive gui
 | Document | Description |
 |----------|-------------|
 | [E2E Testing Guide](E2E_TESTING.md) | ⭐ Comprehensive end-to-end integration testing in Docker |
+| [E2E Test Scenarios](E2E_TEST_SCENARIOS.md) | ⭐ **Detailed test scenarios with complete user journeys** |
+| [E2E Test Methodology](E2E_TEST_METHODOLOGY.md) | ⭐ **Complete testing methodology (11 phases)** |
 | [E2E Testing Quick Reference](E2E_TESTING_QUICK_REF.md) | Quick commands and troubleshooting for E2E tests |
+| [E2E Testing Architecture](E2E_TESTING_ARCHITECTURE.md) | Architecture diagrams and data flow |
+| [E2E Testing Checklist](E2E_TESTING_CHECKLIST.md) | Execution and interpretation checklist |
 | [Testing Guide](TESTING_GUIDE.md) | Comprehensive testing strategies and best practices |
 | [Performance Testing](PERFORMANCE_TESTING.md) | Load testing, benchmarking, and optimization |
 | [Code Quality](CODE_QUALITY.md) | Code quality standards and tooling |
