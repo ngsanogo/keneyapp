@@ -1,0 +1,94 @@
+site_name: KeneyApp Documentation
+site_description: Comprehensive healthcare management platform documentation
+site_author: ISData Consulting
+site_url: https://isdata-consulting.github.io/keneyapp
+
+repo_name: ISData-consulting/keneyapp
+repo_url: https://github.com/ISData-consulting/keneyapp
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Quick Start: QUICK_START.md
+      - Installation: DEPLOYMENT.md
+      - Configuration: docs/DEVELOPMENT.md
+  - Architecture:
+      - Overview: ARCHITECTURE.md
+      - Technology Choices: docs/TECHNOLOGY_CHOICES.md
+      - DMI Alignment: docs/DMI_ARCHITECTURE_ALIGNMENT.md
+  - Features:
+      - v3.0 Features: docs/NEW_FEATURES_V3.md
+      - Medical Terminologies: docs/MEDICAL_TERMINOLOGIES.md
+      - FHIR Guide: docs/FHIR_GUIDE.md
+      - OAuth: docs/OAUTH_GUIDE.md
+  - Development:
+      - Development Guide: docs/DEVELOPMENT.md
+      - Code Quality: CODE_QUALITY.md
+      - Testing: docs/TESTING_GUIDE.md
+      - E2E Testing: docs/E2E_TESTING.md
+  - API Reference:
+      - API Best Practices: docs/API_BEST_PRACTICES.md
+      - API Reference: docs/API_REFERENCE.md
+  - Security:
+      - Security Best Practices: docs/SECURITY_BEST_PRACTICES.md
+      - Encryption Guide: docs/ENCRYPTION_GUIDE.md
+      - Compliance: docs/SECURITY_COMPLIANCE.md
+  - Operations:
+      - Deployment: docs/DEPLOYMENT.md
+      - Monitoring: docs/MONITORING_ALERTING.md
+      - Runbook: docs/OPERATIONS_RUNBOOK.md
+      - Disaster Recovery: docs/DISASTER_RECOVERY.md
+  - Contributing:
+      - Contributing Guide: CONTRIBUTING.md
+      - Code of Conduct: CODE_OF_CONDUCT.md
+      - Governance: GOVERNANCE.md

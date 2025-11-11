@@ -1,4 +1,4 @@
-# Pre-commit hooks configuration
+# Pre-commit hooks configuration for KeneyApp
 # Install: pip install pre-commit && pre-commit install
 # Run manually: pre-commit run --all-files
 
@@ -9,6 +9,7 @@ repos:
     hooks:
       - id: black
         language_version: python3.11
+        args: ['--line-length=100']
         files: ^app/
 
   # Python linting with flake8
@@ -16,7 +17,8 @@ repos:
     rev: 7.1.1
     hooks:
       - id: flake8
-        # Configuration is now in .flake8 file
+        args: ['--max-line-length=100', '--extend-ignore=E203,W503']
+        additional_dependencies: [flake8-docstrings, flake8-bugbear]
         files: ^app/
 
   # Python import sorting
@@ -24,7 +26,7 @@ repos:
     rev: 5.13.2
     hooks:
       - id: isort
-        args: ['--profile', 'black']
+        args: ['--profile', 'black', '--line-length', '100']
         files: ^app/
 
   # Python type checking with mypy
@@ -117,4 +119,11 @@ repos:
       - id: markdownlint
         args: ['--fix']
         files: \.md$
+
+  # Commit message validation (conventional commits)
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
 
