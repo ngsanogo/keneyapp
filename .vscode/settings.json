@@ -3,5 +3,25 @@
         "."
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "typescript.validate.enable": true,
+    "javascript.validate.enable": true,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/.pytest_cache": true,
+        "**/.mypy_cache": true
+    },
+    "files.watcherExclude": {
+        "**/node_modules/**": true,
+        "**/.venv/**": true,
+        "**/htmlcov/**": true,
+        "**/__pycache__/**": true
+    },
+    "typescript.surveys.enabled": false,
+    "github-actions.workflows.pinned.workflows": [],
+    "typescript.disableAutomaticTypeAcquisition": false
 }
