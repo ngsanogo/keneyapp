@@ -91,7 +91,46 @@ KeneyApp implements international healthcare standards for maximum interoperabil
 
 See [Medical Terminologies Guide](docs/MEDICAL_TERMINOLOGIES.md) for complete documentation.
 
-## 🛠 Tech Stack
+## � Docker & Deployment
+
+### Optimized Docker Images
+
+KeneyApp uses highly optimized Docker images with **multi-stage builds**:
+
+| Service | Before | After | Reduction |
+|---------|--------|-------|-----------|
+| Backend | 1.97 GB | **838 MB** | 🚀 **57.5%** |
+| Frontend | 1.4 GB | **82.6 MB** | 🔥 **94.1%** |
+| Celery Worker | 1.97 GB | **838 MB** | 🚀 **57.5%** |
+| **Total** | ~10 GB | **~3.4 GB** | 🎯 **63% savings** |
+
+**Key Optimizations:**
+- ✅ Multi-stage builds (builder + runtime)
+- ✅ Nginx for frontend static serving
+- ✅ Enhanced .dockerignore (-87% build context)
+- ✅ Production-only dependencies
+- ✅ Virtual environment isolation
+- ✅ Non-root users for security
+- ✅ Health checks for monitoring
+
+**Quick Commands:**
+```bash
+# Check optimized image sizes
+make docker-sizes
+
+# Build optimized images
+make docker-build-optimized
+
+# Start services
+make docker-up
+
+# View logs
+make docker-logs
+```
+
+📖 **Full Details:** See [Docker Optimization Results](DOCKER_OPTIMIZATION_RESULTS.md)
+
+## �🛠 Tech Stack
 
 - **Backend**: FastAPI (Python 3.11)
 - **Frontend**: React 18 + TypeScript

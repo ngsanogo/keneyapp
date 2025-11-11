@@ -27,9 +27,14 @@ help:
 	@echo "  make build-quick     Quick build without tests"
 	@echo ""
 	@echo "Docker Commands:"
-	@echo "  make docker-up       Start all services with Docker Compose"
-	@echo "  make docker-down     Stop all Docker services"
-	@echo "  make docker-logs     Follow Docker logs"
+	@echo "  make docker-up            Start all services with Docker Compose"
+	@echo "  make docker-down          Stop all Docker services"
+	@echo "  make docker-logs          Follow Docker logs"
+	@echo "  make docker-build         Build Docker images"
+	@echo "  make docker-build-optimized Build optimized images (no cache)"
+	@echo "  make docker-sizes         Check optimized image sizes"
+	@echo "  make docker-cleanup       Clean unused Docker resources"
+	@echo "  make docker-reset         Reset Docker environment"
 	@echo ""
 	@echo "Utility Commands:"
 	@echo "  make clean           Remove build artifacts and cache files"
@@ -219,6 +224,28 @@ docker-build:
 	@echo "Building Docker images..."
 	docker-compose build
 	@echo "✅ Images built!"
+
+docker-build-optimized:
+	@echo "Building optimized Docker images (no cache)..."
+	docker-compose build --no-cache
+	@echo "✅ Optimized images built!"
+	@echo ""
+	@echo "📊 Run 'make docker-sizes' to check image sizes"
+
+docker-sizes:
+	@echo "Checking Docker image sizes..."
+	@python3 scripts/check_image_sizes.py
+
+docker-cleanup:
+	@echo "Cleaning up Docker resources..."
+	docker system prune -f
+	@echo "✅ Docker cleanup complete!"
+
+docker-reset:
+	@echo "Resetting Docker environment..."
+	docker-compose down -v
+	docker system prune -af
+	@echo "✅ Docker environment reset!"
 
 # Cleanup
 clean:
