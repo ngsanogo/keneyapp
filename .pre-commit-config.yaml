@@ -8,7 +8,7 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black
-        language_version: python3.11
+        language_version: python3.9
         args: ['--line-length=100']
         files: ^app/
 
@@ -126,4 +126,3 @@ repos:
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
-
