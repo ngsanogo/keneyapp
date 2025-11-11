@@ -10,6 +10,7 @@ build/
 .venv/
 venv/
 ENV/
+.mypy_cache/
 
 # Tests
 .pytest_cache/
@@ -17,6 +18,9 @@ ENV/
 htmlcov/
 coverage.xml
 .tox/
+tests/
+test_results/
+e2e_run.log
 
 # IDEs
 .vscode/
@@ -34,18 +38,31 @@ Thumbs.db
 .gitignore
 .gitattributes
 
-# Documentation
+# Documentation (reduce context size)
 *.md
 !README.md
 docs/
+AUDIT_*.md
+CHANGELOG.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+GOVERNANCE.md
+LICENSE
+RELEASE.md
+SECURITY.md
+SUPPORT.md
+BUILD.md
 
 # CI/CD
 .github/
+.pre-commit-config.yaml
+.secrets.baseline
+.releaserc.json
+cliff.toml
+sonar-project.properties
 
-# Terraform
+# Terraform & K8s
 terraform/
-
-# Kubernetes
 k8s/
 
 # Monitoring configs (not needed in image)
@@ -57,8 +74,36 @@ npm-debug.log
 frontend/.next/
 frontend/build/
 frontend/dist/
+package.json
+package-lock.json
+tsconfig.json
+playwright.config.ts
+mkdocs.yml
 
-# Temporary files
+# Temporary files & logs
 *.log
 tmp/
 temp/
+logs/
+uploads/
+
+# Docker files (don't include in context)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Development configs
+.editorconfig
+.flake8
+mypy.ini
+pytest.ini
+pyproject.toml
+requirements-dev.txt
+requirements-test.txt
+
+# Build artifacts
+htmlcov/
+.benchmarks/
+e2e/
+E2E_*.md
+TEST_RUN_RESULTS.md
