@@ -427,9 +427,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: docker-build-push
     if: github.ref == 'refs/heads/develop'
-    environment:
-      name: staging
-      url: https://staging.keneyapp.com
+    # Note: Remove 'environment' block or create 'staging' environment in GitHub repo settings
+    # environment:
+    #   name: staging
+    #   url: https://staging.keneyapp.com
     steps:
       - uses: actions/checkout@v4
       
@@ -454,9 +455,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: docker-build-push
     if: github.ref == 'refs/heads/main'
-    environment:
-      name: production
-      url: https://keneyapp.com
+    # Note: Remove 'environment' block or create 'production' environment in GitHub repo settings
+    # environment:
+    #   name: production
+    #   url: https://keneyapp.com
     steps:
       - uses: actions/checkout@v4
       

@@ -1,7 +1,7 @@
 """enhance_lab_models_with_workflow_states
 
 Revision ID: 016_enhance_lab_models
-Revises: 015_add_lab_test_types_and_criteria
+Revises: 015_add_lab
 Create Date: 2025-11-05
 
 Enhancements based on GNU Health patterns:
@@ -17,7 +17,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '016_enhance_lab_models'
-down_revision = '015_add_lab_test_types_and_criteria'
+down_revision = '015_add_lab'
 branch_labels = None
 depends_on = None
 

@@ -1,5 +1,5 @@
 # Backend Dockerfile for KeneyApp
-FROM python:3.14-slim
+FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
@@ -13,6 +13,8 @@ ENV PYTHONUNBUFFERED=1 \
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     postgresql-client \
+    libpq-dev \
+    gcc \
     curl \
     ca-certificates \
     && update-ca-certificates \
