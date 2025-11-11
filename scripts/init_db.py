@@ -19,8 +19,8 @@ from app.models.tenant import Tenant
 def init_db():
     """Initialize database with sample data."""
 
-    # Create all tables
-    Base.metadata.create_all(bind=engine)
+    # Tables are created by Alembic migrations, not here
+    # Base.metadata.create_all(bind=engine)
 
     db = SessionLocal()
 
@@ -89,94 +89,16 @@ def init_db():
         db.add_all([admin_user, doctor_user, nurse_user, receptionist_user])
         db.commit()
 
-        # Create sample patients
-        patient1 = Patient(
-            tenant_id=tenant_id,
-            first_name="Pierre",
-            last_name="Dubois",
-            date_of_birth=datetime(1985, 5, 15).date(),
-            gender=Gender.MALE,
-            email="pierre.dubois@example.com",
-            phone="+33 6 12 34 56 78",
-            address="123 Rue de la Paix, 75001 Paris",
-            blood_type="O+",
-            allergies="Penicillin",
-            emergency_contact="Marie Dubois",
-            emergency_phone="+33 6 98 76 54 32",
-        )
-
-        patient2 = Patient(
-            tenant_id=tenant_id,
-            first_name="Claire",
-            last_name="Laurent",
-            date_of_birth=datetime(1990, 8, 20).date(),
-            gender=Gender.FEMALE,
-            email="claire.laurent@example.com",
-            phone="+33 6 23 45 67 89",
-            address="456 Avenue des Champs-Élysées, 75008 Paris",
-            blood_type="A+",
-            emergency_contact="Paul Laurent",
-            emergency_phone="+33 6 87 65 43 21",
-        )
-
-        db.add_all([patient1, patient2])
-        db.commit()
-
-        # Create sample appointments
-        tomorrow = datetime.utcnow() + timedelta(days=1)
-        appointment1 = Appointment(
-            tenant_id=tenant_id,
-            patient_id=patient1.id,
-            doctor_id=doctor_user.id,
-            appointment_date=tomorrow.replace(hour=10, minute=0),
-            duration_minutes=30,
-            status=AppointmentStatus.SCHEDULED,
-            reason="Consultation de routine",
-            notes="Patient signale des douleurs au dos",
-        )
-
-        next_week = datetime.utcnow() + timedelta(days=7)
-        appointment2 = Appointment(
-            tenant_id=tenant_id,
-            patient_id=patient2.id,
-            doctor_id=doctor_user.id,
-            appointment_date=next_week.replace(hour=14, minute=30),
-            duration_minutes=45,
-            status=AppointmentStatus.SCHEDULED,
-            reason="Suivi annuel",
-            notes="Contrôle de santé régulier",
-        )
-
-        db.add_all([appointment1, appointment2])
-        db.commit()
-
-        # Create sample prescriptions
-        prescription1 = Prescription(
-            tenant_id=tenant_id,
-            patient_id=patient1.id,
-            doctor_id=doctor_user.id,
-            medication_name="Paracétamol",
-            dosage="500mg",
-            frequency="3 fois par jour",
-            duration="7 jours",
-            instructions="À prendre après les repas",
-            refills=2,
-        )
-
-        prescription2 = Prescription(
-            tenant_id=tenant_id,
-            patient_id=patient2.id,
-            doctor_id=doctor_user.id,
-            medication_name="Vitamine D",
-            dosage="1000 UI",
-            frequency="1 fois par jour",
-            duration="30 jours",
-            instructions="À prendre le matin",
-            refills=1,
-        )
-
-        db.add_all([prescription1, prescription2])
-        db.commit()
+        # TEMPORARY: Skip demo data creation due to model/migration mismatch
+        # TODO: Create proper migrations for all model fields before re-enabling
+        # # Create sample patients
+        # patient1 = Patient(...)
+        # patient2 = Patient(...)
+        # db.add_all([patient1, patient2])
+        # db.commit()
+        
+        # # Create sample appointments...
+        # # Create sample prescriptions...
 
         print("✓ Database initialized successfully!")
         print("\nSample users created:")
@@ -184,6 +106,7 @@ def init_db():
         print("  Doctor: doctor / doctor123")
         print("  Nurse: nurse / nurse123")
         print("  Receptionist: receptionist / receptionist123")
+        print("\n⚠ Demo data (patients, appointments, prescriptions) skipped - use API to create")
 
     finally:
         db.close()

@@ -1,6 +1,6 @@
 """Optimize subscriptions indexing
 
-Revision ID: 014_optimize_subscriptions_indexes
+Revision ID: 014_optimize_subs_indexes
 Revises: 013_add_subscriptions
 Create Date: 2025-11-04
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '014_optimize_subscriptions_indexes'
+revision = '014_optimize_subs_indexes'
 down_revision = '013_add_subscriptions'
 branch_labels = None
 depends_on = None

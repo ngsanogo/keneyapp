@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Enum as SQLEnum, ForeignKey
 from sqlalchemy.sql import func
 import enum
 
@@ -22,7 +22,7 @@ class Subscription(Base):
     id = Column(Integer, primary_key=True, index=True)
     tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False, index=True)
     status = Column(
-        Enum(SubscriptionStatus, name="subscriptionstatus"),
+        SQLEnum(SubscriptionStatus, name="subscriptionstatus", native_enum=False),
         nullable=False,
         default=SubscriptionStatus.requested,
     )
@@ -31,7 +31,7 @@ class Subscription(Base):
         String(255), nullable=False
     )  # e.g., "Appointment?patient=123" or resource type
     channel_type = Column(
-        Enum(SubscriptionChannelType, name="subscriptionchanneltype"),
+        SQLEnum(SubscriptionChannelType, name="subscriptionchanneltype", native_enum=False),
         nullable=False,
         default=SubscriptionChannelType.rest_hook,
     )

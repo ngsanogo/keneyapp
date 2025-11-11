@@ -57,7 +57,7 @@ class MedicalRecordShare(Base):
 
     # Sharing details
     share_token = Column(String(255), unique=True, nullable=False, index=True)
-    scope = Column(SQLEnum(ShareScope, name="sharescope"), nullable=False)
+    scope = Column(SQLEnum(ShareScope, name="sharescope", native_enum=False), nullable=False)
     custom_resources = Column(Text, nullable=True)  # JSON for custom scope
 
     # Access control
@@ -67,7 +67,7 @@ class MedicalRecordShare(Base):
 
     # Status and validity
     status = Column(
-        SQLEnum(ShareStatus, name="sharestatus"),
+        SQLEnum(ShareStatus, name="sharestatus", native_enum=False),
         default=ShareStatus.ACTIVE,
         nullable=False,
     )

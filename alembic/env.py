@@ -8,10 +8,10 @@ from sqlalchemy import pool
 
 from alembic import context
 
-# Import the database base and models
+# Import the database base WITHOUT loading models to avoid ENUM conflicts
 from app.core.database import Base
 from app.core.config import settings
-import app.models  # noqa: F401
+# DO NOT import app.models here - it loads SQLAlchemy metadata which conflicts with migrations
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -25,9 +25,15 @@ config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-target_metadata = Base.metadata
+# For autogenerate support, we need to import models, but for running migrations
+# we should use an empty metadata to avoid conflicts
+import os
+if os.environ.get("ALEMBIC_AUTOGENERATE"):
+    import app.models  # noqa: F401
+    target_metadata = Base.metadata
+else:
+    # Use empty metadata for migration runs to avoid ENUM conflicts
+    target_metadata = None
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -74,7 +80,11 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            include_object=lambda obj, name, type_, reflected, compare_to: (
+                False if type_ == "type" and hasattr(obj, "name") and obj.name in ["sharescope", "sharestatus"] else True
+            ),
         )
 
         with context.begin_transaction():
