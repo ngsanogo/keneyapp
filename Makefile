@@ -40,6 +40,11 @@ help:
 	@echo "  make clean           Remove build artifacts and cache files"
 	@echo "  make db-migrate      Run database migrations"
 	@echo "  make db-init         Initialize database with sample data"
+	@echo ""
+	@echo "CI/CD Testing (Local):"
+	@echo "  make ci-test-lint    Test backend linting locally with act"
+	@echo "  make ci-test-frontend Test frontend linting locally with act"
+	@echo "  make ci-list         List all available CI jobs"
 
 # Installation targets
 install:
@@ -398,3 +403,31 @@ full-check:
 
 fresh-start: clean install install-dev install-hooks db-reset
 	@echo "🚀 Fresh start complete - ready to develop!"
+
+# Local CI/CD Testing with act
+ci-list:
+	@echo "📋 Listing all available CI jobs..."
+	@/opt/homebrew/bin/act -l
+
+ci-test-lint:
+	@echo "🧹 Testing backend linting & security locally..."
+	@/opt/homebrew/bin/act -j backend-lint-and-security -W .github/workflows/ci-enhanced.yml
+
+ci-test-frontend:
+	@echo "🎨 Testing frontend linting locally..."
+	@/opt/homebrew/bin/act -j frontend-lint-and-format -W .github/workflows/ci-enhanced.yml
+
+ci-test-frontend-unit:
+	@echo "🧪 Testing frontend unit tests locally..."
+	@/opt/homebrew/bin/act -j frontend-unit-tests -W .github/workflows/ci-enhanced.yml
+
+ci-test-build:
+	@echo "🏗️  Testing frontend build locally..."
+	@/opt/homebrew/bin/act -j frontend-build -W .github/workflows/ci-enhanced.yml
+
+ci-dry-run:
+	@echo "🔍 Dry run of all CI jobs..."
+	@/opt/homebrew/bin/act -l
+	@echo ""
+	@echo "To run a specific job in dry-run mode:"
+	@echo "  act -j JOB_NAME -W .github/workflows/WORKFLOW.yml -n"

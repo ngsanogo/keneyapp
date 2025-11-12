@@ -172,6 +172,7 @@ Pile technologique recommandée (indicative, adaptable)
 ⸻
 
 Livrables à fournir au dev (checklist)
+
  1. Vision produit, KPI, roadmap incrémentale.
  2. Personae, parcours, blueprint et maquettes hi-fi.
  3. User stories + Gherkin + DOD/DOR.
@@ -398,6 +399,7 @@ Maintenance Évolutive
 Planning Indicatif
 
 Élaborer un planning précis dépendra des ressources de développement allouées (nombre de développeurs, budget, etc.). Néanmoins, voici un découpage possible en phases :
+
  1. Phase de Conception (1 mois) – Rédaction détaillée des spécifications (affinage de ce cahier des charges), conception de l’architecture logicielle, prototypage de l’UI/UX (maquettes), choix définitifs des technologies.
  2. Phase de Développement Initial (3-4 mois) – Implémentation des modules de base : authentification/inscription, prise de rendez-vous, consultation (sans vidéo dans un premier temps), messagerie simple, et facturation basique. Cette phase inclut les tests unitaires au fur et à mesure.
  3. Intégration des Services Externes (1 mois) – Ajout du module de vidéo (intégration WebRTC/Twilio), du module de paiement en ligne, et d’éventuelles API externes (ex : annuaire RPPS pour vérifier les médecins en France, API pharmaceutique pour les prescriptions si disponible, etc.).

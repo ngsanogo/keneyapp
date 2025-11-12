@@ -222,6 +222,10 @@ yarn-error.log*
 # Environment files
 .env
 .env.local
+.secrets
+
+# Act (local CI/CD testing)
+.actrc
 
 # Temporary work files (summaries, reports, plans, checklists)
 *_SUMMARY.md
