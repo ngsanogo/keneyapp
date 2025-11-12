@@ -74,6 +74,7 @@ act -j backend-lint-and-security -W .github/workflows/ci-enhanced.yml -v
 Ces jobs fonctionnent parfaitement avec act :
 
 1. **Backend Linting & Security** (`backend-lint-and-security`)
+
    ```bash
    make ci-test-lint
    # ou
@@ -81,16 +82,19 @@ Ces jobs fonctionnent parfaitement avec act :
    ```
 
 2. **Frontend Linting** (`frontend-lint-and-format`)
+
    ```bash
    make ci-test-frontend
    ```
 
 3. **Frontend Build** (`frontend-build`)
+
    ```bash
    make ci-test-build
    ```
 
 4. **Backend Type Checking** (`backend-type-check`)
+
    ```bash
    act -j backend-type-check -W .github/workflows/ci-enhanced.yml
    ```
@@ -269,7 +273,7 @@ act -j frontend-build -W .github/workflows/ci-enhanced.yml -v
 # Terminal 1
 make ci-test-lint
 
-# Terminal 2  
+# Terminal 2
 make ci-test-frontend
 
 # Terminal 3
@@ -285,6 +289,7 @@ make ci-test-build
 ## ⚡ Performance Tips
 
 1. **Pre-pull les images** avant de commencer :
+
    ```bash
    docker pull catthehacker/ubuntu:act-latest
    docker pull postgres:15-alpine
@@ -292,11 +297,13 @@ make ci-test-build
    ```
 
 2. **Utiliser le cache** :
+
    ```bash
    export ACT_ACTIONS_CACHE=$HOME/.cache/act
    ```
 
 3. **Réutiliser les containers** pour le debug :
+
    ```bash
    act -j backend-lint-and-security --reuse
    ```
@@ -306,6 +313,7 @@ make ci-test-build
 ## 🎯 Conclusion
 
 Act vous permet de :
+
 - ✅ Tester les workflows CI/CD localement
 - ✅ Éviter les problèmes de quota GitHub Actions
 - ✅ Détecter les erreurs avant de pusher

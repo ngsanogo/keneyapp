@@ -295,22 +295,33 @@ hooks-update:
 # E2E Tests with Playwright
 e2e-install:
 	@echo "Installing Playwright..."
-	npm install -D @playwright/test
-	npx playwright install --with-deps
+	cd frontend && npm install -D @playwright/test
+	cd frontend && npx playwright install --with-deps
 	@echo "✅ Playwright installed!"
 
+# Quick E2E tests using existing local stack (fast, 2-5 minutes)
+e2e-quick:
+	@echo "Running quick E2E tests (Chromium only)..."
+	@./scripts/run_e2e_quick.sh
+
+# Full E2E tests with Docker orchestration (comprehensive, 10-15 minutes)
+e2e-full:
+	@echo "Running full E2E tests with Docker..."
+	@./scripts/run_e2e_tests.sh
+
+# Run specific E2E test file
 e2e-test:
 	@echo "Running E2E tests..."
-	npx playwright test
+	cd frontend && npx playwright test --config=../playwright.config.ts --project=chromium
 	@echo "✅ E2E tests complete!"
 
 e2e-ui:
 	@echo "Opening Playwright UI..."
-	npx playwright test --ui
+	cd frontend && npx playwright test --config=../playwright.config.ts --ui
 
 e2e-report:
 	@echo "Opening test report..."
-	npx playwright show-report
+	cd frontend && npx playwright show-report
 
 # Performance testing
 perf-baseline:
