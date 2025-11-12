@@ -32,17 +32,17 @@ assignees: ''
 
 ## Steps to Reproduce
 
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ## Expected Performance
 
 <!-- What performance level would be acceptable? -->
 
-- **Target Response Time**: 
-- **Target Throughput**: 
-- **Target Resource Usage**: 
+- **Target Response Time**:
+- **Target Throughput**:
+- **Target Resource Usage**:
 
 ## Proposed Solution
 

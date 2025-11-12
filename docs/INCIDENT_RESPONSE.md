@@ -20,6 +20,7 @@ This document provides step-by-step procedures for responding to various types o
 ### Severity Levels
 
 #### P0 - Critical (Immediate Response Required)
+
 - Complete service outage
 - Data breach with PHI/PII exposure
 - Security compromise affecting patient data
@@ -28,6 +29,7 @@ This document provides step-by-step procedures for responding to various types o
 - **Notification**: All stakeholders, executive team
 
 #### P1 - High (Urgent Response Required)
+
 - Partial service degradation affecting critical features
 - Authentication/authorization failures
 - Suspected security incident
@@ -36,6 +38,7 @@ This document provides step-by-step procedures for responding to various types o
 - **Notification**: On-call team, management
 
 #### P2 - Medium (Standard Response)
+
 - Non-critical feature failures
 - Performance degradation for subset of users
 - Non-urgent security vulnerabilities discovered
@@ -43,6 +46,7 @@ This document provides step-by-step procedures for responding to various types o
 - **Notification**: On-call team
 
 #### P3 - Low (Routine Response)
+
 - Minor UI issues
 - Documentation errors
 - Low-impact bugs
@@ -54,6 +58,7 @@ This document provides step-by-step procedures for responding to various types o
 ## General Response Procedure
 
 ### 1. Detection & Triage (0-5 minutes)
+
 ```bash
 # Check system health
 curl https://keneyapp.com/health
@@ -66,6 +71,7 @@ kubectl logs -n keneyapp -l app=backend --tail=100 | grep error
 ```
 
 **Actions:**
+
 - [ ] Confirm the incident is real (not false positive)
 - [ ] Assign severity level (P0-P3)
 - [ ] Notify appropriate stakeholders
@@ -73,6 +79,7 @@ kubectl logs -n keneyapp -l app=backend --tail=100 | grep error
 - [ ] Assign incident commander
 
 ### 2. Assessment (5-15 minutes)
+
 - [ ] Determine impact scope (users affected, data at risk)
 - [ ] Identify affected services/components
 - [ ] Check monitoring dashboards (Grafana)
@@ -80,24 +87,28 @@ kubectl logs -n keneyapp -l app=backend --tail=100 | grep error
 - [ ] Document initial findings
 
 ### 3. Containment (15-30 minutes)
+
 - [ ] Prevent incident from spreading
 - [ ] Isolate affected components if necessary
 - [ ] Implement temporary workarounds
 - [ ] Scale resources if needed
 
 ### 4. Resolution (Variable)
+
 - [ ] Apply fix or rollback
 - [ ] Verify fix in staging
 - [ ] Deploy to production
 - [ ] Monitor for recurrence
 
 ### 5. Recovery & Verification (30-60 minutes)
+
 - [ ] Confirm all services operational
 - [ ] Verify data integrity
 - [ ] Monitor key metrics
 - [ ] Communicate resolution to stakeholders
 
 ### 6. Post-Incident Review (Within 48 hours)
+
 - [ ] Schedule post-mortem meeting
 - [ ] Document root cause
 - [ ] Create action items
@@ -110,11 +121,13 @@ kubectl logs -n keneyapp -l app=backend --tail=100 | grep error
 ### Unauthorized Access Attempt
 
 **Indicators:**
+
 - Multiple failed login attempts from single IP
 - Unusual access patterns in audit logs
 - Alerts from rate limiting system
 
 **Response:**
+
 ```bash
 # 1. Check audit logs for the suspicious activity
 curl -X GET "https://api.keneyapp.com/api/v1/audit-logs?action=LOGIN_FAILED" \
@@ -128,6 +141,7 @@ kubectl exec -n keneyapp security-pod -- iptables -A INPUT -s <IP_ADDRESS> -j DR
 ```
 
 **Actions:**
+
 - [ ] Identify affected user accounts
 - [ ] Force password reset if compromised
 - [ ] Enable MFA for affected accounts
@@ -139,12 +153,14 @@ kubectl exec -n keneyapp security-pod -- iptables -A INPUT -s <IP_ADDRESS> -j DR
 ### Suspected Malware/Ransomware
 
 **Indicators:**
+
 - Unusual file modifications
 - Unexpected encryption operations
 - Suspicious process behavior
 - Network traffic to unknown domains
 
 **Response:**
+
 ```bash
 # 1. IMMEDIATELY isolate affected systems
 kubectl scale deployment backend --replicas=0 -n keneyapp
@@ -157,6 +173,7 @@ kubectl exec -n keneyapp postgres-0 -- pg_dump keneyapp > forensics-$(date +%Y%m
 ```
 
 **Actions:**
+
 - [ ] Isolate affected systems IMMEDIATELY
 - [ ] Do NOT attempt to clean - preserve evidence
 - [ ] Snapshot all affected systems
@@ -173,28 +190,31 @@ kubectl exec -n keneyapp postgres-0 -- pg_dump keneyapp > forensics-$(date +%Y%m
 ### HIPAA/GDPR Data Breach Protocol
 
 **⚠️ Legal Requirements:**
+
 - **HIPAA**: Report within 60 days if 500+ patients affected
 - **GDPR**: Report within 72 hours to supervisory authority
 - **State Laws**: Varies by jurisdiction
 
 **Immediate Actions (0-1 hour):**
+
 ```bash
 # 1. Identify scope of breach
-SELECT COUNT(DISTINCT patient_id) FROM audit_logs 
-WHERE action = 'READ' 
+SELECT COUNT(DISTINCT patient_id) FROM audit_logs
+WHERE action = 'READ'
   AND user_id = '<compromised_user_id>'
   AND timestamp > '<breach_start_time>';
 
 # 2. Revoke all access tokens
-UPDATE users SET token_version = token_version + 1 
+UPDATE users SET token_version = token_version + 1
 WHERE id = '<compromised_user_id>';
 
 # 3. Lock affected user accounts
-UPDATE users SET is_active = false 
+UPDATE users SET is_active = false
 WHERE id IN ('<list_of_affected_users>');
 ```
 
 **Actions:**
+
 - [ ] Stop the breach (revoke access, patch vulnerability)
 - [ ] Preserve all evidence (logs, backups, snapshots)
 - [ ] Identify all affected individuals
@@ -224,6 +244,7 @@ WHERE id IN ('<list_of_affected_users>');
 ### Complete Service Down
 
 **Quick Diagnostics:**
+
 ```bash
 # Check if pods are running
 kubectl get pods -n keneyapp
@@ -241,6 +262,7 @@ kubectl logs -n keneyapp -l app=backend --tail=100
 **Common Causes & Solutions:**
 
 #### 1. Database Connection Failure
+
 ```bash
 # Check database pod
 kubectl get pods -n keneyapp -l app=postgres
@@ -253,6 +275,7 @@ kubectl rollout restart statefulset/postgres -n keneyapp
 ```
 
 #### 2. Memory/CPU Exhaustion
+
 ```bash
 # Check resource usage
 kubectl top pods -n keneyapp
@@ -265,6 +288,7 @@ kubectl set resources deployment backend --limits=cpu=2,memory=4Gi -n keneyapp
 ```
 
 #### 3. Bad Deployment
+
 ```bash
 # Rollback to previous version
 kubectl rollout undo deployment backend -n keneyapp
@@ -276,6 +300,7 @@ kubectl rollout status deployment backend -n keneyapp
 ### Partial Service Degradation
 
 **Response:**
+
 ```bash
 # Identify slow endpoints
 curl https://keneyapp.com/metrics | grep http_request_duration_seconds
@@ -285,13 +310,14 @@ curl https://api.keneyapp.com/api/v1/patients/health
 
 # Review slow queries
 kubectl exec -n keneyapp postgres-0 -- psql -c "
-  SELECT query, calls, mean_exec_time 
-  FROM pg_stat_statements 
-  ORDER BY mean_exec_time DESC 
+  SELECT query, calls, mean_exec_time
+  FROM pg_stat_statements
+  ORDER BY mean_exec_time DESC
   LIMIT 10;"
 ```
 
 **Actions:**
+
 - [ ] Identify affected endpoints/features
 - [ ] Check resource utilization
 - [ ] Review recent deployments/changes
@@ -306,14 +332,15 @@ kubectl exec -n keneyapp postgres-0 -- psql -c "
 ### Slow Response Times
 
 **Investigation:**
+
 ```bash
 # Check application metrics
 curl https://keneyapp.com/metrics | grep duration
 
 # Check database performance
 kubectl exec -n keneyapp postgres-0 -- psql -c "
-  SELECT schemaname, tablename, n_live_tup, n_dead_tup 
-  FROM pg_stat_user_tables 
+  SELECT schemaname, tablename, n_live_tup, n_dead_tup
+  FROM pg_stat_user_tables
   ORDER BY n_dead_tup DESC;"
 
 # Check cache hit rate
@@ -327,13 +354,14 @@ kubectl exec -n keneyapp postgres-0 -- psql -c "
 **Common Issues:**
 
 #### 1. Database Query Performance
+
 ```bash
 # Identify slow queries
 kubectl exec -n keneyapp postgres-0 -- psql -c "
   SELECT query, calls, mean_exec_time, stddev_exec_time
-  FROM pg_stat_statements 
+  FROM pg_stat_statements
   WHERE mean_exec_time > 1000
-  ORDER BY mean_exec_time DESC 
+  ORDER BY mean_exec_time DESC
   LIMIT 10;"
 
 # Run VACUUM if needed
@@ -347,6 +375,7 @@ kubectl exec -n keneyapp postgres-0 -- psql -c "
 ```
 
 #### 2. Cache Issues
+
 ```bash
 # Check Redis memory
 redis-cli -h redis INFO memory
@@ -359,6 +388,7 @@ redis-cli -h redis FLUSHDB
 ```
 
 #### 3. Connection Pool Exhaustion
+
 ```python
 # Increase connection pool size
 # In app/core/database.py
@@ -384,8 +414,8 @@ kubectl exec -n keneyapp postgres-0 -- \
 
 # 2. Check database integrity
 kubectl exec -n keneyapp postgres-0 -- psql -c "
-  SELECT datname, pg_database_size(datname) 
-  FROM pg_database 
+  SELECT datname, pg_database_size(datname)
+  FROM pg_database
   WHERE datname = 'keneyapp';"
 
 # 3. Run consistency checks
@@ -398,6 +428,7 @@ kubectl exec -n keneyapp postgres-0 -- psql keneyapp -c "
 ```
 
 **Actions:**
+
 - [ ] Stop all writes immediately
 - [ ] Create full backup
 - [ ] Assess corruption extent
@@ -426,6 +457,7 @@ alembic show current
 ```
 
 **Actions:**
+
 - [ ] Identify failed migration step
 - [ ] Rollback to previous version
 - [ ] Fix migration script
@@ -439,6 +471,7 @@ alembic show current
 ### Post-Mortem Template
 
 **Incident Summary**
+
 - **Date/Time**: [timestamp]
 - **Duration**: [time]
 - **Severity**: [P0/P1/P2/P3]
@@ -446,6 +479,7 @@ alembic show current
 - **Users Impacted**: [count/percentage]
 
 **Timeline**
+
 - **[HH:MM]**: Incident detected
 - **[HH:MM]**: Team notified
 - **[HH:MM]**: Root cause identified
@@ -460,14 +494,17 @@ alembic show current
 [How the incident was resolved]
 
 **What Went Well**
+
 - [Item 1]
 - [Item 2]
 
 **What Could Be Improved**
+
 - [Item 1]
 - [Item 2]
 
 **Action Items**
+
 - [ ] [Action] - Owner: [name] - Due: [date]
 - [ ] [Action] - Owner: [name] - Due: [date]
 
@@ -532,14 +569,14 @@ redis-cli -h redis INFO memory | grep used_memory_human
 
 ### Monitoring Dashboard Links
 
-- **Grafana**: https://grafana.keneyapp.com
-- **Prometheus**: https://prometheus.keneyapp.com
-- **Flower (Celery)**: https://flower.keneyapp.com
-- **Logs**: https://logs.keneyapp.com
+- **Grafana**: <https://grafana.keneyapp.com>
+- **Prometheus**: <https://prometheus.keneyapp.com>
+- **Flower (Celery)**: <https://flower.keneyapp.com>
+- **Logs**: <https://logs.keneyapp.com>
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2024-01-15  
-**Next Review**: 2024-04-15  
+**Document Version**: 1.0
+**Last Updated**: 2024-01-15
+**Next Review**: 2024-04-15
 **Owner**: DevOps Team

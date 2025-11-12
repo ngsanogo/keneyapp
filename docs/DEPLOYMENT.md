@@ -620,6 +620,7 @@ redis-cli INFO
 ## Support
 
 For deployment issues:
+
 - Check logs first
 - Review this documentation
-- Contact: contact@isdataconsulting.com
+- Contact: <contact@isdataconsulting.com>

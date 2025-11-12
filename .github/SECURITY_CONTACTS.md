@@ -4,13 +4,13 @@ For security-related issues, please contact:
 
 ## Primary Contact
 
-- **Email**: contact@isdataconsulting.com
+- **Email**: <contact@isdataconsulting.com>
 - **Response Time**: Within 48 hours
 
 ## Security Team
 
 - ISDATA Consulting Security Team
-- Contact via: contact@isdataconsulting.com
+- Contact via: <contact@isdataconsulting.com>
 
 ## PGP Key
 

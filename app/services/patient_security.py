@@ -6,10 +6,7 @@ from __future__ import annotations
 
 from typing import Dict, Iterable, List
 
-from app.core.encryption import (
-    encrypt_patient_data,
-    decrypt_patient_data,
-)
+from app.core.encryption import decrypt_patient_data, encrypt_patient_data
 from app.models.patient import Patient
 from app.schemas.patient import PatientResponse
 

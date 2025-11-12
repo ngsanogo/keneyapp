@@ -40,6 +40,7 @@
 **Problème**: Le Dockerfile original copiait tout le codebase (754 MB) et incluait tous les outils de build.
 
 **Solution**:
+
 ```dockerfile
 # Stage 1: Builder - Installe les dépendances
 FROM python:3.11-slim AS builder
@@ -63,6 +64,7 @@ COPY scripts ./scripts
 **Problème**: Le frontend utilisait un serveur de développement Node.js (1.4 GB) en production.
 
 **Solution**:
+
 ```dockerfile
 # Stage 1: Build l'application React
 FROM node:25-alpine AS builder
@@ -82,6 +84,7 @@ RUN echo 'server { ... }' > /etc/nginx/conf.d/default.conf
 **Avant**: Build context de 754 MB incluant tout le repository.
 
 **Après**: Exclusions ajoutées:
+
 ```dockerignore
 # Tests et développement
 tests/
@@ -118,6 +121,7 @@ __pycache__/
 **Créé**: `requirements.prod.txt` avec seulement l'essentiel:
 
 **Supprimé** (dev/test uniquement):
+
 - pytest, pytest-cov, pytest-asyncio
 - black, flake8, mypy, isort
 - flower (déplacé en optionnel)
@@ -129,11 +133,13 @@ __pycache__/
 ### 5. Configuration pour Environnements Multiples
 
 **Créé**:
+
 - `docker-compose.yml` - Développement (volumes montés, hot-reload)
 - `docker-compose.dev.yml` - Développement explicite (Dockerfile.dev)
 - `docker-compose.prod.yml` - Production (Dockerfile.prod, nginx, monitoring)
 
 **Avantages**:
+
 - Dev: Itération rapide avec volumes
 - Prod: Images optimisées sans dev tools
 
@@ -149,7 +155,7 @@ __pycache__/
 2. **`Dockerfile.prod`** - Image de production ultra-optimisée
    - Multi-stage avec cleanup
    - requirements.prod.txt
-   - Suppression des .pyc/__pycache__
+   - Suppression des .pyc/**pycache**
    - 4 workers uvicorn
 
 3. **`requirements.prod.txt`** - Dépendances minimalistes
@@ -275,16 +281,16 @@ En plus de la réduction de taille:
 
 ### Best Practices Appliquées
 
-✅ Multi-stage builds pour séparer build et runtime  
-✅ .dockerignore exhaustif pour réduire le build context  
-✅ Copie sélective (seulement app/, alembic/, scripts/)  
-✅ Virtual environments isolés (/opt/venv)  
-✅ Cleanup des caches pip et packages inutiles  
-✅ Nginx pour servir les fichiers statiques  
-✅ Requirements séparés pour dev/prod  
-✅ Non-root users pour la sécurité  
-✅ Health checks pour monitoring  
-✅ Images de base légères (alpine, slim)  
+✅ Multi-stage builds pour séparer build et runtime
+✅ .dockerignore exhaustif pour réduire le build context
+✅ Copie sélective (seulement app/, alembic/, scripts/)
+✅ Virtual environments isolés (/opt/venv)
+✅ Cleanup des caches pip et packages inutiles
+✅ Nginx pour servir les fichiers statiques
+✅ Requirements séparés pour dev/prod
+✅ Non-root users pour la sécurité
+✅ Health checks pour monitoring
+✅ Images de base légères (alpine, slim)
 
 ## 📝 Prochaines Étapes (Optionnel)
 
@@ -294,6 +300,7 @@ Pour aller encore plus loin:
    - Attention: Complexité de compilation pour certains packages
 
 2. **BuildKit cache mounts** pour pip
+
    ```dockerfile
    RUN --mount=type=cache,target=/root/.cache/pip \
        pip install -r requirements.txt
@@ -324,6 +331,6 @@ Ces optimisations sont **production-ready** et suivent les **best practices Dock
 
 ---
 
-**Date**: Novembre 2025  
-**Version**: 1.0  
+**Date**: Novembre 2025
+**Version**: 1.0
 **Auteur**: Optimisation Docker automatisée

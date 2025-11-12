@@ -51,13 +51,13 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['shared_by_user_id'], ['users.id'], ondelete='CASCADE'),
         sa.ForeignKeyConstraint(['revoked_by_user_id'], ['users.id'], ondelete='SET NULL'),
     )
-    
+
     # Create indexes
     op.create_index(op.f('ix_medical_record_shares_id'), 'medical_record_shares', ['id'], unique=False)
     op.create_index(op.f('ix_medical_record_shares_patient_id'), 'medical_record_shares', ['patient_id'], unique=False)
     op.create_index(op.f('ix_medical_record_shares_share_token'), 'medical_record_shares', ['share_token'], unique=True)
     op.create_index(op.f('ix_medical_record_shares_tenant_id'), 'medical_record_shares', ['tenant_id'], unique=False)
-    
+
     # Composite indexes for common queries
     op.create_index('ix_medical_record_shares_active', 'medical_record_shares',
                    ['status', 'expires_at'], unique=False)
@@ -71,6 +71,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_medical_record_shares_share_token'), table_name='medical_record_shares')
     op.drop_index(op.f('ix_medical_record_shares_patient_id'), table_name='medical_record_shares')
     op.drop_index(op.f('ix_medical_record_shares_id'), table_name='medical_record_shares')
-    
+
     # Drop table (no ENUMs to drop since we use VARCHAR)
     op.drop_table('medical_record_shares')

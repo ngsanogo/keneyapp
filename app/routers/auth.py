@@ -8,31 +8,23 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.core.audit import log_audit_event
+from app.core.bootstrap import ensure_bootstrap_admin
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import get_current_active_user
 from app.core.rate_limit import limiter
-from app.core.security import (
-    verify_password,
-    get_password_hash,
-    create_access_token,
-)
-from app.core.config import settings
-from app.core.bootstrap import ensure_bootstrap_admin
-from app.models.user import User
+from app.core.security import create_access_token, get_password_hash, verify_password
 from app.models.tenant import Tenant
+from app.models.user import User
 from app.schemas.user import (
     ChangePasswordRequest,
     MFASetupResponse,
     MFAVerifyRequest,
+    Token,
     UserCreate,
     UserResponse,
-    Token,
 )
-from app.services.mfa import (
-    generate_mfa_secret,
-    generate_provisioning_uri,
-    verify_totp,
-)
+from app.services.mfa import generate_mfa_secret, generate_provisioning_uri, verify_totp
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -332,9 +324,7 @@ def activate_mfa(
         )
 
     if not verify_totp(current_user.mfa_secret, payload.code):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid MFA code"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid MFA code")
 
     current_user.mfa_enabled = True
     db.commit()
@@ -365,14 +355,10 @@ def disable_mfa(
     """Disable MFA for the user (requires a valid code)."""
 
     if not current_user.mfa_enabled:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="MFA is not enabled"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="MFA is not enabled")
 
     if not verify_totp(current_user.mfa_secret, payload.code):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid MFA code"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid MFA code")
 
     current_user.mfa_enabled = False
     current_user.mfa_secret = None

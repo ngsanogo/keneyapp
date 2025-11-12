@@ -2,21 +2,19 @@
 Secure messaging service with E2E encryption.
 """
 
-from typing import List, Optional
-from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_, func
-from datetime import datetime, timezone
 import json
 import uuid
+from datetime import datetime, timezone
+from typing import List, Optional
 
-from app.models.message import Message, MessageStatus
-from app.schemas.message import (
-    MessageCreate,
-    MessageStats,
-)
-from app.core.encryption import encrypt_data, decrypt_data
-from app.core.audit import log_audit_event
 from fastapi import Request
+from sqlalchemy import and_, func, or_
+from sqlalchemy.orm import Session
+
+from app.core.audit import log_audit_event
+from app.core.encryption import decrypt_data, encrypt_data
+from app.models.message import Message, MessageStatus
+from app.schemas.message import MessageCreate, MessageStats
 
 
 def generate_thread_id(user1_id: int, user2_id: int) -> str:
@@ -41,12 +39,8 @@ def get_or_create_thread_id(
         db.query(Message)
         .filter(
             or_(
-                and_(
-                    Message.sender_id == sender_id, Message.receiver_id == receiver_id
-                ),
-                and_(
-                    Message.sender_id == receiver_id, Message.receiver_id == sender_id
-                ),
+                and_(Message.sender_id == sender_id, Message.receiver_id == receiver_id),
+                and_(Message.sender_id == receiver_id, Message.receiver_id == sender_id),
             )
         )
         .first()
@@ -66,9 +60,7 @@ def encrypt_message_content(content: str, tenant_id: str) -> str:
 
 def decrypt_message_content(encrypted_content: str, tenant_id: str) -> str:
     """Decrypt message content."""
-    return decrypt_data(
-        encrypted_content, context={"type": "message", "tenant": tenant_id}
-    )
+    return decrypt_data(encrypted_content, context={"type": "message", "tenant": tenant_id})
 
 
 def create_message(
@@ -128,9 +120,7 @@ def create_message(
     return message
 
 
-def get_message(
-    db: Session, message_id: int, user_id: int, tenant_id: str
-) -> Optional[Message]:
+def get_message(db: Session, message_id: int, user_id: int, tenant_id: str) -> Optional[Message]:
     """Get a message if user is sender or receiver."""
     message = (
         db.query(Message)
@@ -225,12 +215,8 @@ def get_conversation(
         .filter(
             Message.tenant_id == tenant_id,
             or_(
-                and_(
-                    Message.sender_id == user_id, Message.receiver_id == other_user_id
-                ),
-                and_(
-                    Message.sender_id == other_user_id, Message.receiver_id == user_id
-                ),
+                and_(Message.sender_id == user_id, Message.receiver_id == other_user_id),
+                and_(Message.sender_id == other_user_id, Message.receiver_id == user_id),
             ),
         )
         .order_by(Message.created_at.asc())
@@ -336,9 +322,7 @@ def serialize_message(message: Message, tenant_id: str) -> dict:
     encrypted_content_str = str(message.encrypted_content)
     decrypted_content = decrypt_message_content(encrypted_content_str, tenant_id)
     attachment_ids_str = str(message.attachment_ids) if message.attachment_ids else None
-    attachment_ids = (
-        json.loads(attachment_ids_str) if attachment_ids_str else None
-    )
+    attachment_ids = json.loads(attachment_ids_str) if attachment_ids_str else None
 
     return {
         "id": message.id,

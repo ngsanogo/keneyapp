@@ -6,14 +6,14 @@ Uses the modern 'cryptography' library (FIPS 140-2 compliant, actively maintaine
 Migrated from deprecated PyCrypto library for security and compliance.
 """
 
-from typing import Optional
 import base64
 import os
+from typing import Optional
 
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.backends import default_backend
 
 from app.core.config import settings
 
@@ -29,7 +29,7 @@ class DataEncryption:
             key: Encryption key (defaults to SECRET_KEY from settings)
         """
         self.key = key or settings.SECRET_KEY
-        
+
         # Derive a 32-byte key using PBKDF2-HMAC-SHA256
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
@@ -39,7 +39,7 @@ class DataEncryption:
             backend=default_backend(),
         )
         self.derived_key = kdf.derive(self.key.encode("utf-8"))
-        
+
         # Create AESGCM instance for encryption/decryption
         self.aesgcm = AESGCM(self.derived_key)
 
@@ -64,9 +64,7 @@ class DataEncryption:
             nonce = os.urandom(12)
 
             # Encrypt using AESGCM (automatically handles tag)
-            ciphertext = self.aesgcm.encrypt(
-                nonce, plaintext.encode("utf-8"), None
-            )
+            ciphertext = self.aesgcm.encrypt(nonce, plaintext.encode("utf-8"), None)
 
             # Combine nonce + ciphertext (tag is embedded) and encode as base64
             encrypted_data = nonce + ciphertext

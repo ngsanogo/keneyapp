@@ -9,8 +9,9 @@ present in the shell or .env. This lets defaults apply as intended.
 
 import os
 from typing import List, Union
-from pydantic_settings import BaseSettings, SettingsConfigDict
+
 from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -42,9 +43,7 @@ class Settings(BaseSettings):
     BOOTSTRAP_ADMIN_FULL_NAME: str = "System Administrator"
 
     # CORS
-    ALLOWED_ORIGINS: Union[str, List[str]] = (
-        "http://localhost:3000,http://localhost:8000"
-    )
+    ALLOWED_ORIGINS: Union[str, List[str]] = "http://localhost:3000,http://localhost:8000"
 
     # Redis
     REDIS_HOST: str = "localhost"
@@ -234,9 +233,7 @@ class Settings(BaseSettings):
             return "development"
         return v
 
-    model_config = SettingsConfigDict(
-        env_file=".env", case_sensitive=True, extra="allow"
-    )
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="allow")
 
 
 # ----------------------------------------------------------------------------

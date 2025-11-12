@@ -2,14 +2,8 @@
 Prometheus metrics for monitoring.
 """
 
-from prometheus_client import (
-    Counter,
-    Histogram,
-    Gauge,
-    generate_latest,
-    CONTENT_TYPE_LATEST,
-)
 from fastapi import Response
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
 
 # Request counters
 http_requests_total = Counter(
@@ -32,15 +26,11 @@ appointment_bookings_total = Counter(
     "appointment_bookings_total", "Total appointment bookings", ["status"]
 )
 
-prescription_created_total = Counter(
-    "prescription_created_total", "Total prescriptions created"
-)
+prescription_created_total = Counter("prescription_created_total", "Total prescriptions created")
 
 active_users = Gauge("active_users", "Number of currently active users")
 
-database_connections = Gauge(
-    "database_connections", "Number of active database connections"
-)
+database_connections = Gauge("database_connections", "Number of active database connections")
 
 # Business KPI Metrics
 daily_active_patients = Gauge(

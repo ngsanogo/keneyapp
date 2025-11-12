@@ -96,7 +96,7 @@ def init_db():
         # patient2 = Patient(...)
         # db.add_all([patient1, patient2])
         # db.commit()
-        
+
         # # Create sample appointments...
         # # Create sample prescriptions...
 

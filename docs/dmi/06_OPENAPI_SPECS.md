@@ -11,7 +11,7 @@ info:
   version: 1.0.0
   description: |
     API du Dossier Médical Informatisé (DMI) de KeneyApp.
-    
+
     Cette API fournit un accès sécurisé aux fonctionnalités suivantes :
     - Gestion des patients (identito-vigilance)
     - Consultations et observations
@@ -19,13 +19,13 @@ info:
     - Examens de laboratoire et imagerie
     - Documents médicaux
     - Messagerie sécurisée
-    
+
     **Standards supportés** :
     - FHIR R4 (HL7)
     - Terminologies : LOINC, SNOMED CT, CIM-10, ATC, CCAM/CPT
     - Sécurité : OAuth2/OIDC, RBAC/ABAC
     - Conformité : RGPD, HDS, HIPAA
-    
+
   contact:
     name: Support Technique KeneyApp
     email: support@keneyapp.com
@@ -78,13 +78,13 @@ components:
       bearerFormat: JWT
       description: |
         Authentification JWT. Token obtenu via `/auth/login`.
-        
+
         **Format header** : `Authorization: Bearer <token>`
-        
+
         **Durée validité** :
         - Access token : 30 minutes
         - Refresh token : 7 jours
-        
+
         **Claims JWT** :
         ```json
         {
@@ -97,7 +97,7 @@ components:
           "exp": 1704904200
         }
         ```
-    
+
     OAuth2:
       type: oauth2
       flows:
@@ -123,14 +123,14 @@ components:
     summary: Rechercher des patients
     description: |
       Recherche patients par différents critères.
-      
+
       **Cas d'usage** :
       - Recherche par INS (identifiant national santé)
       - Recherche nominative (nom, prénom, date naissance)
       - Recherche par IPP (identifiant patient provisoire)
-      
+
       **Détection doublons** : Score de similarité retourné si > 85%
-      
+
     operationId: searchPatients
     parameters:
       - name: ins
@@ -140,7 +140,7 @@ components:
           type: string
           pattern: '^\d{15}$'
           example: "184127512345678"
-      
+
       - name: nom
         in: query
         description: Nom de famille (sensible à la casse)
@@ -149,7 +149,7 @@ components:
           minLength: 2
           maxLength: 50
           example: "MARTIN"
-      
+
       - name: prenom
         in: query
         description: Prénom
@@ -158,7 +158,7 @@ components:
           minLength: 2
           maxLength: 50
           example: "Jean"
-      
+
       - name: date_naissance
         in: query
         description: Date de naissance (ISO 8601)
@@ -166,14 +166,14 @@ components:
           type: string
           format: date
           example: "1984-12-07"
-      
+
       - name: ipp
         in: query
         description: Identifiant Patient Provisoire
         schema:
           type: string
           example: "123456780"
-      
+
       - name: limit
         in: query
         description: Nombre max résultats
@@ -182,7 +182,7 @@ components:
           minimum: 1
           maximum: 100
           default: 20
-      
+
       - name: offset
         in: query
         description: Offset pagination
@@ -190,7 +190,7 @@ components:
           type: integer
           minimum: 0
           default: 0
-    
+
     responses:
       '200':
         description: Recherche réussie
@@ -235,7 +235,7 @@ components:
                       sexe: "M"
                       status: "ACTIVE"
                   potential_duplicates: []
-      
+
       '400':
         description: Paramètres invalides
         content:
@@ -248,19 +248,19 @@ components:
               details:
                 field: "ins"
                 constraint: "pattern"
-      
+
       '401':
         $ref: '#/components/responses/Unauthorized'
-      
+
       '403':
         $ref: '#/components/responses/Forbidden'
-      
+
       '429':
         $ref: '#/components/responses/RateLimitExceeded'
-    
+
     security:
       - BearerAuth: []
-    
+
     x-rate-limit: "60/minute"
     x-audit-log: true
     x-required-role: ["MEDECIN", "IDE", "SECRETAIRE", "ADMIN"]
@@ -275,7 +275,7 @@ components:
     summary: Créer un nouveau patient
     description: |
       Crée un nouveau dossier patient avec validation INS.
-      
+
       **Workflow** :
       1. Validation format données (côté client + serveur)
       2. Interrogation téléservice INS (si INS fourni)
@@ -284,12 +284,12 @@ components:
       5. Création patient avec statut VALIDATED ou PROVISOIRE
       6. Génération IPP unique
       7. Publication événement `PatientCreated`
-      
+
       **INS Provisoire** :
       - Autorisé en urgence
       - Régularisation obligatoire sous 48h
       - Flag `ins_status: PROVISOIRE`
-      
+
     operationId: createPatient
     requestBody:
       required: true
@@ -308,7 +308,7 @@ components:
                 adresse: "12 rue de la Paix, 75001 Paris"
                 telephone: "+33612345678"
                 email: "jean.martin@example.com"
-            
+
             patient_provisoire:
               value:
                 ins_status: "PROVISOIRE"
@@ -317,7 +317,7 @@ components:
                 date_naissance: "1990-03-15"
                 sexe: "F"
                 telephone: "+33698765432"
-    
+
     responses:
       '201':
         description: Patient créé avec succès
@@ -363,7 +363,7 @@ components:
                 status: "ACTIVE"
                 created_at: "2025-01-10T14:30:00Z"
               warnings: []
-      
+
       '202':
         description: Patient créé avec avertissements (doublons potentiels)
         content:
@@ -407,16 +407,16 @@ components:
                     nom: "MARTIN"
                     prenom: "Jean"
                     date_naissance: "1984-12-07"
-      
+
       '400':
         $ref: '#/components/responses/BadRequest'
-      
+
       '401':
         $ref: '#/components/responses/Unauthorized'
-      
+
       '403':
         $ref: '#/components/responses/Forbidden'
-      
+
       '409':
         description: Conflit - Patient déjà existant
         content:
@@ -428,10 +428,10 @@ components:
               message: "Un patient avec cet INS existe déjà"
               details:
                 existing_patient_id: "550e8400-e29b-41d4-a716-446655440000"
-      
+
       '429':
         $ref: '#/components/responses/RateLimitExceeded'
-      
+
       '503':
         description: Service externe indisponible (téléservice INS)
         content:
@@ -444,10 +444,10 @@ components:
               details:
                 service: "INS"
                 fallback: "Patient créé en mode dégradé (INS PROVISOIRE)"
-    
+
     security:
       - BearerAuth: []
-    
+
     x-rate-limit: "20/minute"
     x-audit-log: true
     x-required-role: ["MEDECIN", "IDE", "SECRETAIRE", "ADMIN"]
@@ -462,18 +462,18 @@ components:
     summary: Récupérer un patient par ID
     description: |
       Récupère les informations complètes d'un patient.
-      
+
       **Contrôle d'accès** :
       - Médecin : Autorisé si dans équipe de soins ou Break-the-Glass
       - IDE : Autorisé si patient du service assigné
       - Secrétaire : Autorisé (lecture seule, données limitées)
       - Pharmacien : Autorisé (contexte prescription)
       - DIM : Refusé (accès données pseudonymisées uniquement)
-      
+
       **Audit** :
       - Toute lecture tracée dans audit log
       - Break-the-Glass → notification DPO immédiate
-      
+
     operationId: getPatient
     parameters:
       - name: id
@@ -484,7 +484,7 @@ components:
           type: string
           format: uuid
           example: "550e8400-e29b-41d4-a716-446655440000"
-      
+
       - name: include
         in: query
         description: |
@@ -493,14 +493,14 @@ components:
         schema:
           type: string
           example: "allergies,medications"
-      
+
       - name: break_the_glass
         in: query
         description: Accès d'urgence (justification requise)
         schema:
           type: boolean
           default: false
-      
+
       - name: btg_justification
         in: query
         description: Justification Break-the-Glass (obligatoire si btg=true)
@@ -508,7 +508,7 @@ components:
           type: string
           minLength: 20
           example: "Urgence vitale - arrêt cardiaque - besoin antécédents"
-    
+
     responses:
       '200':
         description: Patient trouvé
@@ -559,7 +559,7 @@ components:
                     medication_display: "DOLIPRANE 1000mg"
                     status: "ACTIVE"
                     start_date: "2025-01-05"
-      
+
       '403':
         description: Accès refusé - Hors périmètre autorisé
         content:
@@ -573,16 +573,16 @@ components:
                 reason: "Patient hors de votre équipe de soins"
                 break_the_glass_available: true
                 btg_warning: "Accès tracé et notifié au DPO"
-      
+
       '404':
         $ref: '#/components/responses/NotFound'
-      
+
       '401':
         $ref: '#/components/responses/Unauthorized'
-    
+
     security:
       - BearerAuth: []
-    
+
     x-rate-limit: "120/minute"
     x-audit-log: true
     x-required-role: ["MEDECIN", "IDE", "PHARMACIEN", "SECRETAIRE"]
@@ -603,13 +603,13 @@ components:
       - Vérification allergies patient
       - Adaptation posologie (fonction rénale, poids, âge)
       - Détection contre-indications
-      
+
       **Niveaux d'alerte** :
       - INFO : Information (pas de blocage)
       - PRÉCAUTION : Précaution (confirmation médecin)
       - CONTRE-INDICATION : Contre-indication relative (justification obligatoire)
       - ALLERGIE : Allergie patient (blocage, contact pharmacien requis)
-      
+
     operationId: createPrescription
     requestBody:
       required: true
@@ -632,7 +632,7 @@ components:
               unit: "days"
             priority: "ROUTINE"
             clinical_context: "Douleurs post-opératoires modérées"
-    
+
     responses:
       '201':
         description: Prescription créée
@@ -656,7 +656,7 @@ components:
                     medication_display: "DOLIPRANE 1000mg"
                     created_at: "2025-01-10T15:00:00Z"
                   alerts: []
-              
+
               with_interaction:
                 value:
                   prescription:
@@ -674,10 +674,10 @@ components:
                         - medication_code: "3400912345678"
                           medication_display: "PARACÉTAMOL 1000mg"
                           reason: "Pas d'interaction, même indication"
-      
+
       '400':
         $ref: '#/components/responses/BadRequest'
-      
+
       '409':
         description: Allergie patient - Prescription bloquée
         content:
@@ -702,10 +702,10 @@ components:
                 severity: "HIGH"
                 verification_status: "CONFIRMED"
               action_required: "Contacter pharmacien ou choisir alternative"
-    
+
     security:
       - BearerAuth: []
-    
+
     x-rate-limit: "30/minute"
     x-audit-log: true
     x-required-role: ["MEDECIN"]
@@ -789,7 +789,7 @@ components:
           type: string
           format: date-time
           readOnly: true
-    
+
     PatientCreate:
       type: object
       required: [nom, prenom, date_naissance, sexe]
@@ -825,7 +825,7 @@ components:
           type: string
           format: email
           maxLength: 100
-    
+
     Prescription:
       type: object
       properties:
@@ -860,7 +860,7 @@ components:
         prescriber_id:
           type: string
           format: uuid
-    
+
     DrugAlert:
       type: object
       properties:
@@ -890,7 +890,7 @@ components:
                 type: string
               reason:
                 type: string
-    
+
     Error:
       type: object
       required: [error, message]
@@ -919,7 +919,7 @@ components:
           type: string
           format: uuid
           description: ID corrélation pour traçage
-  
+
   responses:
     BadRequest:
       description: Requête invalide
@@ -927,27 +927,27 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    
+
     Unauthorized:
       description: Non authentifié
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    
+
     Forbidden:
       description: Accès interdit
       content:
         application/json:
             $ref: '#/components/schemas/Error'
-    
+
     NotFound:
       description: Ressource non trouvée
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    
+
     RateLimitExceeded:
       description: Limite de taux dépassée
       headers:
@@ -971,7 +971,7 @@ components:
 
 ---
 
-**Document validé par** : Tech Lead, Architecte API  
-**Date** : 2025-01-10  
-**Version** : 1.0  
+**Document validé par** : Tech Lead, Architecte API
+**Date** : 2025-01-10
+**Version** : 1.0
 **Prochaine revue** : 2025-02-10

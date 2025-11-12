@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 
 /**
  * E2E Tests: Authentication Flows
- * 
+ *
  * Tests critical authentication scenarios:
  * - Login with valid credentials
  * - Login failure with invalid credentials
@@ -40,10 +40,10 @@ test.describe('Authentication', () => {
 
     // Wait for navigation to dashboard
     await expect(page).toHaveURL(/\/dashboard/);
-    
+
     // Verify user menu is visible
     await expect(page.locator('[data-testid="user-menu"]')).toBeVisible();
-    
+
     // Verify welcome message
     await expect(page.locator('text=Welcome')).toBeVisible();
   });
@@ -55,7 +55,7 @@ test.describe('Authentication', () => {
 
     // Verify error message
     await expect(page.locator('text=/Invalid credentials|Login failed/i')).toBeVisible();
-    
+
     // Verify still on login page
     await expect(page).toHaveURL(/\/login/);
   });
@@ -104,7 +104,7 @@ test.describe('Authentication', () => {
 
     // Try to access admin route
     await page.goto('/admin/users');
-    
+
     // Should be redirected or show forbidden message
     await expect(
       page.locator('text=/Access denied|Forbidden|Not authorized/i')
@@ -117,7 +117,7 @@ test.describe('Authentication', () => {
 
 /**
  * E2E Tests: Patient Management
- * 
+ *
  * Tests CRUD operations for patients:
  * - Create new patient
  * - View patient list
@@ -139,7 +139,7 @@ test.describe('Patient Management', () => {
     await page.goto('/patients');
     await expect(page).toHaveURL(/\/patients/);
     await expect(page.locator('h1')).toContainText(/Patients/i);
-    
+
     // Verify table or list is visible
     await expect(
       page.locator('[data-testid="patient-list"], table, .patient-card')
@@ -163,14 +163,14 @@ test.describe('Patient Management', () => {
 
     // Verify success message
     await expect(page.locator('text=/Patient created|Success/i')).toBeVisible();
-    
+
     // Verify redirect to patient list or detail
     await expect(page).toHaveURL(/\/patients/);
   });
 
   test('should view patient details', async ({ page }) => {
     await page.goto('/patients');
-    
+
     // Click on first patient
     await page.click('[data-testid="patient-row"]:first-child, .patient-card:first-child');
 
@@ -199,13 +199,13 @@ test.describe('Patient Management', () => {
 
   test('should search patients', async ({ page }) => {
     await page.goto('/patients');
-    
+
     // Enter search query
     await page.fill('input[placeholder*="Search"]', 'John');
-    
+
     // Wait for results
     await page.waitForTimeout(500);
-    
+
     // Verify filtered results
     const rows = page.locator('[data-testid="patient-row"]');
     expect(await rows.count()).toBeGreaterThan(0);
@@ -214,7 +214,7 @@ test.describe('Patient Management', () => {
 
 /**
  * E2E Tests: Messaging v3.0
- * 
+ *
  * Tests secure messaging functionality:
  * - Send message
  * - View inbox
@@ -255,13 +255,13 @@ test.describe('Secure Messaging v3.0', () => {
 
   test('should read message and mark as read', async ({ page }) => {
     await page.goto('/messages');
-    
+
     // Click on first unread message
     await page.click('[data-testid="message-row"]:first-child');
 
     // Verify message content is visible
     await expect(page.locator('[data-testid="message-content"]')).toBeVisible();
-    
+
     // Verify marked as read (check for read indicator)
     await page.goto('/messages');
     // First message should now show as read

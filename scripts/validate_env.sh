@@ -30,7 +30,7 @@ fi
 check_required_var() {
     local var_name=$1
     local var_value=$(grep "^${var_name}=" .env 2>/dev/null | cut -d '=' -f2- | tr -d ' "'"'"'')
-    
+
     if [ -z "$var_value" ]; then
         echo -e "${RED}❌ ERROR: ${var_name} is not set${NC}"
         ((ERRORS++))
@@ -46,11 +46,11 @@ check_secure_var() {
     local var_name=$1
     local insecure_patterns=$2
     local var_value=$(grep "^${var_name}=" .env 2>/dev/null | cut -d '=' -f2- | tr -d ' "'"'"'')
-    
+
     if [ -z "$var_value" ]; then
         return 0  # Already checked by check_required_var
     fi
-    
+
     for pattern in $insecure_patterns; do
         if [[ "$var_value" == *"$pattern"* ]]; then
             echo -e "${YELLOW}⚠️  WARNING: ${var_name} contains potentially insecure value: '$pattern'${NC}"
@@ -59,7 +59,7 @@ check_secure_var() {
             return 1
         fi
     done
-    
+
     return 0
 }
 
@@ -68,14 +68,14 @@ check_var_length() {
     local var_name=$1
     local min_length=$2
     local var_value=$(grep "^${var_name}=" .env 2>/dev/null | cut -d '=' -f2- | tr -d ' "'"'"'')
-    
+
     if [ -n "$var_value" ] && [ ${#var_value} -lt $min_length ]; then
         echo -e "${YELLOW}⚠️  WARNING: ${var_name} is too short (< ${min_length} characters)${NC}"
         echo "   Consider using a longer, more secure value"
         ((WARNINGS++))
         return 1
     fi
-    
+
     return 0
 }
 

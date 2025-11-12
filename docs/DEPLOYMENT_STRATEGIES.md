@@ -26,6 +26,7 @@ We maintain **three primary environments** as recommended:
 **Purpose**: Local development and integration testing
 
 **Configuration**:
+
 - Docker Compose-based local stack
 - SQLite or local PostgreSQL
 - Local Redis instance
@@ -35,11 +36,13 @@ We maintain **three primary environments** as recommended:
 - Reduced security constraints for ease of development
 
 **Access**:
+
 - All developers have full access
 - No PHI or production data
 - Can be reset/rebuilt at any time
 
 **Deployment**:
+
 ```bash
 # Start development environment
 docker-compose up -d
@@ -52,6 +55,7 @@ make dev
 ```
 
 **Environment Variables**:
+
 ```env
 DEBUG=True
 ENVIRONMENT=development
@@ -65,6 +69,7 @@ SECRET_KEY=dev-secret-key-not-for-production
 **Purpose**: Pre-production testing and validation
 
 **Configuration**:
+
 - Mirror of production infrastructure
 - Kubernetes deployment (1-2 replicas per service)
 - Production-like database (PostgreSQL with replication)
@@ -76,16 +81,19 @@ SECRET_KEY=dev-secret-key-not-for-production
 - Full security measures enabled
 
 **Access**:
+
 - QA team, beta testers, internal stakeholders
 - Controlled access with audit logging
 - No direct database access for developers
 
 **Deployment**:
+
 - Automated from `develop` branch via CI/CD
 - Manual approval gate before production
 - Automated smoke tests after deployment
 
 **Environment Variables**:
+
 ```env
 DEBUG=False
 ENVIRONMENT=staging
@@ -100,6 +108,7 @@ ALLOWED_ORIGINS=https://staging.keneyapp.com
 **Purpose**: Live system serving real users
 
 **Configuration**:
+
 - Full Kubernetes cluster with auto-scaling
 - High-availability PostgreSQL (with replication and failover)
 - Redis Sentinel cluster for HA
@@ -113,12 +122,14 @@ ALLOWED_ORIGINS=https://staging.keneyapp.com
 - HDS-certified hosting (if in France)
 
 **Access**:
+
 - Strictly controlled access (ops team only)
 - All actions logged and audited
 - No direct database access (only through bastion/jump host)
 - MFA required for all administrative access
 
 **Deployment**:
+
 - Manual approval required
 - Blue-green or canary deployment
 - Automated rollback on failure
@@ -126,6 +137,7 @@ ALLOWED_ORIGINS=https://staging.keneyapp.com
 - Gradual traffic migration
 
 **Environment Variables**:
+
 ```env
 DEBUG=False
 ENVIRONMENT=production
@@ -139,6 +151,7 @@ SENTRY_DSN=${SENTRY_DSN}
 ### Environment Isolation
 
 **Strict Separation**:
+
 - Each environment has its own namespace in Kubernetes
 - Separate databases (no shared data)
 - Separate Redis instances
@@ -153,12 +166,14 @@ SENTRY_DSN=${SENTRY_DSN}
 **Description**: Gradual replacement of old pods with new ones
 
 **Process**:
+
 1. Deploy new version pods one at a time
 2. Wait for health checks to pass
 3. Terminate old pod
 4. Repeat until all pods updated
 
 **Kubernetes Configuration**:
+
 ```yaml
 spec:
   strategy:
@@ -170,17 +185,20 @@ spec:
 ```
 
 **Advantages**:
+
 - ✅ Zero downtime
 - ✅ Gradual rollout reduces risk
 - ✅ Automatic rollback on health check failure
 - ✅ Simple to implement
 
 **Disadvantages**:
+
 - ⚠️ Both old and new versions run simultaneously
 - ⚠️ Database migrations must be backward compatible
 - ⚠️ Takes longer for full deployment
 
 **Use Cases**:
+
 - Staging environment deployments
 - Minor updates and bug fixes
 - Backward-compatible changes
@@ -190,6 +208,7 @@ spec:
 **Description**: Maintain two identical production environments (Blue and Green)
 
 **Process**:
+
 1. **Current state**: Blue environment serves all traffic
 2. **Deploy**: Deploy new version to Green environment
 3. **Test**: Run smoke tests on Green environment
@@ -199,6 +218,7 @@ spec:
 7. **Cleanup**: After validation period, Blue becomes next Green
 
 **Implementation**:
+
 ```yaml
 # Service selector for traffic routing
 apiVersion: v1
@@ -212,6 +232,7 @@ spec:
 ```
 
 **Traffic Switching**:
+
 ```bash
 # Switch to green deployment
 kubectl patch service keneyapp-backend -p '{"spec":{"selector":{"version":"green"}}}'
@@ -221,17 +242,20 @@ kubectl patch service keneyapp-backend -p '{"spec":{"selector":{"version":"blue"
 ```
 
 **Advantages**:
+
 - ✅ Instant rollback capability
 - ✅ No downtime
 - ✅ Full testing before traffic switch
 - ✅ Clean version separation
 
 **Disadvantages**:
+
 - ⚠️ Requires double infrastructure
 - ⚠️ Database migrations require careful planning
 - ⚠️ Stateful data synchronization challenges
 
 **Use Cases**:
+
 - Production deployments
 - Major version releases
 - Database schema changes
@@ -241,6 +265,7 @@ kubectl patch service keneyapp-backend -p '{"spec":{"selector":{"version":"blue"
 **Description**: Deploy new version to small subset of users first
 
 **Process**:
+
 1. Deploy new version alongside old version
 2. Route 5% of traffic to new version (canary)
 3. Monitor metrics (error rate, latency, user complaints)
@@ -249,6 +274,7 @@ kubectl patch service keneyapp-backend -p '{"spec":{"selector":{"version":"blue"
 6. If issues detected at any stage, rollback immediately
 
 **Implementation**:
+
 ```yaml
 # Ingress with traffic splitting
 apiVersion: networking.k8s.io/v1
@@ -273,6 +299,7 @@ spec:
 ```
 
 **Canary Rollout Schedule**:
+
 ```
 Time    | Traffic to Canary | Action
 --------|-------------------|------------------
@@ -284,6 +311,7 @@ T+3h    | 100%             | Full deployment, remove old version
 ```
 
 **Monitoring During Canary**:
+
 - Error rate (must be < 0.1%)
 - Response time (P95, P99)
 - User complaints in support channels
@@ -292,18 +320,21 @@ T+3h    | 100%             | Full deployment, remove old version
 - Business metrics (appointment bookings, logins)
 
 **Advantages**:
+
 - ✅ Minimal blast radius if issues occur
 - ✅ Real production validation with limited risk
 - ✅ Gradual confidence building
 - ✅ Easy rollback at early stages
 
 **Disadvantages**:
+
 - ⚠️ Complex traffic routing setup
 - ⚠️ Requires excellent monitoring
 - ⚠️ Takes longer to complete deployment
 - ⚠️ Users might see inconsistent behavior
 
 **Use Cases**:
+
 - High-risk production deployments
 - Major feature launches
 - Performance optimization changes
@@ -314,12 +345,14 @@ T+3h    | 100%             | Full deployment, remove old version
 **Description**: Scheduled downtime for major updates
 
 **When to Use**:
+
 - Database migrations requiring downtime
 - Major infrastructure changes
 - Security patches requiring restart
 - Planned system upgrades
 
 **Process**:
+
 1. **2 weeks before**: Announce maintenance window
 2. **1 week before**: Send reminder to all users
 3. **24 hours before**: Final reminder
@@ -333,6 +366,7 @@ T+3h    | 100%             | Full deployment, remove old version
 5. **Post-maintenance**: Monitor closely for issues
 
 **Maintenance Mode Page**:
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -349,6 +383,7 @@ T+3h    | 100%             | Full deployment, remove old version
 ```
 
 **Recommended Windows**:
+
 - Weekends (Saturday 2:00-4:00 AM local time)
 - National holidays
 - Low-usage periods (check analytics)
@@ -381,6 +416,7 @@ graph LR
 **Duration**: 2-3 minutes
 
 **Actions**:
+
 - Python: Black formatting check, Flake8 linting, mypy type checking
 - Frontend: ESLint, Prettier check, TypeScript compilation
 - Security: detect-secrets baseline verification
@@ -392,6 +428,7 @@ graph LR
 **Duration**: 5-10 minutes
 
 **Actions**:
+
 - Backend unit tests (pytest)
 - Frontend unit tests (Jest)
 - Integration tests with test database
@@ -399,6 +436,7 @@ graph LR
 - Coverage report generation
 
 **Success Criteria**:
+
 - All tests pass
 - Coverage ≥ 70%
 - No critical security issues
@@ -408,6 +446,7 @@ graph LR
 **Duration**: 5-8 minutes
 
 **Actions**:
+
 - CodeQL static analysis (Python, TypeScript)
 - pip-audit for Python dependencies
 - npm audit for JavaScript dependencies
@@ -421,6 +460,7 @@ graph LR
 **Duration**: 10-15 minutes
 
 **Actions**:
+
 - Build Docker images (backend, frontend, celery worker)
 - Tag with commit SHA and version
 - Push to container registry
@@ -433,6 +473,7 @@ graph LR
 **Trigger**: Automatic on merge to `develop`
 
 **Actions**:
+
 1. Apply Kubernetes manifests to staging namespace
 2. Run database migrations (if any)
 3. Update configmaps and secrets
@@ -442,6 +483,7 @@ graph LR
 7. Notify team via Slack/email
 
 **Health Checks**:
+
 ```bash
 # Backend health check
 curl https://staging-api.keneyapp.com/health
@@ -460,6 +502,7 @@ curl https://staging-api.keneyapp.com/health/redis
 **Trigger**: Manual approval after successful staging deployment
 
 **Approval Requirements**:
+
 - ✅ All staging tests passed
 - ✅ Beta testers validated
 - ✅ QA team signed off
@@ -467,6 +510,7 @@ curl https://staging-api.keneyapp.com/health/redis
 - ✅ No critical bugs in staging
 
 **Deployment Steps**:
+
 1. Create production deployment ticket
 2. Notify users of upcoming deployment (if maintenance window)
 3. Execute blue-green or canary deployment
@@ -496,6 +540,7 @@ PATCH: Bug fixes, backward compatible (3.0.1)
 ### Release Checklist
 
 **Pre-Release (T-7 days)**:
+
 - [ ] All features merged to `develop`
 - [ ] Release notes drafted
 - [ ] Breaking changes documented
@@ -505,6 +550,7 @@ PATCH: Bug fixes, backward compatible (3.0.1)
 - [ ] Performance testing done
 
 **Release Day (T-0)**:
+
 - [ ] Create release branch: `release/vX.Y.Z`
 - [ ] Update version numbers in codebase
 - [ ] Update CHANGELOG.md
@@ -516,6 +562,7 @@ PATCH: Bug fixes, backward compatible (3.0.1)
 - [ ] Announce to users
 
 **Post-Release (T+24h)**:
+
 - [ ] Monitor error rates and metrics
 - [ ] Address critical bugs immediately
 - [ ] Collect user feedback
@@ -528,6 +575,7 @@ PATCH: Bug fixes, backward compatible (3.0.1)
 **Frequency**: As needed (weekly if bugs exist)
 
 **Process**:
+
 - Fix bug in `develop` branch
 - Cherry-pick to `main` if urgent
 - Deploy with rolling update
@@ -540,6 +588,7 @@ PATCH: Bug fixes, backward compatible (3.0.1)
 **Frequency**: Monthly
 
 **Process**:
+
 - Accumulate features in `develop`
 - Test thoroughly in staging
 - Beta test with users
@@ -553,6 +602,7 @@ PATCH: Bug fixes, backward compatible (3.0.1)
 **Frequency**: Annually or as needed
 
 **Process**:
+
 - Long beta period (2-4 weeks)
 - Migration guide provided
 - Maintenance window may be required
@@ -567,6 +617,7 @@ PATCH: Bug fixes, backward compatible (3.0.1)
 ### Automated Rollback Triggers
 
 The system automatically triggers rollback if:
+
 - Health check failure rate > 10%
 - Error rate > 1%
 - Response time P95 > 2 seconds
@@ -651,6 +702,7 @@ alembic current
 ### Terraform for Cloud Resources
 
 **Managed Resources**:
+
 - Kubernetes clusters (EKS, AKS, GKE)
 - Load balancers
 - DNS records
@@ -663,6 +715,7 @@ alembic current
 - IAM roles and policies
 
 **Directory Structure**:
+
 ```
 terraform/
 ├── environments/
@@ -678,6 +731,7 @@ terraform/
 ```
 
 **Deployment**:
+
 ```bash
 cd terraform/environments/production
 terraform init
@@ -688,6 +742,7 @@ terraform apply tfplan
 ### Kubernetes Manifests
 
 **Directory Structure**:
+
 ```
 k8s/
 ├── base/                    # Base configurations
@@ -706,6 +761,7 @@ k8s/
 ```
 
 **Apply Manifests**:
+
 ```bash
 # Apply to staging
 kubectl apply -k k8s/overlays/staging
@@ -725,6 +781,7 @@ kubectl apply -k k8s/overlays/production
 3. **Cloud provider secret managers** (AWS Secrets Manager, Azure Key Vault)
 
 **Rotation Policy**:
+
 - Database passwords: Every 90 days
 - API keys: Every 180 days
 - JWT signing keys: Every 365 days
@@ -751,6 +808,7 @@ kubectl apply -k k8s/overlays/production
    - Backup before production migration
 
 **Example Safe Migration**:
+
 ```python
 # Migration 1: Add nullable column
 def upgrade():
@@ -768,6 +826,7 @@ def upgrade():
 ### Audit Logging
 
 **All deployments logged**:
+
 - Timestamp
 - User who triggered deployment
 - Version deployed
@@ -782,6 +841,7 @@ def upgrade():
 ### Key Metrics to Watch
 
 **During Deployment**:
+
 - Error rate (must stay < 0.1%)
 - Response time P95 (must stay < 500ms)
 - Response time P99 (must stay < 2s)
@@ -792,6 +852,7 @@ def upgrade():
 - Cache hit rate (should remain high)
 
 **Business Metrics**:
+
 - Login success rate
 - Appointment booking rate
 - Patient creation rate
@@ -799,6 +860,7 @@ def upgrade():
 - API 4xx/5xx error rates
 
 **Alerting Thresholds**:
+
 ```yaml
 - alert: HighErrorRate
   expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.01
@@ -819,6 +881,7 @@ def upgrade():
 ### Grafana Dashboards
 
 **Deployment Dashboard**:
+
 - Deployment timeline
 - Error rate over time
 - Response time over time
@@ -827,13 +890,14 @@ def upgrade():
 - Cache hit rate
 - Active user sessions
 
-**Access**: https://grafana.keneyapp.com/d/deployment
+**Access**: <https://grafana.keneyapp.com/d/deployment>
 
 ## Disaster Recovery
 
 ### Backup Strategy
 
 **Database Backups**:
+
 - Continuous WAL archiving (PostgreSQL)
 - Full backup every 6 hours
 - Retained for 30 days
@@ -842,6 +906,7 @@ def upgrade():
 - Tested monthly
 
 **Application Backups**:
+
 - Docker images in container registry
 - Infrastructure state in Terraform
 - Kubernetes manifests in Git
@@ -853,6 +918,7 @@ def upgrade():
 ### Disaster Recovery Drill
 
 **Quarterly DR Exercise**:
+
 1. Simulate complete infrastructure failure
 2. Restore from backups
 3. Verify data integrity
@@ -866,31 +932,36 @@ def upgrade():
 ### Stakeholder Notifications
 
 **Pre-Deployment**:
+
 - Product owners: 1 week notice
 - Users: 48 hours notice (for maintenance windows)
 - Support team: 24 hours notice
 
 **During Deployment**:
+
 - Internal team: Real-time updates in Slack
 - Users: Status page updates
 - Support team: Alert on standby
 
 **Post-Deployment**:
+
 - Internal team: Deployment success summary
 - Users: New features announcement
 - Support team: Known issues and workarounds
 
-**Status Page**: https://status.keneyapp.com
+**Status Page**: <https://status.keneyapp.com>
 
 ### Incident Communication
 
 **During Outage**:
+
 - Update status page every 15 minutes
 - Post to social media
 - Email critical users
 - Update support team
 
 **Post-Incident**:
+
 - Post-mortem within 48 hours
 - Share lessons learned
 - Document improvements
@@ -901,6 +972,7 @@ def upgrade():
 ### Deployment Metrics
 
 Track and improve:
+
 - Deployment frequency (goal: daily for staging, weekly for production)
 - Deployment duration (goal: < 15 minutes)
 - Deployment failure rate (goal: < 5%)
@@ -910,6 +982,7 @@ Track and improve:
 ### Process Improvements
 
 **Quarterly Reviews**:
+
 - Review deployment failures
 - Analyze rollback causes
 - Update automation
@@ -917,6 +990,7 @@ Track and improve:
 - Update documentation
 
 **Automation Goals**:
+
 - Zero-touch deployments to staging
 - One-click deployments to production
 - Automated rollback on failure

@@ -14,7 +14,7 @@ Ce document aligne la vision d’un Dossier Médical Informatisé (DMI) cloud‑
 - FHIR: Convertisseurs dans `app/fhir/converters.py` couvrant Patient, Appointment, MedicationRequest, Condition, Observation, Procedure. Documentation `docs/FHIR_GUIDE.md`. Endpoints FHIR exposés via `app/routers/fhir.py`.
 - Données/terminologies: Modèles `MedicalCode`, `Observation`, `Condition`, `Procedure`, `LabResult` dans `app/models`. Alembic inclut colonnes/indices pour LOINC, SNOMED CT, ICD‑11, ATC, CPT, CCAM.
 - Sécurité: JWT, RBAC basique via dépendances, audit, rate limiting context‑aware, chiffrement PHI (services dédiés), multi‑tenant.
-- Infra: PostgreSQL, Redis, Celery, Prometheus/Grafana, k8s manifests. CI/CD GitHub Actions (lint, tests, sécurité de base, build Docker, smoke tests). 
+- Infra: PostgreSQL, Redis, Celery, Prometheus/Grafana, k8s manifests. CI/CD GitHub Actions (lint, tests, sécurité de base, build Docker, smoke tests).
 
 ## 3. Vision cible DMI (2025)
 
@@ -43,7 +43,8 @@ Ce document aligne la vision d’un Dossier Médical Informatisé (DMI) cloud‑
 ## 5. Plan de migration par phases (12–18 mois)
 
 ### Phase 1 — FHIR‑first et fondations (0–3 mois)
-- Étendre FHIR R4: 
+
+- Étendre FHIR R4:
   - Recherche (search parameters standards) sur Patient/Appointment/Observation.
   - OperationOutcome uniforme, CapabilityStatement enrichi.
   - Bundles (transaction batch minimal), ETag/versionId pour ressources clés.
@@ -53,43 +54,52 @@ Ce document aligne la vision d’un Dossier Médical Informatisé (DMI) cloud‑
 - Observabilité: instrumentation OpenTelemetry côté FastAPI et workers; export Jaeger/OTLP.
 
 Critères d’acceptation:
+
 - Endpoints FHIR avec search + OperationOutcome + CapabilityStatement complet.
 - Tests d’intégration FHIR étendus; couverture ≥ 78% backend.
 - Authn via OIDC valide en staging; traces OTel visibles dans Jaeger.
 
 ### Phase 2 — API Gateway, événements, découpage initial (3–6 mois)
+
 - API Gateway: Kong ou NGINX Ingress + policies (authn, rate limit, quotas, WAF de base).
 - Bus d’événements: Kafka ou RabbitMQ pour notifications domaine (Patient, Appointment, Prescription) et intégrations.
 - Découpage: extraire un premier microservice « Appointments » (FastAPI/NestJS), base dédiée (ou accès FHIR), contrats stables.
 - FHIR Subscriptions: notifier les services sur création/modif de ressources clés (Appointment, MedicationRequest).
 
 Critères d’acceptation:
+
 - Gateway en prod avec OIDC/JWT, rate limit centralisé.
 - Événements Appointment publiés/consommés; microservice autoscalable.
 
 ### Phase 3 — Laboratoire et interop HL7 v2 (6–9 mois)
+
 - HL7 engine (Mirth/NextGen Connect): canaux ORM/ORU vers/depuis SI Labo, ack/retry, transformation vers FHIR Observation (LOINC).
 - Microservice Labo: mapping ServiceRequest ↔ HL7, persistence Observation; règles de validation référence/intervalle.
 
 Critères d’acceptation:
+
 - Flux e2e: création demande labo → résultat ORU → Observation FHIR sur patient.
 - Latence < 2 min 95e perc. sur intégration de résultats.
 
 ### Phase 4 — Imagerie/PACS et DICOM (9–12 mois)
+
 - PACS: Orthanc ou DCM4CHEE; stockage objet; DICOMweb (WADO/QIDO/STOW) + viewer web embeddable.
 - Microservice Imagerie: ServiceRequest radiologie, `ImagingStudy` + `DiagnosticReport`, liens vers séries/instances.
 - IHE XDS‑I pour partage inter‑établissements (si périmètre requis).
 
 Critères d’acceptation:
+
 - Consultation d’images DICOM depuis DMI avec contrôle d’accès.
 - Indice de disponibilité PACS ≥ 99.9% mensuel.
 
 ### Phase 5 — Sécurité avancée, conformité et durcissement (12–18 mois)
+
 - ABAC via OPA (policies: consentements, service/attribution, BTG), journaux d’audit immuables.
 - mTLS intra‑cluster via service mesh (Istio/Linkerd), rotation certs, politiques Zero Trust.
 - HDS/HIPAA: procédures, preuves, sauvegardes chiffrées, PRA/PCA, tests de restauration.
 
 Critères d’acceptation:
+
 - Audits de conformité internes passés; panoplie d’alertes sécurité active.
 - PRA testé avec RTO≤4h, RPO≤24h.
 
@@ -143,7 +153,8 @@ Recommandation: démarrer en B (façade FHIR enrichie) tout en préparant la com
 
 ---
 
-Annexes: 
+Annexes:
+
 - Diagramme logique (Mermaid)
 
 ```mermaid

@@ -27,17 +27,17 @@ assignees: ''
 
 <!-- Describe specific use cases where this feature would be valuable -->
 
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ## Benefits
 
 <!-- How will this feature improve the application? -->
 
-- 
-- 
-- 
+-
+-
+-
 
 ## Technical Considerations
 
@@ -64,6 +64,6 @@ assignees: ''
 
 <!-- What conditions must be met for this feature to be considered complete? -->
 
-- [ ] 
-- [ ] 
+- [ ]
+- [ ]
 - [ ]

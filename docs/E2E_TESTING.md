@@ -5,6 +5,7 @@ This document describes the comprehensive E2E testing infrastructure for KeneyAp
 ## Overview
 
 The E2E testing framework provides:
+
 - **Complete Stack Testing**: Tests all components in an isolated Docker environment
 - **Structured Logging**: JSON-formatted results with performance metrics
 - **Automated Analysis**: Python-based result analysis with recommendations
@@ -19,6 +20,7 @@ The E2E testing framework provides:
 ```
 
 This single command will:
+
 1. ✅ Start isolated Docker environment (PostgreSQL, Redis, Backend, Celery)
 2. ✅ Run comprehensive test suite
 3. ✅ Collect logs and metrics
@@ -28,6 +30,7 @@ This single command will:
 ### View Results
 
 After running tests, check:
+
 - **Analysis Report**: `logs/e2e_analysis_report.txt` (human-readable summary)
 - **JSON Results**: `logs/e2e_integration_results.json` (machine-readable data)
 - **Detailed Log**: `logs/e2e_integration_test.log` (test execution log)
@@ -36,11 +39,13 @@ After running tests, check:
 ## What's Tested
 
 ### 1. Health Checks
+
 - Root endpoint availability
 - Health endpoint status
 - API documentation access
 
 ### 2. Authentication
+
 - Login for all user roles:
   - Super Admin
   - Admin (Tenant Owner)
@@ -51,6 +56,7 @@ After running tests, check:
 - Token expiry handling
 
 ### 3. Patient Workflows
+
 - **Create Patient** with PHI encryption
 - **List Patients** with pagination
 - **Get Patient** details
@@ -59,22 +65,26 @@ After running tests, check:
 - **Tenant Isolation** validation
 
 ### 4. RBAC (Role-Based Access Control)
+
 - Admin: Full CRUD permissions
 - Doctor: Read access only
 - Nurse: Forbidden on patient operations
 - Receptionist: Forbidden on patient operations
 
 ### 5. Cache Validation
+
 - Cache hit performance
 - Cache invalidation on updates
 - Cache warming strategies
 
 ### 6. GraphQL API
+
 - Patient list queries
 - Field selection
 - Performance comparison with REST
 
 ### 7. Metrics & Monitoring
+
 - Prometheus metrics endpoint
 - Request counters
 - Performance histograms
@@ -123,6 +133,7 @@ After running tests, check:
 ### E2ETestLogger
 
 Structured logging framework that captures:
+
 - Test execution details
 - Performance metrics (response times, operation durations)
 - Errors and tracebacks
@@ -159,7 +170,7 @@ Expected performance (local Docker environment):
 - name: Run E2E Tests
   run: |
     ./scripts/run_e2e_tests.sh
-    
+
 - name: Upload Test Results
   if: always()
   uses: actions/upload-artifact@v3
@@ -187,15 +198,21 @@ pytest tests/test_e2e_integration.py \
 **Issue**: `Connection refused` errors
 
 **Solution**:
+
 1. Check Docker services are running:
+
    ```bash
    docker-compose -f docker-compose.e2e.yml ps
    ```
+
 2. Check backend logs:
+
    ```bash
    docker-compose -f docker-compose.e2e.yml logs backend
    ```
+
 3. Verify health checks:
+
    ```bash
    curl http://localhost:8000/health
    ```
@@ -205,9 +222,11 @@ pytest tests/test_e2e_integration.py \
 **Issue**: Tests take > 2 minutes
 
 **Solution**:
+
 1. Check Docker resources (CPU, memory)
 2. Review performance metrics in results
 3. Consider parallel execution:
+
    ```bash
    pytest tests/test_e2e_integration.py -n auto
    ```
@@ -217,12 +236,16 @@ pytest tests/test_e2e_integration.py \
 **Issue**: `401 Unauthorized` errors
 
 **Solution**:
+
 1. Check bootstrap admin is enabled:
+
    ```bash
    docker-compose -f docker-compose.e2e.yml exec backend \
      printenv ENABLE_BOOTSTRAP_ADMIN
    ```
+
 2. Verify database seed data:
+
    ```bash
    docker-compose -f docker-compose.e2e.yml exec backend \
      python scripts/init_db.py
@@ -233,11 +256,15 @@ pytest tests/test_e2e_integration.py \
 **Issue**: Cache hit rates < 50%
 
 **Solution**:
+
 1. Check Redis is running:
+
    ```bash
    docker-compose -f docker-compose.e2e.yml exec redis redis-cli ping
    ```
+
 2. Verify cache keys:
+
    ```bash
    docker-compose -f docker-compose.e2e.yml exec redis \
      redis-cli KEYS "*"
@@ -258,23 +285,23 @@ Example:
 def test_new_feature(self, e2e_logger: E2ETestLogger, admin_auth: Dict):
     """Test new feature functionality"""
     e2e_logger.log_info("Testing new feature")
-    
+
     start_time = time.time()
-    
+
     # Make request
     response = requests.get(
         f"{BASE_URL}/api/v1/new-feature",
         headers=admin_auth["headers"]
     )
-    
+
     duration_ms = (time.time() - start_time) * 1000
     e2e_logger.record_metric("new_feature_duration", duration_ms, "ms")
-    
+
     # Assertions
     assert response.status_code == 200
     data = response.json()
     assert "expected_field" in data
-    
+
     e2e_logger.log_test_result("test_new_feature", "passed", duration_ms / 1000)
 ```
 
@@ -294,17 +321,17 @@ def analyze_custom_metric(self) -> str:
     lines = []
     lines.append("🔍 Custom Analysis")
     lines.append("-" * 80)
-    
+
     # Extract data
     metrics = self.results.get('performance_metrics', {})
     custom_data = metrics.get('custom_metric', {})
-    
+
     # Analyze
     if custom_data.get('value', 0) > threshold:
         lines.append("  ⚠️  Custom metric exceeds threshold")
     else:
         lines.append("  ✅ Custom metric within bounds")
-    
+
     lines.append("")
     return "\n".join(lines)
 ```
@@ -344,6 +371,7 @@ def analyze_custom_metric(self) -> str:
 ### Monitoring Test Health
 
 Track these metrics over time:
+
 - Pass rate (target: 100%)
 - Execution time (target: < 2 minutes)
 - Flakiness rate (target: < 1%)
@@ -362,6 +390,7 @@ Track these metrics over time:
 ## Support
 
 For issues or questions:
+
 1. Check this documentation
 2. Review test logs in `logs/`
 3. Check backend logs: `docker-compose -f docker-compose.e2e.yml logs backend`

@@ -6,17 +6,18 @@ and maintainability. Follows patterns from GNU Health and ERPNext.
 """
 
 from typing import List, Optional
-from sqlalchemy.orm import Session
-from sqlalchemy import func
 
-from app.models.patient import Patient
-from app.schemas.patient import PatientCreate, PatientUpdate
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
 from app.exceptions import (
-    PatientNotFoundError,
     DuplicateResourceError,
+    PatientNotFoundError,
     raise_if_not_found,
     raise_if_tenant_mismatch,
 )
+from app.models.patient import Patient
+from app.schemas.patient import PatientCreate, PatientUpdate
 from app.services.patient_security import encrypt_patient_payload
 
 
@@ -66,9 +67,7 @@ class PatientService:
             .first()
         )
 
-    def list_patients(
-        self, tenant_id: int, skip: int = 0, limit: int = 100
-    ) -> List[Patient]:
+    def list_patients(self, tenant_id: int, skip: int = 0, limit: int = 100) -> List[Patient]:
         """
         List patients with pagination.
 
@@ -98,11 +97,7 @@ class PatientService:
         Returns:
             Total patient count
         """
-        return (
-            self.db.query(func.count(Patient.id))
-            .filter(Patient.tenant_id == tenant_id)
-            .scalar()
-        )
+        return self.db.query(func.count(Patient.id)).filter(Patient.tenant_id == tenant_id).scalar()
 
     def create_patient(self, patient_data: PatientCreate, tenant_id: int) -> Patient:
         """

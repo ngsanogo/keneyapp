@@ -2,39 +2,29 @@
 API routes for medical document upload and management.
 """
 
+import json
 from typing import List, Optional
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    Request,
-    status,
-    UploadFile,
-    File,
-    Form,
-)
+
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-import json
 
-from app.core.dependencies import get_db, get_current_active_user, require_roles
+from app.core.dependencies import get_current_active_user, get_db, require_roles
 from app.core.rate_limit import limiter
-from app.models.user import User, UserRole
 from app.models.medical_document import DocumentType
+from app.models.user import User, UserRole
 from app.schemas.medical_document import (
-    DocumentUpload,
+    DocumentMetadata,
     DocumentResponse,
     DocumentStats,
-    DocumentMetadata,
+    DocumentUpload,
 )
 from app.services import document_service
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
 
-@router.post(
-    "/upload", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("/upload", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit("20/minute")
 async def upload_document(
     request: Request,

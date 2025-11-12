@@ -7,6 +7,7 @@ KeneyApp implements HL7 FHIR (Fast Healthcare Interoperability Resources) versio
 ## Supported Resources
 
 ### Patient Resource
+
 - Full demographic information
 - Contact details
 - Medical identifiers
@@ -14,6 +15,7 @@ KeneyApp implements HL7 FHIR (Fast Healthcare Interoperability Resources) versio
 - **Operations**: read, create, search-type
 
 ### Appointment Resource
+
 - Scheduling information
 - Participant references
 - Status tracking
@@ -21,6 +23,7 @@ KeneyApp implements HL7 FHIR (Fast Healthcare Interoperability Resources) versio
 - **Operations**: read, search-type
 
 ### MedicationRequest Resource
+
 - Prescription details
 - Dosage instructions
 - Medication references (ATC coding)
@@ -28,6 +31,7 @@ KeneyApp implements HL7 FHIR (Fast Healthcare Interoperability Resources) versio
 - **Operations**: read
 
 ### Observation Resource
+
 - Clinical measurements and vital signs
 - Laboratory results
 - LOINC coding for observation types
@@ -36,6 +40,7 @@ KeneyApp implements HL7 FHIR (Fast Healthcare Interoperability Resources) versio
 - **Operations**: read, search-type
 
 ### Condition Resource
+
 - Patient diagnoses and clinical conditions
 - ICD-11 and SNOMED CT coding
 - Clinical and verification status
@@ -44,6 +49,7 @@ KeneyApp implements HL7 FHIR (Fast Healthcare Interoperability Resources) versio
 - **Operations**: read, search-type
 
 ### Procedure Resource
+
 - Medical procedures and interventions
 - CPT, CCAM, and SNOMED CT coding
 - Performer and timing information
@@ -61,6 +67,7 @@ GET /api/v1/fhir/metadata
 ```
 
 **Response:**
+
 ```json
 {
   "resourceType": "CapabilityStatement",
@@ -100,6 +107,7 @@ Authorization: Bearer {token}
 ```
 
 **Response:**
+
 ```json
 {
   "resourceType": "Patient",
@@ -145,6 +153,7 @@ Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "resourceType": "Patient",
@@ -180,6 +189,7 @@ Authorization: Bearer {token}
 ```
 
 **Response:**
+
 ```json
 {
   "resourceType": "Appointment",
@@ -230,12 +240,14 @@ Authorization: Bearer {token}
 ```
 
 **Parameters:**
+
 - `patient`: Patient ID reference
 - `code`: LOINC code (e.g., `8480-6` for systolic blood pressure)
 - `date`: Effective date (YYYY-MM-DD)
 - `status`: Observation status (`registered`, `preliminary`, `final`, `amended`)
 
 **Response (Bundle):**
+
 ```json
 {
   "resourceType": "Bundle",
@@ -292,6 +304,7 @@ Authorization: Bearer {token}
 ```
 
 **Response:**
+
 ```json
 {
   "resourceType": "Observation",
@@ -330,11 +343,13 @@ Authorization: Bearer {token}
 ```
 
 **Parameters:**
+
 - `patient`: Patient ID reference
 - `code`: ICD-11 or SNOMED CT code (e.g., `5A11` for Type 2 diabetes)
 - `clinical-status`: Clinical status (`active`, `resolved`, etc.)
 
 **Response (Bundle):**
+
 ```json
 {
   "resourceType": "Bundle",
@@ -392,11 +407,13 @@ Authorization: Bearer {token}
 ```
 
 **Parameters:**
+
 - `patient`: Patient ID reference
 - `code`: CPT, CCAM, or SNOMED CT code (e.g., `99213` for office visit)
 - `date`: Performed date (YYYY-MM-DD)
 
 **Response (Bundle):**
+
 ```json
 {
   "resourceType": "Bundle",
@@ -441,6 +458,7 @@ Authorization: Bearer {token}
 ```
 
 **Response:**
+
 ```json
 {
   "resourceType": "MedicationRequest",
@@ -584,6 +602,7 @@ Search results include HATEOAS paging links:
 ### Standard Search Parameters
 
 All search endpoints support:
+
 - `_count`: Items per page (default: 20, max: 100)
 - `_page`: Page number (1-indexed)
 
@@ -654,7 +673,7 @@ async function getFHIRPatient(patientId: number) {
       'Accept': 'application/fhir+json'
     }
   });
-  
+
   const patient = await response.json();
   return patient;
 }
@@ -668,7 +687,7 @@ async function createFHIRPatient(patientData: any) {
     },
     body: JSON.stringify(patientData)
   });
-  
+
   return await response.json();
 }
 ```
@@ -753,6 +772,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ### Authorization
 
 Access controlled by role-based permissions:
+
 - **Admin**: Full access
 - **Doctor**: Read/write for their patients
 - **Nurse**: Read access for their patients
@@ -761,6 +781,7 @@ Access controlled by role-based permissions:
 ### Audit Logging
 
 All FHIR operations are audit logged:
+
 - Resource accessed
 - User performing operation
 - Timestamp
@@ -769,6 +790,7 @@ All FHIR operations are audit logged:
 ## Rate Limiting
 
 FHIR endpoints are rate limited:
+
 - **Read operations**: 100 requests/minute
 - **Write operations**: 30 requests/minute
 
@@ -811,9 +833,9 @@ def test_patient_to_fhir():
         gender="male",
         date_of_birth=date(1980, 1, 15)
     )
-    
+
     fhir_patient = fhir_converter.patient_to_fhir(patient)
-    
+
     assert fhir_patient['resourceType'] == 'Patient'
     assert fhir_patient['name'][0]['family'] == 'Doe'
     assert fhir_patient['gender'] == 'male'
@@ -827,7 +849,7 @@ def test_fhir_patient_endpoint():
         "/api/v1/fhir/Patient/123",
         headers={"Authorization": f"Bearer {token}"}
     )
-    
+
     assert response.status_code == 200
     fhir_patient = response.json()
     assert fhir_patient['resourceType'] == 'Patient'
@@ -868,4 +890,4 @@ def test_fhir_patient_endpoint():
 
 ## Support
 
-For FHIR integration support: fhir-support@isdataconsulting.com
+For FHIR integration support: <fhir-support@isdataconsulting.com>

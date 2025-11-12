@@ -20,24 +20,24 @@ def upgrade() -> None:
     """Create medical_documents table for document storage."""
     # Create enums
     document_type = postgresql.ENUM(
-        'lab_result', 'imaging', 'prescription', 'consultation_note', 
+        'lab_result', 'imaging', 'prescription', 'consultation_note',
         'vaccination_record', 'insurance', 'id_document', 'other',
         name='documenttype', create_type=True
     )
     document_type.create(op.get_bind(), checkfirst=True)
-    
+
     document_format = postgresql.ENUM(
         'pdf', 'jpeg', 'png', 'dicom', 'docx', 'txt',
         name='documentformat', create_type=True
     )
     document_format.create(op.get_bind(), checkfirst=True)
-    
+
     document_status = postgresql.ENUM(
         'uploading', 'processing', 'ready', 'failed', 'archived',
         name='documentstatus', create_type=True
     )
     document_status.create(op.get_bind(), checkfirst=True)
-    
+
     # Create medical_documents table
     op.create_table(
         'medical_documents',
@@ -86,16 +86,16 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['appointment_id'], ['appointments.id'], ondelete='SET NULL'),
         sa.ForeignKeyConstraint(['prescription_id'], ['prescriptions.id'], ondelete='SET NULL'),
     )
-    
+
     # Create indexes
     op.create_index(op.f('ix_medical_documents_id'), 'medical_documents', ['id'], unique=False)
     op.create_index(op.f('ix_medical_documents_patient_id'), 'medical_documents', ['patient_id'], unique=False)
     op.create_index(op.f('ix_medical_documents_tenant_id'), 'medical_documents', ['tenant_id'], unique=False)
     op.create_index(op.f('ix_medical_documents_created_at'), 'medical_documents', ['created_at'], unique=False)
     op.create_index(op.f('ix_medical_documents_checksum'), 'medical_documents', ['checksum'], unique=False)
-    
+
     # Composite indexes for common queries
-    op.create_index('ix_medical_documents_patient_type', 'medical_documents', 
+    op.create_index('ix_medical_documents_patient_type', 'medical_documents',
                    ['patient_id', 'document_type', 'tenant_id'], unique=False)
     op.create_index('ix_medical_documents_patient_deleted', 'medical_documents',
                    ['patient_id', 'deleted_at'], unique=False)
@@ -111,17 +111,17 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_medical_documents_tenant_id'), table_name='medical_documents')
     op.drop_index(op.f('ix_medical_documents_patient_id'), table_name='medical_documents')
     op.drop_index(op.f('ix_medical_documents_id'), table_name='medical_documents')
-    
+
     # Drop table
     op.drop_table('medical_documents')
-    
+
     # Drop enums
     document_status = postgresql.ENUM('uploading', 'processing', 'ready', 'failed', 'archived', name='documentstatus')
     document_status.drop(op.get_bind(), checkfirst=True)
-    
+
     document_format = postgresql.ENUM('pdf', 'jpeg', 'png', 'dicom', 'docx', 'txt', name='documentformat')
     document_format.drop(op.get_bind(), checkfirst=True)
-    
+
     document_type = postgresql.ENUM(
         'lab_result', 'imaging', 'prescription', 'consultation_note',
         'vaccination_record', 'insurance', 'id_document', 'other',

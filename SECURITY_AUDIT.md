@@ -23,7 +23,7 @@ This document summarizes the security vulnerabilities found during the automated
    - **Severity:** Medium
    - **Description:** Minerva timing attack on P-256 curve
    - **Status:** ⚠️ ACKNOWLEDGED - No fix available
-   - **Rationale:** 
+   - **Rationale:**
      - Project maintainers consider side-channel attacks out of scope
      - Used indirectly via python-jose for JWT signing
      - Risk is minimal in our use case (server-side JWT operations)
@@ -33,14 +33,14 @@ This document summarizes the security vulnerabilities found during the automated
    - **Severity:** High
    - **Description:** Path traversal in fallback extraction for source distributions
    - **Status:** ⚠️ SYSTEM DEPENDENCY
-   - **Rationale:** 
+   - **Rationale:**
      - System-level pip installation
      - Not part of application dependencies
      - Should be updated at system level
    - **Recommendation:** Update pip to >=25.3 in deployment environments
 
 4. **setuptools (PYSEC-2025-49)**
-   - **Severity:** High  
+   - **Severity:** High
    - **Description:** Path traversal vulnerability in PackageIndex
    - **Status:** ⚠️ BUILD DEPENDENCY
    - **Rationale:**
@@ -108,6 +108,7 @@ The following vulnerabilities exist in development dependencies (not affecting p
 ## Conclusion
 
 The application has a good security posture with only minor known issues:
+
 - Production runtime has minimal security concerns (ecdsa indirect usage)
 - Development dependencies have known issues but are isolated from production
 - All critical production vulnerabilities have been addressed

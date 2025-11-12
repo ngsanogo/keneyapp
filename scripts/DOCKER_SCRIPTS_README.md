@@ -9,17 +9,20 @@ Ce dossier contient des scripts utilitaires pour l'optimisation et le monitoring
 **Description**: Affiche une comparaison détaillée des tailles d'images avant/après optimisation.
 
 **Usage**:
+
 ```bash
 python3 scripts/check_image_sizes.py
 ```
 
 **Output**:
+
 - Tailles d'images actuelles vs originales
 - Pourcentage de réduction par service
 - Impact total sur le stockage
 - Estimation des gains de performance
 
 **Exemple**:
+
 ```
 🐳 KeneyApp Docker Image Optimization Results
 ==================================================
@@ -277,5 +280,5 @@ Pour toute question sur l'optimisation Docker:
 
 ---
 
-**Dernière mise à jour**: Novembre 2025  
+**Dernière mise à jour**: Novembre 2025
 **Mainteneur**: KeneyApp Team

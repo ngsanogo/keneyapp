@@ -59,6 +59,7 @@ echo -e "\n=== Health Check Complete ==="
 ```
 
 **Daily Checklist:**
+
 - [ ] All pods running and healthy
 - [ ] API responding within SLA (< 200ms p95)
 - [ ] Database connections < 80% of max
@@ -77,6 +78,7 @@ echo -e "\n=== Health Check Complete ==="
 ### Standard Deployment (Blue-Green)
 
 **Prerequisites:**
+
 - [ ] All tests passing in CI/CD
 - [ ] Code review approved
 - [ ] Staging deployment successful
@@ -175,7 +177,7 @@ kubectl exec -n keneyapp postgres-0 -- psql keneyapp -c "ANALYZE;"
 
 # 3. Check for bloat
 kubectl exec -n keneyapp postgres-0 -- psql keneyapp -c "
-  SELECT schemaname, tablename, 
+  SELECT schemaname, tablename,
     pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS size,
     n_dead_tup
   FROM pg_stat_user_tables
@@ -264,6 +266,7 @@ kubectl exec -n keneyapp postgres-0 -- psql -c "\d patients"
 ### Key Metrics to Monitor
 
 **Application Metrics:**
+
 - Request rate (requests/second)
 - Response time (p50, p95, p99)
 - Error rate (4xx, 5xx)
@@ -271,6 +274,7 @@ kubectl exec -n keneyapp postgres-0 -- psql -c "\d patients"
 - Database connections
 
 **Infrastructure Metrics:**
+
 - CPU utilization
 - Memory usage
 - Disk I/O
@@ -334,18 +338,21 @@ kubectl exec -n keneyapp backend-0 -- \
 ### Automated Backup Schedule
 
 **Daily Backups:**
+
 - **Time**: 3:00 AM UTC
 - **Retention**: 7 days
 - **Type**: Full database dump
 - **Storage**: S3 bucket (encrypted)
 
 **Weekly Backups:**
+
 - **Time**: Sunday 4:00 AM UTC
 - **Retention**: 4 weeks
 - **Type**: Full database dump + filesystem
 - **Storage**: S3 bucket (encrypted, cross-region replicated)
 
 **Monthly Backups:**
+
 - **Time**: 1st of month 5:00 AM UTC
 - **Retention**: 12 months
 - **Type**: Full database dump + filesystem
@@ -574,9 +581,9 @@ kubectl exec -n keneyapp postgres-0 -- psql -c "
 
 # Kill long-running queries
 kubectl exec -n keneyapp postgres-0 -- psql -c "
-  SELECT pg_terminate_backend(pid) 
-  FROM pg_stat_activity 
-  WHERE state = 'active' 
+  SELECT pg_terminate_backend(pid)
+  FROM pg_stat_activity
+  WHERE state = 'active'
     AND query_start < now() - interval '5 minutes';
 "
 ```
@@ -625,6 +632,7 @@ kubectl delete pod backend-0 -n keneyapp
 ### Scheduled Maintenance
 
 **Standard Window:**
+
 - **Day**: Sunday
 - **Time**: 2:00 AM - 6:00 AM UTC
 - **Frequency**: Monthly
@@ -673,7 +681,7 @@ npm audit (in frontend/)
 
 # Review access logs for suspicious activity
 kubectl exec -n keneyapp postgres-0 -- psql -c "
-  SELECT * FROM audit_logs 
+  SELECT * FROM audit_logs
   WHERE action IN ('LOGIN_FAILED', 'UNAUTHORIZED_ACCESS')
   AND created_at > now() - interval '30 days';
 "
@@ -684,7 +692,7 @@ trivy filesystem .
 
 # Review user permissions
 kubectl exec -n keneyapp postgres-0 -- psql -c "
-  SELECT username, role FROM users 
+  SELECT username, role FROM users
   WHERE is_active = true;
 "
 ```
@@ -751,7 +759,7 @@ alias metrics='curl -s https://api.keneyapp.com/metrics | grep -E "http_requests
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2024-01-15  
-**Next Review**: 2024-04-15  
+**Document Version**: 1.0
+**Last Updated**: 2024-01-15
+**Next Review**: 2024-04-15
 **Owner**: DevOps Team

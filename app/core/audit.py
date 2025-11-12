@@ -2,7 +2,8 @@
 Audit logging utilities for GDPR/HIPAA compliance.
 """
 
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
+
 from fastapi import Request
 from sqlalchemy.orm import Session
 

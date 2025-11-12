@@ -3,13 +3,13 @@ Notification service for sending emails, SMS, and push notifications.
 Supports multiple providers and channels.
 """
 
-import os
 import logging
-from typing import Optional, Dict
-from datetime import datetime
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import os
 import smtplib
+from datetime import datetime
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -124,11 +124,11 @@ class NotificationService:
 
         email_body = f"""
         Bonjour {patient_name},
-        
+
         Nous vous rappelons votre rendez-vous prévu le {appointment_date.strftime('%d/%m/%Y à %H:%M')} avec {doctor_name}.
-        
+
         Merci de confirmer votre présence ou de nous contacter en cas d'empêchement.
-        
+
         Cordialement,
         L'équipe KeneyApp
         """
@@ -158,16 +158,18 @@ class NotificationService:
 
         email_body = f"""
         Bonjour {patient_name},
-        
+
         Vos résultats d'analyse pour "{test_name}" sont maintenant disponibles dans votre dossier médical.
-        
+
         Connectez-vous à votre compte pour les consulter.
-        
+
         Cordialement,
         L'équipe KeneyApp
         """
 
-        sms_body = f"Vos résultats pour {test_name} sont disponibles. Consultez votre compte KeneyApp."
+        sms_body = (
+            f"Vos résultats pour {test_name} sont disponibles. Consultez votre compte KeneyApp."
+        )
 
         results = {
             "email": EmailNotification.send_email(patient_email, subject, email_body),
@@ -193,11 +195,11 @@ class NotificationService:
 
         email_body = f"""
         Bonjour {patient_name},
-        
+
         Votre ordonnance pour "{medication_name}" expire le {expiry_date.strftime('%d/%m/%Y')}.
-        
+
         Pensez à prendre rendez-vous pour le renouvellement.
-        
+
         Cordialement,
         L'équipe KeneyApp
         """
@@ -228,11 +230,11 @@ class NotificationService:
 
         email_body = f"""
         Bonjour {patient_name},
-        
+
         Un rappel de vaccination pour "{vaccine_name}" est prévu le {due_date.strftime('%d/%m/%Y')}.
-        
+
         Prenez rendez-vous avec votre médecin pour effectuer ce vaccin.
-        
+
         Cordialement,
         L'équipe KeneyApp
         """
@@ -263,13 +265,13 @@ class NotificationService:
 
         email_body = f"""
         Bonjour {recipient_name},
-        
+
         Vous avez reçu un nouveau message de {sender_name}.
-        
+
         Sujet: {message_subject or 'Sans objet'}
-        
+
         Connectez-vous à votre compte pour le lire.
-        
+
         Cordialement,
         L'équipe KeneyApp
         """

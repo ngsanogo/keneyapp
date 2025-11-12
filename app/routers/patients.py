@@ -7,6 +7,7 @@ HTTP/platform concerns (audit, cache, metrics, FHIR events) in router.
 
 import logging
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
@@ -16,19 +17,13 @@ from app.core.database import get_db
 from app.core.dependencies import require_roles
 from app.core.metrics import patient_operations_total
 from app.core.rate_limit import limiter
-from app.models.user import User, UserRole
-from app.schemas.patient import PatientCreate, PatientUpdate, PatientResponse
+from app.exceptions import DuplicateResourceError, PatientNotFoundError
 from app.fhir.converters import fhir_converter
-from app.services.subscription_events import publish_event
-from app.services.patient_security import (
-    serialize_patient_dict,
-    serialize_patient_collection,
-)
+from app.models.user import User, UserRole
+from app.schemas.patient import PatientCreate, PatientResponse, PatientUpdate
+from app.services.patient_security import serialize_patient_collection, serialize_patient_dict
 from app.services.patient_service import PatientService
-from app.exceptions import (
-    PatientNotFoundError,
-    DuplicateResourceError,
-)
+from app.services.subscription_events import publish_event
 
 logger = logging.getLogger(__name__)
 
@@ -51,9 +46,7 @@ def create_patient(
     patient_data: PatientCreate,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])
-    ),
+    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])),
 ):
     """
     Create a new patient record.
@@ -131,9 +124,7 @@ def get_patients(
     limit: int = 100,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(
-            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
-        )
+        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
     ),
 ):
     """
@@ -196,9 +187,7 @@ def get_patient(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(
-            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
-        )
+        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
     ),
 ):
     """
@@ -244,9 +233,7 @@ def get_patient(
             details={"reason": "not_found"},
             request=request,
         )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
 
     log_audit_event(
         db=db,
@@ -287,9 +274,7 @@ def update_patient(
     """
     service = PatientService(db)
     try:
-        patient = service.update_patient(
-            patient_id, patient_data, current_user.tenant_id
-        )
+        patient = service.update_patient(patient_id, patient_data, current_user.tenant_id)
         db.commit()
     except PatientNotFoundError:
         log_audit_event(
@@ -303,9 +288,7 @@ def update_patient(
             details={"reason": "not_found"},
             request=request,
         )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
     except DuplicateResourceError as exc:
         log_audit_event(
             db=db,
@@ -331,9 +314,7 @@ def update_patient(
         status="success",
         user_id=current_user.id,
         username=current_user.username,
-        details={
-            "updated_fields": list(patient_data.model_dump(exclude_unset=True).keys())
-        },
+        details={"updated_fields": list(patient_data.model_dump(exclude_unset=True).keys())},
         request=request,
     )
 
@@ -391,9 +372,7 @@ def delete_patient(
             details={"reason": "not_found"},
             request=request,
         )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
 
     log_audit_event(
         db=db,
@@ -408,9 +387,7 @@ def delete_patient(
 
     cache_clear_pattern(f"{PATIENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
     cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
-    cache_clear_pattern(
-        f"{PATIENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{patient_id}"
-    )
+    cache_clear_pattern(f"{PATIENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{patient_id}")
 
     patient_operations_total.labels(operation="delete").inc()
 

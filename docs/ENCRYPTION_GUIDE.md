@@ -9,6 +9,7 @@ KeneyApp implements encryption at rest for sensitive patient data using AES-256-
 **Algorithm**: AES-256-GCM (Advanced Encryption Standard with Galois/Counter Mode)
 
 **Key Features**:
+
 - **256-bit key**: Maximum security for healthcare data
 - **Authenticated encryption**: Prevents tampering and ensures integrity
 - **Random nonces**: Each encryption produces unique ciphertext
@@ -87,6 +88,7 @@ decrypted_data = decrypt_patient_data(encrypted_data)
 ### Sensitive Fields
 
 The following patient fields are automatically encrypted:
+
 - `medical_history`
 - `allergies`
 - `emergency_contact`
@@ -108,23 +110,23 @@ from app.models.patient import Patient
 def create_patient(patient_data: PatientCreate, db: Session = Depends(get_db)):
     # Encrypt sensitive fields
     encrypted_data = encrypt_patient_data(patient_data.dict())
-    
+
     # Create patient
     patient = Patient(**encrypted_data)
     db.add(patient)
     db.commit()
-    
+
     return patient
 
 # Retrieving and decrypting patient data
 @router.get("/patients/{patient_id}")
 def get_patient(patient_id: int, db: Session = Depends(get_db)):
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
-    
+
     # Decrypt sensitive fields
     patient_dict = patient.__dict__
     decrypted_data = decrypt_patient_data(patient_dict)
-    
+
     return decrypted_data
 ```
 
@@ -148,6 +150,7 @@ decrypted_diagnosis = encryption.decrypt_field(encrypted_diagnosis)
 **Current**: Key derived from `SECRET_KEY` in environment variables
 
 **Production Recommendations**:
+
 1. Use AWS KMS, Azure Key Vault, or GCP Secret Manager
 2. Rotate keys periodically (e.g., annually)
 3. Store keys separately from application code
@@ -168,10 +171,10 @@ new_encryptor = DataEncryption(key=NEW_SECRET_KEY)
 for patient in db.query(Patient).all():
     # Decrypt with old key
     decrypted = old_encryptor.decrypt_field(patient.medical_history)
-    
+
     # Encrypt with new key
     patient.medical_history = new_encryptor.encrypt_field(decrypted)
-    
+
 db.commit()
 ```
 
@@ -219,6 +222,7 @@ db.commit()
 ### Storage
 
 Encrypted fields require more storage:
+
 - Original: VARCHAR(200)
 - Encrypted: VARCHAR(300+) or TEXT
 
@@ -238,6 +242,7 @@ ALTER TABLE patients
 **Solutions**:
 
 1. **Partial decryption**: Decrypt and search in application layer
+
 ```python
 patients = db.query(Patient).all()
 results = [p for p in patients if 'diabetes' in decrypt_patient_data(p.__dict__)['medical_history'].lower()]
@@ -246,6 +251,7 @@ results = [p for p in patients if 'diabetes' in decrypt_patient_data(p.__dict__)
 2. **Searchable encryption**: Use deterministic encryption for searchable fields (advanced)
 
 3. **Metadata fields**: Store searchable metadata separately
+
 ```python
 # Add searchable flag
 patient.has_diabetes = True  # Unencrypted boolean
@@ -273,11 +279,13 @@ patient.medical_history = encrypted_value  # Encrypted details
 ### Error: "Decryption failed"
 
 **Causes**:
+
 1. Wrong encryption key
 2. Corrupted ciphertext
 3. Data not actually encrypted
 
 **Solution**:
+
 ```python
 try:
     decrypted = decrypt_sensitive_data(encrypted_data)
@@ -331,15 +339,15 @@ def test_patient_encryption_in_db(db):
     # Create patient with encrypted data
     patient_data = {"first_name": "John", "medical_history": "Diabetes"}
     encrypted = encrypt_patient_data(patient_data)
-    
+
     patient = Patient(**encrypted)
     db.add(patient)
     db.commit()
-    
+
     # Retrieve and verify
     retrieved = db.query(Patient).filter(Patient.id == patient.id).first()
     assert retrieved.medical_history != "Diabetes"  # Should be encrypted
-    
+
     # Decrypt and verify
     decrypted = decrypt_patient_data(retrieved.__dict__)
     assert decrypted["medical_history"] == "Diabetes"
@@ -357,4 +365,4 @@ Planned improvements:
 
 ## Support
 
-For encryption-related questions: security@isdataconsulting.com
+For encryption-related questions: <security@isdataconsulting.com>

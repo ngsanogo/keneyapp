@@ -256,8 +256,8 @@ groups:
       # This helps detect both unusual spikes and drops in activity
       - alert: PatientOperationsAnomaly
         expr: |
-          abs(rate(patient_operations_total[1h]) - 
-          avg_over_time(rate(patient_operations_total[1h])[7d:1h])) > 
+          abs(rate(patient_operations_total[1h]) -
+          avg_over_time(rate(patient_operations_total[1h])[7d:1h])) >
           2 * stddev_over_time(rate(patient_operations_total[1h])[7d:1h])
         for: 30m
         labels:
@@ -288,8 +288,8 @@ groups:
       # This helps detect potential brute force attacks or unusual access patterns
       - alert: UnusualLoginPattern
         expr: |
-          abs(rate(auth_login_total[1h]) - 
-          avg_over_time(rate(auth_login_total[1h])[7d:1h])) > 
+          abs(rate(auth_login_total[1h]) -
+          avg_over_time(rate(auth_login_total[1h])[7d:1h])) >
           3 * stddev_over_time(rate(auth_login_total[1h])[7d:1h])
         for: 30m
         labels:

@@ -1,7 +1,7 @@
 # KeneyApp Repository Comprehensive Analysis
 
-**Date**: November 5, 2025  
-**Version**: 1.0.0  
+**Date**: November 5, 2025
+**Version**: 1.0.0
 **Coverage**: Full codebase analysis
 
 ---
@@ -17,6 +17,7 @@ KeneyApp is a **well-architected healthcare data management platform** with stro
 - ✅ **FHIR compliance**: Converters, subscriptions, GraphQL support
 
 **Areas for Improvement**:
+
 - 🔄 Service layer could be more robust (some business logic in routers)
 - 🔄 Lab module workflow states need validation logic
 - 🔄 Error handling could use domain-specific exceptions
@@ -53,12 +54,14 @@ app/
 ```
 
 **Strengths**:
+
 - **Middleware stack**: CORS → CorrelationId → Metrics → SecurityHeaders → SlowAPI
 - **Lifespan management**: Proper startup/shutdown with conditional rate limiting
 - **Error handling**: Custom handlers for FHIR OperationOutcome vs. standard JSON
 - **OpenTelemetry**: Optional tracing with OTLP/Jaeger exporters
 
 **Inspired improvements from GNU Health/ERPNext**:
+
 - ✅ **Modular design**: TenantModule system allows feature toggles per tenant
 - ✅ **State machines**: LabResultState enum with validation
 - ✅ **Custom exceptions**: app/exceptions.py provides domain-specific errors
@@ -82,6 +85,7 @@ app/
 | **AuditLog** | Global | ✅ timestamp, user_id | - | - | ✅ Compliance tracking |
 
 **Strengths**:
+
 - **Tenant isolation**: All domain models enforce tenant_id filtering
 - **Rich enums**: Type-safe status/role/state management
 - **Audit trail**: Separate AuditLog for all CRUD operations
@@ -89,6 +93,7 @@ app/
 - **Workflow tracking**: LabResult has requested_by, reviewed_by, validated_by
 
 **Observations**:
+
 - ⚠️ **Missing check constraints**: LabTestType age ranges could use `CheckConstraint(min_age_years <= max_age_years)`
 - ⚠️ **No DB-level state transition enforcement**: Relies on @validates decorator
 - ✅ **Good relationship patterns**: Uses backref where appropriate to avoid circular imports
@@ -119,6 +124,7 @@ def create_resource(
 ```
 
 **Strengths**:
+
 - **Consistent RBAC**: All endpoints use `require_roles()`
 - **Rate limiting**: All mutating endpoints have limits
 - **Audit logging**: CREATE/READ/UPDATE/DELETE actions logged with correlation IDs
@@ -126,11 +132,13 @@ def create_resource(
 - **Metrics**: Prometheus counters track operations
 
 **Weaknesses**:
+
 - ⚠️ **Business logic in routers**: Validation and orchestration should be in services
 - ⚠️ **Repetitive patterns**: Cache key building, serialization could be abstracted
 - ⚠️ **Missing pagination helpers**: Manual `skip`/`limit` handling
 
 **Improvements from tmp analysis**:
+
 - 📦 **Service layer needed**: Move business logic from routers to services
 - 📦 **Validation layer**: Pre-flight checks before database operations
 - 📦 **Response serializers**: Dedicated functions for cache/response formatting
@@ -145,13 +153,13 @@ def create_resource(
 # Base → Create → Update → Response pattern
 class PatientBase(BaseModel):
     # Common fields
-    
+
 class PatientCreate(PatientBase):
     pass  # All fields required
-    
+
 class PatientUpdate(BaseModel):
     # All Optional[...] for partial updates
-    
+
 class PatientResponse(PatientBase):
     id: int
     tenant_id: int
@@ -161,11 +169,13 @@ class PatientResponse(PatientBase):
 ```
 
 **Strengths**:
+
 - **Type safety**: Proper use of Optional, enums
 - **Validation**: Field constraints (min_length, max_length, pattern)
 - **Clean separation**: Base/Create/Update/Response inheritance
 
 **Observations**:
+
 - ⚠️ **Limited custom validators**: Could add @field_validator for complex rules
 - ⚠️ **No computed fields**: @computed_field could derive age from date_of_birth
 - ✅ **Good enum integration**: Gender, AppointmentStatus, LabResultState
@@ -187,16 +197,19 @@ class PatientResponse(PatientBase):
 | `mfa.py` | TOTP generation/verification | ✅ Complete |
 
 **Strengths**:
+
 - **PHI handling**: Dedicated encryption service with field-level control
 - **Event-driven**: Subscription events decouple routers from webhooks
 - **Reusable**: Services are testable independently
 
 **Gaps**:
+
 - ⚠️ **No lab validation service**: Age/gender checks are missing
 - ⚠️ **No appointment conflict service**: Logic is in router
 - ⚠️ **No patient service**: CRUD is directly in router
 
 **Recommended Services** (from GNU Health patterns):
+
 ```python
 # app/services/lab_validation.py
 def validate_test_for_patient(test_type, patient) -> bool:
@@ -224,6 +237,7 @@ def transition_lab_result_state(result, new_state, current_user):
 ### 2.1 Authentication & Authorization
 
 **Authentication**:
+
 - ✅ JWT tokens with expiration (configurable via ACCESS_TOKEN_EXPIRE_MINUTES)
 - ✅ bcrypt password hashing (via passlib CryptContext)
 - ✅ MFA support (TOTP with pyotp)
@@ -231,28 +245,33 @@ def transition_lab_result_state(result, new_state, current_user):
 - ✅ Bootstrap admin for dev/test environments
 
 **Authorization (RBAC)**:
+
 - ✅ Role hierarchy: SUPER_ADMIN > ADMIN > DOCTOR > NURSE > RECEPTIONIST
 - ✅ `require_roles()` decorator accepts UserRole enums or iterables
 - ✅ SUPER_ADMIN bypasses all role checks
 - ✅ Tenant-scoped: Users can only access their tenant's data
 
 **Audit Logging**:
+
 - ✅ All CRUD operations logged to `audit_logs` table
 - ✅ Captures: user_id, username, action, resource_type, resource_id, IP, user_agent, timestamp
 - ✅ Correlation IDs via middleware for request tracing
 - ✅ Success/failure status tracking
 
 **Rate Limiting**:
+
 - ✅ SlowAPI integration with per-endpoint limits
 - ✅ Configurable via ENABLE_RATE_LIMITING env var
 - ✅ Standards: 10/min (create), 60/min (list), 120/min (detail), 5/min (delete)
 
 **Data Encryption**:
+
 - ✅ PHI fields encrypted at rest (medical_history, allergies, address, etc.)
 - ✅ Fernet symmetric encryption with key rotation support
 - ✅ Transparent encryption/decryption via service layer
 
 **Compliance**:
+
 - ✅ GDPR: Audit logs, right to erasure (DELETE endpoints)
 - ✅ HIPAA: Encryption, access controls, audit trails
 - ✅ FHIR R4: Standard data interchange for interoperability
@@ -262,12 +281,14 @@ def transition_lab_result_state(result, new_state, current_user):
 ### 2.2 Security Headers & Middleware
 
 **Middleware Stack** (execution order):
+
 1. **CorrelationIdMiddleware**: Adds X-Correlation-ID to requests/responses
 2. **MetricsMiddleware**: Tracks request durations for Prometheus
 3. **SecurityHeadersMiddleware**: Sets HSTS, X-Content-Type-Options, X-Frame-Options, CSP
 4. **CORSMiddleware**: ALLOWED_ORIGINS configuration
 
 **Security Headers**:
+
 ```python
 Strict-Transport-Security: max-age=31536000; includeSubDomains
 X-Content-Type-Options: nosniff
@@ -276,6 +297,7 @@ Content-Security-Policy: default-src 'self'
 ```
 
 **Observations**:
+
 - ✅ **Defense in depth**: Multiple layers of security
 - ⚠️ **CSP could be more restrictive**: Add script-src, style-src directives
 - ✅ **Correlation IDs**: Excellent for log aggregation and debugging
@@ -287,11 +309,13 @@ Content-Security-Policy: default-src 'self'
 ### 3.1 Test Coverage
 
 **Current Stats** (from pytest.ini):
+
 - **Coverage**: 74.96% (target: ≥70%, goal: ≥85%)
 - **Tests**: 143 passed, 4 skipped (FHIR bundle smoke tests)
 - **Markers**: smoke, slow, integration, unit, api, security, performance
 
 **Test Distribution**:
+
 ```
 tests/
 ├── conftest.py                    ✅ Comprehensive fixtures (tenant, users, patients)
@@ -316,12 +340,14 @@ tests/
 ```
 
 **Test Quality**:
+
 - ✅ **Fixtures**: Excellent separation (tenant, users by role, patients bulk)
 - ✅ **Isolation**: In-memory SQLite per test function
 - ✅ **Markers**: Good organization with custom markers
 - ✅ **Coverage reports**: HTML + XML + terminal output
 
 **Gaps**:
+
 - ⚠️ **Lab workflow tests missing**: No tests for state transitions, age/gender validation
 - ⚠️ **Integration tests sparse**: Need more multi-step workflows (create patient → book appointment → add lab result)
 - ⚠️ **Performance tests**: Marked but not extensively used
@@ -354,6 +380,7 @@ sample_pdf_bytes, sample_image_png_bytes, mock_email_service
 ```
 
 **Observations**:
+
 - ✅ **Scoped appropriately**: Function scope for isolation
 - ✅ **Reusable**: Auth headers derived from user fixtures
 - ✅ **Realistic data**: Bulk patients for pagination tests
@@ -378,24 +405,28 @@ sample_pdf_bytes, sample_image_png_bytes, mock_email_service
 | **flower** | Same as backend | Celery monitoring | - |
 
 **Networking**:
-- Backend: http://localhost:8000
-- Frontend: http://localhost:3000
-- Flower: http://localhost:5555
+
+- Backend: <http://localhost:8000>
+- Frontend: <http://localhost:3000>
+- Flower: <http://localhost:5555>
 - PostgreSQL: localhost:5432
 - Redis: localhost:6379
 
 **Volumes**:
+
 - `postgres_data`: Persistent database
 - `redis_data`: Persistent cache
 - Mount `./app`, `./alembic`, `./scripts` for live reload
 
 **Strengths**:
+
 - ✅ **Health checks**: PostgreSQL and Redis have proper health checks
 - ✅ **Dependency management**: `depends_on` with conditions
 - ✅ **Separation of concerns**: Worker, beat, and flower are isolated
 - ✅ **Live reload**: Volume mounts enable development without rebuilds
 
 **Observations**:
+
 - ⚠️ **No monitoring services**: Prometheus/Grafana mentioned in Makefile but not in docker-compose.yml
 - ⚠️ **No nginx/reverse proxy**: Direct exposure of backend on port 8000
 - ✅ **Alembic auto-migration**: Runs `alembic upgrade head` on backend startup
@@ -405,6 +436,7 @@ sample_pdf_bytes, sample_image_png_bytes, mock_email_service
 ### 4.2 Dockerfile Best Practices
 
 **Backend Dockerfile**:
+
 ```dockerfile
 FROM python:3.11-slim                 ✅ Slim image
 ENV PYTHONUNBUFFERED=1                ✅ No buffering
@@ -418,6 +450,7 @@ CMD ["uvicorn", ...]                  ✅ Direct command
 ```
 
 **Strengths**:
+
 - ✅ Layer optimization for caching
 - ✅ Minimal base image
 - ✅ Non-root user would be improvement (not implemented)
@@ -427,6 +460,7 @@ CMD ["uvicorn", ...]                  ✅ Direct command
 ### 4.3 Makefile & Build System
 
 **Commands**:
+
 ```bash
 make install           # Backend + frontend deps
 make setup            # Full setup with hooks
@@ -439,6 +473,7 @@ make ci               # Simulate CI pipeline locally
 ```
 
 **Strengths**:
+
 - ✅ **Comprehensive targets**: Setup, dev, test, build, deploy
 - ✅ **Parallel execution**: `make -j2 dev-backend dev-frontend`
 - ✅ **CI simulation**: `make ci` runs lint + test + security + build
@@ -450,6 +485,7 @@ make ci               # Simulate CI pipeline locally
 ### 4.4 Monitoring & Observability
 
 **Implemented**:
+
 - ✅ **Prometheus metrics**: Counters for patient operations, HTTP requests
 - ✅ **OpenTelemetry**: Optional tracing with OTLP/Jaeger exporters
 - ✅ **Correlation IDs**: Unique request tracking across services
@@ -457,6 +493,7 @@ make ci               # Simulate CI pipeline locally
 - ✅ **Health endpoints**: `/health`, `/`
 
 **Metrics Exposed** (`/metrics`):
+
 ```python
 patient_operations_total{operation="create|update|delete"}
 http_requests_total{method, path, status}
@@ -464,6 +501,7 @@ http_request_duration_seconds{method, path}
 ```
 
 **Gaps**:
+
 - ⚠️ **No Grafana dashboards**: Prometheus without visualization
 - ⚠️ **No alerting**: No Alertmanager configuration
 - ⚠️ **No distributed tracing UI**: OpenTelemetry enabled but no Jaeger UI in docker-compose
@@ -475,12 +513,14 @@ http_request_duration_seconds{method, path}
 ### 5.1 Code Style
 
 **Linting & Formatting**:
+
 - ✅ **Black**: Auto-formatting with line length 88
 - ✅ **flake8**: PEP 8 compliance checking
 - ✅ **mypy**: Type checking (with `|| true` fallback)
 - ✅ **Prettier**: Frontend code formatting
 
 **Type Hints**:
+
 ```python
 # Strong typing throughout
 def get_patients(
@@ -493,6 +533,7 @@ def get_patients(
 ```
 
 **Strengths**:
+
 - ✅ **Consistent style**: Black + flake8 enforce uniform code
 - ✅ **Type safety**: Pydantic + mypy catch errors early
 - ✅ **Documentation**: Comprehensive docstrings in modules
@@ -502,6 +543,7 @@ def get_patients(
 ### 5.2 Error Handling
 
 **Current Approach**:
+
 ```python
 # Standard FastAPI HTTPException
 raise HTTPException(status_code=404, detail="Patient not found")
@@ -511,6 +553,7 @@ raise HTTPException(status_code=404, detail="Patient not found")
 ```
 
 **New Custom Exceptions** (from app/exceptions.py):
+
 ```python
 # Hierarchy
 KeneyAppException (base)
@@ -537,11 +580,13 @@ KeneyAppException (base)
 ```
 
 **Strengths**:
+
 - ✅ **Domain-specific**: Clear exceptions for business rules
 - ✅ **HTTP status mapping**: Correct status codes per error type
 - ✅ **Helper functions**: `raise_if_not_found()`, `raise_if_tenant_mismatch()`
 
 **Usage Example**:
+
 ```python
 # Before (generic)
 if not patient:
@@ -562,28 +607,32 @@ patient = raise_if_not_found(patient, "Patient")
 ### 6.1 FHIR Converters
 
 **Supported Resources**:
+
 - ✅ **Patient**: Full demographics, contact, telecom
 - ✅ **Appointment**: Status, participants, period
 - ✅ **MedicationRequest**: Dosage, dispense, substitution
 - ✅ **Bundle**: Batch/transaction processing
 
 **Converter Patterns**:
+
 ```python
 # app/fhir/converters.py
 class FHIRConverter:
     def patient_to_fhir(self, patient: Patient) -> dict:
         # KeneyApp Patient → FHIR Patient resource
-        
+
     def fhir_to_patient(self, fhir_patient: dict, tenant_id: int) -> Patient:
         # FHIR Patient → KeneyApp Patient (create)
 ```
 
 **Strengths**:
+
 - ✅ **Bidirectional**: KeneyApp ↔ FHIR
 - ✅ **Standard-compliant**: FHIR R4 resource structure
 - ✅ **Extension support**: DMI extensions for additional fields
 
 **Gaps**:
+
 - ⚠️ **Limited resources**: No Observation, Condition, Procedure converters yet
 - ⚠️ **No validation**: Should validate FHIR resources against profiles
 
@@ -592,12 +641,14 @@ class FHIRConverter:
 ### 6.2 FHIR Subscriptions
 
 **Implementation**:
+
 - ✅ **Topic-based**: Subscribe to Patient, Appointment, MedicationRequest changes
 - ✅ **REST hook**: Webhook delivery via Celery
 - ✅ **Filtering**: Criteria support (e.g., `Patient?status=active`)
 - ✅ **Event publishing**: `publish_event()` triggers webhooks
 
 **Webhook Delivery** (app/tasks.py):
+
 ```python
 @celery_app.task(bind=True, max_retries=3)
 def deliver_subscription_webhook(self, subscription_id: int, payload: dict):
@@ -606,6 +657,7 @@ def deliver_subscription_webhook(self, subscription_id: int, payload: dict):
 ```
 
 **Strengths**:
+
 - ✅ **Asynchronous**: Non-blocking webhook delivery
 - ✅ **Retry logic**: 3 attempts with backoff
 - ✅ **Monitoring**: Celery Flower for task tracking
@@ -615,6 +667,7 @@ def deliver_subscription_webhook(self, subscription_id: int, payload: dict):
 ### 6.3 GraphQL Schema
 
 **Schema** (app/graphql/schema.py):
+
 ```graphql
 type Patient {
   id: Int!
@@ -633,11 +686,13 @@ type Query {
 ```
 
 **Strengths**:
+
 - ✅ **Strawberry framework**: Modern GraphQL for Python
 - ✅ **Type safety**: Auto-generated from Pydantic models
 - ✅ **Mounted at /graphql**: Separate from REST API
 
 **Observations**:
+
 - ⚠️ **Read-only**: No mutations implemented yet
 - ⚠️ **No authentication**: GraphQL endpoints don't enforce RBAC (potential security gap)
 - ⚠️ **Limited resolvers**: Only patients exposed
@@ -658,16 +713,19 @@ type Query {
 | `cleanup_old_audit_logs` | Purge logs >90 days | Maintenance | Daily (Celery Beat) |
 
 **Configuration**:
+
 - ✅ **Broker**: Redis (CELERY_BROKER_URL)
 - ✅ **Backend**: Redis (CELERY_RESULT_BACKEND)
 - ✅ **Monitoring**: Flower on port 5555
 
 **Strengths**:
+
 - ✅ **Asynchronous operations**: Non-blocking user experience
 - ✅ **Retry logic**: Tasks have max_retries with exponential backoff
 - ✅ **Scheduling**: Celery Beat for periodic tasks
 
 **Gaps**:
+
 - ⚠️ **No task result handling**: Fire-and-forget pattern, no result checking
 - ⚠️ **Limited error notifications**: Failed tasks logged but not alerted
 
@@ -678,17 +736,20 @@ type Query {
 ### 8.1 React Frontend
 
 **Structure** (inferred from docker-compose + Makefile):
+
 - ✅ **Framework**: React (Create React App or similar)
-- ✅ **API Integration**: REACT_APP_API_URL=http://localhost:8000
+- ✅ **API Integration**: REACT_APP_API_URL=<http://localhost:8000>
 - ✅ **Development server**: Port 3000
 - ✅ **Testing**: npm test with coverage
 
 **Integration Points**:
+
 - Backend REST API (`/api/v1/*`)
 - GraphQL endpoint (`/graphql`)
 - FHIR endpoints (`/api/v1/fhir/*`)
 
 **Observations**:
+
 - ⚠️ **Limited analysis**: Frontend not deeply reviewed in this analysis
 - ✅ **Separation**: Clear backend/frontend boundary
 
@@ -697,30 +758,35 @@ type Query {
 ## 9. Strengths Summary
 
 ### 9.1 Architecture & Design
+
 - ✅ **Clean separation**: Routers → Services → Models → Schemas
 - ✅ **Multi-tenancy**: Tenant-scoped data with isolation enforcement
 - ✅ **Modular**: TenantModule system for feature toggles
 - ✅ **Extensible**: Custom exceptions, middleware, and services
 
 ### 9.2 Security & Compliance
+
 - ✅ **Defense in depth**: JWT + MFA + rate limiting + encryption + audit logs
 - ✅ **RBAC**: Fine-grained role-based access control with `require_roles()`
 - ✅ **PHI protection**: Field-level encryption for sensitive data
 - ✅ **Compliance**: GDPR + HIPAA audit trails and access controls
 
 ### 9.3 Testing & Quality
+
 - ✅ **High coverage**: 74.96% with comprehensive fixtures
 - ✅ **Well-organized**: Markers, conftest, integration/unit separation
 - ✅ **Automated**: CI-ready with `make ci`
 - ✅ **Type safety**: Pydantic + mypy throughout
 
 ### 9.4 Operations & Deployment
+
 - ✅ **Production-ready**: Docker Compose with health checks
 - ✅ **Observability**: Prometheus metrics + OpenTelemetry + correlation IDs
 - ✅ **Scalable**: Celery workers for background tasks
 - ✅ **Developer-friendly**: Makefile targets, live reload, comprehensive docs
 
 ### 9.5 Standards & Interoperability
+
 - ✅ **FHIR R4**: Converters, subscriptions, OperationOutcome
 - ✅ **GraphQL**: Alternative query interface
 - ✅ **OpenAPI**: Auto-generated docs at `/api/v1/docs`
@@ -732,6 +798,7 @@ type Query {
 ### 10.1 Immediate (Sprint 1-2)
 
 **Priority 1: Service Layer Enhancements**
+
 ```python
 # Create these services to move business logic out of routers:
 app/services/
@@ -742,12 +809,14 @@ app/services/
 ```
 
 **Priority 2: Lab Workflow Implementation**
+
 - Implement state transition validation in service layer
 - Add age/gender constraint checks before creating LabResults
 - Add validation preventing self-validation (`CannotValidateOwnResultError`)
 - Write integration tests for full lab workflow (request → review → validate)
 
 **Priority 3: Error Handling Migration**
+
 - Replace generic `HTTPException` with domain-specific exceptions
 - Use `raise_if_not_found()` and `raise_if_tenant_mismatch()` helpers
 - Add exception handlers for custom exceptions in `app/main.py`
@@ -757,11 +826,13 @@ app/services/
 ### 10.2 Short-term (Sprint 3-4)
 
 **Priority 4: GraphQL Security**
+
 - Add authentication to GraphQL endpoints (use FastAPI dependencies)
 - Implement RBAC for GraphQL queries/mutations
 - Add mutations for create/update/delete operations
 
 **Priority 5: Enhanced Testing**
+
 - Increase coverage to ≥80% (focus on services, edge cases)
 - Add integration tests for multi-step workflows:
   - Patient → Appointment → Lab Result → Report generation
@@ -769,6 +840,7 @@ app/services/
 - Add performance tests with `pytest-benchmark`
 
 **Priority 6: Monitoring & Alerting**
+
 - Add Grafana service to docker-compose.yml
 - Create dashboards for:
   - Request latency by endpoint
@@ -782,18 +854,21 @@ app/services/
 ### 10.3 Medium-term (Month 2-3)
 
 **Priority 7: Advanced FHIR Features**
+
 - Add Observation, Condition, Procedure converters
 - Implement FHIR resource validation against profiles
 - Add FHIR Bulk Data export (`$export` operation)
 - Support SMART on FHIR authentication
 
 **Priority 8: Socioeconomic Module** (from tmp analysis)
+
 - Create SocioeconomicAssessment model
 - Implement Family APGAR questionnaire
 - Add education/occupation/housing enums
 - FHIR mapping to SDOH Observation resources
 
 **Priority 9: Survey Engine** (from tmp analysis)
+
 - Create Survey, SurveyQuestion, SurveyResponse models
 - Implement basic question types (multiple choice, scale, text)
 - Add PHQ-9 and GAD-7 mental health screening templates
@@ -804,18 +879,21 @@ app/services/
 ### 10.4 Long-term (Quarter 2+)
 
 **Priority 10: Multi-Institution Federation** (from Thalamus analysis)
+
 - Design federated identity system
 - Implement consent management for data sharing
 - Add referral network workflows
 - Create de-identified data aggregation for research
 
 **Priority 11: Advanced Analytics**
+
 - Implement population health dashboards
 - Add predictive models (e.g., readmission risk)
 - Create patient cohort management
 - Support for clinical decision support (CDS Hooks)
 
 **Priority 12: Mobile & Offline Support**
+
 - Progressive Web App (PWA) for offline access
 - Mobile apps for iOS/Android
 - Sync strategies for offline data entry
@@ -827,12 +905,14 @@ app/services/
 ### 11.1 From GNU Health (Tryton)
 
 **Adopted**:
+
 - ✅ **State machines**: `LabResultState` enum with @validates
 - ✅ **Domain models**: Rich models with business logic methods
 - ✅ **Age/gender constraints**: `min_age_years`, `max_age_years`, `gender` on LabTestType
 - ✅ **Workflow audit**: `requested_by`, `reviewed_by`, `validated_by` tracking
 
 **To Adopt**:
+
 - 📦 **Functional fields**: Computed properties with @computed_field
 - 📦 **Selection widgets**: Rich enum metadata for UI rendering
 - 📦 **Model inheritance**: Extend base models with tenant/audit/versioning mixins
@@ -842,10 +922,12 @@ app/services/
 ### 11.2 From Thalamus (Federation)
 
 **Adopted**:
+
 - ✅ **ACL patterns**: `require_roles()` maps to ACL method/role checks
 - ✅ **Resource-oriented**: REST endpoints organized by resource type
 
 **To Adopt**:
+
 - 📦 **Global vs. personal scope**: Flag for whether user can see all tenant data or only assigned records
 - 📦 **Federation relay**: Message broker for cross-tenant data exchange
 - 📦 **Consent tracking**: Patient-controlled access grants
@@ -855,11 +937,13 @@ app/services/
 ### 11.3 From ERPNext/Frappe
 
 **Adopted**:
+
 - ✅ **Modular features**: `TenantModule` for per-tenant feature toggles
 - ✅ **Hooks system**: Celery tasks + subscription events = event hooks
 - ✅ **Custom exceptions**: Domain-specific error hierarchy
 
 **To Adopt**:
+
 - 📦 **DocType abstraction**: Generic CRUD service for all models
 - 📦 **Permission rules**: Database-level row-level security (RLS) in PostgreSQL
 - 📦 **Versioning**: Track document versions with diff/restore
@@ -869,6 +953,7 @@ app/services/
 ### 11.4 From LimeSurvey
 
 **To Adopt**:
+
 - 📦 **Question library**: Reusable question templates
 - 📦 **Conditional logic**: Display questions based on previous answers
 - 📦 **Multilingual support**: I18n for patient-facing questionnaires
@@ -947,6 +1032,7 @@ app/services/
 ## 13. Conclusion
 
 KeneyApp is a **mature, well-architected healthcare platform** with strong foundations in:
+
 - ✅ Security & compliance (GDPR/HIPAA)
 - ✅ Multi-tenancy & isolation
 - ✅ Testing & quality (75% coverage)
@@ -954,24 +1040,28 @@ KeneyApp is a **mature, well-architected healthcare platform** with strong found
 - ✅ Production-ready infrastructure (Docker, Celery, monitoring)
 
 **Key Strengths**:
+
 1. Clean architecture with clear separation of concerns
 2. Comprehensive security (encryption, RBAC, audit, rate limiting)
 3. Excellent test coverage with well-organized fixtures
 4. Production-ready with Docker Compose and observability
 
 **Primary Gaps**:
+
 1. **Thin service layer**: Business logic in routers (move to services)
 2. **Lab workflow incomplete**: Missing age/gender validation, state enforcement
 3. **GraphQL security**: Unauthenticated endpoints (add RBAC)
 4. **Limited integration tests**: Need more multi-step workflows
 
 **Immediate Actions**:
+
 1. Create service layer and refactor routers
 2. Implement lab workflow validation with custom exceptions
 3. Add authentication to GraphQL endpoints
 4. Increase test coverage to ≥80%
 
 **Long-term Vision**:
+
 - Multi-institution federation for collaborative care
 - Advanced analytics and population health management
 - Comprehensive FHIR R4 support with bulk data export
@@ -983,6 +1073,6 @@ The codebase is **production-ready** with clear paths for improvement. Focus on 
 
 **Next Steps**: Review this analysis with the team and prioritize improvements based on business needs and technical debt tolerance.
 
-**Document Version**: 1.0  
-**Last Updated**: November 5, 2025  
+**Document Version**: 1.0
+**Last Updated**: November 5, 2025
 **Author**: AI Analysis (GitHub Copilot)

@@ -398,4 +398,3 @@ full-check:
 
 fresh-start: clean install install-dev install-hooks db-reset
 	@echo "🚀 Fresh start complete - ready to develop!"
-

@@ -5,10 +5,11 @@ These handlers avoid leaking PHI and keep responses consistent across the API.
 FHIR-specific behavior remains in the HTTPException handler defined in main.py.
 """
 
-from fastapi import Request
-from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
 from typing import Optional, Union
+
+from fastapi import Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 from app.core.logging_middleware import get_correlation_id
 

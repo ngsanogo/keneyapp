@@ -81,8 +81,9 @@ Additional notes:
 
 4. **Medication & Orders**
    - Medication catalogue, formulary management.
-  - Prescription workflow (draft/approve/dispense, interaction checks).
-   - E-signature integration, audit trails.
+
+- Prescription workflow (draft/approve/dispense, interaction checks).
+- E-signature integration, audit trails.
 
 5. **Interoperability Layer**
    - FHIR resources (Patient, Encounter, Observation, MedicationRequest, etc.).
@@ -105,6 +106,7 @@ Additional notes:
    - Observability: dashboards & alerting policies.
 
 Each iteration ends with:
+
 - Updated documentation (API, runbooks, deployment).
 - Automated tests covering new functionality.
 - Docker build/run validation (local & CI).
@@ -121,4 +123,3 @@ Each iteration ends with:
    - Add MFA & session audit logging.
 
 Progress will be tracked directly in this document, updating sections as milestones are delivered.
-

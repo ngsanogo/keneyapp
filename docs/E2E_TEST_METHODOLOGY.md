@@ -8,7 +8,7 @@ Ce document décrit la **méthodologie complète de test end-to-end** appliquée
 
 ## 🎯 Phase 1: Déterminer les Scénarios de Test
 
-### Approche utilisée:
+### Approche utilisée
 
 1. **Analyse des parcours utilisateurs (User Journeys)**
    - Identification des 5 rôles principaux
@@ -34,18 +34,18 @@ Ce document décrit la **méthodologie complète de test end-to-end** appliquée
 | Tests RBAC | Tous | ⭐⭐⭐ Haute | Moyenne |
 | Tests Sécurité PHI | Admin/Doctor | ⭐⭐⭐ Haute | Complexe |
 
-### Critères de sélection:
+### Critères de sélection
 
-✅ **Impact utilisateur**: Fonctionnalités les plus utilisées  
-✅ **Criticité business**: Workflows essentiels  
-✅ **Risque**: Zones sensibles (sécurité, données)  
-✅ **Complexité**: Interactions multi-composants  
+✅ **Impact utilisateur**: Fonctionnalités les plus utilisées
+✅ **Criticité business**: Workflows essentiels
+✅ **Risque**: Zones sensibles (sécurité, données)
+✅ **Complexité**: Interactions multi-composants
 
 ---
 
 ## 🔍 Phase 2: Identifier les Étapes de Chaque Scénario
 
-### Décomposition méthodique:
+### Décomposition méthodique
 
 Pour chaque scénario, nous avons:
 
@@ -94,13 +94,13 @@ CONTEXTE:
 ... (jusqu'à étape 10)
 ```
 
-### Template utilisé:
+### Template utilisé
 
 ```python
 def test_scenario_[name](self, api_base_url, authenticated_sessions, test_logger):
     """
     SCÉNARIO: [Description]
-    
+
     Étapes:
     1. [Action 1]
     2. [Action 2]
@@ -110,19 +110,19 @@ def test_scenario_[name](self, api_base_url, authenticated_sessions, test_logger
     # Setup
     session = authenticated_sessions['role']
     scenario_start = time.time()
-    
+
     try:
         # Étape 1
         test_logger.log_info("Step 1: [Description]")
         response = requests.[method](url, ...)
         assert [validation]
-        
+
         # Étape 2...
-        
+
         # Mesures finales
         duration = time.time() - scenario_start
         test_logger.log_test(name, "passed", duration, {metrics})
-        
+
     except Exception as e:
         test_logger.log_error(name, str(e))
         raise
@@ -162,7 +162,7 @@ response = requests.post(
 )
 ```
 
-### Avantages vs tests manuels purs:
+### Avantages vs tests manuels purs
 
 | Aspect | Tests Manuels | Tests Automatisés |
 |--------|---------------|-------------------|
@@ -173,7 +173,7 @@ response = requests.post(
 | Documentation | Manuelle | Code = doc |
 | CI/CD | Impossible | Intégré |
 
-### Cas où tests manuels restent nécessaires:
+### Cas où tests manuels restent nécessaires
 
 - ❌ Tests UI/UX (apparence visuelle)
 - ❌ Tests ergonomie (feeling utilisateur)
@@ -184,7 +184,7 @@ response = requests.post(
 
 ## 🤖 Phase 4: Automatiser les Tests
 
-### Framework et outils:
+### Framework et outils
 
 ```
 pytest                  # Test runner
@@ -194,7 +194,7 @@ pytest                  # Test runner
 └── E2ETestLogger       # Structured logging custom
 ```
 
-### Architecture d'automatisation:
+### Architecture d'automatisation
 
 ```
 tests/test_e2e_integration.py
@@ -225,7 +225,7 @@ tests/test_e2e_integration.py
 ```python
 class PatientAPIActions:
     """Encapsule les actions patient (comme Page Object)"""
-    
+
     @staticmethod
     def create(base_url, headers, data):
         return requests.post(
@@ -233,7 +233,7 @@ class PatientAPIActions:
             json=data,
             headers=headers
         )
-    
+
     @staticmethod
     def search(base_url, headers, skip=0, limit=10):
         return requests.get(
@@ -242,7 +242,7 @@ class PatientAPIActions:
         )
 ```
 
-### Logging structuré:
+### Logging structuré
 
 ```python
 class E2ETestLogger:
@@ -254,7 +254,7 @@ class E2ETestLogger:
             "details": details or {},
             "timestamp": datetime.now().isoformat()
         })
-    
+
     def log_performance(self, metric_name, value_ms):
         self.performance_metrics[metric_name] = {
             "value": value_ms,
@@ -262,22 +262,22 @@ class E2ETestLogger:
         }
 ```
 
-### Gestion des erreurs:
+### Gestion des erreurs
 
 ```python
 try:
     response = requests.post(url, json=data)
     response.raise_for_status()  # Raise pour 4xx/5xx
-    
+
     # Validation données
     assert response.json()['id'] is not None
-    
+
     test_logger.log_test("Test Name", "passed", duration)
-    
+
 except requests.exceptions.RequestException as e:
     test_logger.log_error("Test Name", str(e))
     raise
-    
+
 except AssertionError as e:
     test_logger.log_error("Test Name", f"Assertion failed: {e}")
     raise
@@ -304,25 +304,25 @@ jobs:
   e2e-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Set up Docker
         run: docker --version
-      
+
       - name: Run E2E Test Suite
         run: |
           chmod +x scripts/run_e2e_tests.sh
           ./scripts/run_e2e_tests.sh
         env:
           E2E_BASE_URL: http://localhost:8000
-      
+
       - name: Analyze Results
         if: always()
         run: python scripts/analyze_e2e_results.py
-      
+
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v3
@@ -333,7 +333,7 @@ jobs:
             logs/e2e_analysis_report.txt
             test_results/e2e_results.xml
           retention-days: 30
-      
+
       - name: Publish Test Report
         if: always()
         uses: dorny/test-reporter@v1
@@ -342,7 +342,7 @@ jobs:
           path: test_results/e2e_results.xml
           reporter: java-junit
           fail-on-error: true
-      
+
       - name: Comment PR with Results
         if: github.event_name == 'pull_request' && always()
         uses: actions/github-script@v6
@@ -352,29 +352,29 @@ jobs:
             const results = JSON.parse(
               fs.readFileSync('logs/e2e_integration_results.json', 'utf8')
             );
-            
+
             const summary = results.summary;
             const passRate = (summary.passed / summary.total * 100).toFixed(1);
-            
+
             const comment = `## 🧪 E2E Test Results
-            
+
             **Summary:**
             - ✅ Passed: ${summary.passed}
             - ❌ Failed: ${summary.failed}
             - ⏭️ Skipped: ${summary.skipped}
             - 📊 Pass Rate: ${passRate}%
             - ⏱️ Duration: ${results.total_duration_seconds.toFixed(1)}s
-            
+
             ${summary.failed > 0 ? '⚠️ **Some tests failed. Please review.**' : '✅ **All tests passed!**'}
             `;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: comment
             });
-      
+
       - name: Fail if tests failed
         if: always()
         run: |
@@ -386,7 +386,7 @@ jobs:
           echo "✅ All tests passed"
 ```
 
-### Notifications:
+### Notifications
 
 ```yaml
       - name: Notify Slack on Failure
@@ -398,7 +398,7 @@ jobs:
           webhook_url: ${{ secrets.SLACK_WEBHOOK }}
 ```
 
-### Métriques trackées en CI:
+### Métriques trackées en CI
 
 - **Test pass rate** (objectif: 100%)
 - **Test duration** (objectif: < 5 min)
@@ -409,16 +409,17 @@ jobs:
 
 ## 📊 Phase 6: Augmenter la Portée des Tests
 
-### Stratégie d'expansion:
+### Stratégie d'expansion
 
 1. **Coverage horizontale** (plus de features)
+
    ```
    Actuel:
    - Patients ✅
    - Rendez-vous ✅
    - Documents ✅
    - Auth ✅
-   
+
    À ajouter:
    - Prescriptions 🔄
    - Messages 🔄
@@ -427,6 +428,7 @@ jobs:
    ```
 
 2. **Coverage verticale** (plus de profondeur)
+
    ```
    Niveau 1: Happy path ✅
    Niveau 2: Edge cases ✅
@@ -436,6 +438,7 @@ jobs:
    ```
 
 3. **Coverage par rôle**
+
    ```
    Super Admin: 10 scénarios ✅
    Admin: 8 scénarios ✅
@@ -444,7 +447,7 @@ jobs:
    Receptionist: 4 scénarios 🔄
    ```
 
-### Métriques de portée:
+### Métriques de portée
 
 | Métrique | Actuel | Objectif Q1 2026 |
 |----------|--------|------------------|
@@ -458,9 +461,10 @@ jobs:
 
 ## ✅ Phase 7: Assurer le Bon Fonctionnement
 
-### Validations systématiques:
+### Validations systématiques
 
 1. **Health Checks**
+
    ```python
    def test_system_health(api_base_url):
        """Vérifie que tous les services sont up"""
@@ -469,27 +473,29 @@ jobs:
    ```
 
 2. **Data Integrity**
+
    ```python
    def test_data_consistency():
        """Vérifie cohérence données"""
        # Create
        patient = create_patient(data)
-       
+
        # Read
        retrieved = get_patient(patient['id'])
-       
+
        # Verify
        assert retrieved['email'] == data['email']
        assert retrieved['phone'] == data['phone']
    ```
 
 3. **Security Checks**
+
    ```python
    def test_security_enforced():
        """Vérifie sécurité maintenue"""
        # Sans auth → 401
        assert requests.get(url).status_code == 401
-       
+
        # Avec mauvais rôle → 403
        assert requests.post(url, headers=doctor_auth).status_code == 403
    ```
@@ -498,33 +504,36 @@ jobs:
 
 ## ⏱️ Phase 8: Réduire le Temps de Commercialisation
 
-### Optimisations appliquées:
+### Optimisations appliquées
 
 1. **Tests parallèles**
+
    ```bash
    pytest -n auto  # Utilise tous les CPU cores
    ```
 
 2. **Cache Docker layers**
+
    ```dockerfile
    # Installe deps d'abord (rarement changent)
    COPY requirements.txt .
    RUN pip install -r requirements.txt
-   
+
    # Code app ensuite (change souvent)
    COPY . .
    ```
 
 3. **Exécution sélective**
+
    ```bash
    # Seulement tests rapides en PR
    pytest -m "not slow"
-   
+
    # Tests complets en main
    pytest
    ```
 
-### Gains mesurés:
+### Gains mesurés
 
 | Phase | Avant | Après | Gain |
 |-------|-------|-------|------|
@@ -537,7 +546,7 @@ jobs:
 
 ## 💰 Phase 9: Réduire les Coûts
 
-### ROI des tests E2E:
+### ROI des tests E2E
 
 **Coûts évités:**
 
@@ -557,6 +566,7 @@ jobs:
    - **Économie**: ~15k€/an
 
 **Coûts tests E2E:**
+
 - Développement initial: 40h (~5k€)
 - Maintenance: 2h/mois (~2k€/an)
 - Infrastructure CI: 50€/mois (~600€/an)
@@ -567,9 +577,10 @@ jobs:
 
 ## 🐛 Phase 10: Détecter les Bogues
 
-### Types de bugs détectés:
+### Types de bugs détectés
 
 1. **Bugs fonctionnels**
+
    ```python
    # Exemple: Création patient sans email ne doit pas réussir
    response = requests.post(url, json={"first_name": "Test"})
@@ -577,25 +588,28 @@ jobs:
    ```
 
 2. **Bugs de régression**
+
    ```python
    # CI/CD exécute tests à chaque commit
    # Si un test passe puis échoue → régression détectée
    ```
 
 3. **Bugs de performance**
+
    ```python
    # Alerte si temps de réponse > seuil
    assert duration_ms < 500, f"Too slow: {duration_ms}ms"
    ```
 
 4. **Bugs de sécurité**
+
    ```python
    # Test RBAC, encryption, auth
    assert doctor_cannot_delete_patient()
    assert phi_data_is_encrypted()
    ```
 
-### Métriques bugs:
+### Métriques bugs
 
 - **Détection précoce**: 95% bugs trouvés avant prod
 - **Temps de fix**: Réduit de 4h → 30min (contexte clair)
@@ -605,34 +619,38 @@ jobs:
 
 ## 😊 Phase 11: Expérience Client Optimale
 
-### Tests orientés UX:
+### Tests orientés UX
 
 1. **Performance perçue**
+
    ```python
    # Tout endpoint < 500ms
    assert response_time < 500, "Trop lent, UX dégradée"
    ```
 
 2. **Disponibilité**
+
    ```python
    # Tests concurrence → app stable sous charge
    assert success_rate > 95%, "Indisponibilités fréquentes"
    ```
 
 3. **Fiabilité données**
+
    ```python
    # Intégrité garantie → confiance utilisateur
    assert data_integrity_maintained()
    ```
 
 4. **Sécurité ressentie**
+
    ```python
    # Chiffrement PHI → utilisateurs en confiance
    assert phi_encrypted_at_rest()
    assert phi_encrypted_in_transit()
    ```
 
-### Métriques satisfaction:
+### Métriques satisfaction
 
 - **Uptime**: 99.9% (objectif atteint grâce tests)
 - **Response time**: < 300ms moyenne (excellent)
@@ -643,7 +661,7 @@ jobs:
 
 ## 📈 Tableau de Bord Qualité
 
-### KPIs suivis:
+### KPIs suivis
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -677,21 +695,21 @@ jobs:
 
 ## 🎯 Conclusion
 
-### Méthodologie complète implémentée:
+### Méthodologie complète implémentée
 
-✅ **Phase 1**: Scénarios déterminés (8 scénarios principaux)  
-✅ **Phase 2**: Étapes identifiées (10+ par scénario)  
-✅ **Phase 3**: Tests manuels simulés (requests HTTP)  
-✅ **Phase 4**: Tests automatisés (pytest + fixtures)  
-✅ **Phase 5**: CI/CD intégré (GitHub Actions ready)  
-✅ **Phase 6**: Portée augmentée (30+ tests E2E)  
-✅ **Phase 7**: Bon fonctionnement assuré (health checks, validations)  
-✅ **Phase 8**: TTM réduit (2h → 5min, 96% gain)  
-✅ **Phase 9**: Coûts réduits (ROI 1018%)  
-✅ **Phase 10**: Bugs détectés (95% avant prod)  
-✅ **Phase 11**: UX optimale (< 500ms, 99.9% uptime)  
+✅ **Phase 1**: Scénarios déterminés (8 scénarios principaux)
+✅ **Phase 2**: Étapes identifiées (10+ par scénario)
+✅ **Phase 3**: Tests manuels simulés (requests HTTP)
+✅ **Phase 4**: Tests automatisés (pytest + fixtures)
+✅ **Phase 5**: CI/CD intégré (GitHub Actions ready)
+✅ **Phase 6**: Portée augmentée (30+ tests E2E)
+✅ **Phase 7**: Bon fonctionnement assuré (health checks, validations)
+✅ **Phase 8**: TTM réduit (2h → 5min, 96% gain)
+✅ **Phase 9**: Coûts réduits (ROI 1018%)
+✅ **Phase 10**: Bugs détectés (95% avant prod)
+✅ **Phase 11**: UX optimale (< 500ms, 99.9% uptime)
 
-### Prochaines étapes:
+### Prochaines étapes
 
 1. **Court terme** (Q1 2026)
    - Ajouter 20 nouveaux scénarios

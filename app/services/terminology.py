@@ -6,6 +6,7 @@ Future: connect to external terminology servers and extend mappings.
 """
 
 from typing import Any, Dict, List, Optional
+
 from sqlalchemy.orm import Session
 
 from app.core.cache import cache_get, cache_set

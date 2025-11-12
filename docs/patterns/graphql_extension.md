@@ -3,10 +3,12 @@
 Follow this pattern to extend the GraphQL API while preserving tenancy, RBAC, audit, and PHI guarantees.
 
 ## Where to work
+
 - Schema and router live in `app/graphql/schema.py`.
 - The FastAPI router is created via `create_graphql_router()` and mounted in `app/main.py` at `/graphql`.
 
 ## Core patterns to keep
+
 - Context auth: Tokens are decoded in `_get_graphql_context`, which resolves `GraphQLUserContext` with `tenant_id` and `role`.
 - Tenancy: Always filter by `info.context.user.tenant_id` in queries.
 - RBAC: Use `ensure_roles(info, [...])` to guard resolvers.
@@ -15,6 +17,7 @@ Follow this pattern to extend the GraphQL API while preserving tenancy, RBAC, au
 - Audit: For mutations, call `log_audit_event(...)` with `request=info.context.request`.
 
 ## Example: add a query field
+
 ```python
 @strawberry.type
 class Query:
@@ -33,6 +36,7 @@ class Query:
 ```
 
 ## Example: add a mutation
+
 ```python
 @strawberry.type
 class Mutation:
@@ -60,14 +64,17 @@ class Mutation:
 ```
 
 ## Type mappers
+
 - Mirror existing mappers like `to_patient_type`, `to_appointment_type`.
 - If returning PHI, use decrypt/serialize helpers (see `serialize_patient_model`).
 
 ## Error handling
+
 - Use `GraphQLError("message")` for client-facing errors.
 - 401/403 cases are handled centrally in `_get_graphql_context`.
 
 ## Testing
+
 - Use `POST /graphql` with a bearer token.
 - Validate RBAC by trying with roles outside `ensure_roles`.
 - Keep limits `<= 100` and offset `>= 0` as in existing resolvers.

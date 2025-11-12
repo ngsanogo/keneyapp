@@ -3,7 +3,7 @@ Audit log model for GDPR/HIPAA compliance.
 Tracks all critical actions in the system.
 """
 
-from sqlalchemy import Column, Integer, String, DateTime, Text, JSON
+from sqlalchemy import JSON, Column, DateTime, Integer, String, Text
 from sqlalchemy.sql import func
 
 from app.core.database import Base

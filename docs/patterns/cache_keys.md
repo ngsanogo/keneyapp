@@ -3,6 +3,7 @@
 KeneyApp uses Redis for read-side performance. Follow these key families and invalidation rules.
 
 ## Patients (existing example)
+
 - Lists: `patients:list:{tenant}:{skip}:{limit}` (TTL ~120s)
 - Detail: `patients:detail:{tenant}:{id}` (TTL ~300s)
 - Invalidate on create/update/delete:
@@ -11,6 +12,7 @@ KeneyApp uses Redis for read-side performance. Follow these key families and inv
   - `dashboard:*`
 
 ## Appointments (recommended)
+
 - Lists (optionally partition by status):
   - `appointments:list:{tenant}:{status|all}:{skip}:{limit}` (TTL ~60s)
 - Detail:
@@ -21,6 +23,7 @@ KeneyApp uses Redis for read-side performance. Follow these key families and inv
   - `dashboard:*`
 
 ## Prescriptions (recommended)
+
 - Lists (optionally partition by patient):
   - `prescriptions:list:{tenant}:{patientId|all}:{skip}:{limit}` (TTL ~120s)
 - Detail:
@@ -31,13 +34,16 @@ KeneyApp uses Redis for read-side performance. Follow these key families and inv
   - `dashboard:*`
 
 ## Dashboard
+
 - Keys often depend on aggregates; use a simple wildcard pattern like `dashboard:*` and clear it after relevant mutations.
 
 ## Utilities
+
 - Use `cache_get`, `cache_set`, and `cache_clear_pattern` from `app/core/cache.py`.
 - Prefer short TTLs for highly volatile data (appointments) and longer TTLs for stable data.
 - Keep keys deterministic and tenant-prefixed to avoid cross-tenant leaks.
 
 ## Gotchas
+
 - Avoid storing PHI directly; cache only serialized, decrypted responses that are safe for the client.
 - Keep limit caps (<=100) in list endpoints to bound key cardinality.

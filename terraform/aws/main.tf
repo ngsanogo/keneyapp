@@ -2,7 +2,7 @@
 
 terraform {
   required_version = ">= 1.5.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -13,7 +13,7 @@ terraform {
       version = "~> 2.23"
     }
   }
-  
+
   backend "s3" {
     bucket = "keneyapp-terraform-state"
     key    = "production/terraform.tfstate"
@@ -24,7 +24,7 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
-  
+
   default_tags {
     tags = {
       Project     = "KeneyApp"
@@ -45,7 +45,7 @@ module "vpc" {
   azs             = var.availability_zones
   private_subnets = var.private_subnets
   public_subnets  = var.public_subnets
-  
+
   enable_nat_gateway = true
   enable_vpn_gateway = false
   enable_dns_hostnames = true
@@ -77,11 +77,11 @@ module "eks" {
 
       instance_types = var.node_instance_types
       capacity_type  = "ON_DEMAND"
-      
+
       labels = {
         role = "general"
       }
-      
+
       tags = {
         Name = "${var.project_name}-node-group"
       }
@@ -150,7 +150,7 @@ resource "aws_db_instance" "main" {
   maintenance_window     = "mon:04:00-mon:05:00"
 
   skip_final_snapshot = var.environment != "production"
-  
+
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
 
   tags = {
@@ -191,25 +191,25 @@ resource "aws_security_group" "redis" {
 resource "aws_elasticache_replication_group" "main" {
   replication_group_id       = "${var.project_name}-redis"
   replication_group_description = "Redis cluster for KeneyApp"
-  
+
   engine               = "redis"
   engine_version       = var.redis_version
   node_type            = var.redis_node_type
   num_cache_clusters   = var.redis_num_nodes
   port                 = 6379
-  
+
   parameter_group_name = "default.redis7"
   subnet_group_name    = aws_elasticache_subnet_group.main.name
   security_group_ids   = [aws_security_group.redis.id]
-  
+
   at_rest_encryption_enabled = true
   transit_encryption_enabled = true
-  
+
   automatic_failover_enabled = var.redis_num_nodes > 1
-  
+
   snapshot_retention_limit = 5
   snapshot_window          = "03:00-05:00"
-  
+
   tags = {
     Name = "${var.project_name}-redis"
   }

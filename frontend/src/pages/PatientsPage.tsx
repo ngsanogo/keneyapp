@@ -50,7 +50,11 @@ const PatientsPage = () => {
       <Header />
       <div className="container">
         <h1>Patients</h1>
-        <button className="btn btn-primary" style={{marginBottom: '1rem'}} onClick={() => setShowAdd(true)}>
+        <button
+          className="btn btn-primary"
+          style={{ marginBottom: '1rem' }}
+          onClick={() => setShowAdd(true)}
+        >
           Add Patient
         </button>
         <div className="card">

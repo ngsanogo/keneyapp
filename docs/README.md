@@ -111,6 +111,7 @@ docs/
 ## 🎯 Quick Links by Role
 
 ### For Developers
+
 1. Start with [Quick Start](QUICK_START.md)
 2. Read [Development Guide](DEVELOPMENT.md)
 3. Review [API Reference](API_REFERENCE.md)
@@ -118,6 +119,7 @@ docs/
 5. Learn about [Testing Guide](TESTING_GUIDE.md)
 
 ### For DevOps Engineers
+
 1. Review [Production Deployment Guide](PRODUCTION_DEPLOYMENT_GUIDE.md)
 2. Set up [Monitoring & Alerting](MONITORING_ALERTING.md)
 3. Implement [Security Best Practices](SECURITY_BEST_PRACTICES.md)
@@ -125,6 +127,7 @@ docs/
 5. Prepare [Disaster Recovery](DISASTER_RECOVERY.md) plan
 
 ### For Healthcare Compliance Officers
+
 1. Review [Security Compliance](SECURITY_COMPLIANCE.md)
 2. Understand [Medical Terminologies](MEDICAL_TERMINOLOGIES.md)
 3. Check [FHIR Guide](FHIR_GUIDE.md) for interoperability
@@ -132,6 +135,7 @@ docs/
 5. Audit [Security Best Practices](SECURITY_BEST_PRACTICES.md)
 
 ### For QA Engineers
+
 1. Read [Testing Guide](TESTING_GUIDE.md)
 2. Perform [Performance Testing](PERFORMANCE_TESTING.md)
 3. Follow [Code Quality](CODE_QUALITY.md) checks
@@ -180,5 +184,5 @@ When contributing to documentation:
 
 ---
 
-**Last Updated**: November 2025  
+**Last Updated**: November 2025
 Made with ❤️ by ISDATA Consulting

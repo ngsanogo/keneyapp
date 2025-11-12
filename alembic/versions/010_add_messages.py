@@ -21,7 +21,7 @@ def upgrade() -> None:
     # Create enum for message status
     message_status = postgresql.ENUM('sent', 'delivered', 'read', 'failed', name='messagestatus', create_type=True)
     message_status.create(op.get_bind(), checkfirst=True)
-    
+
     # Create messages table
     op.create_table(
         'messages',
@@ -54,7 +54,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['receiver_id'], ['users.id'], ondelete='CASCADE'),
         sa.ForeignKeyConstraint(['reply_to_id'], ['messages.id'], ondelete='SET NULL'),
     )
-    
+
     # Create indexes
     op.create_index(op.f('ix_messages_id'), 'messages', ['id'], unique=False)
     op.create_index(op.f('ix_messages_sender_id'), 'messages', ['sender_id'], unique=False)
@@ -62,7 +62,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_messages_thread_id'), 'messages', ['thread_id'], unique=False)
     op.create_index(op.f('ix_messages_tenant_id'), 'messages', ['tenant_id'], unique=False)
     op.create_index(op.f('ix_messages_created_at'), 'messages', ['created_at'], unique=False)
-    
+
     # Composite index for common query patterns
     op.create_index('ix_messages_receiver_unread', 'messages', ['receiver_id', 'read_at', 'tenant_id'], unique=False)
     op.create_index('ix_messages_conversation', 'messages', ['sender_id', 'receiver_id', 'created_at'], unique=False)
@@ -79,10 +79,10 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_messages_receiver_id'), table_name='messages')
     op.drop_index(op.f('ix_messages_sender_id'), table_name='messages')
     op.drop_index(op.f('ix_messages_id'), table_name='messages')
-    
+
     # Drop table
     op.drop_table('messages')
-    
+
     # Drop enum type
     message_status = postgresql.ENUM('sent', 'delivered', 'read', 'failed', name='messagestatus')
     message_status.drop(op.get_bind(), checkfirst=True)

@@ -7,6 +7,7 @@ and role-based access control across the API.
 
 from collections.abc import Iterable as IterableABC
 from typing import Callable, Optional, Union
+
 from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 

@@ -34,11 +34,11 @@ Wait for all services to start (about 30-60 seconds).
 
 ### 3. Access the Application
 
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8000
-- **API Docs**: http://localhost:8000/api/v1/docs
-- **Prometheus**: http://localhost:9090
-- **Grafana**: http://localhost:3001
+- **Frontend**: <http://localhost:3000>
+- **Backend API**: <http://localhost:8000>
+- **API Docs**: <http://localhost:8000/api/v1/docs>
+- **Prometheus**: <http://localhost:9090>
+- **Grafana**: <http://localhost:3001>
 
 ### 4. Login
 
@@ -81,7 +81,7 @@ python scripts/init_db.py
 uvicorn app.main:app --reload
 ```
 
-The backend API will be available at http://localhost:8000
+The backend API will be available at <http://localhost:8000>
 
 ### 2. Frontend Setup
 
@@ -93,7 +93,7 @@ npm install
 npm start
 ```
 
-The frontend will be available at http://localhost:3000
+The frontend will be available at <http://localhost:3000>
 
 ## Quick Setup Script
 
@@ -131,7 +131,7 @@ curl "http://localhost:8000/api/v1/dashboard/stats" \
 
 The easiest way to explore the API is through the interactive documentation:
 
-1. Go to http://localhost:8000/api/v1/docs
+1. Go to <http://localhost:8000/api/v1/docs>
 2. Click "Authorize" button
 3. Login with `admin/admin123`
 4. Try out any endpoint interactively
@@ -245,7 +245,7 @@ npm install
 
 Once you have KeneyApp running:
 
-1. **Explore the API**: http://localhost:8000/api/v1/docs
+1. **Explore the API**: <http://localhost:8000/api/v1/docs>
 2. **Read the Documentation**: Check out the `docs/` directory
 3. **Review the Code**: Start with `app/main.py` and `frontend/src/App.tsx`
 4. **Try the Features**:
@@ -269,13 +269,14 @@ If you run into issues:
 1. Check the [Troubleshooting](#troubleshooting) section
 2. Review the logs for error messages
 3. Check existing GitHub issues
-4. Contact: contact@isdataconsulting.com
+4. Contact: <contact@isdataconsulting.com>
 
 ## Production Deployment
 
 **⚠️ Warning**: This quick start is for development only!
 
 For production deployment:
+
 - Use strong passwords and secrets
 - Enable HTTPS/TLS
 - Configure proper backup strategies

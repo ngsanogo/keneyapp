@@ -20,7 +20,7 @@ We provide security updates for the following versions:
 
 If you discover a security vulnerability, please report it by emailing:
 
-📧 **contact@isdataconsulting.com**
+📧 **<contact@isdataconsulting.com>**
 
 ### What to Include in Your Report
 
@@ -103,13 +103,14 @@ If you discover a security vulnerability, please report it by emailing:
    - Add `.env` to `.gitignore`
 
 2. **Validate all inputs**
+
    ```python
    from pydantic import BaseModel, validator
 
    class PatientCreate(BaseModel):
        first_name: str
        email: EmailStr
-       
+
        @validator('first_name')
        def validate_name(cls, v):
            if not v or len(v) < 2:
@@ -118,21 +119,24 @@ If you discover a security vulnerability, please report it by emailing:
    ```
 
 3. **Use parameterized queries**
+
    ```python
    # Good - prevents SQL injection
    patient = db.query(Patient).filter(Patient.id == patient_id).first()
-   
+
    # Bad - vulnerable to SQL injection
    db.execute(f"SELECT * FROM patients WHERE id = {patient_id}")
    ```
 
 4. **Sanitize output**
+
    ```python
    from html import escape
    safe_text = escape(user_input)
    ```
 
 5. **Use secure random generators**
+
    ```python
    import secrets
    token = secrets.token_urlsafe(32)
@@ -141,11 +145,12 @@ If you discover a security vulnerability, please report it by emailing:
 ### Dependency Management
 
 1. **Keep dependencies up to date**
+
    ```bash
    # Backend
    pip install --upgrade -r requirements.txt
    pip-audit
-   
+
    # Frontend
    npm update
    npm audit fix
@@ -174,11 +179,13 @@ REDIS_URL=redis://localhost:6379
 ### Secure Configuration
 
 1. **Disable debug mode in production**
+
    ```python
    DEBUG = False
    ```
 
 2. **Use HTTPS only**
+
    ```python
    # FastAPI - force HTTPS
    from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
@@ -186,6 +193,7 @@ REDIS_URL=redis://localhost:6379
    ```
 
 3. **Set secure cookie flags**
+
    ```python
    response.set_cookie(
        key="session",
@@ -197,9 +205,10 @@ REDIS_URL=redis://localhost:6379
    ```
 
 4. **Configure CORS properly**
+
    ```python
    from fastapi.middleware.cors import CORSMiddleware
-   
+
    app.add_middleware(
        CORSMiddleware,
        allow_origins=["https://yourdomain.com"],  # Never use "*"
@@ -311,7 +320,7 @@ pip install --upgrade -r requirements.txt
 
 For security concerns or questions:
 
-📧 **contact@isdataconsulting.com**
+📧 **<contact@isdataconsulting.com>**
 
 For urgent security issues, please use the vulnerability reporting process described above.
 

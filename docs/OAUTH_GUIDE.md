@@ -71,10 +71,12 @@ GET /api/v1/oauth/authorize/{provider}
 ```
 
 **Parameters:**
+
 - `provider` (path): OAuth provider (google, microsoft, okta)
 - `redirect_uri` (query, optional): Custom redirect URI
 
 **Response:**
+
 ```json
 {
   "authorization_url": "https://provider.com/oauth/authorize?...",
@@ -89,11 +91,13 @@ GET /api/v1/oauth/callback/{provider}?code={code}&state={state}
 ```
 
 **Parameters:**
+
 - `provider` (path): OAuth provider
 - `code` (query): Authorization code from provider
 - `state` (query): CSRF protection token
 
 **Response:**
+
 ```json
 {
   "access_token": "eyJhbGc...",
@@ -110,7 +114,7 @@ GET /api/v1/oauth/callback/{provider}?code={code}&state={state}
 async function loginWithGoogle() {
   const response = await fetch('/api/v1/oauth/authorize/google');
   const { authorization_url } = await response.json();
-  
+
   // Redirect user to authorization URL
   window.location.href = authorization_url;
 }
@@ -121,13 +125,13 @@ async function handleOAuthCallback() {
   const code = params.get('code');
   const state = params.get('state');
   const provider = getProviderFromUrl(); // Extract from URL
-  
+
   const response = await fetch(
     `/api/v1/oauth/callback/${provider}?code=${code}&state=${state}`
   );
-  
+
   const { access_token } = await response.json();
-  
+
   // Store token and redirect to dashboard
   localStorage.setItem('token', access_token);
   window.location.href = '/dashboard';
@@ -193,12 +197,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ### Rate Limiting
 
 OAuth endpoints are rate-limited:
+
 - Authorization: 10 requests/minute
 - Callback: 10 requests/minute
 
 ### Audit Logging
 
 All OAuth authentication events are logged:
+
 - User registration via OAuth
 - Successful OAuth logins
 - Failed authentication attempts
@@ -215,7 +221,8 @@ All OAuth authentication events are logged:
 
 **Error**: `redirect_uri_mismatch`
 
-**Solution**: 
+**Solution**:
+
 1. Check that redirect URI in provider console matches `{APP_URL}/api/v1/oauth/callback/{provider}`
 2. Ensure `APP_URL` in `.env` matches your actual domain
 
@@ -223,7 +230,8 @@ All OAuth authentication events are logged:
 
 **Error**: `Email not provided by OAuth provider`
 
-**Solution**: 
+**Solution**:
+
 1. Ensure email scope is requested
 2. Verify user granted email permission
 3. Check provider configuration
@@ -240,6 +248,7 @@ All OAuth authentication events are logged:
 ## Compliance
 
 OAuth integration maintains HIPAA/GDPR compliance:
+
 - OAuth providers must be BAA-compliant for HIPAA
 - Users can revoke OAuth access at any time
 - All OAuth events are audit logged
@@ -247,4 +256,4 @@ OAuth integration maintains HIPAA/GDPR compliance:
 
 ## Support
 
-For OAuth integration issues, contact: support@isdataconsulting.com
+For OAuth integration issues, contact: <support@isdataconsulting.com>

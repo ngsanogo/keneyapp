@@ -3,6 +3,7 @@
 These are concise, actionable rules for AI coding agents working in this repository. Focus on these patterns and workflows to be productive immediately.
 
 ## Architecture & Boundaries
+
 - **Backend**: FastAPI app in `app/` with routers in `app/routers`, business logic in `app/services`, ORM models in `app/models`, Pydantic schemas in `app/schemas`, and platform concerns in `app/core` (config, security, db, cache, rate limiting, metrics, audit).
 - **Frontend**: React + TypeScript in `frontend/` consuming REST (`/api/v1/...`) and GraphQL (`/graphql`).
 - **Infrastructure**: PostgreSQL, Redis, Celery (workers + beat), Prometheus/Grafana. Local stack is orchestrated via `docker-compose.yml` and `./scripts/start_stack.sh`.
@@ -12,12 +13,14 @@ These are concise, actionable rules for AI coding agents working in this reposit
 ## Core Conventions (Backend)
 
 ### Routers & Endpoints
-- Create `app/routers/<resource>.py` with `APIRouter(prefix="/<resource>", tags=["<resource>"])`. 
+
+- Create `app/routers/<resource>.py` with `APIRouter(prefix="/<resource>", tags=["<resource>"])`.
 - Include in `app/main.py` with `app.include_router(router, prefix=settings.API_V1_PREFIX)` alongside existing routers.
 - Apply `@limiter.limit("X/minute")` from `app/core/rate_limit.py` (default: 10/minute for writes, 100/minute for reads).
 - Example: `app/routers/patients.py` shows complete pattern.
 
 ### Authorization & RBAC
+
 - Use dependency guards from `app/core/dependencies.py`:
   - `get_current_user` / `get_current_active_user` for authentication
   - `require_roles([UserRole.ADMIN, UserRole.DOCTOR, ...])` for RBAC
@@ -25,12 +28,14 @@ These are concise, actionable rules for AI coding agents working in this reposit
 - JWT token includes `tenant_id` and `role`; both must be validated for multi-tenant security.
 
 ### Audit Logging (Required)
+
 - Log CREATE/READ/UPDATE/DELETE and security events with `log_audit_event(...)` from `app/core/audit.py`.
 - Pass `request` for correlation ID and client IP.
 - Never log PHI in plain text; use sanitized details.
 - Example: `app/routers/patients.py` shows comprehensive audit patterns.
 
 ### Caching Strategy
+
 - Use Redis helpers in `app/core/cache.py`: `cache_get`, `cache_set`, `cache_clear_pattern`.
 - **Naming**: `{resource}:list:{tenant}:{params}`, `{resource}:detail:{tenant}:{id}`.
 - **TTL**: Lists 120s, details 300s (PATIENT_LIST_TTL_SECONDS, PATIENT_DETAIL_TTL_SECONDS).
@@ -38,6 +43,7 @@ These are concise, actionable rules for AI coding agents working in this reposit
 - See `docs/patterns/cache_keys.md` for complete patterns.
 
 ### PHI Encryption & Security
+
 - Patient and sensitive payloads are encrypted/decrypted via `app/services/patient_security.py` and `app/core/encryption.py`.
 - **Write flow**: `encrypt_patient_payload(data)` → store encrypted fields.
 - **Read flow**: `serialize_patient_dict(patient)` → returns decrypted response.
@@ -45,17 +51,20 @@ These are concise, actionable rules for AI coding agents working in this reposit
 - See `docs/patterns/phi_logging_checklist.md` for PHI handling rules.
 
 ### Metrics & Observability
+
 - Correlation IDs via `CorrelationIdMiddleware` (X-Correlation-ID header).
 - Prometheus metrics via `app/core/metrics.py`: increment counters like `patient_operations_total.labels(action="create", tenant_id=tenant).inc()`.
 - Structured JSON logs with correlation IDs for tracing.
 - `/metrics` endpoint exposes Prometheus-compatible metrics.
 
 ### Service Layer Pattern
+
 - Business logic lives in `app/services/` (e.g., `patient_service.py`, `messaging_service.py`, `document_service.py`).
 - Routers handle HTTP concerns (request/response, cache, audit, metrics); services handle domain logic and data access.
 - Custom exceptions defined in `app/exceptions.py` (e.g., `PatientNotFoundError`, `DuplicateResourceError`).
 
 ### Database Access
+
 - Inject sessions with `db: Session = Depends(get_db)`. Never use global sessions.
 - Models in `app/models/` extend `Base` from `app/core/database.py`.
 - All tenant-scoped models have `tenant_id` column with index and foreign key.
@@ -64,12 +73,14 @@ These are concise, actionable rules for AI coding agents working in this reposit
 ## Workflows (Do This by Default)
 
 ### Local Development
+
 - **Quick start**: `make dev` (uvicorn + React dev server).
 - **Full stack**: `./scripts/start_stack.sh` (Docker Compose with DB, Redis, Celery, Prometheus).
 - **Backend only**: `uvicorn app.main:app --reload` (requires local PostgreSQL + Redis).
 - **Frontend only**: `cd frontend && npm start`.
 
 ### Testing
+
 - **Backend**: `pytest tests/ -v` (skip slow tests: `-m "not slow and not smoke"`).
 - **Frontend**: `cd frontend && npm test -- --watchAll=false`.
 - **Coverage**: `pytest --cov=app tests/` or `make test-cov`.
@@ -77,12 +88,14 @@ These are concise, actionable rules for AI coding agents working in this reposit
 - **CI parity**: `make ci` runs same checks as GitHub Actions.
 
 ### Code Quality
+
 - **Format**: `make format` (Black + Prettier) or `black app tests`.
 - **Lint**: `make lint` (flake8 + mypy + ESLint).
 - **Type checking**: `mypy app` (gradual typing, non-blocking).
 - **Security**: `make security` (pip-audit + npm audit).
 
 ### Database Migrations
+
 - **Create migration**: `alembic revision --autogenerate -m "description"`.
 - **Apply migration**: `alembic upgrade head`.
 - **Seed database**: `python scripts/init_db.py` (idempotent, creates default tenant + demo users).
@@ -91,6 +104,7 @@ These are concise, actionable rules for AI coding agents working in this reposit
 ## Adding Features (Examples)
 
 ### New REST Endpoint
+
 1. Define Pydantic schemas in `app/schemas/<resource>.py` (Create/Update/Response).
 2. Create SQLAlchemy model in `app/models/<resource>.py` with `tenant_id` and timestamps.
 3. Add Alembic migration: `alembic revision --autogenerate -m "add <resource>"`.
@@ -104,6 +118,7 @@ These are concise, actionable rules for AI coding agents working in this reposit
 6. See `docs/patterns/new_resource_scaffold.md` for complete template.
 
 ### Mutating Patient Data
+
 - **Encrypt on write**: `encrypt_patient_payload(data)` before `db.add()`.
 - **Decrypt on read**: `serialize_patient_dict(patient)` for responses.
 - **Cache invalidation**: Clear `patients:list:*`, `patients:detail:*`, `dashboard:*`.
@@ -111,16 +126,19 @@ These are concise, actionable rules for AI coding agents working in this reposit
 - **Audit**: Log action with sanitized details (no raw PHI).
 
 ### Background Tasks
+
 - Add Celery tasks in `app/tasks.py` (see `generate_patient_report`, `send_appointment_reminder`).
 - Trigger with `.delay(...)` from routers/services.
 - Monitor with Flower at `http://localhost:5555`.
 
 ### GraphQL Extensions
+
 - Schema/routers created via `app.graphql.schema.create_graphql_router()` and mounted at `/graphql`.
 - Resolvers must enforce tenancy, RBAC, and use `get_session(info)` for DB access.
 - Follow patterns in `app/graphql/schema.py` and see `docs/patterns/graphql_extension.md`.
 
 ### FHIR Interoperability
+
 - Converters in `app/fhir/converters.py` map domain models ↔ FHIR resources.
 - FHIR endpoints in `app/routers/fhir.py` follow HL7 FHIR R4 spec.
 - Return OperationOutcome for errors (see `app/fhir/utils.py`).
@@ -128,26 +146,31 @@ These are concise, actionable rules for AI coding agents working in this reposit
 ## Project-Specific Gotchas
 
 ### Bootstrap Admin
+
 - Local/test auth falls back to bootstrap admin when `ENABLE_BOOTSTRAP_ADMIN=True` (see `app/core/config.py` and `app/core/bootstrap.py`).
 - **Never rely on this in production**; disable or override credentials.
 - Creates default tenant "Default Tenant" (slug: "default") and admin user ("admin"/"admin123").
 
 ### Tenancy & Multi-Tenant Security
+
 - **Always** filter queries by `tenant_id` from JWT payload/current user.
 - Many tests expect this; missing tenant_id will cause 401/403 errors.
 - Super Admin can access all tenants; others are restricted to their tenant.
 
 ### Rate Limiting & Security Headers
+
 - Rate limits enforced by middleware (SlowAPI); bypass only for internal/health endpoints.
 - Security headers (XSS, CSP, X-Frame-Options) set by `SecurityHeadersMiddleware` in `app/main.py`.
 - CORS driven by `settings.ALLOWED_ORIGINS`; don't modify unless intentional.
 
 ### Error Handling
+
 - Use FastAPI `HTTPException` with clear messages.
 - FHIR endpoints return OperationOutcome for errors (see `app/main.py` exception handler).
 - Custom exceptions in `app/exceptions.py` (raise, catch in routers, convert to HTTPException).
 
 ### OpenTelemetry Tracing
+
 - Optional distributed tracing via `app/core/tracing.py`.
 - Enable with `OTEL_ENABLED=True` and set `OTEL_EXPORTER_TYPE` (console/otlp/jaeger).
 - Automatic span creation for HTTP requests and database queries.
@@ -155,6 +178,7 @@ These are concise, actionable rules for AI coding agents working in this reposit
 ## Where to Look
 
 ### Core Files
+
 - **Entry point & wiring**: `app/main.py` (routers, middleware, exception handlers).
 - **Settings**: `app/core/config.py` (Pydantic Settings; add new env vars here).
 - **Auth/JWT**: `app/core/security.py`, dependencies: `app/core/dependencies.py`.
@@ -162,6 +186,7 @@ These are concise, actionable rules for AI coding agents working in this reposit
 - **Database**: `app/core/database.py` (session factory, Base class).
 
 ### Example Patterns
+
 - **Complete CRUD pattern**: `app/routers/patients.py` (RBAC, caching, audit, encryption, metrics).
 - **Service layer**: `app/services/patient_service.py` (business logic separation).
 - **PHI handling**: `app/services/patient_security.py` (encryption/decryption workflows).
@@ -170,6 +195,7 @@ These are concise, actionable rules for AI coding agents working in this reposit
 - **GraphQL**: `app/graphql/schema.py`.
 
 ### Documentation
+
 - **Comprehensive guides**: `README.md`, `docs/DEVELOPMENT.md`, `BUILD.md`, `ARCHITECTURE.md`.
 - **Testing**: `docs/TESTING_GUIDE.md`, `docs/E2E_TESTING.md`, `docs/E2E_TESTING_QUICK_REF.md`.
 - **Security & compliance**: `docs/ENCRYPTION_GUIDE.md`, `docs/SECURITY_BEST_PRACTICES.md`.
@@ -215,13 +241,16 @@ make build-full                   # With Docker images
 ## Patterns & Checklists
 
 ### Pattern Documents
+
 - **New resource scaffold (REST)**: `docs/patterns/new_resource_scaffold.md` (complete template with RBAC, caching, audit).
 - **GraphQL extension guide**: `docs/patterns/graphql_extension.md` (resolver patterns, tenancy, mutations).
 - **PHI logging checklist**: `docs/patterns/phi_logging_checklist.md` (sanitization rules).
 - **Cache keys and invalidation**: `docs/patterns/cache_keys.md` (naming conventions, TTLs, invalidation patterns).
 
 ### AI PR Checklist
+
 Before committing, verify compliance with `.github/ai-commit-checklist.md`:
+
 - ✅ Tenancy: DB reads/writes scoped by `tenant_id`.
 - ✅ RBAC: Routes guarded with `require_roles`.
 - ✅ Rate limits: Endpoints decorated appropriately.
@@ -247,6 +276,7 @@ Before committing, verify compliance with `.github/ai-commit-checklist.md`:
 KeneyApp is designed for **French healthcare compliance** and international expansion:
 
 ### Planned French Healthcare Standards
+
 - **INS (Identifiant National de Santé)**: Patient unique identifier - prepare patient models for INS integration
 - **Pro Santé Connect**: CPS/e-CPS authentication for healthcare professionals
 - **MSSanté**: Secure health messaging - current secure messaging is a foundation
@@ -255,6 +285,7 @@ KeneyApp is designed for **French healthcare compliance** and international expa
 - **HDS Certification**: Already architected for certified health data hosting compliance
 
 ### Current Implementation Status
+
 - ✅ FHIR R4 base implementation (`app/fhir/`)
 - ✅ Medical terminologies (ICD-11, SNOMED CT, LOINC, ATC) in place
 - ✅ DICOM support for imaging documents

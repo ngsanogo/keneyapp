@@ -30,6 +30,7 @@ KeneyApp follows a comprehensive testing strategy aligned with healthcare indust
 ### Quality Gates
 
 Before any production deployment:
+
 - ✅ All unit tests pass (100%)
 - ✅ Integration tests pass (100%)
 - ✅ Code coverage ≥ 70% (target 80%)
@@ -103,6 +104,7 @@ Before any production deployment:
    - Permission checks
 
 **Example Test**:
+
 ```python
 def test_create_patient_authenticated(client, auth_headers):
     """Test creating a patient with authentication."""
@@ -113,13 +115,13 @@ def test_create_patient_authenticated(client, auth_headers):
         "gender": "M",
         "email": "john.doe@example.com"
     }
-    
+
     response = client.post(
         f"{settings.API_V1_PREFIX}/patients/",
         json=patient_data,
         headers=auth_headers
     )
-    
+
     assert response.status_code == 201
     data = response.json()
     assert data["first_name"] == "John"
@@ -129,6 +131,7 @@ def test_create_patient_authenticated(client, auth_headers):
 ```
 
 **Running Unit Tests**:
+
 ```bash
 # Run all tests
 pytest
@@ -151,6 +154,7 @@ pytest -n auto
 **Location**: `tests/test_integration.py`
 
 **Testing**:
+
 - Database transactions
 - Redis cache operations
 - Celery background tasks
@@ -159,6 +163,7 @@ pytest -n auto
 - GraphQL queries
 
 **Example Test**:
+
 ```python
 def test_patient_cache_integration(client, db, auth_headers):
     """Test patient caching integration."""
@@ -169,14 +174,14 @@ def test_patient_cache_integration(client, db, auth_headers):
         headers=auth_headers
     )
     patient_id = response.json()["id"]
-    
+
     # First request - cache miss
     response1 = client.get(
         f"{settings.API_V1_PREFIX}/patients/{patient_id}",
         headers=auth_headers
     )
     assert response1.status_code == 200
-    
+
     # Second request - cache hit (should be faster)
     response2 = client.get(
         f"{settings.API_V1_PREFIX}/patients/{patient_id}",
@@ -184,7 +189,7 @@ def test_patient_cache_integration(client, db, auth_headers):
     )
     assert response2.status_code == 200
     assert response1.json() == response2.json()
-    
+
     # Verify cache was used
     cache_key = f"patients:detail:{tenant_id}:{patient_id}"
     cached_data = cache_get(cache_key)
@@ -200,6 +205,7 @@ def test_patient_cache_integration(client, db, auth_headers):
 **Purpose**: Ensure API responses match documented schemas
 
 **Example Test**:
+
 ```python
 def test_patient_response_schema(client, auth_headers):
     """Test patient response matches schema."""
@@ -216,12 +222,12 @@ def test_patient_response_schema(client, auth_headers):
             "created_at": {"type": "string", "format": "date-time"},
         }
     }
-    
+
     response = client.get(
         f"{settings.API_V1_PREFIX}/patients/1",
         headers=auth_headers
     )
-    
+
     jsonschema.validate(instance=response.json(), schema=schema)
 ```
 
@@ -234,6 +240,7 @@ def test_patient_response_schema(client, auth_headers):
 **Run Against**: Docker Compose stack
 
 **Tests**:
+
 - Health endpoint accessible
 - Database connection works
 - Redis connection works
@@ -243,6 +250,7 @@ def test_patient_response_schema(client, auth_headers):
 - Dashboard statistics load
 
 **Running Smoke Tests**:
+
 ```bash
 # Start docker stack
 docker-compose up -d
@@ -259,6 +267,7 @@ pytest tests/test_smoke.py -v
 **Location**: `tests/conftest.py`
 
 **Fixtures Provided**:
+
 - `db`: Test database session
 - `client`: TestClient for API requests
 - `auth_headers`: Authenticated request headers
@@ -267,6 +276,7 @@ pytest tests/test_smoke.py -v
 - `test_tenant`: Pre-created test tenant
 
 **Example Fixture**:
+
 ```python
 @pytest.fixture
 def auth_headers(client, test_user):
@@ -310,33 +320,35 @@ def auth_headers(client, test_user):
    - Validation logic
 
 **Example Test**:
+
 ```typescript
 import { render, screen, fireEvent } from '@testing-library/react';
 import LoginPage from './LoginPage';
 
 test('login form submits with username and password', async () => {
   const mockLogin = jest.fn();
-  
+
   render(<LoginPage onLogin={mockLogin} />);
-  
+
   // Find form inputs
   const usernameInput = screen.getByLabelText(/username/i);
   const passwordInput = screen.getByLabelText(/password/i);
   const submitButton = screen.getByRole('button', { name: /login/i });
-  
+
   // Fill form
   fireEvent.change(usernameInput, { target: { value: 'admin' } });
   fireEvent.change(passwordInput, { target: { value: 'password123' } });
-  
+
   // Submit form
   fireEvent.click(submitButton);
-  
+
   // Verify login called
   expect(mockLogin).toHaveBeenCalledWith('admin', 'password123');
 });
 ```
 
 **Running Frontend Tests**:
+
 ```bash
 cd frontend
 
@@ -353,6 +365,7 @@ npm test -- --coverage --watchAll=false
 ### Integration Tests
 
 **Testing**:
+
 - API integration with mock server
 - Authentication context
 - Protected routes
@@ -360,15 +373,16 @@ npm test -- --coverage --watchAll=false
 - Error handling
 
 **Example Test**:
+
 ```typescript
 test('patient creation flow', async () => {
   // Mock API
   const mockApi = jest.spyOn(axios, 'post').mockResolvedValue({
     data: { id: 1, first_name: 'John', last_name: 'Doe' }
   });
-  
+
   render(<PatientForm />);
-  
+
   // Fill form
   fireEvent.change(screen.getByLabelText(/first name/i), {
     target: { value: 'John' }
@@ -376,10 +390,10 @@ test('patient creation flow', async () => {
   fireEvent.change(screen.getByLabelText(/last name/i), {
     target: { value: 'Doe' }
   });
-  
+
   // Submit
   fireEvent.click(screen.getByRole('button', { name: /save/i }));
-  
+
   // Wait for API call
   await waitFor(() => {
     expect(mockApi).toHaveBeenCalledWith(
@@ -405,7 +419,7 @@ test('patient card matches snapshot', () => {
     last_name: 'Doe',
     date_of_birth: '1990-01-01'
   };
-  
+
   const { container } = render(<PatientCard patient={patient} />);
   expect(container).toMatchSnapshot();
 });
@@ -422,6 +436,7 @@ test('patient card matches snapshot', () => {
 **Implementation**: ✅ Completed (see E2E_TESTING.md)
 
 **Scenarios Tested**:
+
 1. **Authentication Flows**
    - Admin login
    - Doctor login
@@ -460,6 +475,7 @@ test('patient card matches snapshot', () => {
    - Histogram updates
 
 **Running E2E Tests**:
+
 ```bash
 # Full E2E test suite
 ./scripts/run_e2e_tests.sh
@@ -472,6 +488,7 @@ python scripts/analyze_e2e_results.py
 ```
 
 **E2E Test Results**:
+
 - ✅ 156 scenarios tested
 - ✅ 100% pass rate
 - ✅ Average response time: 45ms
@@ -482,6 +499,7 @@ python scripts/analyze_e2e_results.py
 **Location**: `tests/test_migrations.py`
 
 **Testing**:
+
 - Migrations can upgrade
 - Migrations can downgrade
 - Data integrity maintained
@@ -489,6 +507,7 @@ python scripts/analyze_e2e_results.py
 - Foreign keys enforced
 
 **Example Test**:
+
 ```python
 def test_migration_upgrade_downgrade():
     """Test migration can upgrade and downgrade."""
@@ -499,13 +518,13 @@ def test_migration_upgrade_downgrade():
         text=True
     )
     initial_version = result.stdout.strip()
-    
+
     # Downgrade one version
     subprocess.run(["alembic", "downgrade", "-1"])
-    
+
     # Upgrade back
     subprocess.run(["alembic", "upgrade", "head"])
-    
+
     # Verify we're back to initial version
     result = subprocess.run(
         ["alembic", "current"],
@@ -513,7 +532,7 @@ def test_migration_upgrade_downgrade():
         text=True
     )
     final_version = result.stdout.strip()
-    
+
     assert initial_version == final_version
 ```
 
@@ -522,6 +541,7 @@ def test_migration_upgrade_downgrade():
 ### Automated Security Scans
 
 **Tools**:
+
 - CodeQL (static analysis)
 - pip-audit (Python dependencies)
 - npm audit (JavaScript dependencies)
@@ -594,6 +614,7 @@ def test_migration_upgrade_downgrade():
 **Frequency**: Annually or after major releases
 
 **Scope**:
+
 - External penetration testing
 - Internal network testing
 - Social engineering testing
@@ -602,6 +623,7 @@ def test_migration_upgrade_downgrade():
 **Provider**: Third-party security firm
 
 **Deliverables**:
+
 - Vulnerability report
 - Risk assessment
 - Remediation recommendations
@@ -634,12 +656,13 @@ def test_migration_upgrade_downgrade():
    - Verify graceful degradation
 
 **Example Locust Test**:
+
 ```python
 from locust import HttpUser, task, between
 
 class KeneyAppUser(HttpUser):
     wait_time = between(1, 3)
-    
+
     def on_start(self):
         # Login
         response = self.client.post("/api/v1/auth/login", json={
@@ -648,21 +671,21 @@ class KeneyAppUser(HttpUser):
         })
         self.token = response.json()["access_token"]
         self.headers = {"Authorization": f"Bearer {self.token}"}
-    
+
     @task(3)
     def list_patients(self):
         self.client.get(
             "/api/v1/patients/",
             headers=self.headers
         )
-    
+
     @task(2)
     def get_dashboard(self):
         self.client.get(
             "/api/v1/dashboard/stats",
             headers=self.headers
         )
-    
+
     @task(1)
     def create_appointment(self):
         self.client.post(
@@ -678,6 +701,7 @@ class KeneyAppUser(HttpUser):
 ```
 
 **Running Load Tests**:
+
 ```bash
 # Install locust
 pip install locust
@@ -705,26 +729,28 @@ locust -f tests/performance/locustfile.py --host=https://staging.keneyapp.com
 ### Database Performance
 
 **Query Performance Tests**:
+
 ```python
 def test_patient_list_query_performance(db):
     """Test patient list query is fast."""
     import time
-    
+
     start = time.time()
-    
+
     # Query with pagination
     patients = db.query(Patient).filter(
         Patient.tenant_id == 1
     ).limit(50).all()
-    
+
     duration = time.time() - start
-    
+
     # Should complete in < 100ms
     assert duration < 0.1
     assert len(patients) <= 50
 ```
 
 **Database Optimization**:
+
 - Indexed columns: tenant_id, email, date_of_birth
 - EXPLAIN ANALYZE for slow queries
 - Connection pooling (10-20 connections)
@@ -735,18 +761,21 @@ def test_patient_list_query_performance(db):
 ### Beta Program Structure
 
 **Phase 1: Internal Beta (2 weeks)**
+
 - QA team
 - Internal stakeholders
 - Sample size: 5-10 users
 - Focus: Bug detection, usability
 
 **Phase 2: Closed Beta (4 weeks)**
+
 - Selected healthcare professionals
 - Real patient data (anonymized or test)
 - Sample size: 20-50 users
 - Focus: Real-world usage, performance
 
 **Phase 3: Open Beta (4 weeks)**
+
 - Public signup (controlled)
 - Real usage scenarios
 - Sample size: 100-500 users
@@ -755,6 +784,7 @@ def test_patient_list_query_performance(db):
 ### Beta Feedback Collection
 
 **Methods**:
+
 1. **In-App Feedback Widget**
    - Quick bug reports
    - Feature requests
@@ -776,6 +806,7 @@ def test_patient_list_query_performance(db):
    - Performance metrics
 
 **Feedback Processing**:
+
 - Triage within 24 hours
 - Critical bugs fixed immediately
 - Feature requests prioritized
@@ -784,6 +815,7 @@ def test_patient_list_query_performance(db):
 ### Beta Success Criteria
 
 **Before Public Launch**:
+
 - [ ] < 5 critical bugs per 1000 users
 - [ ] > 4/5 average satisfaction rating
 - [ ] > 80% task completion rate
@@ -796,6 +828,7 @@ def test_patient_list_query_performance(db):
 ### GDPR Compliance Testing
 
 **Checklist**:
+
 - [ ] User can view their data (data subject access request)
 - [ ] User can export their data (data portability)
 - [ ] User can delete their data (right to erasure)
@@ -808,6 +841,7 @@ def test_patient_list_query_performance(db):
 - [ ] Cross-border transfer controls (if applicable)
 
 **Test Script**:
+
 ```python
 def test_gdpr_right_to_erasure(client, auth_headers, test_user):
     """Test user can delete their account (GDPR)."""
@@ -817,12 +851,12 @@ def test_gdpr_right_to_erasure(client, auth_headers, test_user):
         headers=auth_headers
     )
     assert response.status_code == 200
-    
+
     # Verify user data anonymized
     user = db.query(User).filter(User.id == test_user.id).first()
     assert user.email.startswith("deleted_")
     assert user.is_active == False
-    
+
     # Verify audit log
     audit_log = db.query(AuditLog).filter(
         AuditLog.user_id == test_user.id,
@@ -835,6 +869,7 @@ def test_gdpr_right_to_erasure(client, auth_headers, test_user):
 ### HIPAA Compliance Testing
 
 **Checklist**:
+
 - [ ] Access controls enforced (authentication + RBAC)
 - [ ] Audit logging captures all PHI access
 - [ ] PHI encrypted at rest (AES-256-GCM)
@@ -847,6 +882,7 @@ def test_gdpr_right_to_erasure(client, auth_headers, test_user):
 - [ ] Business associate agreements with vendors
 
 **Test Script**:
+
 ```python
 def test_hipaa_audit_logging(client, auth_headers):
     """Test all PHI access is logged (HIPAA)."""
@@ -856,14 +892,14 @@ def test_hipaa_audit_logging(client, auth_headers):
         headers=auth_headers
     )
     assert response.status_code == 200
-    
+
     # Verify audit log created
     audit_log = db.query(AuditLog).filter(
         AuditLog.resource_type == "patient",
         AuditLog.resource_id == 1,
         AuditLog.action == "READ"
     ).order_by(AuditLog.timestamp.desc()).first()
-    
+
     assert audit_log is not None
     assert audit_log.user_id == test_user.id
     assert audit_log.ip_address is not None
@@ -872,12 +908,14 @@ def test_hipaa_audit_logging(client, auth_headers):
 ### HDS Compliance (France)
 
 **Requirements**:
+
 - Hébergeur de Données de Santé certification
 - French data residency
 - Enhanced security controls
 - Specific audit requirements
 
 **Validation**:
+
 - [ ] Data hosted in France (or EU)
 - [ ] Provider is HDS-certified
 - [ ] Encryption standards met
@@ -892,6 +930,7 @@ def test_hipaa_audit_logging(client, auth_headers):
 **Reviewer**: Data Protection Officer (DPO) or legal counsel
 
 **Scope**:
+
 - Privacy policy review
 - Terms of service review
 - Data processing agreements
@@ -905,6 +944,7 @@ def test_hipaa_audit_logging(client, auth_headers):
 ### Continuous Integration
 
 **GitHub Actions Workflow**:
+
 ```yaml
 name: CI
 
@@ -926,7 +966,7 @@ jobs:
         run: pytest --cov=app tests/
       - name: Upload coverage
         uses: codecov/codecov-action@v3
-  
+
   frontend-tests:
     runs-on: ubuntu-latest
     steps:
@@ -945,6 +985,7 @@ jobs:
 **Configuration**: `.pre-commit-config.yaml`
 
 **Hooks**:
+
 - Black (Python formatting)
 - Flake8 (Python linting)
 - mypy (Type checking)
@@ -953,6 +994,7 @@ jobs:
 - detect-secrets (Secret scanning)
 
 **Install**:
+
 ```bash
 pip install pre-commit
 pre-commit install
@@ -961,12 +1003,14 @@ pre-commit install
 ### Test Coverage Reports
 
 **Backend Coverage**:
+
 ```bash
 pytest --cov=app --cov-report=html tests/
 open htmlcov/index.html
 ```
 
 **Frontend Coverage**:
+
 ```bash
 cd frontend
 npm test -- --coverage --watchAll=false
@@ -974,6 +1018,7 @@ open coverage/lcov-report/index.html
 ```
 
 **Coverage Goals**:
+
 - Overall: ≥ 70% (target 80%)
 - Critical paths: ≥ 90%
 - New code: ≥ 80%
@@ -981,6 +1026,7 @@ open coverage/lcov-report/index.html
 ### Continuous Testing
 
 **Test Execution**:
+
 - Every commit: Unit tests + linting
 - Every PR: Full test suite + security scans
 - Daily (develop branch): E2E tests + performance tests
@@ -996,6 +1042,7 @@ open coverage/lcov-report/index.html
 **Tool**: Python Faker
 
 **Example**:
+
 ```python
 from faker import Faker
 
@@ -1020,6 +1067,7 @@ def create_fake_patient():
 4. **Isolation**: Each test has isolated data
 
 **Database Isolation**:
+
 ```python
 @pytest.fixture(autouse=True)
 def reset_database(db):
@@ -1037,21 +1085,23 @@ def reset_database(db):
 **Frequency**: Before every release
 
 **Coverage**:
+
 - All critical user workflows
 - Previously fixed bugs (regression tests)
 - High-risk areas (payments, prescriptions)
 - Integration points (FHIR, OAuth)
 
 **Regression Test Example**:
+
 ```python
 def test_bug_123_patient_update_preserves_data():
     """Regression test for bug #123: patient update loses data."""
     # Create patient with all fields
     patient = create_patient_with_all_fields()
-    
+
     # Update only email
     update_patient(patient.id, email="new@email.com")
-    
+
     # Verify all other fields preserved
     updated = get_patient(patient.id)
     assert updated.first_name == patient.first_name
@@ -1066,6 +1116,7 @@ def test_bug_123_patient_update_preserves_data():
 **Tool**: OpenAPI validation
 
 **Tests**:
+
 - Swagger UI accessible
 - All endpoints documented
 - Request/response schemas accurate
@@ -1074,6 +1125,7 @@ def test_bug_123_patient_update_preserves_data():
 ### Documentation Examples
 
 **Validation**:
+
 ```python
 def test_readme_code_examples():
     """Test code examples in README.md work."""
@@ -1091,11 +1143,11 @@ def test_prometheus_metrics_collected():
     """Test Prometheus metrics are collected."""
     # Make API request
     response = client.get(f"{settings.API_V1_PREFIX}/patients/")
-    
+
     # Check metrics endpoint
     metrics_response = client.get("/metrics")
     metrics_text = metrics_response.text
-    
+
     # Verify metrics present
     assert "http_requests_total" in metrics_text
     assert "patient_operations_total" in metrics_text
@@ -1109,7 +1161,7 @@ def test_high_error_rate_alert():
     # Simulate high error rate
     for _ in range(100):
         client.get(f"{settings.API_V1_PREFIX}/nonexistent")
-    
+
     # Verify alert would fire
     error_rate = get_error_rate()
     assert error_rate > 0.01  # Alert threshold

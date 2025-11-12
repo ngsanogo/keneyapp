@@ -5,6 +5,7 @@
 ### 1.1 Objectif du Projet
 
 Développer et déployer un Dossier Médical Informatisé (DMI) de niveau production, conforme aux standards internationaux (FHIR R4, terminologies médicales), sécurisé (RGPD/HDS/HIPAA), et scalable pour :
+
 - GHU (Groupements Hospitaliers Universitaires)
 - Hôpitaux de taille moyenne
 - Cabinets médicaux
@@ -20,12 +21,12 @@ gantt
     MVP Développement     :2025-01-15, 180d
     MVP Tests & Validation :2025-04-15, 60d
     MVP Déploiement Pilote :2025-06-15, 30d
-    
+
     section Phase 2
     V1 Développement      :2025-07-15, 150d
     V1 Tests & Validation :2025-11-15, 45d
     V1 Production         :2026-01-01, 30d
-    
+
     section Phase 3
     V2 Développement      :2026-02-01, 180d
     V2 Tests & Validation :2026-06-01, 60d
@@ -64,6 +65,7 @@ gantt
 ### 2.1 Objectifs MVP
 
 **Périmètre Fonctionnel** :
+
 - ✅ Identito-vigilance (création, recherche patient, gestion INS)
 - ✅ Dossier patient (antécédents, allergies, traitements)
 - ✅ Consultation ambulatoire (anamnèse, examen, constantes)
@@ -73,6 +75,7 @@ gantt
 - ✅ Sécurité (JWT, chiffrement, audit logging)
 
 **Critères de Succès MVP** :
+
 - 70% adoption utilisateurs pilotes (1 cabinet + 1 service hospitalier)
 - < 7 min temps saisie consultation
 - 95% complétude INS
@@ -84,6 +87,7 @@ gantt
 #### Sprint 1-2 : Fondations & Identito-Vigilance (M1)
 
 **Objectifs** :
+
 - Setup environnements (dev, staging, prod)
 - CI/CD pipeline (GitHub Actions)
 - Architecture backend (FastAPI + PostgreSQL + Redis)
@@ -92,11 +96,13 @@ gantt
 - Détection doublons
 
 **User Stories** :
+
 - US-001 : Recherche patient par INS
 - US-002 : Création patient avec validation INS
 - US-003 : Gestion doublons
 
 **Livrables** :
+
 - Backend : API REST patients (CRUD)
 - Frontend : Pages création/recherche patient
 - Tests : Unitaires + intégration (couverture 80%)
@@ -105,17 +111,20 @@ gantt
 #### Sprint 3-4 : Dossier Patient & Allergies (M2)
 
 **Objectifs** :
+
 - Gestion allergies/intolérances
 - Antécédents médicaux structurés
 - Traitements en cours
 - Chiffrement données sensibles
 
 **User Stories** :
+
 - US-004 : Saisie allergies avec codes SNOMED CT
 - US-005 : Historique médical patient
 - US-006 : Traitements en cours (liste)
 
 **Livrables** :
+
 - Backend : API allergies, conditions, medications
 - Frontend : Composant dossier patient (onglets)
 - Chiffrement : AES-256-GCM PHI
@@ -124,17 +133,20 @@ gantt
 #### Sprint 5-6 : Consultation & Observations (M3)
 
 **Objectifs** :
+
 - Module consultation (Encounter)
 - Saisie constantes vitales
 - Scores cliniques (IMC, clairance rénale)
 - Templates consultation
 
 **User Stories** :
+
 - US-010 : Saisie consultation avec template
 - US-011 : Saisie constantes avec validation
 - US-012 : Calculs automatiques scores
 
 **Livrables** :
+
 - Backend : API encounters, observations
 - Frontend : Formulaire consultation + constantes
 - Validation : Plages valeurs (alertes)
@@ -143,17 +155,20 @@ gantt
 #### Sprint 7-8 : Prescription Médicamenteuse (M4)
 
 **Objectifs** :
+
 - Prescription avec BDM (Base Données Médicamenteuse)
 - Analyse interactions (Thériaque ou équivalent)
 - Vérification allergies
 - Génération ordonnance PDF
 
 **User Stories** :
+
 - US-020 : Prescription avec vérification interactions
 - US-021 : Détection allergie bloquante
 - US-040 : Génération ordonnance PDF
 
 **Livrables** :
+
 - Backend : API prescriptions + moteur interactions
 - Intégration BDM (CIP/UCD + ATC)
 - Frontend : Formulaire prescription + alertes
@@ -162,17 +177,20 @@ gantt
 #### Sprint 9-10 : Documents & Sécurité (M5)
 
 **Objectifs** :
+
 - Upload/download documents
 - Signature électronique (e-CPS)
 - Audit logging complet
 - RBAC finalisé
 
 **User Stories** :
+
 - US-041 : Upload document médical
 - US-042 : Signature électronique ordonnance
 - US-050 : Consultation logs audit
 
 **Livrables** :
+
 - Backend : API documents (S3), audit logs
 - Signature : Intégration e-CPS
 - Frontend : Gestion documents
@@ -181,12 +199,14 @@ gantt
 #### Sprint 11-12 : Tests, Optimisations, MVP Release (M6)
 
 **Objectifs** :
+
 - Tests de charge (1,000 patients, 100 utilisateurs concurrents)
 - Optimisations performance (caching, indices DB)
 - Documentation utilisateur
 - Formation équipe pilote
 
 **Livrables** :
+
 - Tests : Performance, sécurité, accessibilité
 - Documentation : Guide utilisateur, runbooks
 - Formation : Vidéos, webinaires
@@ -197,12 +217,14 @@ gantt
 #### Sites Pilotes
 
 **Site 1 : Cabinet Médical**
+
 - 3 médecins généralistes
 - 1 secrétaire
 - 50-80 patients/jour
 - Durée pilote : 1 mois
 
 **Site 2 : Service Hospitalier**
+
 - Médecine interne (20 lits)
 - 4 médecins, 8 IDE, 2 secrétaires
 - 15-25 consultations/jour
@@ -231,6 +253,7 @@ gantt
 ### 3.1 Objectifs V1
 
 **Périmètre Fonctionnel Additionnel** :
+
 - ✅ Agenda & RDV (multi-praticiens, ressources)
 - ✅ Laboratoire (HL7 v2 ORM/ORU, résultats LOINC)
 - ✅ Imagerie (PACS, DICOM, visionneuse)
@@ -240,6 +263,7 @@ gantt
 - ✅ FHIR R4 complet (search, bundles, subscriptions)
 
 **Critères de Succès V1** :
+
 - 90% adoption multi-sites (3 sites hospitaliers + 10 cabinets)
 - < 5 min temps saisie consultation
 - 98% complétude INS
@@ -252,12 +276,14 @@ gantt
 #### Sprints 13-15 : Agenda & Appointments (M7-8)
 
 **Objectifs** :
+
 - Gestion RDV multi-praticiens
 - Planning salles et ressources
 - Synchronisation calendriers
 - Notifications RDV (email, SMS)
 
 **Livrables** :
+
 - API appointments (CRUD, search, conflicts)
 - Frontend : Vue planning (jour, semaine, mois)
 - Notifications : Celery tasks
@@ -266,12 +292,14 @@ gantt
 #### Sprints 16-18 : Laboratoire & HL7 v2 (M8-9)
 
 **Objectifs** :
+
 - Intégration HL7 v2 (ORM demandes, ORU résultats)
 - Mapping LOINC obligatoire
 - Push notifications résultats critiques
 - Historique et courbes évolution
 
 **Livrables** :
+
 - HL7 engine (Mirth ou custom)
 - Backend : ServiceRequest, Observation (labo)
 - Frontend : Demandes labo, résultats, graphiques
@@ -280,12 +308,14 @@ gantt
 #### Sprints 19-21 : Imagerie & PACS (M10-11)
 
 **Objectifs** :
+
 - Intégration PACS (Orthanc ou DCM4CHEE)
 - DICOMweb (WADO-RS, QIDO-RS)
 - Visionneuse DICOM embarquée
 - ImagingStudy FHIR
 
 **Livrables** :
+
 - PACS : Installation + configuration
 - Backend : ImagingStudy, DiagnosticReport
 - Frontend : Visionneuse DICOM (Cornerstone.js)
@@ -294,12 +324,14 @@ gantt
 #### Sprints 22-24 : Messagerie & Dashboards (M11-12)
 
 **Objectifs** :
+
 - Messagerie interne sécurisée
 - Intégration MSSanté (SMTP sécurisé)
 - Tableaux de bord temps réel
 - Alertes personnalisées
 
 **Livrables** :
+
 - Messagerie : API messages, threads
 - MSSanté : Connector SMTP
 - Dashboards : Grafana + métriques customs
@@ -310,19 +342,23 @@ gantt
 #### Sites de Déploiement
 
 **Vague 1 (M12)** :
+
 - 1 hôpital moyen (100-200 lits)
 - 3 cabinets médicaux pilotes
 
 **Vague 2 (M14)** :
+
 - 2 hôpitaux moyens
 - 10 cabinets médicaux
 
 **Vague 3 (M16)** :
+
 - 1 GHU (1,000+ lits, déploiement progressif par services)
 
 #### Migration Données
 
 **Stratégie** :
+
 - Migration à blanc (dry-run) : Test complet sans impact
 - Cutover weekend : Bascule en production
 - Rétrocompatibilité : Ancien système maintenu 3 mois
@@ -330,6 +366,7 @@ gantt
 - Reprise antériorité : Consultations 5 ans, prescriptions 1 an
 
 **Checklist Migration** :
+
 - [ ] Extraction données source (CSV/SQL)
 - [ ] Validation qualité données (complétude, cohérence)
 - [ ] Mapping terminologies
@@ -345,6 +382,7 @@ gantt
 ### 4.1 Objectifs V2
 
 **Périmètre Fonctionnel Additionnel** :
+
 - ✅ Télémédecine (WebRTC visio, e-consultation)
 - ✅ Portail patient (accès dossier, prise RDV)
 - ✅ Analytics avancés (dashboards BI, OLAP)
@@ -353,6 +391,7 @@ gantt
 - ✅ Intégration IoT/wearables (optionnel)
 
 **Critères de Succès V2** :
+
 - Déploiement GHU complet
 - Télémédecine opérationnelle (100 consultations/semaine)
 - Portail patient actif (1,000+ patients inscrits)
@@ -364,6 +403,7 @@ gantt
 #### Module Télémédecine
 
 **Fonctionnalités** :
+
 - Visioconférence WebRTC (1-to-1, sécurisée)
 - Prise RDV téléconsultation
 - E-prescription (ordonnance envoyée par email sécurisé)
@@ -371,6 +411,7 @@ gantt
 - Facturation téléconsultation
 
 **Tech Stack** :
+
 - WebRTC : Jitsi Meet ou custom
 - Signaling : WebSocket (Socket.IO)
 - Storage : S3 (enregistrements chiffrés)
@@ -378,6 +419,7 @@ gantt
 #### Portail Patient
 
 **Fonctionnalités** :
+
 - Authentification FranceConnect / Pro Santé Connect
 - Consultation dossier médical (historique, résultats, documents)
 - Prise RDV en ligne
@@ -386,6 +428,7 @@ gantt
 - Consentements (DMP, recherche, portail)
 
 **Tech Stack** :
+
 - Frontend : React + TypeScript (SPA)
 - Auth : OAuth2 / OIDC (Pro Santé Connect)
 - Mobile : PWA (Progressive Web App)
@@ -393,12 +436,14 @@ gantt
 #### Analytics & BI
 
 **Fonctionnalités** :
+
 - Dashboards personnalisables (Grafana / Superset)
 - Requêtes OLAP (PostgreSQL + Citus ou ClickHouse)
 - Export données anonymisées (recherche, PMSI)
 - Reporting réglementaire automatisé
 
 **Tech Stack** :
+
 - BI : Apache Superset ou Grafana
 - OLAP : PostgreSQL partitionné ou ClickHouse
 - ETL : Apache Airflow
@@ -421,11 +466,13 @@ gantt
 ### 5.2 Plan de Gestion Risques
 
 #### Revues Hebdomadaires
+
 - Comité projet : Suivi risques actifs
 - Indicateurs : Probabilité, impact, tendance
 - Actions : Mitigation, contingence, escalade
 
 #### Escalation
+
 - **Risque faible** : Tech Lead décision
 - **Risque moyen** : Product Owner + Tech Lead
 - **Risque élevé** : Comité Stratégique
@@ -436,6 +483,7 @@ gantt
 ### 6.1 RGPD
 
 **Livrables** :
+
 - [ ] Registre des traitements (Article 30)
 - [ ] AIPD (Analyse d'Impact Protection Données) - Obligatoire DMI
 - [ ] Politique de confidentialité
@@ -445,6 +493,7 @@ gantt
 - [ ] Procédure notification violation données (< 72h CNIL)
 
 **Timeline** :
+
 - AIPD : Mois 2 (avant MVP)
 - Registre traitements : Mois 3
 - Politiques : Mois 4
@@ -453,12 +502,14 @@ gantt
 ### 6.2 HDS (Hébergement Données de Santé)
 
 **Exigences** :
+
 - Hébergeur certifié HDS (ou auto-certification si < 10 ETP santé)
 - Procédures : Sauvegardes, PRA/PCA, gestion incidents
 - Documentation : Cartographie SI, analyses risques, SOPs
 - Audits : Annuel (interne), tous les 3 ans (externe)
 
 **Timeline** :
+
 - Sélection hébergeur HDS : Mois 1
 - Documentation procédures : Mois 4-5
 - Audit interne : Mois 6 (avant MVP)
@@ -467,6 +518,7 @@ gantt
 ### 6.3 Sécurité (ISO 27001)
 
 **Livrables** :
+
 - [ ] Politique de sécurité SI (PSSI)
 - [ ] Analyse risques (EBIOS RM)
 - [ ] Plan d'action sécurité
@@ -475,6 +527,7 @@ gantt
 - [ ] Audits sécurité code (SAST/DAST)
 
 **Timeline** :
+
 - PSSI : Mois 2
 - Analyse risques : Mois 3
 - Pentest : Mois 6 (MVP), Mois 12 (V1), Mois 18 (V2)
@@ -560,18 +613,21 @@ Voir document **01_VISION_PRODUCT.md** section KPIs de succès.
 ### 9.3 Success Criteria
 
 **MVP Success** (Mois 6) :
+
 - ✅ Déploiement pilote réussi (2 sites)
 - ✅ KPIs MVP atteints (70% adoption, 0 incident sécurité)
 - ✅ Feedback utilisateurs > 3.5/5
 - ✅ Go/No-go V1 validé par Comité Stratégique
 
 **V1 Success** (Mois 12) :
+
 - ✅ Production multi-sites (3 hôpitaux + 10 cabinets)
 - ✅ KPIs V1 atteints (90% adoption, ROI positif)
 - ✅ Certification HDS obtenue
 - ✅ 0 incident sécurité critique
 
 **V2 Success** (Mois 18) :
+
 - ✅ GHU complet déployé
 - ✅ Télémédecine & portail patient actifs
 - ✅ Leader marché segment cible
@@ -579,7 +635,7 @@ Voir document **01_VISION_PRODUCT.md** section KPIs de succès.
 
 ---
 
-**Document validé par** : Product Owner, DSI, Direction Médicale  
-**Date** : 2025-01-10  
-**Version** : 1.0  
+**Document validé par** : Product Owner, DSI, Direction Médicale
+**Date** : 2025-01-10
+**Version** : 1.0
 **Prochaine revue** : 2025-02-10

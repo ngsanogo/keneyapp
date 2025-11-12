@@ -5,7 +5,7 @@ This directory contains Terraform configurations for deploying KeneyApp to vario
 ## Supported Providers
 
 - **AWS** - Amazon Web Services deployment
-- **Azure** - Microsoft Azure deployment  
+- **Azure** - Microsoft Azure deployment
 - **GCP** - Google Cloud Platform deployment
 
 ## Prerequisites
@@ -113,6 +113,7 @@ Approximate monthly costs (production setup):
 - **GCP**: $480-980/month
 
 Costs vary based on:
+
 - Cluster size
 - Database instance type
 - Data transfer
@@ -147,4 +148,4 @@ terraform destroy
 
 ## Support
 
-For issues or questions, contact: support@isdataconsulting.com
+For issues or questions, contact: <support@isdataconsulting.com>

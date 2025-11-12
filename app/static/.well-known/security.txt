@@ -6,12 +6,12 @@ Canonical: https://keneyapp.com/.well-known/security.txt
 
 # KeneyApp Security Vulnerability Disclosure
 
-Thank you for helping keep KeneyApp and our users safe. We take security 
+Thank you for helping keep KeneyApp and our users safe. We take security
 seriously and appreciate your efforts to disclose vulnerabilities responsibly.
 
 ## Reporting a Vulnerability
 
-If you believe you have found a security vulnerability in KeneyApp, please 
+If you believe you have found a security vulnerability in KeneyApp, please
 send an email to security@isdataconsulting.com with:
 
 1. Description of the vulnerability
@@ -30,10 +30,10 @@ send an email to security@isdataconsulting.com with:
 
 Please:
 - Give us reasonable time to investigate and fix the issue before disclosure
-- Make a good faith effort to avoid privacy violations, data destruction, and 
+- Make a good faith effort to avoid privacy violations, data destruction, and
   service disruption
 - Do not access or modify data that does not belong to you
-- Do not perform actions that could harm the reliability or integrity of our 
+- Do not perform actions that could harm the reliability or integrity of our
   services
 
 ## Scope
@@ -52,7 +52,7 @@ Out of scope:
 
 ## Recognition
 
-We are committed to working with security researchers and will acknowledge your 
+We are committed to working with security researchers and will acknowledge your
 contribution in our security hall of fame (with your permission).
 
 For more information about our security practices, see:

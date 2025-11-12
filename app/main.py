@@ -3,46 +3,44 @@ Main FastAPI application entry point for KeneyApp.
 """
 
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.exception_handlers import http_exception_handler as fastapi_http_exception_handler
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-from fastapi.exception_handlers import (
-    http_exception_handler as fastapi_http_exception_handler,
-)
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from app.core.config import settings
-from app.core.tracing import setup_tracing, instrument_app
-from app.core.errors import validation_exception_handler, generic_exception_handler
-
 # Ensure all models are imported and registered before metadata operations
 from app import models as app_models  # noqa: F401
-from app.core.database import engine, Base
-from app.core.rate_limit import limiter
-from app.core.middleware import MetricsMiddleware, SecurityHeadersMiddleware
+from app.core.config import settings
+from app.core.database import Base, engine
+from app.core.errors import generic_exception_handler, validation_exception_handler
 from app.core.logging_middleware import CorrelationIdMiddleware
 from app.core.metrics import metrics_endpoint
-from app.routers import (
-    auth,
-    patients,
-    appointments,
-    prescriptions,
-    dashboard,
-    users,
-    fhir,
-    oauth,
-    tenants,
-    messages,
-    documents,
-    shares,
-    terminology,
-    subscriptions,
-    lab,
-)
-from app.graphql.schema import create_graphql_router
+from app.core.middleware import MetricsMiddleware, SecurityHeadersMiddleware
+from app.core.rate_limit import limiter
+from app.core.tracing import instrument_app, setup_tracing
 from app.fhir.utils import operation_outcome
+from app.graphql.schema import create_graphql_router
+from app.routers import (
+    appointments,
+    auth,
+    dashboard,
+    documents,
+    fhir,
+    lab,
+    messages,
+    oauth,
+    patients,
+    prescriptions,
+    shares,
+    subscriptions,
+    tenants,
+    terminology,
+    users,
+)
 
 
 @asynccontextmanager

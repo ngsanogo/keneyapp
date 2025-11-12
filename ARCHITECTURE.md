@@ -75,7 +75,7 @@ graph LR
     subgraph "Source Control"
         GIT[GitHub Repository]
     end
-    
+
     subgraph "CI Pipeline - GitHub Actions"
         TRIGGER[Push/PR Trigger]
         LINT[Linting & Formatting]
@@ -85,19 +85,19 @@ graph LR
         SMOKE[Docker Smoke Tests]
         BUILD[Docker Build]
     end
-    
+
     subgraph "Security Scanning"
         CODEQL[CodeQL Analysis]
         PIPAUDIT[pip-audit]
         TRIVY[Trivy Container Scan]
         GITLEAKS[Gitleaks Secret Scan]
     end
-    
+
     subgraph "Deployment"
         STAGING[Staging Environment]
         PROD[Production Environment]
     end
-    
+
     GIT --> TRIGGER
     TRIGGER --> LINT
     LINT --> TYPE
@@ -105,12 +105,12 @@ graph LR
     TEST --> SECURITY
     SECURITY --> SMOKE
     SMOKE --> BUILD
-    
+
     SECURITY --> CODEQL
     SECURITY --> PIPAUDIT
     SECURITY --> TRIVY
     SECURITY --> GITLEAKS
-    
+
     BUILD --> STAGING
     STAGING --> PROD
 ```
@@ -159,6 +159,7 @@ graph LR
 ### Continuous Improvement Cycle Integration
 
 The CI/CD pipeline supports the continuous improvement methodology:
+
 - Automated weekly security scans (Monday 9 AM UTC)
 - All PRs trigger full pipeline validation
 - Security findings uploaded to GitHub Security tab
@@ -168,6 +169,7 @@ The CI/CD pipeline supports the continuous improvement methodology:
 ## Technology Stack
 
 ### Backend
+
 - **Framework**: FastAPI 0.115.0
 - **Language**: Python 3.11+
 - **ORM**: SQLAlchemy 2.0
@@ -177,6 +179,7 @@ The CI/CD pipeline supports the continuous improvement methodology:
 - **Validation**: Pydantic 2.9
 
 ### Frontend
+
 - **Framework**: React 18
 - **Language**: TypeScript 5.3
 - **Routing**: React Router v6
@@ -184,11 +187,13 @@ The CI/CD pipeline supports the continuous improvement methodology:
 - **Testing**: Jest + React Testing Library
 
 ### Database
+
 - **Primary Database**: PostgreSQL 15
 - **Extension**: TimescaleDB (for time-series data)
 - **Connection Pooling**: SQLAlchemy connection pool
 
 ### Caching & Message Queue
+
 - **Cache**: Redis 7
 - **Task Queue**: Celery 5.3
 - **Message Broker**: Redis
@@ -196,6 +201,7 @@ The CI/CD pipeline supports the continuous improvement methodology:
 - **Monitoring**: Flower
 
 ### Infrastructure
+
 - **Containerization**: Docker
 - **Orchestration**: Kubernetes
 - **Ingress**: Nginx Ingress Controller
@@ -203,6 +209,7 @@ The CI/CD pipeline supports the continuous improvement methodology:
 - **CI/CD**: GitHub Actions
 
 ### Monitoring & Observability
+
 - **Metrics**: Prometheus
 - **Visualization**: Grafana
 - **Logging**: Application logs (JSON format)
@@ -213,11 +220,13 @@ The CI/CD pipeline supports the continuous improvement methodology:
 ### 1. Authentication & Authorization
 
 #### JWT-based Authentication
+
 - Access tokens with configurable expiration
 - Refresh token support (planned)
 - Role-based access control (RBAC)
 
 #### User Roles
+
 - **Admin**: Full system access
 - **Doctor**: Patient management, appointments, prescriptions
 - **Nurse**: Patient records, basic appointments
@@ -226,6 +235,7 @@ The CI/CD pipeline supports the continuous improvement methodology:
 ### 2. Audit Logging
 
 All critical operations are logged for GDPR/HIPAA compliance:
+
 - User authentication events
 - Patient record access/modifications
 - Prescription creation/updates
@@ -233,6 +243,7 @@ All critical operations are logged for GDPR/HIPAA compliance:
 - Administrative actions
 
 Audit logs include:
+
 - Timestamp
 - User ID and username
 - Action performed
@@ -245,6 +256,7 @@ Audit logs include:
 ### 3. Rate Limiting
 
 Protection against abuse and DDoS attacks:
+
 - IP-based rate limiting
 - Per-endpoint rate limits
 - Configurable thresholds
@@ -253,6 +265,7 @@ Protection against abuse and DDoS attacks:
 ### 4. Caching Strategy
 
 Redis-based caching for performance optimization:
+
 - Dashboard statistics (5-minute TTL)
 - Patient list queries (2-minute TTL)
 - Appointment schedules (1-minute TTL)
@@ -263,6 +276,7 @@ Cache invalidation on data updates.
 ### 5. Background Tasks
 
 Celery handles asynchronous operations:
+
 - **Appointment Reminders**: Send notifications before appointments
 - **Report Generation**: Create patient reports asynchronously
 - **Drug Interaction Checks**: Validate prescriptions against interaction databases
@@ -272,6 +286,7 @@ Celery handles asynchronous operations:
 ### 6. Security Features
 
 #### Data Protection
+
 - Password hashing with bcrypt (12 rounds)
 - JWT token encryption
 - HTTPS enforcement in production
@@ -281,6 +296,7 @@ Celery handles asynchronous operations:
 - Content Security Policy
 
 #### Security Headers
+
 - X-Content-Type-Options: nosniff
 - X-Frame-Options: DENY
 - X-XSS-Protection: 1; mode=block
@@ -288,6 +304,7 @@ Celery handles asynchronous operations:
 - Content-Security-Policy: default-src 'self'
 
 #### HIPAA Compliance
+
 - Audit logging of all PHI access
 - Data encryption in transit (TLS)
 - Data encryption at rest (planned: pgcrypto)
@@ -298,11 +315,13 @@ Celery handles asynchronous operations:
 ## Data Models
 
 ### User
+
 - Authentication and profile information
 - Role-based permissions
 - Activity tracking
 
 ### Patient
+
 - Personal information
 - Medical history (JSONB structure planned)
 - Contact details
@@ -310,18 +329,21 @@ Celery handles asynchronous operations:
 - Allergies and conditions
 
 ### Appointment
+
 - Scheduling information
 - Patient and doctor relationships
 - Status tracking
 - Notes and history
 
 ### Prescription
+
 - Medication details
 - Dosage and instructions
 - Doctor and patient relationships
 - Refill information
 
 ### AuditLog
+
 - Comprehensive activity tracking
 - Compliance and security monitoring
 - Forensic analysis capability
@@ -329,6 +351,7 @@ Celery handles asynchronous operations:
 ## API Design
 
 ### RESTful Principles
+
 - Resource-based URLs
 - Standard HTTP methods (GET, POST, PUT, DELETE)
 - JSON request/response format
@@ -336,15 +359,18 @@ Celery handles asynchronous operations:
 - Pagination support
 
 ### Versioning
+
 - URL-based versioning: `/api/v1/`
 - Backward compatibility maintained
 
 ### Documentation
+
 - Auto-generated OpenAPI/Swagger docs
 - ReDoc alternative documentation
 - Interactive API testing
 
 ### Rate Limits
+
 - Default: 100 requests per minute per IP
 - Authentication: 10 requests per minute
 - Sensitive endpoints: Lower limits
@@ -354,12 +380,14 @@ Celery handles asynchronous operations:
 > **📖 For comprehensive deployment strategies and procedures, see [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md)**
 
 ### Development Environment
+
 - Docker Compose for local development
 - Hot-reload for rapid iteration
 - SQLite option for quick setup
 - Sample data seeding
 
 ### Production Environment
+
 - Kubernetes cluster deployment
 - Horizontal scaling (3-10 backend pods)
 - Load balancing with Nginx Ingress
@@ -389,6 +417,7 @@ KeneyApp supports multiple deployment strategies for zero-downtime releases:
 See [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) for detailed procedures, rollback plans, and best practices.
 
 ### High Availability
+
 - Multiple backend replicas
 - Database replication (planned)
 - Redis Sentinel (planned)
@@ -398,6 +427,7 @@ See [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) for detailed proce
 ## Monitoring & Observability
 
 ### Metrics Collection
+
 - Request rate and duration
 - Error rates by endpoint
 - Database query performance
@@ -406,6 +436,7 @@ See [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) for detailed proce
 - Resource utilization (CPU, memory)
 
 ### Custom Healthcare Metrics
+
 - Patient operations per hour
 - Appointment bookings rate
 - Prescription creation rate
@@ -413,6 +444,7 @@ See [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) for detailed proce
 - System availability
 
 ### Alerting
+
 - High error rates
 - Slow response times
 - Database connection issues
@@ -422,12 +454,14 @@ See [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) for detailed proce
 ## Scalability Considerations
 
 ### Horizontal Scaling
+
 - Stateless backend services
 - Session management via JWT (no server-side state)
 - Database connection pooling
 - Distributed caching
 
 ### Performance Optimization
+
 - Database query optimization
 - Eager loading of relationships
 - Index optimization
@@ -435,6 +469,7 @@ See [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) for detailed proce
 - Asset optimization (frontend)
 
 ### Future Enhancements
+
 - GraphQL API alongside REST
 - Read replicas for database
 - CDN for static assets
@@ -457,17 +492,20 @@ See [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) for detailed proce
 ## Testing Strategy
 
 ### Backend Testing
+
 - Unit tests for business logic
 - Integration tests for API endpoints
 - Database migration tests
 - Security testing (OWASP)
 
 ### Frontend Testing
+
 - Component unit tests
 - Integration tests
 - End-to-end tests with Cypress (planned)
 
 ### Performance Testing
+
 - Load testing with locust (planned)
 - Stress testing
 - Capacity planning
@@ -475,12 +513,14 @@ See [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) for detailed proce
 ## Backup & Recovery
 
 ### Database Backups
+
 - Automated daily backups
 - Point-in-time recovery capability
 - Backup retention: 30 days
 - Backup verification
 
 ### Disaster Recovery
+
 - Recovery Time Objective (RTO): 4 hours
 - Recovery Point Objective (RPO): 24 hours
 - Documented recovery procedures
@@ -489,6 +529,7 @@ See [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) for detailed proce
 ## Compliance
 
 ### GDPR
+
 - Right to access
 - Right to erasure
 - Data portability
@@ -496,6 +537,7 @@ See [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) for detailed proce
 - Data breach notification
 
 ### HIPAA
+
 - Access controls
 - Audit trails
 - Data encryption
@@ -505,6 +547,7 @@ See [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) for detailed proce
 ## Maintenance
 
 ### Regular Tasks
+
 - Security patches
 - Dependency updates
 - Database optimization
@@ -512,6 +555,7 @@ See [DEPLOYMENT_STRATEGIES.md](docs/DEPLOYMENT_STRATEGIES.md) for detailed proce
 - Certificate renewal
 
 ### Monitoring
+
 - Daily health checks
 - Weekly performance reviews
 - Monthly security audits

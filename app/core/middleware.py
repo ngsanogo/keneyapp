@@ -4,13 +4,11 @@ Custom middleware for request tracking, metrics, and security.
 
 import time
 from typing import Callable
+
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.core.metrics import (
-    http_requests_total,
-    http_request_duration_seconds,
-)
+from app.core.metrics import http_request_duration_seconds, http_requests_total
 
 
 class MetricsMiddleware(BaseHTTPMiddleware):
@@ -40,13 +38,9 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         endpoint = request.url.path
         status = response.status_code
 
-        http_requests_total.labels(
-            method=method, endpoint=endpoint, status=status
-        ).inc()
+        http_requests_total.labels(method=method, endpoint=endpoint, status=status).inc()
 
-        http_request_duration_seconds.labels(method=method, endpoint=endpoint).observe(
-            duration
-        )
+        http_request_duration_seconds.labels(method=method, endpoint=endpoint).observe(duration)
 
         return response
 
@@ -71,9 +65,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains"
-        )
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         response.headers["Content-Security-Policy"] = "default-src 'self'"
 
         return response

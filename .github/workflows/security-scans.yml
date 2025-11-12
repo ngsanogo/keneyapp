@@ -13,10 +13,10 @@ jobs:
   trivy-scan:
     name: Trivy Security Scan
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run Trivy vulnerability scanner (Filesystem)
         uses: aquasecurity/trivy-action@master
         with:
@@ -25,12 +25,12 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
-      
+
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
-      
+
       - name: Run Trivy vulnerability scanner (Docker image)
         uses: aquasecurity/trivy-action@master
         with:
@@ -43,10 +43,10 @@ jobs:
   dependency-check:
     name: OWASP Dependency Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
@@ -57,7 +57,7 @@ jobs:
             --enableRetired
             --enableExperimental
             --failOnCVSS 7
-      
+
       - name: Upload Dependency Check report
         uses: actions/upload-artifact@v4
         with:
@@ -68,20 +68,20 @@ jobs:
   snyk-scan:
     name: Snyk Security Scan
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-      
+
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/python@master
         env:
@@ -89,7 +89,7 @@ jobs:
         with:
           args: --severity-threshold=high --file=requirements.txt
         continue-on-error: true
-      
+
       - name: Upload Snyk results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
@@ -99,30 +99,30 @@ jobs:
   safety-scan:
     name: Safety & pip-audit
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-      
+
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
           pip install safety pip-audit
-      
+
       - name: Run Safety check
         run: |
           safety check --ignore 70612 --json > safety-report.json || true
-      
+
       - name: Run pip-audit
         run: |
           pip-audit --format json > pip-audit-report.json || true
-      
+
       - name: Upload security reports
         uses: actions/upload-artifact@v4
         with:
@@ -139,23 +139,23 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    
+
     strategy:
       fail-fast: false
       matrix:
         language: ['python', 'javascript']
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-      
+
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
-      
+
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:

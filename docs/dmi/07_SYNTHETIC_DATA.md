@@ -5,6 +5,7 @@
 ### 1.1 Objectifs
 
 Les données synthétiques sont essentielles pour :
+
 - ✅ **Développement** : Tests unitaires et d'intégration
 - ✅ **Démonstration** : Présentations clients et formations
 - ✅ **Performance** : Tests de charge et de scalabilité
@@ -14,18 +15,21 @@ Les données synthétiques sont essentielles pour :
 ### 1.2 Principes de Génération
 
 #### Réalisme
+
 - Scénarios cliniques cohérents
 - Parcours patients crédibles
 - Terminologies médicales valides (LOINC, SNOMED CT, CIM-10, ATC)
 - Valeurs biologiques plausibles
 
 #### Sécurité
+
 - INS générés mais **non valides** (clé de contrôle incorrecte)
 - Noms/prénoms issus de listes fictives
 - Adresses, téléphones, emails générés
 - Aucune correspondance avec données réelles possible
 
 #### Diversité
+
 - Âges : 0-100 ans
 - Sexes : M, F, Indéterminé
 - Pathologies variées
@@ -808,10 +812,10 @@ from datetime import datetime, timedelta
 from typing import List, Dict
 
 # Listes de noms/prénoms fictifs
-NOMS = ["MARTIN", "BERNARD", "DUBOIS", "THOMAS", "ROBERT", "PETIT", "DURAND", 
+NOMS = ["MARTIN", "BERNARD", "DUBOIS", "THOMAS", "ROBERT", "PETIT", "DURAND",
         "LEROY", "MOREAU", "SIMON", "LAURENT", "LEFEBVRE", "MICHEL", "GARCIA"]
 
-PRENOMS_M = ["Jean", "Pierre", "Michel", "André", "Philippe", "Alain", "François", 
+PRENOMS_M = ["Jean", "Pierre", "Michel", "André", "Philippe", "Alain", "François",
              "Jacques", "Daniel", "Patrick", "Nicolas", "Christophe"]
 
 PRENOMS_F = ["Marie", "Nathalie", "Isabelle", "Sylvie", "Catherine", "Françoise",
@@ -829,10 +833,10 @@ def generate_ins(sexe: str, date_naissance: datetime) -> str:
     dept = random.randint(1, 95)  # Département
     commune = random.randint(1, 999)  # Commune
     ordre = random.randint(1, 999)  # Ordre
-    
+
     # Clé INCORRECTE volontairement (sécurité)
     cle_invalide = "99"
-    
+
     ins = f"{sexe_code}{annee}{mois}{jour}{dept:02d}{commune:03d}{ordre:03d}{cle_invalide}"
     return ins
 
@@ -847,14 +851,14 @@ def generate_patient() -> Dict:
     """Génère un patient synthétique"""
     patient_id = str(uuid.uuid4())
     sexe = random.choice(["M", "F"])
-    
+
     # Date naissance aléatoire (0-90 ans)
     age_days = random.randint(0, 90 * 365)
     date_naissance = datetime.now() - timedelta(days=age_days)
-    
+
     nom = random.choice(NOMS)
     prenom = random.choice(PRENOMS_M if sexe == "M" else PRENOMS_F)
-    
+
     patient = {
         "id": patient_id,
         "ipp": generate_ipp(),
@@ -871,7 +875,7 @@ def generate_patient() -> Dict:
         "tenant_id": "default-tenant",
         "created_at": datetime.now().isoformat() + "Z"
     }
-    
+
     return patient
 
 def generate_patients(count: int = 100) -> List[Dict]:
@@ -881,12 +885,12 @@ def generate_patients(count: int = 100) -> List[Dict]:
 if __name__ == "__main__":
     # Génération 100 patients
     patients = generate_patients(100)
-    
+
     # Export JSON
     import json
     with open("synthetic_patients.json", "w", encoding="utf-8") as f:
         json.dump(patients, f, ensure_ascii=False, indent=2)
-    
+
     print(f"✅ {len(patients)} patients synthétiques générés → synthetic_patients.json")
 ```
 
@@ -898,7 +902,7 @@ if __name__ == "__main__":
 
 -- Insertion patients
 INSERT INTO patients (id, ipp, ins, ins_status, nom, prenom, date_naissance, sexe, adresse, telephone, email, status, tenant_id, created_at, updated_at)
-VALUES 
+VALUES
   ('550e8400-e29b-41d4-a716-446655440000', '100000018', '299120175012399', 'PROVISOIRE', 'DUBOIS', 'François', '1965-03-12', 'M', '42 Avenue de la République, 75011 Paris', '+33612000001', 'francois.dubois.synthetic@keneyapp.test', 'ACTIVE', 'default-tenant', NOW(), NOW()),
   ('550e8400-e29b-41d4-a716-446655440001', '100000026', '185061275034512', 'PROVISOIRE', 'LEROUX', 'Sophie', '1992-06-25', 'F', '28 Rue des Lilas, 69001 Lyon', '+33698000002', 'sophie.leroux.synthetic@keneyapp.test', 'ACTIVE', 'default-tenant', NOW(), NOW());
 
@@ -928,7 +932,7 @@ VALUES
 
 ---
 
-**Document validé par** : Data Engineer, Tech Lead  
-**Date** : 2025-01-10  
-**Version** : 1.0  
+**Document validé par** : Data Engineer, Tech Lead
+**Date** : 2025-01-10
+**Version** : 1.0
 **Prochaine revue** : 2025-02-10

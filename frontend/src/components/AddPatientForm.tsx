@@ -37,7 +37,10 @@ type PatientPayload = {
 
 // Helper: base64url-safe decode for JWT payloads
 function base64UrlDecode(input: string): string {
-  const base64 = input.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(input.length / 4) * 4, '=');
+  const base64 = input
+    .replace(/-/g, '+')
+    .replace(/_/g, '/')
+    .padEnd(Math.ceil(input.length / 4) * 4, '=');
   return atob(base64);
 }
 
@@ -164,7 +167,7 @@ const AddPatientForm = ({ onAdd, onClose, token }: AddPatientFormProps) => {
       ...normalized,
       ...(tenantId ? { tenant_id: tenantId } : {}),
     };
-    Object.keys(basePayload).forEach((k) => {
+    Object.keys(basePayload).forEach(k => {
       // remove empty optional fields
       // @ts-expect-error dynamic key
       if (basePayload[k] === '') delete basePayload[k];
@@ -199,7 +202,8 @@ const AddPatientForm = ({ onAdd, onClose, token }: AddPatientFormProps) => {
               const fe: FieldErrors = {};
               for (const d of data.detail) {
                 const loc = Array.isArray(d?.loc) ? d.loc[d.loc.length - 1] : d?.loc;
-                if (typeof loc === 'string' && typeof d?.msg === 'string') fe[loc as keyof FieldErrors] = d.msg;
+                if (typeof loc === 'string' && typeof d?.msg === 'string')
+                  fe[loc as keyof FieldErrors] = d.msg;
               }
               if (Object.keys(fe).length) setFieldErrors(fe);
               msg = data?.title || 'Please correct the highlighted fields.';
@@ -249,7 +253,11 @@ const AddPatientForm = ({ onAdd, onClose, token }: AddPatientFormProps) => {
               aria-invalid={!!fieldErrors.first_name}
               aria-describedby={fieldErrors.first_name ? 'first_name_error' : undefined}
             />
-            {fieldErrors.first_name && <span id="first_name_error" className="field-error">{fieldErrors.first_name}</span>}
+            {fieldErrors.first_name && (
+              <span id="first_name_error" className="field-error">
+                {fieldErrors.first_name}
+              </span>
+            )}
             <input
               name="last_name"
               placeholder="Last Name"
@@ -261,7 +269,11 @@ const AddPatientForm = ({ onAdd, onClose, token }: AddPatientFormProps) => {
               aria-invalid={!!fieldErrors.last_name}
               aria-describedby={fieldErrors.last_name ? 'last_name_error' : undefined}
             />
-            {fieldErrors.last_name && <span id="last_name_error" className="field-error">{fieldErrors.last_name}</span>}
+            {fieldErrors.last_name && (
+              <span id="last_name_error" className="field-error">
+                {fieldErrors.last_name}
+              </span>
+            )}
           </div>
           <div className="form-row">
             <input
@@ -275,8 +287,18 @@ const AddPatientForm = ({ onAdd, onClose, token }: AddPatientFormProps) => {
               aria-invalid={!!fieldErrors.date_of_birth}
               aria-describedby={fieldErrors.date_of_birth ? 'dob_error' : undefined}
             />
-            {fieldErrors.date_of_birth && <span id="dob_error" className="field-error">{fieldErrors.date_of_birth}</span>}
-            <select name="gender" value={form.gender} onChange={handleChange} required aria-label="Gender">
+            {fieldErrors.date_of_birth && (
+              <span id="dob_error" className="field-error">
+                {fieldErrors.date_of_birth}
+              </span>
+            )}
+            <select
+              name="gender"
+              value={form.gender}
+              onChange={handleChange}
+              required
+              aria-label="Gender"
+            >
               <option value="female">Female</option>
               <option value="male">Male</option>
               <option value="other">Other</option>
@@ -294,7 +316,11 @@ const AddPatientForm = ({ onAdd, onClose, token }: AddPatientFormProps) => {
               aria-invalid={!!fieldErrors.email}
               aria-describedby={fieldErrors.email ? 'email_error' : undefined}
             />
-            {fieldErrors.email && <span id="email_error" className="field-error">{fieldErrors.email}</span>}
+            {fieldErrors.email && (
+              <span id="email_error" className="field-error">
+                {fieldErrors.email}
+              </span>
+            )}
             <input
               name="phone"
               placeholder="Phone"
@@ -310,14 +336,34 @@ const AddPatientForm = ({ onAdd, onClose, token }: AddPatientFormProps) => {
               aria-invalid={!!fieldErrors.phone}
               aria-describedby={fieldErrors.phone ? 'phone_error' : undefined}
             />
-            {fieldErrors.phone && <span id="phone_error" className="field-error">{fieldErrors.phone}</span>}
+            {fieldErrors.phone && (
+              <span id="phone_error" className="field-error">
+                {fieldErrors.phone}
+              </span>
+            )}
           </div>
           <div className="form-row">
-            <input name="address" placeholder="Address" value={form.address} onChange={handleChange} autoComplete="street-address" />
+            <input
+              name="address"
+              placeholder="Address"
+              value={form.address}
+              onChange={handleChange}
+              autoComplete="street-address"
+            />
           </div>
           <div className="form-row">
-            <input name="medical_history" placeholder="Medical History" value={form.medical_history} onChange={handleChange} />
-            <input name="allergies" placeholder="Allergies" value={form.allergies} onChange={handleChange} />
+            <input
+              name="medical_history"
+              placeholder="Medical History"
+              value={form.medical_history}
+              onChange={handleChange}
+            />
+            <input
+              name="allergies"
+              placeholder="Allergies"
+              value={form.allergies}
+              onChange={handleChange}
+            />
           </div>
           <div className="form-row">
             <input
@@ -330,14 +376,39 @@ const AddPatientForm = ({ onAdd, onClose, token }: AddPatientFormProps) => {
               aria-invalid={!!fieldErrors.blood_type}
               aria-describedby={fieldErrors.blood_type ? 'blood_error' : undefined}
             />
-            {fieldErrors.blood_type && <span id="blood_error" className="field-error">{fieldErrors.blood_type}</span>}
-            <input name="emergency_contact" placeholder="Emergency Contact" value={form.emergency_contact} onChange={handleChange} autoComplete="name" />
-            <input name="emergency_phone" placeholder="Emergency Phone" value={form.emergency_phone} onChange={handleChange} type="tel" autoComplete="tel" />
+            {fieldErrors.blood_type && (
+              <span id="blood_error" className="field-error">
+                {fieldErrors.blood_type}
+              </span>
+            )}
+            <input
+              name="emergency_contact"
+              placeholder="Emergency Contact"
+              value={form.emergency_contact}
+              onChange={handleChange}
+              autoComplete="name"
+            />
+            <input
+              name="emergency_phone"
+              placeholder="Emergency Phone"
+              value={form.emergency_phone}
+              onChange={handleChange}
+              type="tel"
+              autoComplete="tel"
+            />
           </div>
-          {error && <div className="error" role="alert">{error}</div>}
+          {error && (
+            <div className="error" role="alert">
+              {error}
+            </div>
+          )}
           <div className="form-actions">
-            <button type="submit" disabled={loading}>{loading ? 'Adding...' : 'Add Patient'}</button>
-            <button type="button" onClick={onClose}>Cancel</button>
+            <button type="submit" disabled={loading}>
+              {loading ? 'Adding...' : 'Add Patient'}
+            </button>
+            <button type="button" onClick={onClose}>
+              Cancel
+            </button>
           </div>
         </form>
       </div>

@@ -90,7 +90,7 @@ if [ -f "logs/e2e_integration_results.json" ]; then
         echo ""
         echo -e "${BLUE}🔍 Analyzing Results...${NC}"
         echo ""
-        
+
         # Run Python analyzer
         if command -v python3 &> /dev/null; then
             python3 scripts/analyze_e2e_results.py
@@ -98,7 +98,7 @@ if [ -f "logs/e2e_integration_results.json" ]; then
         else
             echo -e "${YELLOW}⚠️  Python3 not found. Using basic jq analysis...${NC}"
             ANALYZER_EXIT=1
-            
+
             # Fallback to jq if Python not available
             if command -v jq &> /dev/null; then
                 TOTAL=$(jq -r '.summary.total' "$RESULTS_FILE")
@@ -106,13 +106,13 @@ if [ -f "logs/e2e_integration_results.json" ]; then
                 FAILED=$(jq -r '.summary.failed' "$RESULTS_FILE")
                 SKIPPED=$(jq -r '.summary.skipped' "$RESULTS_FILE")
                 DURATION=$(jq -r '.total_duration_seconds' "$RESULTS_FILE")
-                
+
                 echo "  Total Tests:  $TOTAL"
                 echo -e "  ${GREEN}✓ Passed:${NC}     $PASSED"
                 echo -e "  ${RED}✗ Failed:${NC}     $FAILED"
                 echo "  ⏭ Skipped:     $SKIPPED"
                 echo "  Duration:     ${DURATION}s"
-                
+
                 if [ "$FAILED" -gt 0 ]; then
                     echo ""
                     echo -e "${YELLOW}⚠️  Failed Tests:${NC}"
@@ -126,12 +126,12 @@ if [ -f "logs/e2e_integration_results.json" ]; then
         echo -e "${YELLOW}⚠️  Results file not found: $RESULTS_FILE${NC}"
         ANALYZER_EXIT=1
     fi
-    
+
     # Show performance metrics
     echo "Performance Metrics:"
     jq -r '.performance_metrics | to_entries[] | "  \(.key): \(.value.value) \(.value.unit)"' logs/e2e_integration_results.json || true
     echo ""
-    
+
     # Show errors if any
     ERROR_COUNT=$(jq -r '.errors | length' logs/e2e_integration_results.json)
     if [ "$ERROR_COUNT" -gt 0 ]; then
@@ -139,11 +139,11 @@ if [ -f "logs/e2e_integration_results.json" ]; then
         jq -r '.errors[] | "  ❌ \(.test): \(.error)"' logs/e2e_integration_results.json
         echo ""
     fi
-    
+
     # Show test details
     echo "Test Details:"
     jq -r '.tests[] | "  \(if .status == "passed" then "✅" elif .status == "failed" then "❌" else "⏭️" end) \(.name) (\(.duration_seconds)s)"' logs/e2e_integration_results.json
-    
+
 else
     echo -e "${YELLOW}⚠️  Results file not found. Tests may have failed to complete.${NC}"
 fi

@@ -210,7 +210,7 @@ echo ""
 cd "${PROJECT_ROOT}"
 if [ "$NO_DOCKER" = false ] && command -v docker &> /dev/null; then
     echo -e "${YELLOW}[8/8] Building Docker images...${NC}"
-    
+
     echo "  - Building backend image..."
     BACKEND_DOCKER_LOG=$(mktemp)
     if docker build -t keneyapp-backend:latest -f Dockerfile . > "$BACKEND_DOCKER_LOG" 2>&1; then
@@ -220,7 +220,7 @@ if [ "$NO_DOCKER" = false ] && command -v docker &> /dev/null; then
         echo -e "${YELLOW}  ⚠ Backend Docker build failed (non-critical)${NC}"
         echo "  See $BACKEND_DOCKER_LOG for details"
     fi
-    
+
     echo "  - Building frontend image..."
     FRONTEND_DOCKER_LOG=$(mktemp)
     if docker build -t keneyapp-frontend:latest -f Dockerfile.frontend . > "$FRONTEND_DOCKER_LOG" 2>&1; then

@@ -3,12 +3,14 @@
 Use this brief template to add a new REST resource that matches KeneyApp patterns (RBAC, tenancy, PHI, caching, audit, metrics).
 
 ## Tiny contract
+
 - Inputs: JSON body validated by Pydantic schemas (Create/Update). Tenant inferred from token.
 - Outputs: Response schema with decrypted PHI when applicable.
 - Errors: 400 for validation/conflicts, 401/403 for auth/RBAC, 404 for not found, 429 for rate limit.
 - Success: 201 on create, 200 on read/update, 204 on delete.
 
 ## 1) Define Pydantic schemas
+
 Create `app/schemas/<resource>.py`:
 
 ```python
@@ -35,6 +37,7 @@ class <Resource>Response(BaseModel):
 ```
 
 ## 2) Define SQLAlchemy model
+
 Create `app/models/<resource>.py` with tenant scoping and timestamps:
 
 ```python
@@ -53,12 +56,14 @@ class <Resource>(Base):
 ```
 
 Add Alembic migration:
+
 ```bash
 alembic revision --autogenerate -m "add <resources>"
 alembic upgrade head
 ```
 
 ## 3) Router with RBAC, rate limits, audit, caching
+
 Create `app/routers/<resources>.py`:
 
 ```python
@@ -180,17 +185,21 @@ def delete_<resource>(id: int, request: Request, db: Session = Depends(get_db), 
 ```
 
 Register in `app/main.py`:
+
 ```python
 from app.routers import <resources>
 app.include_router(<resources>.router, prefix=settings.API_V1_PREFIX)
 ```
 
 ## 4) Metrics
+
 - Add counter/gauge in `app/core/metrics.py` if this resource needs KPIs.
 - Bump counters in router after successful mutations (see `patient_operations_total`).
 
 ## 5) Tests (minimal)
+
 Create `tests/test_<resources>.py`:
+
 ```python
 from fastapi.testclient import TestClient
 from app.main import app
@@ -202,5 +211,6 @@ def test_list_requires_auth():
 ```
 
 ## 6) PHI handling (if applicable)
+
 - Use `app/services/patient_security.py` patterns to encrypt/decrypt fields.
 - Never log PHI; rely on audit + correlation IDs.

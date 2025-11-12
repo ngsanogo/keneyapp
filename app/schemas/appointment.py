@@ -2,9 +2,11 @@
 Appointment schemas for request/response validation.
 """
 
-from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
+
 from app.models.appointment import AppointmentStatus
 
 

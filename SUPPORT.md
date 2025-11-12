@@ -23,7 +23,7 @@ Found a bug? Please check if it has already been reported:
 
 ## 💬 Questions and Discussions
 
-Have a question about using KeneyApp? 
+Have a question about using KeneyApp?
 
 - Check the [Discussions](https://github.com/ISData-consulting/keneyapp/discussions) section
 - Review existing Q&A threads
@@ -40,7 +40,7 @@ Interested in contributing? Great! Please read:
 
 For commercial support, licensing inquiries, or other business matters:
 
-**Email**: contact@isdataconsulting.com  
+**Email**: <contact@isdataconsulting.com>
 **Company**: ISDATA Consulting
 
 ## 🔒 Security Vulnerabilities

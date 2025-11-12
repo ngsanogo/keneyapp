@@ -4,9 +4,9 @@ Patient schemas for request/response validation.
 
 from datetime import date, datetime
 from typing import Optional
-import re
 
-from pydantic import BaseModel, EmailStr, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+
 from app.models.patient import Gender
 
 
@@ -27,8 +27,8 @@ class PatientBase(BaseModel):
     emergency_phone: Optional[str] = None
     ins_number: Optional[str] = None
     social_security_number: Optional[str] = None
-    
-    @field_validator('ins_number')
+
+    @field_validator("ins_number")
     @classmethod
     def validate_ins(cls, v: Optional[str]) -> Optional[str]:
         """Validate INS format: 1YYMMSSNNNCCCXX (15 digits)."""
@@ -37,12 +37,12 @@ class PatientBase(BaseModel):
         # Remove spaces and formatting
         v_clean = v.replace(" ", "").replace("-", "")
         if not v_clean.isdigit() or len(v_clean) != 15:
-            raise ValueError('INS must be 15 digits in format 1YYMMSSNNNCCCXX')
-        if not v_clean.startswith('1'):
-            raise ValueError('INS must start with 1')
+            raise ValueError("INS must be 15 digits in format 1YYMMSSNNNCCCXX")
+        if not v_clean.startswith("1"):
+            raise ValueError("INS must start with 1")
         return v_clean
-    
-    @field_validator('social_security_number')
+
+    @field_validator("social_security_number")
     @classmethod
     def validate_ssn(cls, v: Optional[str]) -> Optional[str]:
         """Validate French Social Security Number (NIR): 13 digits + 2 key digits."""
@@ -50,7 +50,7 @@ class PatientBase(BaseModel):
             return v
         v_clean = v.replace(" ", "").replace("-", "")
         if not v_clean.isdigit() or len(v_clean) != 15:
-            raise ValueError('Social Security Number must be 15 digits (13 + 2 key)')
+            raise ValueError("Social Security Number must be 15 digits (13 + 2 key)")
         return v_clean
 
 

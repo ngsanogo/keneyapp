@@ -7,19 +7,20 @@ and result validation.
 
 from datetime import date
 from typing import Optional
+
 from sqlalchemy.orm import Session
 
-from app.models.lab import LabTestType, LabResult, LabResultState
-from app.models.patient import Patient
-from app.models.user import User
 from app.exceptions import (
+    CannotValidateOwnResultError,
     InvalidAgeForTestError,
     InvalidGenderForTestError,
     InvalidStateTransitionError,
     LabResultAlreadyValidatedError,
-    CannotValidateOwnResultError,
     raise_if_not_found,
 )
+from app.models.lab import LabResult, LabResultState, LabTestType
+from app.models.patient import Patient
+from app.models.user import User
 
 
 class LabValidationService:
@@ -45,9 +46,7 @@ class LabValidationService:
             age -= 1
         return float(age)
 
-    def validate_test_for_patient(
-        self, test_type: LabTestType, patient: Patient
-    ) -> None:
+    def validate_test_for_patient(self, test_type: LabTestType, patient: Patient) -> None:
         """
         Validate that a test type is appropriate for a patient.
 

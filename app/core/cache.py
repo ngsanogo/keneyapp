@@ -3,10 +3,11 @@ Redis caching utilities for performance optimization.
 """
 
 import json
-from typing import Optional, Any
-import redis
-from app.core.config import settings
+from typing import Any, Optional
 
+import redis
+
+from app.core.config import settings
 
 # Redis connection pool (lazy initialization)
 _redis_client: Optional[redis.Redis] = None

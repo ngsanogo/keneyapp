@@ -5,23 +5,24 @@ This module provides functions to collect and update business KPIs for monitorin
 """
 
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Any
+from typing import Any, Dict
+
+from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_
 
 from app.core.metrics import (
-    daily_active_patients,
     appointment_completion_rate,
-    prescription_fulfillment_rate,
     appointment_no_show_rate,
     appointments_by_status,
-    prescriptions_by_status,
+    daily_active_patients,
     patients_by_risk_level,
+    prescription_fulfillment_rate,
+    prescriptions_by_status,
 )
-from app.models.patient import Patient
 from app.models.appointment import Appointment, AppointmentStatus
-from app.models.prescription import Prescription
 from app.models.audit_log import AuditLog
+from app.models.patient import Patient
+from app.models.prescription import Prescription
 
 
 def collect_daily_active_patients(db: Session) -> int:
@@ -64,9 +65,7 @@ def collect_appointment_metrics(db: Session) -> Dict[str, Any]:
 
     # Appointments by status
     status_counts = (
-        db.query(Appointment.status, func.count(Appointment.id))
-        .group_by(Appointment.status)
-        .all()
+        db.query(Appointment.status, func.count(Appointment.id)).group_by(Appointment.status).all()
     )
 
     for status, count in status_counts:
@@ -74,9 +73,7 @@ def collect_appointment_metrics(db: Session) -> Dict[str, Any]:
 
     # Completion rate - daily
     daily_scheduled = (
-        db.query(func.count(Appointment.id))
-        .filter(Appointment.appointment_date >= today)
-        .scalar()
+        db.query(func.count(Appointment.id)).filter(Appointment.appointment_date >= today).scalar()
         or 0
     )
 
@@ -115,9 +112,7 @@ def collect_appointment_metrics(db: Session) -> Dict[str, Any]:
         or 0
     )
 
-    weekly_rate = (
-        (weekly_completed / weekly_scheduled * 100) if weekly_scheduled > 0 else 0
-    )
+    weekly_rate = (weekly_completed / weekly_scheduled * 100) if weekly_scheduled > 0 else 0
     appointment_completion_rate.labels(time_period="week").set(weekly_rate)
 
     # Completion rate - monthly
@@ -140,9 +135,7 @@ def collect_appointment_metrics(db: Session) -> Dict[str, Any]:
         or 0
     )
 
-    monthly_rate = (
-        (monthly_completed / monthly_scheduled * 100) if monthly_scheduled > 0 else 0
-    )
+    monthly_rate = (monthly_completed / monthly_scheduled * 100) if monthly_scheduled > 0 else 0
     appointment_completion_rate.labels(time_period="month").set(monthly_rate)
 
     # No-show rate
@@ -158,9 +151,7 @@ def collect_appointment_metrics(db: Session) -> Dict[str, Any]:
         or 0
     )
 
-    daily_no_show_rate = (
-        (daily_no_show / daily_scheduled * 100) if daily_scheduled > 0 else 0
-    )
+    daily_no_show_rate = (daily_no_show / daily_scheduled * 100) if daily_scheduled > 0 else 0
     appointment_no_show_rate.labels(time_period="day").set(daily_no_show_rate)
 
     return {
@@ -195,22 +186,18 @@ def collect_prescription_metrics(db: Session) -> Dict[str, Any]:
     # Total prescriptions created weekly
     weekly_total = (
         db.query(func.count(Prescription.id))
-        .filter(
-            Prescription.created_at >= datetime.combine(week_ago, datetime.min.time())
-        )
+        .filter(Prescription.created_at >= datetime.combine(week_ago, datetime.min.time()))
         .scalar()
         or 0
     )
 
     # Count prescriptions by refill status (has refills = active, no refills = completed)
     active_prescriptions = (
-        db.query(func.count(Prescription.id)).filter(Prescription.refills > 0).scalar()
-        or 0
+        db.query(func.count(Prescription.id)).filter(Prescription.refills > 0).scalar() or 0
     )
 
     completed_prescriptions = (
-        db.query(func.count(Prescription.id)).filter(Prescription.refills == 0).scalar()
-        or 0
+        db.query(func.count(Prescription.id)).filter(Prescription.refills == 0).scalar() or 0
     )
 
     # Update Prometheus metrics
@@ -222,9 +209,7 @@ def collect_prescription_metrics(db: Session) -> Dict[str, Any]:
     # additional status fields in the Prescription model.
     total_prescriptions = active_prescriptions + completed_prescriptions
     active_rate = (
-        (active_prescriptions / total_prescriptions * 100)
-        if total_prescriptions > 0
-        else 0
+        (active_prescriptions / total_prescriptions * 100) if total_prescriptions > 0 else 0
     )
 
     # Update metrics with active rate (renamed from fulfillment rate for clarity)

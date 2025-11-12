@@ -5,6 +5,7 @@
 ### 1.1 Dr. Marie Dubois - Médecin Urgentiste
 
 **Profil**
+
 - Âge : 38 ans
 - Expérience : 12 ans en médecine d'urgence
 - Service : Urgences générales, CHU
@@ -12,12 +13,14 @@
 - Charge travail : 15-20 patients/garde
 
 **Contexte**
+
 - Travaille en garde de 12h
 - Besoin d'accès rapide aux informations vitales
 - Pressions temporelles importantes
 - Multitasking constant
 
 **Besoins**
+
 - ⚡ Saisie ultra-rapide (< 2 min admission)
 - 🔍 Recherche patient instantanée
 - 📊 Scores cliniques automatiques (Glasgow, NEWS)
@@ -25,6 +28,7 @@
 - 📱 Interface adaptée tablette/mobile
 
 **Frustrations actuelles**
+
 - ❌ Systèmes lents et non intuitifs
 - ❌ Doubles saisies entre services
 - ❌ Manque d'historique patient complet
@@ -38,6 +42,7 @@
 ### 1.2 Isabelle Martin - Infirmière Diplômée d'État (IDE)
 
 **Profil**
+
 - Âge : 45 ans
 - Expérience : 20 ans en soins
 - Service : Médecine interne
@@ -45,12 +50,14 @@
 - Charge travail : 10-15 patients/jour
 
 **Contexte**
+
 - Saisie constantes et surveillance
 - Administration traitements
 - Coordination médecins/autres IDE
 - Formation continue limitée
 
 **Besoins**
+
 - 📝 Saisie constantes simplifiée
 - ✅ Validation administration médicaments
 - 📋 Checklist soins infirmiers
@@ -58,6 +65,7 @@
 - 💬 Communication fluide avec équipe
 
 **Frustrations actuelles**
+
 - ❌ Interface trop complexe
 - ❌ Trop de clics pour actions simples
 - ❌ Manque de formation continue
@@ -71,6 +79,7 @@
 ### 1.3 Dr. Jean Lefebvre - Médecin Généraliste Libéral
 
 **Profil**
+
 - Âge : 52 ans
 - Expérience : 25 ans en médecine générale
 - Contexte : Cabinet de groupe (3 médecins)
@@ -78,12 +87,14 @@
 - Charge travail : 25-30 consultations/jour
 
 **Contexte**
+
 - Consultations programmées 15-20 min
 - Gestion cabinet + soins
 - Budget limité pour outils
 - Besoin de rentabilité
 
 **Besoins**
+
 - 🏥 Dossier patient longitudinal complet
 - 📅 Agenda intégré
 - 💊 Prescriptions avec BDM
@@ -91,6 +102,7 @@
 - 💰 Facturation simplifiée
 
 **Frustrations actuelles**
+
 - ❌ Multiples logiciels non connectés
 - ❌ Coûts de licence élevés
 - ❌ Support technique insuffisant
@@ -104,6 +116,7 @@
 ### 1.4 Sophie Bernard - Secrétaire Médicale
 
 **Profil**
+
 - Âge : 32 ans
 - Expérience : 8 ans en secrétariat médical
 - Contexte : Hôpital de jour
@@ -111,12 +124,14 @@
 - Charge travail : 40-60 appels/jour
 
 **Contexte**
+
 - Accueil patients
 - Gestion agenda multi-praticiens
 - Coordination RDV et examens
 - Gestion documents administratifs
 
 **Besoins**
+
 - 📞 Prise RDV rapide
 - 📄 Édition courriers/certificats
 - 🔍 Recherche patients efficace
@@ -124,6 +139,7 @@
 - 📧 Envoi documents automatisé
 
 **Frustrations actuelles**
+
 - ❌ Overbooking par manque de visibilité
 - ❌ Pas d'alerte conflits RDV
 - ❌ Génération manuelle documents
@@ -137,6 +153,7 @@
 ### 1.5 Dr. Paul Durand - Pharmacien Hospitalier
 
 **Profil**
+
 - Âge : 42 ans
 - Expérience : 15 ans en pharmacie hospitalière
 - Service : Pharmacie à usage intérieur (PUI)
@@ -144,12 +161,14 @@
 - Charge travail : 50-80 prescriptions/jour
 
 **Contexte**
+
 - Validation pharmaceutique obligatoire
 - Détection interactions médicamenteuses
 - Optimisation traitements
 - Conformité réglementaire
 
 **Besoins**
+
 - 💊 Analyse automatique interactions
 - 📉 Calcul posologie selon fonction organique
 - ✅ Workflow validation clair
@@ -157,6 +176,7 @@
 - 🚨 Alertes critiques prioritaires
 
 **Frustrations actuelles**
+
 - ❌ Alertes non pertinentes (sur-alerte)
 - ❌ Manque de contexte clinique
 - ❌ Pas d'historique médicamenteux complet
@@ -170,6 +190,7 @@
 ### 1.6 Claire Moreau - Data Manager / DIM
 
 **Profil**
+
 - Âge : 36 ans
 - Expérience : 10 ans en information médicale
 - Service : Direction Information Médicale (DIM)
@@ -177,12 +198,14 @@
 - Charge travail : Analyse continue
 
 **Contexte**
+
 - Codage PMSI
 - Extraction données pour décisionnel
 - Contrôle qualité données
 - Reporting réglementaire
 
 **Besoins**
+
 - 📊 Export données structurées
 - 🔍 Requêtes personnalisées
 - ✅ Validation complétude données
@@ -190,6 +213,7 @@
 - 🔒 Anonymisation données
 
 **Frustrations actuelles**
+
 - ❌ Données non structurées
 - ❌ Exports manuels chronophages
 - ❌ Incohérences entre sources
@@ -203,6 +227,7 @@
 ### 1.7 Maître Jean Rousseau - DPO (Data Protection Officer)
 
 **Profil**
+
 - Âge : 48 ans
 - Expérience : 12 ans en protection des données santé
 - Service : Direction juridique
@@ -210,12 +235,14 @@
 - Charge travail : Audit continu
 
 **Contexte**
+
 - Conformité RGPD/HDS
 - Gestion consentements
 - Audits sécurité
 - Formation utilisateurs
 
 **Besoins**
+
 - 📋 Journal d'audit complet
 - 🔐 Gestion consentements patients
 - 📝 Documentation conformité
@@ -223,6 +250,7 @@
 - 📊 Rapports conformité CNIL
 
 **Frustrations actuelles**
+
 - ❌ Logs incomplets ou manquants
 - ❌ Pas de gestion consentements centralisée
 - ❌ Preuves de conformité difficiles à produire
@@ -244,9 +272,10 @@
 **Étapes du Parcours**
 
 #### 1. Pré-consultation (Secrétaire - 2 min)
+
 ```
 Action : Sophie accueille patient, vérifie identité
-Système : 
+Système :
   - Recherche patient par nom/prénom/date naissance
   - Affiche dernière visite (il y a 3 mois)
   - Marque "Arrivé" dans agenda
@@ -256,6 +285,7 @@ Pain points :
 ```
 
 #### 2. Ouverture Dossier (Médecin - 30 sec)
+
 ```
 Action : Dr. Lefebvre ouvre dossier depuis agenda
 Système :
@@ -268,6 +298,7 @@ Pain points :
 ```
 
 #### 3. Anamnèse (5 min)
+
 ```
 Action : Écoute patient, saisie motif et histoire
 Système :
@@ -280,6 +311,7 @@ Pain points :
 ```
 
 #### 4. Examen Clinique (3 min)
+
 ```
 Action : Examen physique, saisie constantes
 Système :
@@ -293,6 +325,7 @@ Pain points :
 ```
 
 #### 5. Prescription (3 min)
+
 ```
 Action : Renouvellement + nouveau traitement
 Système :
@@ -308,6 +341,7 @@ Pain points :
 ```
 
 #### 6. Documents (2 min)
+
 ```
 Action : Génération ordonnance + arrêt travail
 Système :
@@ -321,6 +355,7 @@ Pain points :
 ```
 
 #### 7. Clôture Consultation (1 min)
+
 ```
 Action : Enregistrement, prochaine visite
 Système :
@@ -336,12 +371,14 @@ Pain points :
 **Temps Total : 16 min (objectif < 15 min)**
 
 **Points de Friction Majeurs** :
+
 1. ❌ Recherche médicaments lente
 2. ❌ Trop d'alertes non pertinentes
 3. ❌ Pas de dictée vocale
 4. ❌ Génération documents trop manuelle
 
 **Quick Wins** :
+
 1. ✅ Templates consultation pré-remplis
 2. ✅ Renouvellement ordonnance en 1 clic
 3. ✅ Auto-complétion intelligente
@@ -356,6 +393,7 @@ Pain points :
 **Étapes du Parcours**
 
 #### 1. Admission Ultra-Rapide (IDE - 1 min)
+
 ```
 Action : IDE accueil saisie identité minimale
 Système :
@@ -369,6 +407,7 @@ Pain points :
 ```
 
 #### 2. Prise en Charge Immédiate (Urgentiste - simultané)
+
 ```
 Action : Réanimation, saisie constantes vitales
 Système :
@@ -383,6 +422,7 @@ Pain points :
 ```
 
 #### 3. Stabilisation et Bilan (10 min)
+
 ```
 Action : Stabilisation, prescriptions examens
 Système :
@@ -397,6 +437,7 @@ Pain points :
 ```
 
 #### 4. Résultats et Décision (15 min)
+
 ```
 Action : Consultation résultats, décision thérapeutique
 Système :
@@ -411,6 +452,7 @@ Pain points :
 ```
 
 #### 5. Orientation (Hospitalisation) (5 min)
+
 ```
 Action : Décision hospitalisation, transfert réa
 Système :
@@ -427,12 +469,14 @@ Pain points :
 **Temps Total : 32 min (dont 25 min soins)**
 
 **Points Critiques** :
+
 1. 🔥 Identité patient incertaine → dossier temporaire
 2. 🔥 Traçabilité actes vitaux en temps réel
 3. 🔥 Intégration monitoring/scope
 4. 🔥 Push résultats critiques immédiat
 
 **Requirements Spécifiques Urgences** :
+
 - Mode "Urgence Vitale" avec workflow simplifié
 - Intégration monitoring (HL7 MDM ou API)
 - Prescription STAT ultra-rapide
@@ -448,6 +492,7 @@ Pain points :
 **Étapes du Parcours**
 
 #### 1. Ouverture File d'Attente (8h - 2 min)
+
 ```
 Action : Connexion, ouverture dashboard validation
 Système :
@@ -461,6 +506,7 @@ Pain points :
 ```
 
 #### 2. Analyse Prescription Patient (Moyenne 5 min x 50 = 4h)
+
 ```
 Action : Pour chaque patient, analyse complète
 Système :
@@ -481,6 +527,7 @@ Pain points :
 #### 3. Décisions (par prescription)
 
 ##### Cas 1 : Validation Directe (70% cas - 2 min)
+
 ```
 Action : Prescription conforme, validation
 Système :
@@ -491,6 +538,7 @@ Système :
 ```
 
 ##### Cas 2 : Adaptation Posologie (20% cas - 5 min)
+
 ```
 Action : Posologie inappropriée, ajustement
 Système :
@@ -505,6 +553,7 @@ Pain points :
 ```
 
 ##### Cas 3 : Contre-indication / Refus (10% cas - 10 min)
+
 ```
 Action : Contre-indication majeure, refus
 Système :
@@ -520,6 +569,7 @@ Pain points :
 ```
 
 #### 4. Suivi Dispensation (IDE)
+
 ```
 Action : IDE prépare et administre traitement validé
 Système :
@@ -536,6 +586,7 @@ Pain points :
 **Temps Total : 6h pour 50 patients (objectif < 5h)**
 
 **Optimisations Prioritaires** :
+
 1. ✅ Pré-analyse IA pour pré-trier (urgent vs normal)
 2. ✅ Vue consolidée patient (1 écran)
 3. ✅ Calculs posologies automatiques
@@ -686,7 +737,7 @@ Document
 
 ---
 
-**Document validé par** : Product Owner, UX Designer, Direction Médicale  
-**Date** : 2025-01-10  
-**Version** : 1.0  
+**Document validé par** : Product Owner, UX Designer, Direction Médicale
+**Date** : 2025-01-10
+**Version** : 1.0
 **Prochaine revue** : 2025-04-10

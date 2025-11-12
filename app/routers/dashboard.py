@@ -2,18 +2,19 @@
 Dashboard router for real-time health metrics and statistics.
 """
 
-from fastapi import APIRouter, Depends, Request
-from sqlalchemy.orm import Session
-from sqlalchemy import func
 from datetime import datetime, timedelta, timezone
+
+from fastapi import APIRouter, Depends, Request
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 from app.core.audit import log_audit_event
 from app.core.cache import cache_get, cache_set
 from app.core.database import get_db
 from app.core.dependencies import require_roles
 from app.core.rate_limit import limiter
-from app.models.patient import Patient
 from app.models.appointment import Appointment, AppointmentStatus
+from app.models.patient import Patient
 from app.models.prescription import Prescription
 from app.models.user import User, UserRole
 

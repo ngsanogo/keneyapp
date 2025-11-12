@@ -6,13 +6,13 @@ import enum
 
 from sqlalchemy import (
     Column,
-    Integer,
-    String,
     Date,
     DateTime,
-    Text,
     Enum,
     ForeignKey,
+    Integer,
+    String,
+    Text,
     UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
@@ -34,9 +34,7 @@ class Patient(Base):
     """Patient model for storing patient information and medical history."""
 
     __tablename__ = "patients"
-    __table_args__ = (
-        UniqueConstraint("tenant_id", "email", name="uq_patients_tenant_email"),
-    )
+    __table_args__ = (UniqueConstraint("tenant_id", "email", name="uq_patients_tenant_email"),)
 
     id = Column(Integer, primary_key=True, index=True)
     tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False, index=True)
@@ -55,14 +53,14 @@ class Patient(Base):
     blood_type = Column(String(5))
     emergency_contact = Column(String)
     emergency_phone = Column(String)
-    
+
     # French Healthcare Identifiers
-    ins_number = Column(String(15), index=True, unique=False)  # INS format: 1YYMMSSNNNCCCXX (15 digits)
+    ins_number = Column(
+        String(15), index=True, unique=False
+    )  # INS format: 1YYMMSSNNNCCCXX (15 digits)
     social_security_number = Column(String(15), index=True)  # NIR: 13 digits + 2 key digits
-    
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),

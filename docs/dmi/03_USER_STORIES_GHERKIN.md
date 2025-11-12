@@ -4,12 +4,12 @@
 
 ### US-001 : Recherche Patient par INS
 
-**En tant que** secrétaire médicale  
-**Je veux** rechercher un patient par son numéro INS  
+**En tant que** secrétaire médicale
+**Je veux** rechercher un patient par son numéro INS
 **Afin de** ouvrir rapidement son dossier sans risque d'erreur d'identité
 
-**Priorité** : CRITIQUE  
-**Estimation** : 5 points  
+**Priorité** : CRITIQUE
+**Estimation** : 5 points
 **Sprint** : 1
 
 #### Critères d'acceptation (Gherkin)
@@ -50,12 +50,14 @@ Scenario: Patient non trouvé avec INS valide
 ```
 
 #### Règles métier
+
 - Format INS : 15 chiffres (sexe, année, mois, jour, département, commune, ordre, clé)
 - Validation clé de contrôle obligatoire
 - Appel téléservice INS si patient non trouvé localement
 - Timeout téléservice : 5 secondes maximum
 
 #### Définition of Done
+
 - [ ] Tests unitaires (couverture > 80%)
 - [ ] Tests d'intégration avec téléservice INS (mock)
 - [ ] Validation format INS côté client et serveur
@@ -68,12 +70,12 @@ Scenario: Patient non trouvé avec INS valide
 
 ### US-002 : Création Patient avec Validation INS
 
-**En tant que** médecin  
-**Je veux** créer un nouveau patient avec validation INS automatique  
+**En tant que** médecin
+**Je veux** créer un nouveau patient avec validation INS automatique
 **Afin de** garantir l'unicité et la fiabilité de l'identité
 
-**Priorité** : CRITIQUE  
-**Estimation** : 8 points  
+**Priorité** : CRITIQUE
+**Estimation** : 8 points
 **Sprint** : 1
 
 #### Critères d'acceptation (Gherkin)
@@ -132,6 +134,7 @@ Scenario: Détection doublon potentiel
 ```
 
 #### Règles métier
+
 - INS obligatoire sauf cas d'urgence (statut PROVISOIRE autorisé)
 - Téléservice INS doit être interrogé avant création
 - Détection doublons : algorithme Levenshtein + date naissance
@@ -139,6 +142,7 @@ Scenario: Détection doublon potentiel
 - Patient PROVISOIRE → workflow régularisation sous 48h
 
 #### Définition of Done
+
 - [ ] Intégration téléservice INS (prod + mock test)
 - [ ] Algorithme détection doublons implémenté
 - [ ] Tests unitaires et intégration (> 80%)
@@ -153,12 +157,12 @@ Scenario: Détection doublon potentiel
 
 ### US-010 : Saisie Consultation avec Template
 
-**En tant que** médecin  
-**Je veux** utiliser un template de consultation pré-rempli  
+**En tant que** médecin
+**Je veux** utiliser un template de consultation pré-rempli
 **Afin de** gagner du temps et standardiser la saisie
 
-**Priorité** : HAUTE  
-**Estimation** : 5 points  
+**Priorité** : HAUTE
+**Estimation** : 5 points
 **Sprint** : 2
 
 #### Critères d'acceptation (Gherkin)
@@ -204,6 +208,7 @@ Scenario: Calcul automatique scores cliniques
 ```
 
 #### Règles métier
+
 - Templates personnalisables par médecin
 - Auto-sauvegarde toutes les 30 secondes
 - Brouillon conservé 7 jours
@@ -214,12 +219,12 @@ Scenario: Calcul automatique scores cliniques
 
 ### US-011 : Saisie Constantes avec Validation
 
-**En tant que** IDE  
-**Je veux** saisir rapidement les constantes vitales avec validation automatique  
+**En tant que** IDE
+**Je veux** saisir rapidement les constantes vitales avec validation automatique
 **Afin de** minimiser les erreurs et gagner du temps
 
-**Priorité** : HAUTE  
-**Estimation** : 3 points  
+**Priorité** : HAUTE
+**Estimation** : 3 points
 **Sprint** : 2
 
 #### Critères d'acceptation (Gherkin)
@@ -261,6 +266,7 @@ Scenario: Saisie impossible avec valeur aberrante
 ```
 
 #### Règles métier
+
 - Plages de valeurs par constante (normales, alertes, aberrantes)
 - Alertes critiques : notification temps réel médecin
 - Horodatage précis (seconde) obligatoire
@@ -273,12 +279,12 @@ Scenario: Saisie impossible avec valeur aberrante
 
 ### US-020 : Prescription Médicamenteuse avec Vérification Interactions
 
-**En tant que** médecin  
-**Je veux** prescrire un médicament avec vérification automatique des interactions  
+**En tant que** médecin
+**Je veux** prescrire un médicament avec vérification automatique des interactions
 **Afin de** prévenir les risques iatrogènes
 
-**Priorité** : CRITIQUE  
-**Estimation** : 13 points  
+**Priorité** : CRITIQUE
+**Estimation** : 13 points
 **Sprint** : 3
 
 #### Critères d'acceptation (Gherkin)
@@ -337,6 +343,7 @@ Scenario: Adaptation posologie selon fonction rénale
 ```
 
 #### Règles métier
+
 - Base médicamenteuse (BDM) mise à jour mensuellement
 - Analyse interactions : base Thériaque/ANSM
 - Niveaux d'alerte : Information < Précaution < Contre-indication < Allergie
@@ -345,6 +352,7 @@ Scenario: Adaptation posologie selon fonction rénale
 - Traçabilité décisions (prescription malgré alerte)
 
 #### Définition of Done
+
 - [ ] Intégration BDM (CIP/UCD + ATC)
 - [ ] Moteur d'analyse interactions (Thériaque ou équivalent)
 - [ ] Gestion alertes (niveaux, blocking/non-blocking)
@@ -358,12 +366,12 @@ Scenario: Adaptation posologie selon fonction rénale
 
 ### US-021 : Validation Pharmaceutique
 
-**En tant que** pharmacien  
-**Je veux** valider ou refuser une prescription médicale  
+**En tant que** pharmacien
+**Je veux** valider ou refuser une prescription médicale
 **Afin de** sécuriser le circuit du médicament
 
-**Priorité** : CRITIQUE  
-**Estimation** : 8 points  
+**Priorité** : CRITIQUE
+**Estimation** : 8 points
 **Sprint** : 4
 
 #### Critères d'acceptation (Gherkin)
@@ -418,6 +426,7 @@ Scenario: Adaptation posologie
 ```
 
 #### Règles métier
+
 - Validation obligatoire par pharmacien avant dispensation
 - Délai validation cible : < 2h (hors urgences)
 - Urgences vitales : validation a posteriori possible (tracée)
@@ -430,12 +439,12 @@ Scenario: Adaptation posologie
 
 ### US-030 : Prescription Analyses Biologiques
 
-**En tant que** médecin  
-**Je veux** prescrire des analyses biologiques avec codes LOINC  
+**En tant que** médecin
+**Je veux** prescrire des analyses biologiques avec codes LOINC
 **Afin de** transmettre la demande au laboratoire de façon structurée
 
-**Priorité** : HAUTE  
-**Estimation** : 8 points  
+**Priorité** : HAUTE
+**Estimation** : 8 points
 **Sprint** : 5
 
 #### Critères d'acceptation (Gherkin)
@@ -482,6 +491,7 @@ Scenario: Consultation historique analyses
 ```
 
 #### Règles métier
+
 - Nomenclature LOINC obligatoire
 - Panels pré-définis personnalisables par service
 - Transmission HL7 v2 ORM vers LIS
@@ -493,12 +503,12 @@ Scenario: Consultation historique analyses
 
 ### US-031 : Réception et Affichage Résultats Labo
 
-**En tant que** médecin  
-**Je veux** recevoir les résultats d'analyses en temps réel avec alertes  
+**En tant que** médecin
+**Je veux** recevoir les résultats d'analyses en temps réel avec alertes
 **Afin de** réagir rapidement aux valeurs critiques
 
-**Priorité** : CRITIQUE  
-**Estimation** : 13 points  
+**Priorité** : CRITIQUE
+**Estimation** : 13 points
 **Sprint** : 5-6
 
 #### Critères d'acceptation (Gherkin)
@@ -542,6 +552,7 @@ Scenario: Résultat en attente
 ```
 
 #### Règles métier
+
 - Réception HL7 v2 ORU (listener 24/7)
 - Mapping LOINC obligatoire (validation à la réception)
 - Valeurs critiques : notification immédiate (< 1 min)
@@ -556,12 +567,12 @@ Scenario: Résultat en attente
 
 ### US-040 : Génération Ordonnance PDF
 
-**En tant que** médecin  
-**Je veux** générer automatiquement une ordonnance PDF conforme  
+**En tant que** médecin
+**Je veux** générer automatiquement une ordonnance PDF conforme
 **Afin de** gagner du temps et assurer la conformité réglementaire
 
-**Priorité** : HAUTE  
-**Estimation** : 5 points  
+**Priorité** : HAUTE
+**Estimation** : 5 points
 **Sprint** : 7
 
 #### Critères d'acceptation (Gherkin)
@@ -607,6 +618,7 @@ Scenario: Signature électronique ordonnance
 ```
 
 #### Règles métier
+
 - Format ordonnance conforme décret (mentions obligatoires)
 - QR code DataMatrix pour sécurisation
 - Signature électronique CPS/e-CPS obligatoire
@@ -650,7 +662,7 @@ Rule: Code terminologie obligatoire
   Given la saisie d'une observation clinique
   Then un code LOINC ou SNOMED CT est OBLIGATOIRE
   And le libellé textuel seul est INTERDIT
-  
+
 Example: Observation conforme
   | Type observation | Code LOINC | Valeur   | Unité UCUM |
   | Glycémie         | 2339-0     | 1.2      | g/L        |
@@ -665,7 +677,7 @@ Rule: Plage de valeurs plausibles
   Given une observation avec code LOINC
   Then une plage de valeurs plausibles est définie
   And une valeur hors plage génère une alerte
-  
+
 Example: Alertes valeurs aberrantes
   | Observation | Valeur | Plage normale | Plage max   | Action           |
   | Température | 25°C   | 36-38°C       | 30-45°C     | Alerte aberrant  |
@@ -732,12 +744,12 @@ Rule: Allergie patient bloquante
 ```markdown
 ### US-XXX : [Titre court et explicite]
 
-**En tant que** [rôle/persona]  
-**Je veux** [action/fonctionnalité]  
+**En tant que** [rôle/persona]
+**Je veux** [action/fonctionnalité]
 **Afin de** [bénéfice/objectif]
 
-**Priorité** : [CRITIQUE / HAUTE / MOYENNE / BASSE]  
-**Estimation** : [points Fibonacci]  
+**Priorité** : [CRITIQUE / HAUTE / MOYENNE / BASSE]
+**Estimation** : [points Fibonacci]
 **Sprint** : [numéro]
 
 #### Contexte
@@ -761,15 +773,19 @@ Scenario: [Scenario d'erreur]
 ```
 
 #### Règles métier
+
 - [Liste des règles métier applicables]
 
 #### Dépendances
+
 - [US ou modules dépendants]
 
 #### Maquettes
+
 - [Lien vers maquettes Figma/Sketch]
 
 #### Définition of Done
+
 - [ ] Tests unitaires (couverture > 80%)
 - [ ] Tests d'intégration
 - [ ] Tests Gherkin automatisés
@@ -780,11 +796,12 @@ Scenario: [Scenario d'erreur]
 - [ ] Sécurité validée
 - [ ] Accessibilité WCAG 2.1 AA
 - [ ] Audit logging si applicable
+
 ```
 
 ---
 
-**Document validé par** : Product Owner, Tech Lead, Direction Médicale  
-**Date** : 2025-01-10  
-**Version** : 1.0  
+**Document validé par** : Product Owner, Tech Lead, Direction Médicale
+**Date** : 2025-01-10
+**Version** : 1.0
 **Prochaine revue** : 2025-02-10

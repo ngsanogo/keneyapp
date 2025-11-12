@@ -24,6 +24,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
@@ -53,6 +54,7 @@ Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "username": "john.doe",
@@ -64,6 +66,7 @@ Content-Type: application/json
 ```
 
 **Response:** `201 Created`
+
 ```json
 {
   "id": 1,
@@ -84,6 +87,7 @@ Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "username": "john.doe",
@@ -92,6 +96,7 @@ Content-Type: application/json
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
@@ -108,6 +113,7 @@ Authorization: Bearer {token}
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "id": 1,
@@ -131,11 +137,13 @@ Authorization: Bearer {token}
 ```
 
 **Query Parameters:**
+
 - `skip` (optional): Number of records to skip (default: 0)
 - `limit` (optional): Maximum records to return (default: 100, max: 1000)
 - `search` (optional): Search by name or email
 
 **Response:** `200 OK`
+
 ```json
 [
   {
@@ -159,6 +167,7 @@ Authorization: Bearer {token}
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "id": 1,
@@ -184,6 +193,7 @@ Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "first_name": "Jane",
@@ -196,6 +206,7 @@ Content-Type: application/json
 ```
 
 **Response:** `201 Created`
+
 ```json
 {
   "id": 1,
@@ -218,6 +229,7 @@ Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "phone": "+1234567899",
@@ -248,6 +260,7 @@ Authorization: Bearer {token}
 ```
 
 **Query Parameters:**
+
 - `skip` (optional): Number of records to skip
 - `limit` (optional): Maximum records to return
 - `patient_id` (optional): Filter by patient
@@ -256,6 +269,7 @@ Authorization: Bearer {token}
 - `date_to` (optional): Filter to date (ISO 8601)
 
 **Response:** `200 OK`
+
 ```json
 [
   {
@@ -280,6 +294,7 @@ Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "patient_id": 1,
@@ -301,6 +316,7 @@ Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "status": "completed",
@@ -322,12 +338,14 @@ Authorization: Bearer {token}
 ```
 
 **Query Parameters:**
+
 - `skip` (optional): Number of records to skip
 - `limit` (optional): Maximum records to return
 - `patient_id` (optional): Filter by patient
 - `active_only` (optional): Show only active prescriptions
 
 **Response:** `200 OK`
+
 ```json
 [
   {
@@ -355,6 +373,7 @@ Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "patient_id": 1,
@@ -382,6 +401,7 @@ Authorization: Bearer {token}
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "total_patients": 1250,
@@ -405,6 +425,7 @@ GET /api/v1/oauth/authorize/{provider}
 ```
 
 **Path Parameters:**
+
 - `provider`: OAuth provider (`google`, `microsoft`, `okta`)
 
 **Response:** `302 Redirect` to OAuth provider
@@ -416,6 +437,7 @@ GET /api/v1/oauth/callback/{provider}?code={authorization_code}
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
@@ -436,6 +458,7 @@ Authorization: Bearer {token}
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "resourceType": "Patient",
@@ -488,6 +511,7 @@ Content-Type: application/json
 ```
 
 **Example Query:**
+
 ```graphql
 query {
   patients(limit: 10) {
@@ -505,6 +529,7 @@ query {
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "data": {
@@ -538,6 +563,7 @@ GET /health
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "status": "healthy",
@@ -612,6 +638,7 @@ GET /api/v1/patients/?skip=0&limit=50
 ```
 
 **Response includes:**
+
 ```json
 {
   "items": [...],

@@ -9,12 +9,14 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ### 1. Diagnostic Coding
 
 #### ICD-11 (International Classification of Diseases, 11th Revision)
+
 - **Organization**: World Health Organization (WHO)
 - **Usage**: Classification and coding of diseases, symptoms, and health conditions
 - **URI**: `http://id.who.int/icd/release/11/mms`
 - **Implementation**: Used in `Condition` resources for diagnosis coding
 
 **Example**:
+
 ```json
 {
   "icd11_code": "2E65",
@@ -23,12 +25,14 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ```
 
 #### SNOMED CT (Systematized Nomenclature of Medicine - Clinical Terms)
+
 - **Organization**: SNOMED International
 - **Usage**: Comprehensive clinical terminology for diseases, clinical findings, procedures, and more
 - **URI**: `http://snomed.info/sct`
 - **Implementation**: Used in `Condition` and `Procedure` resources for detailed clinical coding
 
 **Example**:
+
 ```json
 {
   "snomed_code": "38341003",
@@ -39,12 +43,14 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ### 2. Laboratory and Observations
 
 #### LOINC (Logical Observation Identifiers Names and Codes)
+
 - **Organization**: Regenstrief Institute
 - **Usage**: Universal standard for laboratory and clinical observations
 - **URI**: `http://loinc.org`
 - **Implementation**: Used in `Observation` resources for lab results and vital signs
 
 **Example**:
+
 ```json
 {
   "loinc_code": "8480-6",
@@ -57,12 +63,14 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ### 3. Medication Coding
 
 #### ATC (Anatomical Therapeutic Chemical Classification)
+
 - **Organization**: World Health Organization (WHO)
 - **Usage**: Classification of medications by therapeutic, pharmacological, and chemical properties
 - **URI**: `http://www.whocc.no/atc`
 - **Implementation**: Used in `Prescription` resources for medication coding
 
 **Example**:
+
 ```json
 {
   "medication_name": "Metformin",
@@ -74,12 +82,14 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ### 4. Procedure Coding
 
 #### CPT (Current Procedural Terminology)
+
 - **Organization**: American Medical Association (AMA)
 - **Usage**: Medical procedure coding for billing and documentation (primarily US)
 - **URI**: `http://www.ama-assn.org/go/cpt`
 - **Implementation**: Used in `Procedure` resources
 
 **Example**:
+
 ```json
 {
   "cpt_code": "99213",
@@ -88,12 +98,14 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ```
 
 #### CCAM (Classification Commune des Actes Médicaux)
+
 - **Organization**: Agence Nationale de Santé (ANS), France
 - **Usage**: Medical procedure classification for billing and reimbursement (France)
 - **URI**: `http://www.ccam.fr`
 - **Implementation**: Used in `Procedure` resources
 
 **Example**:
+
 ```json
 {
   "ccam_code": "YYYY001",
@@ -104,6 +116,7 @@ KeneyApp implements comprehensive international healthcare standards, nomenclatu
 ### 5. Medical Imaging
 
 #### DICOM (Digital Imaging and Communications in Medicine)
+
 - **Organization**: NEMA (National Electrical Manufacturers Association)
 - **Usage**: Standard for medical imaging and related information
 - **URI**: `http://dicom.nema.org/resources/ontology/DCM`
@@ -130,6 +143,7 @@ CREATE TABLE medical_codes (
 ### Clinical Resources
 
 #### Conditions (Diagnoses)
+
 ```sql
 CREATE TABLE conditions (
     id INTEGER PRIMARY KEY,
@@ -153,6 +167,7 @@ CREATE TABLE conditions (
 ```
 
 #### Observations (Laboratory Results, Vital Signs)
+
 ```sql
 CREATE TABLE observations (
     id INTEGER PRIMARY KEY,
@@ -177,6 +192,7 @@ CREATE TABLE observations (
 ```
 
 #### Procedures
+
 ```sql
 CREATE TABLE procedures (
     id INTEGER PRIMARY KEY,
@@ -204,6 +220,7 @@ CREATE TABLE procedures (
 ### FHIR R4 Resource Mapping
 
 #### Condition Resource
+
 ```json
 {
   "resourceType": "Condition",
@@ -233,6 +250,7 @@ CREATE TABLE procedures (
 ```
 
 #### Observation Resource
+
 ```json
 {
   "resourceType": "Observation",
@@ -255,6 +273,7 @@ CREATE TABLE procedures (
 ```
 
 #### Procedure Resource
+
 ```json
 {
   "resourceType": "Procedure",
@@ -280,6 +299,7 @@ CREATE TABLE procedures (
 ```
 
 #### MedicationRequest with ATC
+
 ```json
 {
   "resourceType": "MedicationRequest",
@@ -310,6 +330,7 @@ Authorization: Bearer {token}
 ```
 
 Response
+
 ```json
 {
   "is_valid": true,
@@ -334,6 +355,7 @@ Content-Type: application/json
 ```
 
 Response (placeholder when mapping is not available):
+
 ```json
 {
   "found": false,
@@ -425,7 +447,9 @@ response = requests.post(
 ## Compliance and Regulations
 
 ### RGPD (General Data Protection Regulation - Europe)
+
 ✅ **Implemented**:
+
 - Data encryption at rest (AES-256-GCM)
 - Access control and audit logging
 - Patient consent management
@@ -433,7 +457,9 @@ response = requests.post(
 - Right to be forgotten
 
 ### HIPAA (Health Insurance Portability and Accountability Act - US)
+
 ✅ **Implemented**:
+
 - Secure data transmission (TLS)
 - Access controls and authentication
 - Audit trails for all data access
@@ -441,7 +467,9 @@ response = requests.post(
 - Business Associate Agreement (BAA) ready
 
 ### HDS (Hébergeur de Données de Santé - France)
+
 ✅ **Compliant Architecture**:
+
 - ISO 27001 security controls
 - Data encryption (at rest and in transit)
 - Comprehensive audit logging
@@ -463,6 +491,7 @@ The standardized coding enables:
 ### OMOP CDM (Observational Medical Outcomes Partnership Common Data Model)
 
 KeneyApp's standardized coding makes it compatible with OMOP CDM for research purposes:
+
 - ICD-11/SNOMED CT → Condition tables
 - LOINC → Measurement tables
 - ATC → Drug exposure tables
@@ -488,24 +517,24 @@ KeneyApp's standardized coding makes it compatible with OMOP CDM for research pu
 
 ### Official Standards Organizations
 
-- **WHO ICD-11**: https://icd.who.int/
-- **SNOMED International**: https://www.snomed.org/
-- **LOINC**: https://loinc.org/
-- **WHO ATC**: https://www.whocc.no/atc/
-- **AMA CPT**: https://www.ama-assn.org/practice-management/cpt
-- **ANS France**: https://esante.gouv.fr/
-- **HL7 FHIR**: https://www.hl7.org/fhir/
+- **WHO ICD-11**: <https://icd.who.int/>
+- **SNOMED International**: <https://www.snomed.org/>
+- **LOINC**: <https://loinc.org/>
+- **WHO ATC**: <https://www.whocc.no/atc/>
+- **AMA CPT**: <https://www.ama-assn.org/practice-management/cpt>
+- **ANS France**: <https://esante.gouv.fr/>
+- **HL7 FHIR**: <https://www.hl7.org/fhir/>
 
 ### Implementation Libraries
 
-- **Python FHIR**: `fhir.resources` (https://pypi.org/project/fhir.resources/)
-- **HAPI FHIR (Java)**: https://hapifhir.io/
-- **FHIR.js**: https://github.com/FHIR/fhir.js
+- **Python FHIR**: `fhir.resources` (<https://pypi.org/project/fhir.resources/>)
+- **HAPI FHIR (Java)**: <https://hapifhir.io/>
+- **FHIR.js**: <https://github.com/FHIR/fhir.js>
 
 ### Validation Tools
 
-- **FHIR Validator**: https://confluence.hl7.org/display/FHIR/Using+the+FHIR+Validator
-- **Terminology Services**: https://tx.fhir.org/
+- **FHIR Validator**: <https://confluence.hl7.org/display/FHIR/Using+the+FHIR+Validator>
+- **Terminology Services**: <https://tx.fhir.org/>
 
 ## Best Practices
 
@@ -531,9 +560,10 @@ KeneyApp's standardized coding makes it compatible with OMOP CDM for research pu
 ## Support
 
 For questions about medical terminologies implementation:
-- **Technical Support**: fhir-support@isdataconsulting.com
-- **Documentation**: https://docs.keneyapp.com
-- **Community**: https://community.keneyapp.com
+
+- **Technical Support**: <fhir-support@isdataconsulting.com>
+- **Documentation**: <https://docs.keneyapp.com>
+- **Community**: <https://community.keneyapp.com>
 
 ---
 

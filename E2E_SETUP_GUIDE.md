@@ -12,11 +12,12 @@ This guide helps you set up and run end-to-end (E2E) tests for KeneyApp using Pl
 ### 1. Install Node.js (if not already installed)
 
 **macOS (using Homebrew):**
+
 ```bash
 brew install node@18
 ```
 
-**Or download from:** https://nodejs.org/
+**Or download from:** <https://nodejs.org/>
 
 ### 2. Install Dependencies
 
@@ -35,31 +36,37 @@ npm run playwright:install
 ## Running E2E Tests
 
 ### Run All Tests
+
 ```bash
 npm run test:e2e
 ```
 
 ### Run Tests in UI Mode (Interactive)
+
 ```bash
 npm run test:e2e:ui
 ```
 
 ### Run Tests in Headed Mode (See Browser)
+
 ```bash
 npm run test:e2e:headed
 ```
 
 ### Debug Tests
+
 ```bash
 npm run test:e2e:debug
 ```
 
 ### Run Specific Test File
+
 ```bash
 npx playwright test e2e/auth.spec.ts
 ```
 
 ### Run Specific Test by Name
+
 ```bash
 npx playwright test -g "should login with valid credentials"
 ```
@@ -104,8 +111,10 @@ If you see TypeScript errors like "Cannot find module '@playwright/test'":
 ### Port Already in Use
 
 If port 3000 is in use, you can:
+
 1. Change the port in the frontend
 2. Override with `BASE_URL` environment variable:
+
    ```bash
    BASE_URL=http://localhost:3001 npm run test:e2e
    ```
@@ -113,6 +122,7 @@ If port 3000 is in use, you can:
 ## CI/CD Integration
 
 E2E tests run automatically in GitHub Actions workflows. See:
+
 - `.github/workflows/ci-enhanced.yml`
 - `docker-compose.e2e.yml` for the E2E test environment
 
@@ -120,16 +130,20 @@ E2E tests run automatically in GitHub Actions workflows. See:
 
 1. Create a new `.spec.ts` file in the `e2e/` directory
 2. Import Playwright test utilities:
+
    ```typescript
    import { test, expect } from '@playwright/test';
    ```
+
 3. Write test cases:
+
    ```typescript
    test('should do something', async ({ page }) => {
      await page.goto('/');
      await expect(page).toHaveTitle(/KeneyApp/);
    });
    ```
+
 4. Run your test: `npx playwright test e2e/your-test.spec.ts`
 
 ## Best Practices

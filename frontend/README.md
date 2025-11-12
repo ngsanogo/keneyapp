@@ -44,7 +44,7 @@ frontend/
 ### Prerequisites
 
 - Node.js 18+ and npm
-- Backend API running on http://localhost:8000
+- Backend API running on <http://localhost:8000>
 
 ### Installation
 
@@ -99,6 +99,7 @@ npm run format:check
 ## Key Features
 
 ### Authentication
+
 - JWT-based authentication
 - Secure token storage
 - Auto-logout on token expiration
@@ -107,17 +108,19 @@ npm run format:check
 ### Components
 
 #### LoadingSpinner
+
 ```typescript
 import LoadingSpinner from './components/LoadingSpinner';
 
-<LoadingSpinner 
-  size="medium" 
-  message="Loading patients..." 
+<LoadingSpinner
+  size="medium"
+  message="Loading patients..."
   fullScreen={false}
 />
 ```
 
 #### ErrorBoundary
+
 ```typescript
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -127,6 +130,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 ```
 
 #### NotificationToast
+
 ```typescript
 import NotificationToast from './components/NotificationToast';
 
@@ -141,6 +145,7 @@ import NotificationToast from './components/NotificationToast';
 ### Custom Hooks
 
 #### useApi Hook
+
 ```typescript
 import { useApi } from './hooks/useApi';
 
@@ -157,7 +162,7 @@ function PatientsPage() {
 
   if (loading) return <LoadingSpinner />;
   if (error) return <div>Error: {error}</div>;
-  
+
   return <div>{/* Render patients */}</div>;
 }
 ```
@@ -188,6 +193,7 @@ REACT_APP_API_VERSION=v1
 ## API Integration
 
 The frontend communicates with the backend API at:
+
 - Default: `http://localhost:8000/api/v1`
 - Production: Configure via environment variables
 
@@ -221,23 +227,27 @@ const newPatient = await axios.post('/api/v1/patients', patientData, {
 ## Best Practices
 
 ### Component Design
+
 - Use functional components with hooks
 - Keep components small and focused
 - Extract reusable logic into custom hooks
 - Use TypeScript interfaces for props
 
 ### State Management
+
 - Use React Context for global state (auth, theme, etc.)
 - Use local state for component-specific data
 - Consider adding Redux/Zustand for complex state
 
 ### Error Handling
+
 - Wrap routes with ErrorBoundary
 - Use try-catch for async operations
 - Show user-friendly error messages
 - Log errors for debugging
 
 ### Performance
+
 - Use React.memo for expensive components
 - Implement code splitting with React.lazy
 - Optimize images and assets
@@ -246,15 +256,18 @@ const newPatient = await axios.post('/api/v1/patients', patientData, {
 ## Common Issues
 
 ### CORS Errors
+
 If you encounter CORS errors, ensure the backend is configured to allow requests from `http://localhost:3000`.
 
 ### Port Already in Use
+
 ```bash
 # Kill process on port 3000
 lsof -ti:3000 | xargs kill -9
 ```
 
 ### Module Not Found
+
 ```bash
 # Clear cache and reinstall
 rm -rf node_modules package-lock.json
@@ -298,4 +311,4 @@ Proprietary - ISDATA Consulting
 
 ## Support
 
-For questions or issues, contact: contact@isdataconsulting.com
+For questions or issues, contact: <contact@isdataconsulting.com>

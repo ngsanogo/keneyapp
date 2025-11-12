@@ -1,6 +1,6 @@
 from typing import Optional
-from pydantic import BaseModel, AnyHttpUrl, Field
-from pydantic import ConfigDict
+
+from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field
 
 
 class SubscriptionCreate(BaseModel):

@@ -35,14 +35,17 @@ Réduire la taille des images Docker de KeneyApp qui étaient excessivement volu
 ### 1. Multi-Stage Builds (Backend)
 
 **Problème Initial:**
+
 ```dockerfile
 FROM python:3.11-slim
 COPY . .  # Copie TOUT (754 MB: tests/, docs/, .git/, etc.)
 RUN pip install -r requirements.txt
 ```
+
 Résultat: 1.97 GB
 
 **Solution:**
+
 ```dockerfile
 # Stage 1: Builder
 FROM python:3.11-slim AS builder
@@ -58,20 +61,24 @@ COPY app ./app
 COPY scripts ./scripts
 # Ne copie PAS: tests/, docs/, .git/, node_modules/, .venv/
 ```
+
 Résultat: **838 MB (-57%)**
 
 ### 2. Nginx Static Serving (Frontend)
 
 **Problème Initial:**
+
 ```dockerfile
 FROM node:25-alpine
 COPY . .
 RUN npm install
 CMD ["npm", "start"]  # Serveur de développement en prod!
 ```
+
 Résultat: 1.4 GB
 
 **Solution:**
+
 ```dockerfile
 # Stage 1: Build
 FROM node:25-alpine AS builder
@@ -82,6 +89,7 @@ RUN npm run build
 FROM nginx:alpine
 COPY --from=builder /app/build /usr/share/nginx/html
 ```
+
 Résultat: **82.6 MB (-94%)**
 
 ### 3. .dockerignore Amélioré
@@ -89,6 +97,7 @@ Résultat: **82.6 MB (-94%)**
 **Avant:** Build context de 754 MB
 
 **Après:** Exclusions ajoutées
+
 ```dockerignore
 tests/
 e2e/
@@ -118,6 +127,7 @@ k8s/
 **Créé:** `requirements.prod.txt`
 
 **Supprimé** (dev/test uniquement):
+
 - pytest, pytest-cov, pytest-asyncio
 - black, flake8, mypy, isort
 - flower (optionnel en prod)
@@ -149,7 +159,7 @@ k8s/
 
 4. **`Dockerfile.prod`**
    - Ultra-optimisé pour production
-   - Cleanup .pyc/__pycache__
+   - Cleanup .pyc/**pycache**
    - 4 workers uvicorn
    - Utilise requirements.prod.txt
 
@@ -243,15 +253,18 @@ docker-compose -f docker-compose.prod.yml up -d
 ### Coûts
 
 **Storage:**
+
 - Par environnement: **5.85 GB économisés**
 - 3 environnements: **17.5 GB économisés**
 - Registry (par version): **5.85 GB économisés**
 
 **Bande passante:**
+
 - CI/CD (10 builds/jour): **58 GB/jour économisés**
 - Déploiements: **Temps de déploiement réduit de 67%**
 
 **Cloud Costs (exemple AWS ECR):**
+
 - Storage: ~$0.10/GB/month → Économie: **$0.59/month** par env
 - Data transfer: ~$0.09/GB → Économie: **~$5/month** pour CI/CD
 
@@ -327,16 +340,16 @@ En bonus de la réduction de taille:
 
 ### Best Practices Appliquées
 
-✅ Multi-stage builds  
-✅ .dockerignore exhaustif  
-✅ Copie sélective des fichiers  
-✅ Virtual environments isolés  
-✅ Cleanup des caches  
-✅ Nginx pour static files  
-✅ Requirements séparés dev/prod  
-✅ Non-root users  
-✅ Health checks  
-✅ Base images légères  
+✅ Multi-stage builds
+✅ .dockerignore exhaustif
+✅ Copie sélective des fichiers
+✅ Virtual environments isolés
+✅ Cleanup des caches
+✅ Nginx pour static files
+✅ Requirements séparés dev/prod
+✅ Non-root users
+✅ Health checks
+✅ Base images légères
 
 ## 🔄 Prochaines Étapes (Optionnel)
 
@@ -346,6 +359,7 @@ Pour aller encore plus loin:
    - Attention: Complexité accrue pour psycopg2
 
 2. **BuildKit cache mounts**
+
    ```dockerfile
    RUN --mount=type=cache,target=/root/.cache/pip \
        pip install -r requirements.txt
@@ -356,6 +370,7 @@ Pour aller encore plus loin:
    - Debug plus complexe
 
 4. **Squash layers**
+
    ```bash
    docker build --squash -t keneyapp-backend .
    ```
@@ -386,6 +401,6 @@ Ces optimisations suivent les **best practices Docker** de l'industrie et sont *
 
 ---
 
-**Date**: Novembre 2025  
-**Version**: 1.0  
+**Date**: Novembre 2025
+**Version**: 1.0
 **Auteur**: KeneyApp DevOps Team

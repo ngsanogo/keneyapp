@@ -99,6 +99,7 @@ Based on the specifications, here is the recommended phased approach:
 **Duration**: October - December 2023 (3 months)
 
 **Deliverables**: ✅ Completed
+
 - ✅ Detailed specifications document (cahier des charges)
 - ✅ System architecture design
 - ✅ Technology stack selection
@@ -120,6 +121,7 @@ Based on the specifications, here is the recommended phased approach:
 **Sprint Structure**: 6 sprints × 2 weeks
 
 **Deliverables**: ✅ Completed
+
 - ✅ Database models (User, Patient, Appointment, Prescription)
 - ✅ Authentication system (JWT)
 - ✅ Patient CRUD API
@@ -140,6 +142,7 @@ Based on the specifications, here is the recommended phased approach:
 **Sprint Structure**: 6 sprints × 2 weeks
 
 **Deliverables**: ✅ Completed
+
 - ✅ React application structure
 - ✅ Authentication UI (login, registration)
 - ✅ Dashboard with statistics
@@ -159,6 +162,7 @@ Based on the specifications, here is the recommended phased approach:
 **Sprint Structure**: 6 sprints × 2 weeks
 
 **Deliverables**: ✅ Completed
+
 - ✅ OAuth2/OIDC authentication (Google, Microsoft, Okta)
 - ✅ Data encryption at rest (AES-256-GCM)
 - ✅ FHIR R4 interoperability
@@ -179,6 +183,7 @@ Based on the specifications, here is the recommended phased approach:
 **Sprint Structure**: 6 sprints × 2 weeks
 
 **Deliverables**: ✅ Completed
+
 - ✅ Secure messaging system (end-to-end encrypted)
 - ✅ Document management (lab results, imaging, prescriptions)
 - ✅ Medical record sharing (temporary secure links)
@@ -201,6 +206,7 @@ Based on the specifications, here is the recommended phased approach:
 **Status**: ✅ **Production Ready**
 
 **Key Features**:
+
 - ✅ Complete patient management system
 - ✅ Appointment scheduling with conflict detection
 - ✅ Digital prescription management
@@ -219,6 +225,7 @@ Based on the specifications, here is the recommended phased approach:
 - ✅ 77% test coverage
 
 **Metrics**:
+
 - 159 total tests (155 passing, 4 expected failures)
 - 156 E2E scenarios tested (100% pass rate)
 - 99.9% uptime target
@@ -236,6 +243,7 @@ Based on the specifications, here is the recommended phased approach:
 **Status**: 📋 Planned
 
 **Goals**:
+
 - Professional healthcare dashboards
 - Patient tracking and KPIs
 - Custom report generation
@@ -244,6 +252,7 @@ Based on the specifications, here is the recommended phased approach:
 - Performance analytics
 
 **Features**:
+
 - [ ] Healthcare KPI dashboards
 - [ ] Custom report builder
 - [ ] Patient outcome tracking
@@ -254,6 +263,7 @@ Based on the specifications, here is the recommended phased approach:
 - [ ] Export to multiple formats
 
 **Success Criteria**:
+
 - Dashboard loads < 1 second
 - Reports generate < 5 seconds
 - 100+ predefined reports
@@ -268,6 +278,7 @@ Based on the specifications, here is the recommended phased approach:
 **Status**: 📋 Planned
 
 **Goals**:
+
 - WebRTC video consultations
 - Payment processing for consultations
 - Consultation recording and storage
@@ -277,6 +288,7 @@ Based on the specifications, here is the recommended phased approach:
 **Features**:
 
 **Telemedicine Module**:
+
 - [ ] WebRTC peer-to-peer video calls
 - [ ] Screen sharing capabilities
 - [ ] Chat during video call
@@ -287,6 +299,7 @@ Based on the specifications, here is the recommended phased approach:
 - [ ] STUN/TURN server setup
 
 **Payment Integration**:
+
 - [ ] Stripe payment processing
 - [ ] PayPal integration
 - [ ] Payment for telemedicine consultations
@@ -297,6 +310,7 @@ Based on the specifications, here is the recommended phased approach:
 - [ ] PCI-DSS compliance
 
 **Technical Requirements**:
+
 - Coturn TURN server for NAT traversal
 - End-to-end encryption for video/audio
 - Secure payment gateway integration
@@ -304,6 +318,7 @@ Based on the specifications, here is the recommended phased approach:
 - Audit logging for payments
 
 **Success Criteria**:
+
 - Video call setup < 10 seconds
 - HD video quality (720p minimum)
 - < 200ms latency
@@ -319,6 +334,7 @@ Based on the specifications, here is the recommended phased approach:
 **Status**: 📋 Planned
 
 **Goals**:
+
 - French healthcare standards compliance
 - Government system integration
 - Enhanced security for HDS certification
@@ -326,42 +342,49 @@ Based on the specifications, here is the recommended phased approach:
 **Features**:
 
 **INS Integration** (Identifiant National de Santé):
+
 - [ ] INS patient identifier integration
 - [ ] Patient identity verification
 - [ ] INS search and validation API
 - [ ] Identity quality indicator
 
 **Pro Santé Connect**:
+
 - [ ] CPS/e-CPS authentication
 - [ ] Healthcare professional verification
 - [ ] SSO for doctors and nurses
 - [ ] Role and specialty mapping
 
 **MSSanté**:
+
 - [ ] MSSanté messaging integration
 - [ ] Secure email to healthcare professionals
 - [ ] MSSanté address validation
 - [ ] Encrypted message exchange
 
 **DMP Integration** (Dossier Médical Partagé):
+
 - [ ] DMP document upload
 - [ ] DMP document retrieval
 - [ ] Patient consent management
 - [ ] Document metadata standards
 
 **Ségur FHIR Profiles**:
+
 - [ ] ANS FHIR profile compliance
 - [ ] French FHIR extensions
 - [ ] Interoperability testing
 - [ ] Connectathon participation
 
 **HDS Certification Support**:
+
 - [ ] Enhanced audit logging
 - [ ] Data residency controls
 - [ ] Security hardening
 - [ ] Compliance documentation
 
 **Success Criteria**:
+
 - INS validation < 2 seconds
 - Pro Santé Connect SSO functional
 - MSSanté message delivery 100%
@@ -371,6 +394,7 @@ Based on the specifications, here is the recommended phased approach:
 **Team**: 3 developers, 1 compliance specialist, 1 security consultant
 
 **Partnerships**:
+
 - Work with ANS (Agence du Numérique en Santé)
 - HDS hosting provider selection
 - Integration partner for INS/DMP
@@ -382,6 +406,7 @@ Based on the specifications, here is the recommended phased approach:
 **Status**: 📋 Planned
 
 **Goals**:
+
 - Native mobile experience
 - Offline capabilities
 - Push notifications
@@ -390,12 +415,14 @@ Based on the specifications, here is the recommended phased approach:
 **Features**:
 
 **React Native Mobile Apps**:
+
 - [ ] iOS application
 - [ ] Android application
 - [ ] Shared codebase with web
 - [ ] Native performance
 
 **Core Mobile Features**:
+
 - [ ] Authentication with biometrics
 - [ ] Patient management
 - [ ] Appointment scheduling
@@ -407,6 +434,7 @@ Based on the specifications, here is the recommended phased approach:
 - [ ] Camera integration (document scanning)
 
 **Mobile-Specific Features**:
+
 - [ ] Barcode scanning (insurance cards, prescriptions)
 - [ ] Geolocation for nearby appointments
 - [ ] Calendar integration
@@ -415,6 +443,7 @@ Based on the specifications, here is the recommended phased approach:
 - [ ] Photo upload for documents
 
 **Technical Requirements**:
+
 - React Native 0.72+
 - Expo for managed workflow
 - Push notifications (FCM/APNS)
@@ -423,6 +452,7 @@ Based on the specifications, here is the recommended phased approach:
 - Camera and media access
 
 **Success Criteria**:
+
 - App store approval (iOS and Android)
 - < 50MB app size
 - 4.5+ star rating target
@@ -438,11 +468,13 @@ Based on the specifications, here is the recommended phased approach:
 **Status**: 💡 Research Phase
 
 **Goals**:
+
 - Clinical decision support
 - Intelligent automation
 - Predictive analytics
 
 **Potential Features**:
+
 - [ ] Medical coding suggestions (ICD-11, SNOMED CT)
 - [ ] Drug interaction warnings
 - [ ] Appointment scheduling optimization
@@ -453,6 +485,7 @@ Based on the specifications, here is the recommended phased approach:
 - [ ] Duplicate patient detection
 
 **Technical Requirements**:
+
 - Machine learning infrastructure
 - Training data collection (anonymized)
 - Model versioning and deployment
@@ -460,6 +493,7 @@ Based on the specifications, here is the recommended phased approach:
 - Regulatory compliance (MDR for medical devices if applicable)
 
 **Research Phase** (Q4 2025):
+
 - Feasibility study
 - Regulatory requirements analysis
 - Technology selection
@@ -467,6 +501,7 @@ Based on the specifications, here is the recommended phased approach:
 - Partnership exploration (academic, research institutions)
 
 **Success Criteria**:
+
 - 90%+ accuracy on medical coding
 - Drug interaction detection 100%
 - No false negatives on critical warnings
@@ -482,11 +517,13 @@ Based on the specifications, here is the recommended phased approach:
 **Status**: 💡 Vision
 
 **Goals**:
+
 - Multi-country support
 - Localization
 - Regional compliance
 
 **Target Markets**:
+
 1. **France** (primary): Full compliance, government integration
 2. **Belgium**: Similar healthcare system, French/Dutch support
 3. **Switzerland**: Private healthcare market, multi-language
@@ -494,6 +531,7 @@ Based on the specifications, here is the recommended phased approach:
 5. **Spain**: EU market, Spanish localization
 
 **Requirements per Market**:
+
 - [ ] Language localization
 - [ ] Regional compliance (data residency, regulations)
 - [ ] Currency and payment integration
@@ -504,6 +542,7 @@ Based on the specifications, here is the recommended phased approach:
 - [ ] Support infrastructure
 
 **Success Criteria**:
+
 - Legal compliance in each market
 - Local hosting if required
 - Translated documentation
@@ -515,6 +554,7 @@ Based on the specifications, here is the recommended phased approach:
 ### Team Composition
 
 **Current Team** (v3.0):
+
 - 6 Software Developers (4 backend, 2 frontend)
 - 1 DevOps Engineer
 - 1 QA Engineer
@@ -525,23 +565,28 @@ Based on the specifications, here is the recommended phased approach:
 **Planned Growth**:
 
 **2025 Q1** (Total: 12):
+
 - +1 Backend Developer (analytics)
 - +1 Data Analyst
 - +1 Support Engineer
 
 **2025 Q2** (Total: 15):
+
 - +2 Full-Stack Developers (telemedicine)
 - +1 Payment Specialist
 
 **2025 Q3** (Total: 17):
+
 - +1 Backend Developer (integrations)
 - +1 Compliance Specialist
 
 **2025 Q4** (Total: 20):
+
 - +2 Mobile Developers
 - +1 UX Designer (full-time)
 
 **2026** (Total: 25+):
+
 - +2 ML Engineers
 - +1 Data Scientist
 - +1 DevOps Engineer
@@ -552,18 +597,21 @@ Based on the specifications, here is the recommended phased approach:
 **Annual Budget Breakdown** (estimated):
 
 **2025**: €1.5M - €2M
+
 - Personnel: 70% (€1.05M - €1.4M)
 - Infrastructure: 15% (€225K - €300K)
 - Marketing: 10% (€150K - €200K)
 - Operations: 5% (€75K - €100K)
 
 **2026**: €2.5M - €3.5M
+
 - Personnel: 70% (€1.75M - €2.45M)
 - Infrastructure: 15% (€375K - €525K)
 - Marketing: 10% (€250K - €350K)
 - Operations: 5% (€125K - €175K)
 
 **Infrastructure Costs**:
+
 - Cloud hosting: €30K - €50K/year (scales with usage)
 - Monitoring and logging: €5K - €10K/year
 - Third-party services: €15K - €30K/year (Twilio, email, etc.)
@@ -573,6 +621,7 @@ Based on the specifications, here is the recommended phased approach:
 ### Sprint Planning
 
 **Agile Methodology**:
+
 - Sprint duration: 2 weeks
 - Sprint planning: Monday morning
 - Daily standup: 15 minutes
@@ -580,10 +629,12 @@ Based on the specifications, here is the recommended phased approach:
 - Sprint retrospective: Friday afternoon
 
 **Sprint Velocity**:
+
 - Target: 40-50 story points per sprint (team of 6 developers)
 - Historical average: 45 story points per sprint
 
 **Release Cycle**:
+
 - Sprint releases to staging: Every 2 weeks
 - Production releases: Monthly (from main branch)
 - Hotfixes: As needed (within 4 hours for critical)
@@ -651,18 +702,21 @@ Based on the specifications, here is the recommended phased approach:
 ### Risk Monitoring
 
 **Weekly**:
+
 - Review open incidents
 - Check security alerts
 - Monitor system performance
 - Track sprint progress
 
 **Monthly**:
+
 - Risk assessment review
 - Compliance checklist
 - Team health check
 - Budget review
 
 **Quarterly**:
+
 - Comprehensive risk audit
 - Update risk mitigation plans
 - Business continuity drill
@@ -673,17 +727,20 @@ Based on the specifications, here is the recommended phased approach:
 ### Product Metrics
 
 **User Adoption**:
+
 - Target: 1,000 active users by end of 2025
 - Target: 10,000 active users by end of 2026
 - Growth rate: 50% year-over-year
 
 **User Engagement**:
+
 - Daily active users (DAU): 30% of registered users
 - Monthly active users (MAU): 70% of registered users
 - Session duration: Average 15 minutes
 - Return rate: 70% users return within 7 days
 
 **Feature Usage**:
+
 - Appointment scheduling: 80% of users
 - Secure messaging: 60% of users
 - Document management: 50% of users
@@ -693,18 +750,21 @@ Based on the specifications, here is the recommended phased approach:
 ### Technical Metrics
 
 **System Performance**:
+
 - Uptime: 99.9% (< 8.77 hours downtime per year)
 - P95 response time: < 200ms
 - P99 response time: < 500ms
 - Error rate: < 0.1%
 
 **Quality Metrics**:
+
 - Test coverage: 80% (current: 77%)
 - Code review coverage: 100%
 - Security vulnerabilities: 0 critical, < 5 high
 - Technical debt ratio: < 5%
 
 **Development Velocity**:
+
 - Deployment frequency: Weekly to staging, Monthly to production
 - Lead time for changes: < 1 week
 - Change failure rate: < 5%
@@ -713,18 +773,21 @@ Based on the specifications, here is the recommended phased approach:
 ### Business Metrics
 
 **Revenue** (if applicable):
+
 - Monthly recurring revenue (MRR): Growth trajectory
 - Customer acquisition cost (CAC): Decrease over time
 - Lifetime value (LTV): Increase over time
 - LTV:CAC ratio: > 3:1
 
 **Customer Satisfaction**:
+
 - Net Promoter Score (NPS): > 50
 - Customer satisfaction (CSAT): > 4.5/5
 - Support ticket resolution: > 95%
 - User retention (90 days): > 80%
 
 **Compliance**:
+
 - Security incidents: 0 data breaches
 - Audit findings: 0 critical, < 5 high
 - Compliance certifications: Maintained
@@ -762,6 +825,7 @@ KeneyApp's development roadmap demonstrates:
 5. **Growth**: Strategic expansion to new markets
 
 The roadmap is flexible and will be adjusted based on:
+
 - User feedback and feature requests
 - Market conditions and competition
 - Regulatory changes

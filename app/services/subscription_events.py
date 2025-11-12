@@ -10,8 +10,8 @@ Matching rule (minimal):
 Future: support search-style criteria (e.g., Patient?identifier=..., Appointment?patient=...).
 """
 
-from typing import Dict, Iterable
 import logging
+from typing import Dict, Iterable
 
 from sqlalchemy.orm import Session
 
@@ -35,9 +35,7 @@ def _find_matching_subscriptions(
     )
 
 
-def publish_event(
-    db: Session, tenant_id: int, resource_type: str, fhir_resource: Dict
-) -> None:
+def publish_event(db: Session, tenant_id: int, resource_type: str, fhir_resource: Dict) -> None:
     """Publish a resource change event to all matching subscriptions.
 
     Args:

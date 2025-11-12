@@ -12,6 +12,7 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 ## 🏥 Features
 
 ### Core Functionality
+
 - **Patient Management**: Complete patient record system with medical history, allergies, and emergency contacts
 - **Appointment Scheduling**: Comprehensive appointment management with status tracking
 - **Prescription Management**: Digital prescription system with medication details and refill tracking
@@ -19,6 +20,7 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 - **Multi-Role Support**: Role-based access control for Admin, Doctor, Nurse, and Receptionist
 
 ### 🆕 Enterprise Features (v2.0)
+
 - ✅ **OAuth2/OIDC Authentication**: SSO with Google, Microsoft, and Okta
 - ✅ **Data Encryption at Rest**: AES-256-GCM encryption for sensitive patient data
 - ✅ **GraphQL API**: Modern API alongside REST for flexible data queries
@@ -27,6 +29,7 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 - ✅ **Cloud Deployment**: Terraform scripts for AWS, Azure, and GCP
 
 ### 🚀 New in v3.0 - Complete Medical Record System
+
 - 💬 **Secure Messaging**: End-to-end encrypted patient-doctor communication with threaded conversations
 - 📄 **Document Management**: Complete medical document storage (lab results, imaging, prescriptions, vaccination records)
 - 🔔 **Automated Notifications**: Multi-channel alerts (email, SMS) for appointments, results, and prescription renewals
@@ -36,6 +39,7 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 - 📹 **Telemedicine Module**: WebRTC video consultations with recording (coming Q2 2026)
 
 ### Security & Compliance
+
 - ✅ **GDPR/HIPAA/HDS compliant architecture**
 - ✅ JWT-based authentication + OAuth2/OIDC
 - ✅ Password hashing with bcrypt
@@ -49,6 +53,7 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 - ✅ **International medical coding standards** (ICD-11, SNOMED CT, LOINC, ATC, CPT/CCAM)
 
 ### Performance & Scalability
+
 - ⚡ **Redis caching** for frequently accessed data
 - ⚡ **Celery background tasks** for asynchronous operations
 - ⚡ **Horizontal auto-scaling** with Kubernetes HPA
@@ -56,6 +61,7 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 - ⚡ Database query optimization
 
 ### Enterprise Features
+
 - 🚀 **Kubernetes deployment** ready with Helm charts
 - 📊 **Grafana dashboards** for visualization
 - 🔍 **Prometheus monitoring** for metrics collection
@@ -68,6 +74,7 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 KeneyApp implements international healthcare standards for maximum interoperability and compliance:
 
 ### Supported Medical Terminologies
+
 - **ICD-11** (WHO): International Classification of Diseases for diagnosis coding
 - **SNOMED CT**: Comprehensive clinical terminology for detailed medical coding
 - **LOINC**: Laboratory and clinical observation coding
@@ -77,6 +84,7 @@ KeneyApp implements international healthcare standards for maximum interoperabil
 - **DICOM**: Digital Imaging and Communications in Medicine (reference support)
 
 ### FHIR Resources
+
 - **Patient**: Demographics and identifiers
 - **Appointment**: Scheduling and visits
 - **MedicationRequest**: Prescriptions with ATC codes
@@ -85,6 +93,7 @@ KeneyApp implements international healthcare standards for maximum interoperabil
 - **Procedure**: Medical procedures with CPT/CCAM codes
 
 ### Compliance
+
 - ✅ **RGPD** (Europe): Full GDPR compliance with data protection and privacy controls
 - ✅ **HIPAA** (US): Security and confidentiality of health information
 - ✅ **HDS** (France): Hébergeur de Données de Santé certification-ready architecture
@@ -105,6 +114,7 @@ KeneyApp uses highly optimized Docker images with **multi-stage builds**:
 | **Total** | ~10 GB | **~3.4 GB** | 🎯 **63% savings** |
 
 **Key Optimizations:**
+
 - ✅ Multi-stage builds (builder + runtime)
 - ✅ Nginx for frontend static serving
 - ✅ Enhanced .dockerignore (-87% build context)
@@ -114,6 +124,7 @@ KeneyApp uses highly optimized Docker images with **multi-stage builds**:
 - ✅ Health checks for monitoring
 
 **Quick Commands:**
+
 ```bash
 # Check optimized image sizes
 make docker-sizes
@@ -195,23 +206,25 @@ keneyapp/
 ### Option 1: Docker Compose (Recommended)
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/ISData-consulting/keneyapp.git
    cd keneyapp
    ```
 
 2. **Start all services**
+
    ```bash
    ./scripts/start_stack.sh
    # add --logs to follow container output, or --down to stop everything
    ```
 
 4. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - API Documentation: http://localhost:8000/api/v1/docs
-   - Prometheus Metrics: http://localhost:8000/metrics
-   - Flower (Celery Monitoring): http://localhost:5555
+   - Frontend: <http://localhost:3000>
+   - Backend API: <http://localhost:8000>
+   - API Documentation: <http://localhost:8000/api/v1/docs>
+   - Prometheus Metrics: <http://localhost:8000/metrics>
+   - Flower (Celery Monitoring): <http://localhost:5555>
    - Redis: localhost:6379
 
 ### Option 2: Manual Setup
@@ -219,38 +232,45 @@ keneyapp/
 #### Backend Setup
 
 1. **Create and activate virtual environment**
+
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
 
 2. **Install dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. **Set up PostgreSQL database**
+
    ```bash
    createdb keneyapp
    ```
 
 4. **Configure environment**
+
    ```bash
    cp .env.example .env
    # Update DATABASE_URL in .env if needed
    ```
 
 5. **Run database migrations**
+
    ```bash
    alembic upgrade head
    ```
 
 6. **Initialize database with sample data**
+
    ```bash
    python scripts/init_db.py
    ```
 
 7. **Start the backend server**
+
    ```bash
    uvicorn app.main:app --reload
    ```
@@ -258,12 +278,14 @@ keneyapp/
 #### Frontend Setup
 
 1. **Install dependencies**
+
    ```bash
    cd frontend
    npm install
    ```
 
 2. **Start the development server**
+
    ```bash
    npm start
    ```
@@ -284,12 +306,14 @@ After running the initialization script, you can log in with these demo accounts
 ## 📚 API Documentation
 
 The API documentation is automatically generated and available at:
-- **Swagger UI**: http://localhost:8000/api/v1/docs
-- **ReDoc**: http://localhost:8000/api/v1/redoc
+
+- **Swagger UI**: <http://localhost:8000/api/v1/docs>
+- **ReDoc**: <http://localhost:8000/api/v1/redoc>
 
 ### Main Endpoints
 
 **Authentication:**
+
 - `POST /api/v1/auth/register` - Register new user
 - `POST /api/v1/auth/login` - User login
 - `GET /api/v1/auth/me` - Retrieve current authenticated user profile
@@ -297,12 +321,14 @@ The API documentation is automatically generated and available at:
 - `GET /api/v1/oauth/callback/{provider}` - 🆕 OAuth callback handler
 
 **Patient Management:**
+
 - `GET /api/v1/patients/` - List all patients
 - `POST /api/v1/patients/` - Create new patient
 - `GET /api/v1/fhir/Patient/{id}` - 🆕 Get patient in FHIR format
 - `POST /api/v1/fhir/Patient` - 🆕 Create patient from FHIR resource
 
 **Appointments & Prescriptions:**
+
 - `GET /api/v1/appointments/` - List all appointments
 - `POST /api/v1/appointments/` - Create new appointment
 - `GET /api/v1/prescriptions/` - List all prescriptions
@@ -311,6 +337,7 @@ The API documentation is automatically generated and available at:
 - `GET /api/v1/fhir/MedicationRequest/{id}` - 🆕 Get prescription in FHIR format
 
 **Dashboard & Monitoring:**
+
 - `GET /api/v1/dashboard/stats` - Get dashboard statistics
 - `GET /health` - Health check endpoint
 - `GET /metrics` - Prometheus metrics
@@ -328,6 +355,7 @@ curl http://localhost:8000/metrics
 ```
 
 **Available Metrics:**
+
 - `http_requests_total` - Total HTTP requests by method, endpoint, and status
 - `http_request_duration_seconds` - Request duration histogram
 - `patient_operations_total` - Total patient operations
@@ -349,6 +377,7 @@ curl -H "X-Correlation-ID: my-trace-id" https://api.keneyapp.com/health
 ```
 
 Logs are structured in JSON format for easy parsing:
+
 ```json
 {
   "event": "request_complete",
@@ -364,6 +393,7 @@ Logs are structured in JSON format for easy parsing:
 ### Grafana Dashboards
 
 Pre-configured dashboards are available in `/monitoring/grafana-dashboard.json`:
+
 - API performance metrics
 - Database health
 - Redis cache statistics
@@ -379,6 +409,7 @@ http://localhost:5555
 ```
 
 **Background Tasks:**
+
 - `send_appointment_reminder` - Send appointment notifications
 - `generate_patient_report` - Create comprehensive patient reports
 - `check_prescription_interactions` - Validate drug interactions
@@ -408,22 +439,25 @@ All critical operations are logged for GDPR/HIPAA compliance:
 ```
 
 Query audit logs via the database:
+
 ```sql
-SELECT * FROM audit_logs 
-WHERE resource_type = 'patient' 
-ORDER BY timestamp DESC 
+SELECT * FROM audit_logs
+WHERE resource_type = 'patient'
+ORDER BY timestamp DESC
 LIMIT 100;
 ```
 
 ## 🧪 Testing
 
 ### End-to-End (E2E) Integration Tests ⭐ NEW
+
 ```bash
 # Run complete E2E test suite in Docker
 ./scripts/run_e2e_tests.sh
 ```
 
 **Comprehensive testing** covering:
+
 - ✅ Authentication (all user roles)
 - ✅ Patient CRUD workflows with PHI encryption
 - ✅ RBAC enforcement
@@ -436,6 +470,7 @@ LIMIT 100;
 📖 **Documentation:** [E2E Testing Guide](docs/E2E_TESTING.md) | [Quick Reference](docs/E2E_TESTING_QUICK_REF.md)
 
 ### Backend Tests
+
 ```bash
 # Run all tests
 pytest
@@ -454,6 +489,7 @@ pytest tests/test_smoke.py -v
 **Test Coverage:** 75% (155/159 tests passing)
 
 **Test Types:**
+
 - Unit tests for API endpoints, models, and services
 - Integration tests with database
 - API contract tests (JSON Schema validation)
@@ -462,6 +498,7 @@ pytest tests/test_smoke.py -v
 - E2E integration tests in Docker
 
 ### Frontend Tests
+
 ```bash
 cd frontend
 npm test
@@ -499,6 +536,7 @@ All tests run automatically on every pull request and push to main/develop branc
 ## 🔍 Code Quality
 
 ### Backend Linting
+
 ```bash
 # Check code style
 flake8 app
@@ -511,6 +549,7 @@ mypy app
 ```
 
 ### Frontend Linting
+
 ```bash
 cd frontend
 npm run lint
@@ -571,6 +610,7 @@ kubectl get pods -n keneyapp
 ```
 
 **Features:**
+
 - Horizontal Pod Autoscaling (3-10 replicas)
 - Health checks and readiness probes
 - Resource limits and requests
@@ -583,6 +623,7 @@ See [k8s/README.md](k8s/README.md) for detailed deployment instructions.
 ### Docker Production Deployment
 
 1. **Set environment variables**
+
    ```bash
    export DATABASE_URL=your_production_database_url
    export SECRET_KEY=your_production_secret_key
@@ -590,11 +631,13 @@ See [k8s/README.md](k8s/README.md) for detailed deployment instructions.
    ```
 
 2. **Run database migrations**
+
    ```bash
    alembic upgrade head
    ```
 
 3. **Deploy with Docker**
+
    ```bash
    docker-compose -f docker-compose.prod.yml up -d
    ```
@@ -604,11 +647,13 @@ See [k8s/README.md](k8s/README.md) for detailed deployment instructions.
 We welcome contributions! Please read our contribution guidelines before submitting PRs.
 
 **Quick Links:**
+
 - [Contributing Guide](CONTRIBUTING.md) - Detailed contribution guidelines
 - [Code of Conduct](CODE_OF_CONDUCT.md) - Community standards
 - [Security Policy](SECURITY.md) - Security reporting and best practices
 
 **Development Setup:**
+
 ```bash
 # Quick setup with Makefile
 make setup          # Install dependencies and hooks
@@ -621,6 +666,7 @@ make lint           # Check code quality
 See [BUILD.md](BUILD.md) for comprehensive build instructions.
 
 **Contribution Process:**
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes following our [coding standards](CONTRIBUTING.md#coding-standards)
@@ -634,12 +680,14 @@ See [BUILD.md](BUILD.md) for comprehensive build instructions.
 Comprehensive documentation available in the `docs/` directory:
 
 ### Getting Started
+
 - **[Build Guide](BUILD.md)** - Comprehensive build instructions and troubleshooting
 - **[Development Guide](docs/DEVELOPMENT.md)** - Complete development setup and workflow
 - **[API Reference](docs/API_REFERENCE.md)** - Full API documentation with examples
 - **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment instructions
 
 ### Technology & Planning
+
 - **[Technology Choices](docs/TECHNOLOGY_CHOICES.md)** - Technology stack justification and decisions
 - **[Deployment Strategies](docs/DEPLOYMENT_STRATEGIES.md)** - Blue-Green, Canary, and Rolling deployment procedures
 - **[Testing Strategy](docs/TESTING_STRATEGY.md)** - Comprehensive testing approach and validation
@@ -647,6 +695,7 @@ Comprehensive documentation available in the `docs/` directory:
 - **[Indicative Planning](docs/INDICATIVE_PLANNING.md)** - Development roadmap and milestones
 
 ### Advanced Features
+
 - **[OAuth Guide](docs/OAUTH_GUIDE.md)** - OAuth2/OIDC authentication setup
 - **[Encryption Guide](docs/ENCRYPTION_GUIDE.md)** - Data encryption implementation
 - **[FHIR Guide](docs/FHIR_GUIDE.md)** - FHIR interoperability guide
@@ -655,6 +704,7 @@ Comprehensive documentation available in the `docs/` directory:
 - **[Integration Plan](docs/INTEGRATION_PLAN.md)** - System integration guide
 
 ### Operations & Maintenance
+
 - **[Incident Response Playbook](docs/INCIDENT_RESPONSE.md)** - Step-by-step incident handling procedures
 - **[Operations Runbook](docs/OPERATIONS_RUNBOOK.md)** - Standard operating procedures and troubleshooting
 
@@ -663,6 +713,7 @@ Comprehensive documentation available in the `docs/` directory:
 A comprehensive analysis of this repository is available in [REPOSITORY_ANALYSIS_REPORT.md](REPOSITORY_ANALYSIS_REPORT.md).
 
 **Analysis Coverage:**
+
 - Repository structure and architecture assessment
 - Code quality and best practices review
 - Testing coverage and quality evaluation
@@ -675,15 +726,15 @@ A comprehensive analysis of this repository is available in [REPOSITORY_ANALYSIS
 
 ## 📄 License
 
-KeneyApp is proprietary software owned by **ISDATA Consulting**.  
-Unauthorized copying, modification, or distribution of this software is prohibited.  
+KeneyApp is proprietary software owned by **ISDATA Consulting**.
+Unauthorized copying, modification, or distribution of this software is prohibited.
 
-For licensing or partnership inquiries, please contact: **contact@isdataconsulting.com**
+For licensing or partnership inquiries, please contact: **<contact@isdataconsulting.com>**
 
 ## 📞 Support
 
-For technical support or questions, please contact:  
-📧 **contact@isdataconsulting.com**
+For technical support or questions, please contact:
+📧 **<contact@isdataconsulting.com>**
 
 ---
 

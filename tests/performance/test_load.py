@@ -55,7 +55,7 @@ class AuthenticatedTaskSet(TaskSet):
     def authenticate(self) -> bool:
         """
         Authenticate and obtain JWT access token.
-        
+
         Returns:
             bool: True if authentication successful, False otherwise
         """
@@ -73,7 +73,9 @@ class AuthenticatedTaskSet(TaskSet):
                 self.access_token = data.get("access_token")
                 return True
             else:
-                print(f"Authentication failed: {response.status_code} - {response.text}")
+                print(
+                    f"Authentication failed: {response.status_code} - {response.text}"
+                )
                 return False
         except Exception as e:
             print(f"Authentication error: {e}")
@@ -90,7 +92,7 @@ class AuthenticatedTaskSet(TaskSet):
 class PatientTasks(AuthenticatedTaskSet):
     """
     Patient management tasks - simulates typical patient operations.
-    
+
     Weight distribution:
     - 70% list/read operations (most common in healthcare)
     - 20% create operations
@@ -152,7 +154,9 @@ class PatientTasks(AuthenticatedTaskSet):
             "address": "123 Test Street",
             "medical_history": "Test medical history",
             "allergies": "None",
-            "blood_group": random.choice(["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]),
+            "blood_group": random.choice(
+                ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]
+            ),
         }
         self.client.post(
             "/api/v1/patients/",
@@ -182,7 +186,7 @@ class PatientTasks(AuthenticatedTaskSet):
 class MessageTasks(AuthenticatedTaskSet):
     """
     Messaging tasks - simulates secure patient-doctor communication (v3.0 feature).
-    
+
     Weight distribution:
     - 60% read operations (checking messages)
     - 30% send operations (replying/new messages)
@@ -259,12 +263,12 @@ class MessageTasks(AuthenticatedTaskSet):
 class DocumentTasks(AuthenticatedTaskSet):
     """
     Document management tasks - simulates medical document operations (v3.0 feature).
-    
+
     Weight distribution:
     - 50% list/view operations
     - 30% upload operations
     - 20% metadata/search operations
-    
+
     Note: Upload tests use small dummy files for performance testing.
     """
 
@@ -302,25 +306,31 @@ class DocumentTasks(AuthenticatedTaskSet):
     def upload_document(self):
         """
         Upload a document (simulated with small test file).
-        
+
         Note: Uses multipart/form-data with dummy PDF content.
         In production, test with realistic file sizes.
         """
         # Create small dummy PDF-like content
         dummy_content = b"%PDF-1.4\n%Test document for performance testing\n%%EOF"
-        
+
         files = {
-            "file": (f"test_doc_{random.randint(1000, 9999)}.pdf", dummy_content, "application/pdf"),
+            "file": (
+                f"test_doc_{random.randint(1000, 9999)}.pdf",
+                dummy_content,
+                "application/pdf",
+            ),
         }
         data = {
             "patient_id": str(random.randint(1, 50)),
-            "document_type": random.choice(["prescription", "lab_result", "imaging", "consultation_note"]),
+            "document_type": random.choice(
+                ["prescription", "lab_result", "imaging", "consultation_note"]
+            ),
             "description": "Performance test document",
         }
-        
+
         # Note: Remove Content-Type header for multipart/form-data
         headers = {"Authorization": f"Bearer {self.access_token}"}
-        
+
         self.client.post(
             "/api/v1/documents/upload",
             headers=headers,
@@ -347,32 +357,32 @@ class DocumentTasks(AuthenticatedTaskSet):
 class MixedWorkloadUser(HttpUser):
     """
     Simulates realistic mixed workload with multiple user behaviors.
-    
+
     This user performs a combination of patient, messaging, and document operations
     with realistic timing between requests.
-    
+
     Target load: 100 concurrent users with 10 users/sec spawn rate
     """
 
     wait_time = between(1, 3)  # Wait 1-3 seconds between tasks
-    
+
     tasks = {
-        PatientTasks: 5,    # 50% weight - patients are most accessed
-        MessageTasks: 3,    # 30% weight - messaging is frequent
-        DocumentTasks: 2,   # 20% weight - documents less frequent
+        PatientTasks: 5,  # 50% weight - patients are most accessed
+        MessageTasks: 3,  # 30% weight - messaging is frequent
+        DocumentTasks: 2,  # 20% weight - documents less frequent
     }
 
 
 class ReadHeavyUser(HttpUser):
     """
     Simulates users performing mostly read operations.
-    
+
     Use this for testing read-heavy scenarios (e.g., doctors reviewing records).
     Run with: locust -f test_load.py ReadHeavyUser --host=http://localhost:8000
     """
 
     wait_time = between(0.5, 2)
-    
+
     tasks = {
         PatientTasks: 6,
         MessageTasks: 3,
@@ -383,13 +393,13 @@ class ReadHeavyUser(HttpUser):
 class WriteHeavyUser(HttpUser):
     """
     Simulates users performing write-intensive operations.
-    
+
     Use this for testing write performance (e.g., admission desk, document uploads).
     Run with: locust -f test_load.py WriteHeavyUser --host=http://localhost:8000
     """
 
     wait_time = between(2, 5)  # Longer wait for write operations
-    
+
     tasks = {
         PatientTasks: 3,
         MessageTasks: 3,
@@ -401,11 +411,11 @@ class WriteHeavyUser(HttpUser):
 class KeneyAppUser(HttpUser):
     """
     Default user class for general load testing.
-    
+
     This is an alias for MixedWorkloadUser and will be used when running:
     locust -f tests/performance/test_load.py --host=http://localhost:8000
     """
-    
+
     wait_time = between(1, 3)
     tasks = {
         PatientTasks: 5,

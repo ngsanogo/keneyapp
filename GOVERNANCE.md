@@ -8,13 +8,14 @@ This document outlines the governance structure and decision-making processes fo
 
 - **Owner**: ISDATA Consulting
 - **License**: Proprietary (See [LICENSE](LICENSE))
-- **Contact**: contact@isdataconsulting.com
+- **Contact**: <contact@isdataconsulting.com>
 
 ## Project Structure
 
 ### Maintainers
 
 Project maintainers are ISDATA Consulting team members responsible for:
+
 - Reviewing and merging pull requests
 - Managing releases and versioning
 - Triaging and prioritizing issues
@@ -24,6 +25,7 @@ Project maintainers are ISDATA Consulting team members responsible for:
 ### Contributors
 
 Contributors are individuals who:
+
 - Submit pull requests
 - Report issues and bugs
 - Participate in discussions
@@ -35,14 +37,16 @@ All contributions must follow our [Contributing Guide](CONTRIBUTING.md) and [Cod
 ## Decision-Making Process
 
 ### 1. Minor Changes
+
 - **Examples**: Bug fixes, documentation updates, small improvements
-- **Process**: 
+- **Process**:
   - Submit a pull request
   - Requires 1 maintainer approval
   - Automated tests must pass
   - Can be merged directly after approval
 
 ### 2. Major Changes
+
 - **Examples**: New features, breaking changes, architectural modifications
 - **Process**:
   - Open an issue first to discuss the proposal
@@ -53,6 +57,7 @@ All contributions must follow our [Contributing Guide](CONTRIBUTING.md) and [Cod
   - Final decision by project owner
 
 ### 3. Security Issues
+
 - **Process**:
   - Follow [Security Policy](SECURITY.md)
   - Report privately to security team
@@ -73,7 +78,7 @@ graph LR
     G --> H[Deploy]
 ```
 
-### Steps:
+### Steps
 
 1. **Fork and Clone**: Fork the repository and create a feature branch
 2. **Develop**: Make your changes following our coding standards
@@ -160,7 +165,7 @@ We use GitHub labels to categorize issues:
 - **GitHub Issues**: Bug reports, feature requests
 - **GitHub Discussions**: Questions, general discussions
 - **Pull Requests**: Code review, technical discussions
-- **Email**: contact@isdataconsulting.com (business inquiries)
+- **Email**: <contact@isdataconsulting.com> (business inquiries)
 
 ### Response Times
 

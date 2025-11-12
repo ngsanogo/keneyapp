@@ -85,22 +85,23 @@ git push origin release/v2.1.0
   - `app/__init__.py` or `app/core/config.py`
   - `frontend/package.json`
   - `docker-compose.yml` (if needed)
-  
+
 - [ ] Update CHANGELOG.md:
+
   ```markdown
   ## [2.1.0] - 2025-11-15
-  
+
   ### Added
   - New feature X
   - New feature Y
-  
+
   ### Changed
   - Updated component Z
-  
+
   ### Fixed
   - Bug fix A
   - Bug fix B
-  
+
   ### Security
   - Security patch C
   ```
@@ -112,26 +113,28 @@ git push origin release/v2.1.0
   - Migration guides (for breaking changes)
 
 - [ ] Run comprehensive tests:
+
   ```bash
   # Backend tests
   pytest --cov=app tests/
-  
+
   # Frontend tests
   cd frontend && npm test
-  
+
   # Integration tests
   docker-compose up -d
   pytest tests/test_smoke.py
   ```
 
 - [ ] Security scan:
+
   ```bash
   # Python dependencies
   pip-audit
-  
+
   # Frontend dependencies
   cd frontend && npm audit
-  
+
   # Code scanning
   # (Runs automatically in CI)
   ```
@@ -145,8 +148,9 @@ git push origin release/v2.1.0
   - Appointment scheduling
   - Prescription handling
   - Dashboard functionality
-  
+
 - [ ] Load testing (for major releases):
+
   ```bash
   # Run performance tests
   pytest tests/test_performance.py
@@ -431,6 +435,7 @@ alembic downgrade <previous_revision>
 - **Older versions**: End of life, no updates
 
 Example:
+
 - v2.x.x: Fully supported
 - v1.x.x: Security patches only
 - v0.x.x: No longer supported
@@ -522,5 +527,5 @@ For critical security issues:
 
 ---
 
-**Last Updated**: November 2025  
+**Last Updated**: November 2025
 Made with ❤️ by ISDATA Consulting

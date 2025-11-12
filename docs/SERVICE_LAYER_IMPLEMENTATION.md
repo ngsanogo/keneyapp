@@ -1,6 +1,6 @@
 # Service Layer Implementation Summary
 
-**Date**: November 5, 2025  
+**Date**: November 5, 2025
 **Status**: Phase 1 Complete - Service Layer Created
 
 ---
@@ -12,9 +12,11 @@
 Created three core service modules following patterns from GNU Health and ERPNext:
 
 #### **`app/services/patient_service.py`** (204 lines)
+
 **Purpose**: Centralize patient CRUD operations and business logic
 
 **Methods**:
+
 - `get_by_id()` - Retrieve patient with tenant isolation
 - `get_by_email()` - Find patient by email
 - `list_patients()` - Paginated patient listing
@@ -26,6 +28,7 @@ Created three core service modules following patterns from GNU Health and ERPNex
 - `search_patients()` - Search by name or email
 
 **Key Features**:
+
 - ✅ Tenant isolation enforced
 - ✅ Duplicate email detection
 - ✅ Domain-specific exceptions (PatientNotFoundError, DuplicateResourceError)
@@ -35,9 +38,11 @@ Created three core service modules following patterns from GNU Health and ERPNex
 ---
 
 #### **`app/services/lab_validation.py`** (250 lines)
+
 **Purpose**: Implement lab test validation and workflow state management
 
 **Methods**:
+
 - `calculate_age_years()` - Convert birth date to age
 - `validate_test_for_patient()` - Check age/gender constraints
 - `validate_state_transition()` - Enforce workflow rules
@@ -48,6 +53,7 @@ Created three core service modules following patterns from GNU Health and ERPNex
 - `validate_criterion_value()` - Check if value is within normal range
 
 **Key Features**:
+
 - ✅ Age constraint validation (min_age_years, max_age_years)
 - ✅ Gender constraint validation (m/f)
 - ✅ State transition enforcement (draft → pending_review → reviewed → validated)
@@ -56,6 +62,7 @@ Created three core service modules following patterns from GNU Health and ERPNex
 - ✅ Normal range validation for lab criteria
 
 **State Machine**:
+
 ```
 DRAFT → PENDING_REVIEW → REVIEWED → VALIDATED
          ↓                  ↓
@@ -65,9 +72,11 @@ DRAFT → PENDING_REVIEW → REVIEWED → VALIDATED
 ---
 
 #### **`app/services/appointment_scheduler.py`** (315 lines)
+
 **Purpose**: Handle appointment scheduling with conflict detection
 
 **Methods**:
+
 - `get_by_id()` - Retrieve appointment with tenant isolation
 - `check_doctor_availability()` - Detect overlapping appointments for doctor
 - `check_patient_availability()` - Detect patient double-booking
@@ -78,6 +87,7 @@ DRAFT → PENDING_REVIEW → REVIEWED → VALIDATED
 - `get_patient_appointments()` - List all patient appointments
 
 **Key Features**:
+
 - ✅ Overlap detection algorithm: `(start < other_end) AND (end > other_start)`
 - ✅ Validates both doctor AND patient availability
 - ✅ Excludes cancelled/no-show appointments from conflict checks
@@ -89,9 +99,11 @@ DRAFT → PENDING_REVIEW → REVIEWED → VALIDATED
 ### 2. Test Suite ✅
 
 #### **`tests/test_patient_service.py`** (350+ lines)
+
 Comprehensive test coverage for patient service:
 
 **Tests Implemented**:
+
 - ✅ `test_create_patient_success` - Happy path creation
 - ✅ `test_create_patient_duplicate_email` - Duplicate detection
 - ✅ `test_get_patient_by_id` - Retrieval
@@ -112,6 +124,7 @@ Comprehensive test coverage for patient service:
 ## Architecture Improvements
 
 ### Before (Router-Heavy)
+
 ```python
 # app/routers/patients.py (old pattern)
 @router.post("/")
@@ -121,12 +134,12 @@ def create_patient(patient_data: PatientCreate, db: Session, current_user: User)
         existing = db.query(Patient).filter(...).first()
         if existing:
             raise HTTPException(400, "Email already registered")
-    
+
     # Business logic HERE
     db_patient = Patient(**patient_data.model_dump(), tenant_id=current_user.tenant_id)
     db.add(db_patient)
     db.commit()
-    
+
     # Caching HERE
     # Audit logging HERE
     # Metrics HERE
@@ -134,6 +147,7 @@ def create_patient(patient_data: PatientCreate, db: Session, current_user: User)
 ```
 
 **Problems**:
+
 - ❌ Business logic mixed with HTTP concerns
 - ❌ Hard to test (requires FastAPI TestClient)
 - ❌ Code duplication across endpoints
@@ -142,6 +156,7 @@ def create_patient(patient_data: PatientCreate, db: Session, current_user: User)
 ---
 
 ### After (Service-Based)
+
 ```python
 # app/services/patient_service.py (new pattern)
 class PatientService:
@@ -150,7 +165,7 @@ class PatientService:
             existing = self.get_by_email(patient_data.email, tenant_id)
             if existing:
                 raise DuplicateResourceError("Patient", patient_data.email)
-        
+
         patient = Patient(**patient_data.model_dump(), tenant_id=tenant_id)
         self.db.add(patient)
         self.db.flush()
@@ -162,7 +177,7 @@ def create_patient(patient_data: PatientCreate, db: Session, current_user: User)
     service = PatientService(db)
     patient = service.create_patient(patient_data, current_user.tenant_id)
     db.commit()
-    
+
     # HTTP concerns ONLY
     log_audit_event(...)
     cache_set(...)
@@ -171,6 +186,7 @@ def create_patient(patient_data: PatientCreate, db: Session, current_user: User)
 ```
 
 **Benefits**:
+
 - ✅ Business logic isolated and testable
 - ✅ Service methods reusable (CLI, background tasks, GraphQL)
 - ✅ Domain-specific exceptions
@@ -181,17 +197,20 @@ def create_patient(patient_data: PatientCreate, db: Session, current_user: User)
 ## Benefits Achieved
 
 ### 1. **Separation of Concerns**
+
 - **Routers**: HTTP handling, authentication, caching, metrics
 - **Services**: Business logic, validation, workflow orchestration
 - **Models**: Data structure and relationships
 - **Schemas**: Input/output validation
 
 ### 2. **Testability**
+
 - Services can be tested with just a database session (no HTTP client)
 - Mock-free testing (real database operations in memory)
 - Faster test execution (no HTTP overhead)
 
 ### 3. **Reusability**
+
 - Services can be called from:
   - REST API endpoints
   - GraphQL resolvers
@@ -200,11 +219,13 @@ def create_patient(patient_data: PatientCreate, db: Session, current_user: User)
   - Jupyter notebooks for data analysis
 
 ### 4. **Domain-Driven Design**
+
 - Custom exception hierarchy reflects business rules
 - Clear error messages for users
 - Type-safe with Pydantic models
 
 ### 5. **Maintainability**
+
 - Business logic changes don't require touching routers
 - Easier to onboard new developers (clear structure)
 - Less code duplication
@@ -214,17 +235,20 @@ def create_patient(patient_data: PatientCreate, db: Session, current_user: User)
 ## Patterns Applied from tmp Analysis
 
 ### From GNU Health (Tryton)
+
 - ✅ **State machines**: LabResultState with validation
 - ✅ **Age/gender constraints**: Validates test appropriateness
 - ✅ **Workflow audit**: Tracks who requested/reviewed/validated
 - ✅ **Domain models**: Rich models with business methods
 
 ### From ERPNext/Frappe
+
 - ✅ **Service layer**: Centralized business logic (like Frappe Controllers)
 - ✅ **Custom exceptions**: Domain-specific error hierarchy
 - ✅ **Validation hooks**: Pre-flight checks before database operations
 
 ### From Thalamus
+
 - ✅ **Access control**: validate_patient_access() for cross-tenant checks
 - ✅ **Resource isolation**: Tenant filtering in all queries
 
@@ -233,6 +257,7 @@ def create_patient(patient_data: PatientCreate, db: Session, current_user: User)
 ## Next Steps (Priority Order)
 
 ### Immediate (Sprint 1 - Current)
+
 1. **Refactor routers to use services**
    - Update `app/routers/patients.py` to use PatientService
    - Update `app/routers/appointments.py` to use AppointmentSchedulerService
@@ -251,6 +276,7 @@ def create_patient(patient_data: PatientCreate, db: Session, current_user: User)
 ---
 
 ### Short-term (Sprint 2)
+
 4. **GraphQL authentication**
    - Add RBAC to GraphQL endpoints
    - Use FastAPI dependencies for auth
@@ -269,6 +295,7 @@ def create_patient(patient_data: PatientCreate, db: Session, current_user: User)
 ---
 
 ### Medium-term (Sprint 3-4)
+
 7. **Advanced lab features**
    - Create LabWorkflowService for complex transitions
    - Add lab result report generation
@@ -289,16 +316,19 @@ def create_patient(patient_data: PatientCreate, db: Session, current_user: User)
 ## Code Quality Metrics
 
 ### Services Created
+
 - **3 services**: patient, lab_validation, appointment_scheduler
 - **~770 lines** of business logic extracted from routers
 - **15+ methods** per service (average)
 
 ### Tests Created
+
 - **1 test file** for patient_service (more to come)
 - **12 test cases** covering happy paths and edge cases
 - **~350 lines** of test code
 
 ### Exceptions Defined
+
 - **25+ custom exceptions** in `app/exceptions.py`
 - Organized by HTTP status code (404, 409, 422, 403, 502)
 - Helper functions for common patterns
@@ -349,7 +379,7 @@ Phase 1 of the service layer migration is **complete**. The foundation is solid:
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: November 5, 2025  
-**Author**: Implementation by GitHub Copilot  
+**Document Version**: 1.0
+**Last Updated**: November 5, 2025
+**Author**: Implementation by GitHub Copilot
 **Status**: Ready for code review and router refactoring

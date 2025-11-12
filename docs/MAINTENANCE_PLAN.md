@@ -39,6 +39,7 @@ KeneyApp follows a comprehensive maintenance and support strategy to ensure syst
 #### 1. Support Engineer (Tier 1)
 
 **Responsibilities**:
+
 - Answer user questions via email/chat
 - Triage incoming tickets
 - Provide basic troubleshooting
@@ -46,6 +47,7 @@ KeneyApp follows a comprehensive maintenance and support strategy to ensure syst
 - Escalate complex problems
 
 **Skills Required**:
+
 - Healthcare domain knowledge
 - KeneyApp feature knowledge
 - Customer service skills
@@ -56,6 +58,7 @@ KeneyApp follows a comprehensive maintenance and support strategy to ensure syst
 #### 2. Technical Support Engineer (Tier 2)
 
 **Responsibilities**:
+
 - Investigate reported bugs
 - Reproduce issues in staging
 - Analyze logs and metrics
@@ -64,6 +67,7 @@ KeneyApp follows a comprehensive maintenance and support strategy to ensure syst
 - Update documentation
 
 **Skills Required**:
+
 - Advanced KeneyApp knowledge
 - API understanding
 - Database query skills
@@ -75,6 +79,7 @@ KeneyApp follows a comprehensive maintenance and support strategy to ensure syst
 #### 3. DevOps Engineer (Tier 3)
 
 **Responsibilities**:
+
 - System monitoring and alerting
 - Infrastructure maintenance
 - Deployment management
@@ -83,6 +88,7 @@ KeneyApp follows a comprehensive maintenance and support strategy to ensure syst
 - Backup verification
 
 **Skills Required**:
+
 - Kubernetes administration
 - PostgreSQL management
 - Prometheus/Grafana
@@ -94,6 +100,7 @@ KeneyApp follows a comprehensive maintenance and support strategy to ensure syst
 #### 4. Software Developer (Tier 3)
 
 **Responsibilities**:
+
 - Bug fixes
 - Feature development
 - Code reviews
@@ -102,6 +109,7 @@ KeneyApp follows a comprehensive maintenance and support strategy to ensure syst
 - Technical documentation
 
 **Skills Required**:
+
 - Python/FastAPI expertise
 - React/TypeScript proficiency
 - Healthcare standards (FHIR, ICD-11)
@@ -132,7 +140,7 @@ Add to sprint backlog → Fix in next release
 
 ### Support Channels
 
-1. **Email Support**: support@keneyapp.com
+1. **Email Support**: <support@keneyapp.com>
    - Response time: < 4 hours (business hours)
    - For non-urgent issues
 
@@ -144,12 +152,12 @@ Add to sprint backlog → Fix in next release
    - Response time: Immediate
    - For urgent/critical issues
 
-4. **Status Page**: https://status.keneyapp.com
+4. **Status Page**: <https://status.keneyapp.com>
    - Real-time system status
    - Scheduled maintenance announcements
    - Incident updates
 
-5. **Knowledge Base**: https://help.keneyapp.com
+5. **Knowledge Base**: <https://help.keneyapp.com>
    - Self-service documentation
    - Video tutorials
    - FAQs
@@ -434,18 +442,21 @@ Add to sprint backlog → Fix in next release
 ### Log Management
 
 **Log Aggregation**:
+
 - Structured JSON logs
 - Centralized logging (planned: ELK stack)
 - Correlation ID tracking
 - Log retention: 90 days (hot), 7 years (cold archive for audit)
 
 **Log Levels**:
+
 - **ERROR**: Application errors requiring attention
 - **WARNING**: Potential issues to monitor
 - **INFO**: Important events (deployments, config changes)
 - **DEBUG**: Detailed information for troubleshooting (dev only)
 
 **Log Monitoring**:
+
 - Real-time error tracking
 - Failed authentication attempts
 - Rate limit hits
@@ -455,6 +466,7 @@ Add to sprint backlog → Fix in next release
 ### User Activity Monitoring
 
 **Tracked Metrics**:
+
 - Daily active users (DAU)
 - Monthly active users (MAU)
 - Feature usage statistics
@@ -464,16 +476,17 @@ Add to sprint backlog → Fix in next release
 
 **Analytics Tool**: Matomo (privacy-focused, GDPR-compliant)
 
-**Dashboard**: https://analytics.keneyapp.internal
+**Dashboard**: <https://analytics.keneyapp.internal>
 
 ## Update Management
 
 ### Dependency Updates
 
 **Security Updates** (Critical):
+
 - **Detection**: Dependabot alerts, pip-audit, npm audit
 - **Response Time**: < 24 hours
-- **Process**: 
+- **Process**:
   1. Review vulnerability details
   2. Update dependency version
   3. Test in staging
@@ -481,6 +494,7 @@ Add to sprint backlog → Fix in next release
   5. Verify fix applied
 
 **Regular Updates** (Monthly):
+
 - **Python packages**: Update minor/patch versions
 - **Node packages**: Update minor/patch versions
 - **System packages**: Update via base image rebuild
@@ -488,6 +502,7 @@ Add to sprint backlog → Fix in next release
 - **Deployment**: Standard release process
 
 **Major Updates** (Quarterly):
+
 - **Planning**: Evaluate breaking changes
 - **Testing**: Extensive integration testing
 - **Migration**: Provide migration guide if needed
@@ -496,11 +511,13 @@ Add to sprint backlog → Fix in next release
 ### System Updates
 
 **Operating System Updates**:
+
 - **Container base images**: Monthly rebuild with latest patches
 - **Kubernetes**: Update every 3 months (following K8s release cycle)
 - **Database**: PostgreSQL minor updates quarterly
 
 **Infrastructure Updates**:
+
 - **Cloud provider updates**: Automated with maintenance windows
 - **Load balancer configuration**: As needed
 - **SSL certificates**: Auto-renewal via cert-manager
@@ -508,12 +525,14 @@ Add to sprint backlog → Fix in next release
 ### Application Updates
 
 **Hotfix Releases** (Critical bugs):
+
 ```
 Bug reported → Fix developed → Tests pass → Deploy to production
 Timeline: 2-4 hours for critical issues
 ```
 
 **Patch Releases** (Bug fixes):
+
 ```
 Bugs accumulated → Weekly release → Staging → Production
 Timeline: 1 week cadence
@@ -521,6 +540,7 @@ Version: X.Y.Z → X.Y.(Z+1)
 ```
 
 **Minor Releases** (Features):
+
 ```
 Features developed → Monthly release → Beta → Production
 Timeline: 1 month cadence
@@ -528,6 +548,7 @@ Version: X.Y.0 → X.(Y+1).0
 ```
 
 **Major Releases** (Breaking changes):
+
 ```
 Major features → Long beta → Production with migration
 Timeline: Annually or as needed
@@ -539,12 +560,14 @@ Version: X.0.0 → (X+1).0.0
 ### Living Documentation
 
 **Technical Documentation**:
+
 - Updated with every code change
 - Architecture Decision Records (ADRs) for major decisions
 - API documentation auto-generated from code
 - Runbooks updated after incidents
 
 **User Documentation**:
+
 - Updated with every feature release
 - Video tutorials for major features
 - FAQs based on support tickets
@@ -584,17 +607,20 @@ Version: X.0.0 → (X+1).0.0
 ### Documentation Review Cycle
 
 **Monthly**:
+
 - Review and update FAQs
 - Add new troubleshooting guides
 - Update screenshots if UI changed
 
 **Quarterly**:
+
 - Full documentation audit
 - Remove outdated information
 - Improve clarity based on feedback
 - Add missing documentation
 
 **Annually**:
+
 - Complete documentation overhaul
 - Restructure if needed
 - Professional editing
@@ -647,6 +673,7 @@ Examples:
 ### Release Notes
 
 **Public Release Notes** (for users):
+
 - What's new (features)
 - Improvements
 - Bug fixes
@@ -654,6 +681,7 @@ Examples:
 - Migration guide (if needed)
 
 **Technical Release Notes** (for developers):
+
 - API changes
 - Database migrations
 - Breaking changes
@@ -663,16 +691,19 @@ Examples:
 ### Version Compatibility
 
 **API Versioning**:
+
 - URL-based: `/api/v1/`, `/api/v2/`
 - Backward compatibility maintained for 1 year
 - Deprecation notices 6 months in advance
 
 **Database Compatibility**:
+
 - Migrations must be backward compatible
 - Support rollback for at least 3 versions
 - Data migrations separate from schema changes
 
 **Client Compatibility**:
+
 - Frontend auto-updates (web application)
 - Mobile apps support last 3 major versions
 - API clients support current + previous version
@@ -682,6 +713,7 @@ Examples:
 ### Support Ticket Management
 
 **Ticket Lifecycle**:
+
 ```
 New → Triaged → In Progress → Resolved → Closed
                     ↓
@@ -698,6 +730,7 @@ New → Triaged → In Progress → Resolved → Closed
 | Low | 24 hours | 7 days |
 
 **Priority Definitions**:
+
 - **Critical**: System down, data loss, security breach
 - **High**: Core functionality broken, multiple users affected
 - **Medium**: Feature not working, workaround available
@@ -706,6 +739,7 @@ New → Triaged → In Progress → Resolved → Closed
 ### Knowledge Base
 
 **Categories**:
+
 1. Getting Started
 2. User Management
 3. Patient Management
@@ -718,6 +752,7 @@ New → Triaged → In Progress → Resolved → Closed
 10. API Integration
 
 **Content Types**:
+
 - Step-by-step guides
 - Video tutorials
 - Screenshots and diagrams
@@ -725,6 +760,7 @@ New → Triaged → In Progress → Resolved → Closed
 - Best practices
 
 **Maintenance**:
+
 - Add article for every new feature
 - Update based on support tickets
 - Regular review for accuracy
@@ -755,6 +791,7 @@ New → Triaged → In Progress → Resolved → Closed
    - Error tracking
 
 **Feedback Processing**:
+
 - Weekly review of feedback
 - Prioritize in product backlog
 - Communicate decisions to users
@@ -765,6 +802,7 @@ New → Triaged → In Progress → Resolved → Closed
 ### Feature Request Management
 
 **Collection**:
+
 - In-app feature request form
 - Support tickets
 - User interviews
@@ -772,6 +810,7 @@ New → Triaged → In Progress → Resolved → Closed
 - Market research
 
 **Prioritization Framework** (RICE):
+
 - **R**each: How many users affected?
 - **I**mpact: How much value delivered?
 - **C**onfidence: How certain are we?
@@ -780,6 +819,7 @@ New → Triaged → In Progress → Resolved → Closed
 **Score** = (Reach × Impact × Confidence) / Effort
 
 **Roadmap Planning**:
+
 - **Now** (0-3 months): In development
 - **Next** (3-6 months): Planned
 - **Later** (6-12 months): Under consideration
@@ -788,6 +828,7 @@ New → Triaged → In Progress → Resolved → Closed
 ### Technical Debt Management
 
 **Identification**:
+
 - Code review comments
 - TODO/FIXME comments in code
 - Performance bottlenecks
@@ -795,12 +836,14 @@ New → Triaged → In Progress → Resolved → Closed
 - Test coverage gaps
 
 **Prioritization**:
+
 - **Critical**: Blocking new features or causing bugs
 - **High**: Slowing development or affecting performance
 - **Medium**: Maintenance burden but manageable
 - **Low**: Nice to have improvements
 
 **Allocation**:
+
 - 20% of each sprint dedicated to tech debt
 - Major refactoring in quarterly planning
 - Document architectural decisions (ADRs)
@@ -808,6 +851,7 @@ New → Triaged → In Progress → Resolved → Closed
 ### Technology Evolution
 
 **Evaluation Criteria**:
+
 - Solves current pain points
 - Active community and support
 - Security and compliance fit
@@ -816,6 +860,7 @@ New → Triaged → In Progress → Resolved → Closed
 - Migration path clear
 
 **Adoption Process**:
+
 1. Research and proof-of-concept
 2. Team evaluation and vote
 3. Pilot in non-critical feature
@@ -831,21 +876,25 @@ New → Triaged → In Progress → Resolved → Closed
 **Key Performance Indicators**:
 
 **System Reliability**:
+
 - Uptime: 99.9% target
 - MTBF (Mean Time Between Failures): > 30 days
 - MTTR (Mean Time To Recovery): < 1 hour
 
 **Performance**:
+
 - P95 response time: < 200ms
 - P99 response time: < 500ms
 - Database query time: < 50ms average
 
 **User Satisfaction**:
+
 - NPS score: > 50
 - User retention: > 80% after 90 days
 - Support ticket resolution rate: > 95%
 
 **Development Velocity**:
+
 - Deployment frequency: Weekly
 - Lead time for changes: < 1 week
 - Change failure rate: < 5%
@@ -882,23 +931,27 @@ New → Triaged → In Progress → Resolved → Closed
 ### Regular Reviews
 
 **Weekly Team Sync**:
+
 - Review previous week
 - Upcoming priorities
 - Blockers and dependencies
 - Knowledge sharing
 
 **Monthly Retrospective**:
+
 - What went well
 - What could be improved
 - Action items for next month
 
 **Quarterly Planning**:
+
 - Review quarterly goals
 - Plan next quarter
 - Technology updates
 - Team training needs
 
 **Annual Strategy**:
+
 - Review annual performance
 - Set next year goals
 - Budget planning
@@ -907,18 +960,21 @@ New → Triaged → In Progress → Resolved → Closed
 ### Training & Knowledge Sharing
 
 **New Team Member Onboarding**:
+
 - Week 1: Environment setup, codebase tour
 - Week 2: First small bug fix
 - Week 3: Feature development (paired)
 - Week 4: On-call shadow
 
 **Ongoing Training**:
+
 - Monthly tech talks (team members present)
 - Quarterly external training
 - Conference attendance (1-2 per year)
 - Certification support (AWS, Kubernetes, etc.)
 
 **Knowledge Sharing**:
+
 - Weekly team demos
 - Documentation contributions
 - Code review learning
@@ -942,6 +998,7 @@ The plan balances reactive support (bug fixes, user help) with proactive mainten
 ### Continuous Improvement Commitment
 
 We commit to:
+
 - Regular user feedback integration
 - Monthly feature releases
 - Quarterly performance reviews

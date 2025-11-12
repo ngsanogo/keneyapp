@@ -3,6 +3,7 @@
 Use this checklist before opening a PR or committing automated changes.
 
 ## Functional
+
 - [ ] Tenancy: All DB reads/writes are scoped by `tenant_id` (from token/current user).
 - [ ] RBAC: Routes/mutations guarded with `require_roles([...])` or `ensure_roles(...)`.
 - [ ] Rate limits: Endpoints decorated with `@limiter.limit("X/minute")` appropriately.
@@ -13,6 +14,7 @@ Use this checklist before opening a PR or committing automated changes.
 - [ ] GraphQL: Resolvers enforce tenancy, RBAC, and use `get_session(info)`; mutations log audit events.
 
 ## Quality Gates
+
 - [ ] Backend: `make lint` passes (flake8, black --check, mypy non-blocking).
 - [ ] Backend tests: `pytest -m "not smoke"` pass locally.
 - [ ] Frontend: `npm run lint` and `npm test -- --watchAll=false` pass if touched.
@@ -20,11 +22,13 @@ Use this checklist before opening a PR or committing automated changes.
 - [ ] Docs: Updated `.github/copilot-instructions.md` or `docs/patterns/*` if patterns changed.
 
 ## Safety
+
 - [ ] No secrets or tokens in code or logs.
 - [ ] CORS and security headers unchanged unless intentional.
 - [ ] Rate limits remain reasonable for the endpoint risk.
 
 Refer to:
+
 - Backend patterns: `app/routers/patients.py`, `app/core/*`
 - GraphQL patterns: `app/graphql/schema.py`
 - Caching: `app/core/cache.py`, `docs/patterns/cache_keys.md`

@@ -11,7 +11,8 @@ Tous les scénarios de test E2E demandés ont été implémentés avec succès d
 ## 🎯 Scénarios Implémentés
 
 ### ✅ 1. La connexion à un profil
-**Fichier**: `tests/test_e2e_integration.py`  
+
+**Fichier**: `tests/test_e2e_integration.py`
 **Classe**: `TestE2ECompleteUserJourneys`
 
 - ✅ Connexion Admin
@@ -22,10 +23,11 @@ Tous les scénarios de test E2E demandés ont été implémentés avec succès d
 - ✅ Validation rôles et permissions
 
 **Fixture utilisée**: `authenticated_sessions` (ligne 145-213)
-- Admin: admin@example.com / admin123
-- Doctor: doctor@example.com / doctor123
-- Nurse: nurse@example.com / nurse123
-- Receptionist: receptionist@example.com / receptionist123
+
+- Admin: <admin@example.com> / admin123
+- Doctor: <doctor@example.com> / doctor123
+- Nurse: <nurse@example.com> / nurse123
+- Receptionist: <receptionist@example.com> / receptionist123
 
 ---
 
@@ -34,6 +36,7 @@ Tous les scénarios de test E2E demandés ont été implémentés avec succès d
 **Test**: `test_scenario_search_and_navigation` (ligne 976-1049)
 
 **Fonctionnalités testées**:
+
 - ✅ Recherche patients avec pagination
   - Page 1: skip=0, limit=5
   - Page 2: skip=5, limit=5
@@ -43,8 +46,9 @@ Tous les scénarios de test E2E demandés ont été implémentés avec succès d
   - Dashboard → Patients
   - Patients → Rendez-vous
   - Rendez-vous → Documents
-  
+
 **Assertions**:
+
 - ✅ Status 200 sur recherche
 - ✅ Pagination fonctionnelle
 - ✅ Résultats cohérents
@@ -53,10 +57,11 @@ Tous les scénarios de test E2E demandés ont été implémentés avec succès d
 
 ### ✅ 3. L'ajout d'un dossier patient (équivalent "article au panier")
 
-**Test**: `test_scenario_admin_complete_workflow` (ligne 734-894)  
+**Test**: `test_scenario_admin_complete_workflow` (ligne 734-894)
 **Étape 3**: Création patient
 
 **Fonctionnalités**:
+
 - ✅ Création nouveau dossier patient
 - ✅ Chiffrement données PHI (Protected Health Information)
 - ✅ Validation données obligatoires:
@@ -68,6 +73,7 @@ Tous les scénarios de test E2E demandés ont été implémentés avec succès d
 - ✅ Association au tenant
 
 **Code** (ligne 784-813):
+
 ```python
 create_payload = {
     "full_name": "Test Patient E2E",
@@ -89,10 +95,11 @@ response = requests.post(
 
 ### ✅ 4. L'enregistrement pour plus tard (documents médicaux)
 
-**Test**: `test_scenario_admin_complete_workflow`  
+**Test**: `test_scenario_admin_complete_workflow`
 **Étape 4**: Upload document médical
 
 **Fonctionnalités**:
+
 - ✅ Upload fichier PDF/image
 - ✅ Association au patient
 - ✅ Métadonnées:
@@ -102,6 +109,7 @@ response = requests.post(
 - ✅ Persistance sécurisée
 
 **Code** (ligne 820-830):
+
 ```python
 document_payload = {
     "patient_id": patient_id,
@@ -120,10 +128,11 @@ doc_response = requests.post(
 
 ### ✅ 5. L'achat (création rendez-vous)
 
-**Test**: `test_scenario_admin_complete_workflow`  
+**Test**: `test_scenario_admin_complete_workflow`
 **Étape 5**: Création rendez-vous
 
 **Fonctionnalités**:
+
 - ✅ Sélection patient
 - ✅ Choix date/heure
 - ✅ Attribution docteur
@@ -132,6 +141,7 @@ doc_response = requests.post(
 - ✅ Confirmation création
 
 **Code** (ligne 837-849):
+
 ```python
 appt_payload = {
     "patient_id": patient_id,
@@ -151,10 +161,11 @@ appt_response = requests.post(
 
 ### ✅ 6. L'enregistrement des informations (données patient - équivalent livraison/paiement)
 
-**Test**: `test_scenario_admin_complete_workflow`  
+**Test**: `test_scenario_admin_complete_workflow`
 **Étape 6**: Mise à jour informations
 
 **Fonctionnalités**:
+
 - ✅ Modification téléphone
 - ✅ Modification adresse
 - ✅ Ajout contact urgence
@@ -163,6 +174,7 @@ appt_response = requests.post(
 - ✅ Sauvegarde sécurisée avec encryption PHI
 
 **Code** (ligne 856-869):
+
 ```python
 update_payload = {
     "emergency_contact_phone": "+33987654321",
@@ -179,10 +191,11 @@ update_response = requests.put(
 
 ### ✅ 7. La confirmation (audit logs et dashboard)
 
-**Test**: `test_scenario_admin_complete_workflow`  
+**Test**: `test_scenario_admin_complete_workflow`
 **Étapes 7-8**: Vérification dashboard et audit logs
 
 **Fonctionnalités**:
+
 - ✅ Dashboard mis à jour
   - Compteur patients
   - Compteur rendez-vous
@@ -194,6 +207,7 @@ update_response = requests.put(
   - Détails changements
 
 **Code** (ligne 876-890):
+
 ```python
 # Vérification dashboard
 dashboard_response = requests.get(
@@ -211,16 +225,18 @@ assert dashboard_response.status_code == 200
 
 ### ✅ 8. La déconnexion
 
-**Test**: Tous les tests  
+**Test**: Tous les tests
 **Dernière étape**: Cleanup et déconnexion
 
 **Fonctionnalités**:
+
 - ✅ Invalidation token JWT
 - ✅ Nettoyage session
 - ✅ Suppression données test (patient créé)
 - ✅ Cleanup ressources
 
 **Code** (ligne 885-892):
+
 ```python
 # Cleanup: Delete test patient
 delete_response = requests.delete(
@@ -241,6 +257,7 @@ delete_response = requests.delete(
 **Document**: `docs/E2E_TEST_SCENARIOS.md` (400+ lignes)
 
 **Scénarios identifiés**:
+
 1. Parcours Administrateur Complet (10 étapes)
 2. Parcours Docteur - Consultation Patient (9 étapes)
 3. Recherche et Navigation Avancée (4 fonctionnalités)
@@ -254,6 +271,7 @@ delete_response = requests.delete(
 **Document**: `docs/E2E_TEST_METHODOLOGY.md` (600+ lignes)
 
 **11 phases détaillées**:
+
 1. Déterminer les scénarios
 2. Identifier les étapes
 3. Tests manuels simulés
@@ -273,6 +291,7 @@ delete_response = requests.delete(
 **Fichier**: `tests/test_e2e_integration.py` (1200+ lignes)
 
 **Classes de tests**:
+
 1. `TestE2ECompleteUserJourneys` (3 méthodes)
    - test_scenario_admin_complete_workflow
    - test_scenario_doctor_consultation_workflow
@@ -295,6 +314,7 @@ delete_response = requests.delete(
 **Document**: `docs/E2E_TEST_METHODOLOGY.md` (Phase 5)
 
 **Pipeline GitHub Actions** (exemple complet fourni):
+
 ```yaml
 name: E2E Tests
 
@@ -307,13 +327,13 @@ on:
 jobs:
   e2e-tests:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Run E2E Test Suite
         run: ./scripts/run_e2e_tests.sh
-      
+
       - name: Upload Test Results
         uses: actions/upload-artifact@v3
         with:
@@ -328,6 +348,7 @@ jobs:
 ### ✅ Augmenter la portée des tests
 
 **Couverture**:
+
 - ✅ 5 rôles utilisateurs (Admin, Doctor, Nurse, Receptionist, Super Admin)
 - ✅ 8+ endpoints API testés
 - ✅ CRUD complet (Create, Read, Update, Delete)
@@ -340,6 +361,7 @@ jobs:
 - ✅ Intégrité données
 
 **Métriques**:
+
 - Tests totaux: 185+ (155 existants + 30 E2E)
 - Couverture code: 75% (cible 85%)
 - Durée exécution: <5 minutes
@@ -349,6 +371,7 @@ jobs:
 ### ✅ Assurer le bon fonctionnement de l'application
 
 **Tests fonctionnels**:
+
 - ✅ Health checks (`/health`)
 - ✅ Validation données (Pydantic schemas)
 - ✅ Contraintes base de données (foreign keys, unique)
@@ -363,6 +386,7 @@ jobs:
 ### ✅ Réduire le temps nécessaire à la commercialisation
 
 **Optimisations**:
+
 - ✅ Tests parallèles (`pytest -n auto`)
 - ✅ Docker caching (images cachées)
 - ✅ Exécution sélective (tests modifiés seulement)
@@ -381,6 +405,7 @@ jobs:
 **Économies annuelles**: **85 000€**
 
 **Détail**:
+
 - Investissement initial: 8 500€
 - Bugs détectés tôt: 50 000€ économisés
 - Réduction support: 20 000€ économisés
@@ -428,6 +453,7 @@ jobs:
 **Tests performance** (TestE2EPerformanceAndReliability):
 
 **Cibles de performance**:
+
 - ✅ Patient List: <300ms
 - ✅ Dashboard: <500ms
 - ✅ Health Check: <100ms
@@ -435,12 +461,14 @@ jobs:
 - ✅ Toutes autres: <500ms
 
 **Tests de charge**:
+
 - ✅ 5 utilisateurs simultanés
 - ✅ Taux de succès >80%
 - ✅ Pas de dégradation performance
 - ✅ Concurrence gérée proprement
 
 **UX validée**:
+
 - ✅ Réponses rapides
 - ✅ Messages erreur clairs
 - ✅ Feedback temps réel
@@ -472,26 +500,31 @@ jobs:
 ## 🚀 Commandes d'Exécution
 
 ### Tous les scénarios
+
 ```bash
 ./scripts/run_e2e_tests.sh
 ```
 
 ### Scénarios utilisateurs complets
+
 ```bash
 pytest tests/test_e2e_integration.py::TestE2ECompleteUserJourneys -v
 ```
 
 ### Scénario admin spécifique
+
 ```bash
 pytest tests/test_e2e_integration.py::TestE2ECompleteUserJourneys::test_scenario_admin_complete_workflow -v
 ```
 
 ### Tests performance
+
 ```bash
 pytest tests/test_e2e_integration.py::TestE2EPerformanceAndReliability -v
 ```
 
 ### Tests qualité
+
 ```bash
 pytest tests/test_e2e_integration.py::TestE2EBugDetectionAndQuality -v
 ```
@@ -554,6 +587,7 @@ pytest tests/test_e2e_integration.py::TestE2EBugDetectionAndQuality -v
 L'exécution complète des tests E2E via Docker est actuellement bloquée par:
 
 **Erreur Alembic Migration**:
+
 ```
 KeyError: '015_add_lab_test_types_and_criteria'
 ```
@@ -563,6 +597,7 @@ KeyError: '015_add_lab_test_types_and_criteria'
 ### Solutions Possibles
 
 1. **Fix migrations** (recommandé):
+
    ```bash
    # Supprimer révisions problématiques
    rm alembic/versions/*015*.py
@@ -572,6 +607,7 @@ KeyError: '015_add_lab_test_types_and_criteria'
    ```
 
 2. **Utiliser init_db.py** (workaround):
+
    ```bash
    PYTHONPATH=/Users/issasanogo/GitHub/keneyapp python scripts/init_db.py
    ```
@@ -628,6 +664,7 @@ KeyError: '015_add_lab_test_types_and_criteria'
 8. ✅ La déconnexion
 
 **Plus**:
+
 - ✅ Déterminer les scénarios de test
 - ✅ Identifier les étapes de chaque scénario
 - ✅ Automatiser les tests (30+ tests)
@@ -654,6 +691,7 @@ Pour exécuter les tests:
 ## 📝 Résumé Final
 
 **Livré**:
+
 - ✅ 30+ tests E2E automatisés
 - ✅ 2200+ lignes documentation française
 - ✅ 8 scénarios complets détaillés

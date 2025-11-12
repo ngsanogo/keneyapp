@@ -170,6 +170,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_medical_codes_code_system'), table_name='medical_codes')
     op.drop_index(op.f('ix_medical_codes_id'), table_name='medical_codes')
     op.drop_table('medical_codes')
-    
+
     # Drop enum type
     op.execute('DROP TYPE codesystem')

@@ -25,6 +25,7 @@
 | **created_by** | UUID | 36 | Oui | - | Référence utilisateur | `user-uuid` |
 
 **Règles Métier** :
+
 - INS obligatoire sauf urgence (statut PROVISOIRE autorisé max 48h)
 - Détection doublons : Levenshtein(nom+prénom) < 2 ET date_naissance = → score > 85%
 - Chiffrement : nom, prenom, date_naissance, adresse, telephone, email
@@ -48,6 +49,7 @@
 | **recorded_by** | UUID | 36 | Oui | - | Référence utilisateur | `user-uuid` |
 
 **Règles Métier** :
+
 - Code SNOMED CT obligatoire (recherche dans référentiel)
 - Allergie `LIFE_THREATENING` → alerte bloquante si prescription
 - Vérification croisée avec prescriptions existantes
@@ -75,6 +77,7 @@
 | **tenant_id** | UUID | 36 | Oui | - | Référence tenant | `tenant-uuid` |
 
 **Règles Métier** :
+
 - period_end obligatoire si status = FINISHED
 - Durée consultation : 5 min ≤ durée ≤ 2h (alerte si hors plage)
 - Médecin référent obligatoire
@@ -102,6 +105,7 @@
 | **device_id** | UUID | 36 | Non | - | Référence device (si automatique) | `device-uuid` |
 
 **Règles Métier** :
+
 - Code LOINC obligatoire (rejet si absent)
 - Unité UCUM obligatoire (rejet si absent)
 - value_quantity OU value_string (au moins 1)
@@ -149,6 +153,7 @@
 | **pharmacy_notes** | Text | 500 | Non | - | Commentaires pharmacien | `Adaptation posologie...` |
 
 **Règles Métier** :
+
 - Code CIP/UCD obligatoire (validation base médicamenteuse)
 - Analyse interactions automatique avant enregistrement
 - Vérification allergie patient (bloquante si allergie connue)
@@ -175,6 +180,7 @@
 | **note** | Text | 500 | Non | - | Commentaires | `Bien toléré` |
 
 **Règles Métier** :
+
 - Administration tracée individuellement (chaque prise)
 - Scan code-barre patient + médicament obligatoire (si équipé)
 - Écart > 30 min vs horaire prévu → alerte + justification
@@ -204,6 +210,7 @@
 | **hl7_message_id** | String | 50 | Non | - | ID message HL7 ORM envoyé | `HL7-12345` |
 
 **Règles Métier** :
+
 - Code LOINC obligatoire (panel ou test individuel)
 - Renseignements cliniques recommandés (améliore interprétation)
 - Priority STAT → traitement prioritaire labo (< 1h)
@@ -235,6 +242,7 @@
 | **signature_certificate** | Text | 5000 | Non | - | Certificat électronique | `-----BEGIN CERTIFICATE-----` |
 
 **Règles Métier** :
+
 - Hash SHA-256 obligatoire (intégrité)
 - Documents médicaux : signature électronique obligatoire
 - MIME types autorisés : PDF, JPEG, PNG, DICOM
@@ -247,6 +255,7 @@
 ### 6.1 Règles Générales
 
 #### RQ-GEN-001 : Horodatage Fiable
+
 ```
 Tous les timestamps DOIVENT :
 - Être en UTC (timezone explicite)
@@ -256,6 +265,7 @@ Tous les timestamps DOIVENT :
 ```
 
 #### RQ-GEN-002 : Identifiants Uniques
+
 ```
 Tous les identifiants (id, ipp, ins) DOIVENT :
 - Être générés côté serveur
@@ -264,6 +274,7 @@ Tous les identifiants (id, ipp, ins) DOIVENT :
 ```
 
 #### RQ-GEN-003 : Soft Delete
+
 ```
 Suppression logique uniquement :
 - Flag deleted_at (timestamp)
@@ -273,6 +284,7 @@ Suppression logique uniquement :
 ```
 
 #### RQ-GEN-004 : Traçabilité
+
 ```
 Pour toute modification critique :
 - Qui (user_id)
@@ -285,6 +297,7 @@ Pour toute modification critique :
 ### 6.2 Règles de Cohérence
 
 #### RQ-COH-001 : Dates Logiques
+
 ```sql
 -- Exemple : Date naissance ≤ date consultation
 CHECK (patient.date_naissance <= encounter.period_start)
@@ -294,12 +307,13 @@ CHECK (medication_request.authored_on <= medication_request.pharmacy_validation_
 
 -- Durée consultation plausible (5 min ≤ durée ≤ 2h)
 CHECK (
-  EXTRACT(EPOCH FROM (encounter.period_end - encounter.period_start)) / 60 
+  EXTRACT(EPOCH FROM (encounter.period_end - encounter.period_start)) / 60
   BETWEEN 5 AND 120
 )
 ```
 
 #### RQ-COH-002 : Références Intégrité
+
 ```sql
 -- Toutes les références FK doivent exister
 FOREIGN KEY (patient_id) REFERENCES patients(id)
@@ -311,6 +325,7 @@ FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 ```
 
 #### RQ-COH-003 : Valeurs Énumérées
+
 ```
 Utiliser des ENUM ou tables de référence :
 - Statuts (DRAFT, ACTIVE, COMPLETED, CANCELLED)
@@ -322,6 +337,7 @@ Utiliser des ENUM ou tables de référence :
 ### 6.3 Règles de Complétude
 
 #### RQ-COMP-001 : Complétude Minimale Patient
+
 ```
 À la création, un patient DOIT avoir :
 - Nom, prénom, date naissance, sexe
@@ -330,6 +346,7 @@ Utiliser des ENUM ou tables de référence :
 ```
 
 #### RQ-COMP-002 : Complétude Prescription
+
 ```
 Une prescription DOIT avoir :
 - Médicament (code CIP/UCD)
@@ -340,6 +357,7 @@ Une prescription DOIT avoir :
 ```
 
 #### RQ-COMP-003 : Complétude Observation
+
 ```
 Une observation DOIT avoir :
 - Code terminologie (LOINC/SNOMED CT)
@@ -462,7 +480,7 @@ Une observation DOIT avoir :
 
 ---
 
-**Document validé par** : Data Architect, DBA, Tech Lead  
-**Date** : 2025-01-10  
-**Version** : 1.0  
+**Document validé par** : Data Architect, DBA, Tech Lead
+**Date** : 2025-01-10
+**Version** : 1.0
 **Prochaine revue** : 2025-02-10

@@ -77,6 +77,7 @@ docker-compose -f docker-compose.e2e.yml down -v --rmi local
 ## Common Issues
 
 ### Connection Refused
+
 ```bash
 # Wait for services to be healthy
 docker-compose -f docker-compose.e2e.yml up -d
@@ -85,6 +86,7 @@ docker-compose -f docker-compose.e2e.yml ps
 ```
 
 ### Tests Hanging
+
 ```bash
 # Check for port conflicts
 lsof -i :8000 -i :5433 -i :6380
@@ -95,6 +97,7 @@ docker-compose -f docker-compose.yml down -v
 ```
 
 ### Database Not Seeded
+
 ```bash
 # Manually run seed script
 docker-compose -f docker-compose.e2e.yml exec backend \
@@ -102,6 +105,7 @@ docker-compose -f docker-compose.e2e.yml exec backend \
 ```
 
 ### Performance Issues
+
 ```bash
 # Check Docker resources
 docker stats
@@ -128,6 +132,7 @@ open htmlcov/index.html
 ## CI Integration
 
 ### GitHub Actions
+
 ```yaml
 - name: E2E Tests
   run: ./scripts/run_e2e_tests.sh
@@ -143,6 +148,7 @@ open htmlcov/index.html
 ```
 
 ### Environment Variables
+
 ```bash
 # Override base URL
 export E2E_BASE_URL=http://custom-host:8000

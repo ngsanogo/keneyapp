@@ -3,17 +3,14 @@ API routes for secure messaging between patients and healthcare professionals.
 """
 
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_db, get_current_active_user
+from app.core.dependencies import get_current_active_user, get_db
 from app.core.rate_limit import limiter
 from app.models.user import User
-from app.schemas.message import (
-    MessageCreate,
-    MessageResponse,
-    MessageStats,
-)
+from app.schemas.message import MessageCreate, MessageResponse, MessageStats
 from app.services import messaging_service
 
 router = APIRouter(prefix="/messages", tags=["messages"])
@@ -42,9 +39,7 @@ async def send_message(
     # Verify receiver exists and is in same tenant
     receiver = (
         db.query(User)
-        .filter(
-            User.id == message.receiver_id, User.tenant_id == current_user.tenant_id
-        )
+        .filter(User.id == message.receiver_id, User.tenant_id == current_user.tenant_id)
         .first()
     )
 
@@ -102,8 +97,7 @@ async def get_messages(
     )
 
     return [
-        messaging_service.serialize_message(msg, str(current_user.tenant_id))
-        for msg in messages
+        messaging_service.serialize_message(msg, str(current_user.tenant_id)) for msg in messages
     ]
 
 
@@ -179,8 +173,7 @@ async def get_conversation(
     )
 
     return [
-        messaging_service.serialize_message(msg, str(current_user.tenant_id))
-        for msg in messages
+        messaging_service.serialize_message(msg, str(current_user.tenant_id)) for msg in messages
     ]
 
 

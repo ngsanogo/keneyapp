@@ -29,41 +29,49 @@ Super Admin (système)
 ### 1.2 Description des Rôles
 
 #### Super Admin
+
 - **Périmètre** : Multi-tenant, configuration plateforme
 - **Responsabilités** : Gestion tenants, configuration système, support N3
 - **Restrictions** : Pas d'accès données patients (sauf support avec audit)
 
 #### Admin (Établissement)
+
 - **Périmètre** : Établissement/tenant spécifique
 - **Responsabilités** : Gestion utilisateurs, configuration établissement, rapports globaux
 - **Restrictions** : Accès données patients en lecture seule (audit uniquement)
 
 #### Médecin
+
 - **Périmètre** : Patients dont il est référent ou consultés
 - **Responsabilités** : Consultation, prescription, validation examens
 - **Restrictions** : Break-the-glass requis pour patients hors périmètre
 
 #### Pharmacien
+
 - **Périmètre** : Prescriptions de l'établissement
 - **Responsabilités** : Validation pharmaceutique, gestion interactions
 - **Restrictions** : Pas de création/modification données cliniques hors prescription
 
 #### IDE (Infirmier·e)
+
 - **Périmètre** : Patients du service assigné
 - **Responsabilités** : Saisie constantes, administration traitements, surveillance
 - **Restrictions** : Pas de prescription (sauf protocoles validés), pas de consultation médicale
 
 #### Secrétaire Médicale
+
 - **Périmètre** : Service/cabinet assigné
 - **Responsabilités** : Gestion RDV, saisie administrative, édition courriers
 - **Restrictions** : Accès données médicales en lecture seule limitée
 
 #### DIM (Data Manager)
+
 - **Périmètre** : Établissement (données agrégées)
 - **Responsabilités** : Extraction données, reporting, codage PMSI
 - **Restrictions** : Accès données pseudonymisées sauf mission spécifique
 
 #### DPO
+
 - **Périmètre** : Établissement (audit et conformité)
 - **Responsabilités** : Audit logs, gestion consentements, conformité RGPD
 - **Restrictions** : Accès données patients pour audit uniquement (tracé)
@@ -84,6 +92,7 @@ Super Admin (système)
 | **Exporter** | ❌ | ⚠️ (anonymisé) | ✅ | ❌ | ❌ | ❌ | ✅ (anonymisé) | ✅ (audit) |
 
 **Légende** :
+
 - ✅ = Autorisé sans restriction
 - ⚠️ = Autorisé avec restrictions (voir détails)
 - ❌ = Interdit
@@ -164,6 +173,7 @@ Super Admin (système)
 ### 3.1 Attributs Contextuels
 
 #### Attributs Utilisateur
+
 ```json
 {
   "user_id": "uuid",
@@ -178,6 +188,7 @@ Super Admin (système)
 ```
 
 #### Attributs Patient
+
 ```json
 {
   "patient_id": "uuid",
@@ -191,6 +202,7 @@ Super Admin (système)
 ```
 
 #### Attributs Contexte de Soins
+
 ```json
 {
   "encounter_id": "uuid",
@@ -202,6 +214,7 @@ Super Admin (système)
 ```
 
 #### Attributs Temporels
+
 ```json
 {
   "access_time": "2025-01-10T14:30:00Z",
@@ -333,6 +346,7 @@ all_consented(patient_ids) {
 ```
 
 #### Règles BTG
+
 - ✅ Disponible uniquement pour : Médecin, IDE, Pharmacien
 - ✅ Justification obligatoire (texte libre, min 20 caractères)
 - ✅ Accès accordé immédiatement (urgence vitale)
@@ -364,21 +378,25 @@ all_consented(patient_ids) {
 ### 4.1 Types de Consentements
 
 #### Consentement Soins
+
 - **Portée** : Accès dossier pour soins
 - **Défaut** : Donné (consentement implicite loi)
 - **Révocable** : Oui (tracé, sauf urgence)
 
 #### Consentement Recherche
+
 - **Portée** : Utilisation données pour recherche (anonymisées)
 - **Défaut** : Non donné (opt-in)
 - **Révocable** : Oui
 
 #### Consentement Partage DMP
+
 - **Portée** : Alimentation DMP national
 - **Défaut** : Donné (opt-out possible)
 - **Révocable** : Oui
 
 #### Consentement Portail Patient
+
 - **Portée** : Accès dossier via portail web/mobile
 - **Défaut** : Non activé (opt-in)
 - **Révocable** : Oui
@@ -444,6 +462,7 @@ Scenario: Révocation consentement
 ### 6.1 Événements Audités
 
 #### Événements de Sécurité (100% tracés)
+
 ```
 - LOGIN_SUCCESS
 - LOGIN_FAILED
@@ -457,6 +476,7 @@ Scenario: Révocation consentement
 ```
 
 #### Événements Données Patients (100% tracés)
+
 ```
 - PATIENT_CREATED
 - PATIENT_READ (si hors équipe soins habituelle)
@@ -468,6 +488,7 @@ Scenario: Révocation consentement
 ```
 
 #### Événements Cliniques (100% tracés)
+
 ```
 - PRESCRIPTION_CREATED
 - PRESCRIPTION_VALIDATED
@@ -555,7 +576,7 @@ Scenario: Révocation consentement
 
 ---
 
-**Document validé par** : RSSI, DPO, DSI  
-**Date** : 2025-01-10  
-**Version** : 1.0  
+**Document validé par** : RSSI, DPO, DSI
+**Date** : 2025-01-10
+**Version** : 1.0
 **Prochaine revue** : 2025-04-10

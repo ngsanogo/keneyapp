@@ -54,21 +54,21 @@ total_after=0
 
 for service in backend frontend celery_worker celery_beat flower; do
     image="keneyapp-${service}"
-    
+
     # Check if image exists
     if docker images -q $image:latest > /dev/null 2>&1; then
         current_size=$(docker images $image:latest --format "{{.Size}}")
         current_mb=$(size_to_mb $current_size)
         before_mb=${before_sizes[$service]}
-        
+
         total_before=$((total_before + before_mb))
         total_after=$((total_after + current_mb))
-        
+
         # Calculate reduction
         if [ $before_mb -gt 0 ]; then
             reduction=$(calc_reduction $before_mb $current_mb)
             saved=$((before_mb - current_mb))
-            
+
             # Color based on optimization
             if (( $(echo "$reduction > 50" | bc -l) )); then
                 color=$GREEN
@@ -80,7 +80,7 @@ for service in backend frontend celery_worker celery_beat flower; do
                 color=$RED
                 emoji="⚠️"
             fi
-            
+
             printf "${color}%-20s${NC} %6s MB → %6s MB  ${color}%s -%.1f%%${NC} (%.0f MB saved)\n" \
                 "$service" \
                 "$before_mb" \

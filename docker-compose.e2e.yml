@@ -39,25 +39,25 @@ services:
     environment:
       # Database
       DATABASE_URL: postgresql://keneyapp:keneyapp_test_pass@db:5432/keneyapp_test
-      
+
       # Redis
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/2
-      
+
       # Security
       SECRET_KEY: e2e_test_secret_key_change_in_production_12345
       ENCRYPTION_KEY: e2e_test_encryption_key_32_bytes_exactly_123456789012
-      
+
       # App Config
       ENVIRONMENT: testing
       DEBUG: "false"
       ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8000
-      
+
       # Features
       ENABLE_RATE_LIMITING: "true"
       ENABLE_BOOTSTRAP_ADMIN: "true"
-      
+
       # Monitoring
       ENABLE_TRACING: "true"
       ENABLE_METRICS: "true"

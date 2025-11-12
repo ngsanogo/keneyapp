@@ -1,6 +1,9 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum as SQLEnum, ForeignKey
-from sqlalchemy.sql import func
 import enum
+
+from sqlalchemy import Column, DateTime
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy.sql import func
 
 from app.core.database import Base
 
@@ -37,9 +40,7 @@ class Subscription(Base):
     )
     endpoint = Column(String(512), nullable=False)  # webhook URL
     payload = Column(String(128), nullable=True, default="application/fhir+json")
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),

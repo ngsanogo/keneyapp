@@ -9,9 +9,11 @@ Ce document détaille les nouvelles fonctionnalités implémentées pour transfo
 ## 1. 💬 Messagerie Sécurisée Patient-Médecin
 
 ### Description
+
 Système de messagerie chiffrée E2E permettant une communication sécurisée entre patients et professionnels de santé.
 
 ### Fonctionnalités
+
 - **Chiffrement AES-256-GCM** : Tous les messages sont chiffrés au repos
 - **Conversations threadées** : Regroupement automatique des messages par conversation
 - **Statuts de lecture** : Suivi des messages lus/non lus
@@ -32,6 +34,7 @@ DELETE /api/v1/messages/{id}                # Supprimer un message
 ```
 
 ### Modèle de données
+
 ```sql
 TABLE messages (
   id, sender_id, receiver_id, encrypted_content,
@@ -42,6 +45,7 @@ TABLE messages (
 ```
 
 ### Sécurité
+
 - ✅ Chiffrement des messages avec contexte tenant
 - ✅ Validation RBAC (tous les rôles peuvent envoyer/recevoir)
 - ✅ Rate limiting : 30 envois/min, 60 lectures/min
@@ -49,6 +53,7 @@ TABLE messages (
 - ✅ Pas de PHI dans les logs
 
 ### Migration
+
 ```bash
 alembic upgrade head  # Applique 010_add_messages
 ```
@@ -58,15 +63,18 @@ alembic upgrade head  # Applique 010_add_messages
 ## 2. 📄 Upload et Gestion de Documents Médicaux
 
 ### Description
+
 Système complet de gestion documentaire pour stocker analyses, imagerie, ordonnances, vaccins, etc.
 
 ### Formats supportés
+
 - **PDF** : Comptes-rendus, ordonnances
 - **Images** : JPEG, PNG (radios, photos)
 - **DICOM** : Imagerie médicale standard
 - **Office** : DOCX, TXT
 
 ### Types de documents
+
 - `lab_result` : Résultats d'analyses
 - `imaging` : Imagerie médicale (X-ray, CT, MRI)
 - `prescription` : Ordonnances
@@ -77,6 +85,7 @@ Système complet de gestion documentaire pour stocker analyses, imagerie, ordonn
 - `other` : Autres
 
 ### Fonctionnalités
+
 - **Upload sécurisé** : Limite 50 MB, validation MIME
 - **Détection de doublons** : Checksum SHA-256
 - **Stockage local ou S3** : Configurable via env vars
@@ -97,6 +106,7 @@ DELETE /api/v1/documents/{id}                # Supprimer document
 ```
 
 ### Modèle de données
+
 ```sql
 TABLE medical_documents (
   id, filename, original_filename,
@@ -111,12 +121,14 @@ TABLE medical_documents (
 ```
 
 ### Configuration
+
 ```env
 DOCUMENTS_UPLOAD_DIR=./uploads/medical_documents  # Local storage path
 MAX_DOCUMENT_SIZE=52428800                        # 50 MB in bytes
 ```
 
 ### Sécurité
+
 - ✅ Validation MIME type stricte
 - ✅ Limite de taille fichier
 - ✅ Checksum pour intégrité
@@ -126,6 +138,7 @@ MAX_DOCUMENT_SIZE=52428800                        # 50 MB in bytes
 - ✅ Rate limiting : 20 uploads/min, 30 downloads/min
 
 ### Migration
+
 ```bash
 alembic upgrade head  # Applique 011_add_medical_documents
 ```
@@ -135,30 +148,36 @@ alembic upgrade head  # Applique 011_add_medical_documents
 ## 3. 🔔 Système d'Alertes et Rappels Automatiques
 
 ### Description
+
 Notifications automatiques multi-canal (email, SMS) pour rappels et alertes importantes.
 
 ### Types de notifications
 
 #### 📅 Rappels de rendez-vous
+
 - Envoyés 24h avant le rendez-vous
 - Email + SMS (si numéro fourni)
 - Tâche Celery : `send_upcoming_appointment_reminders` (daily)
 
 #### 🧪 Résultats d'analyses disponibles
+
 - Notification immédiate après upload
 - Tâche Celery : `send_lab_results_notifications`
 - Déclenchée manuellement après upload document
 
 #### 💊 Renouvellement d'ordonnances
+
 - Rappel 7 jours avant expiration
 - Email + SMS
 - Tâche Celery : `send_prescription_renewal_reminders` (daily)
 
 #### 💉 Rappels de vaccination
+
 - Configurable par vaccin
 - Tâche Celery : `send_vaccination_reminder`
 
 #### 💬 Nouveaux messages
+
 - Notification immédiate
 - Tâche Celery : `send_new_message_notification`
 - Déclenchée après création message
@@ -168,6 +187,7 @@ Notifications automatiques multi-canal (email, SMS) pour rappels et alertes impo
 **Module**: `app/services/notification_service.py`
 
 Classes:
+
 - `EmailNotification` : SMTP (Gmail, SendGrid, SES)
 - `SMSNotification` : Twilio, AWS SNS
 - `NotificationService` : Orchestrateur unifié
@@ -219,12 +239,14 @@ beat_schedule = {
 ```
 
 ### Sécurité
+
 - ✅ Pas de PHI dans les logs
 - ✅ Emails avec opt-out (futur)
 - ✅ RGPD compliant
 - ✅ Rate limiting providers
 
 ### Dépendances
+
 ```bash
 pip install twilio==9.3.7
 ```
@@ -234,9 +256,11 @@ pip install twilio==9.3.7
 ## 4. 🔗 Partage Contrôlé du Dossier Médical
 
 ### Description
+
 Système de partage temporaire et sécurisé des dossiers médicaux via tokens et liens.
 
 ### Fonctionnalités
+
 - **Tokens temporaires** : Validité 1h à 30 jours
 - **Protection PIN optionnelle** : Code à 6 chiffres
 - **Limitation d'accès** : Nombre maximum d'accès configurable
@@ -249,6 +273,7 @@ Système de partage temporaire et sécurisé des dossiers médicaux via tokens e
   - `custom` : Sélection personnalisée
 
 ### Cas d'usage
+
 1. **Consultation externe** : Patient partage son dossier avec un nouveau médecin
 2. **Urgences** : Accès rapide aux données critiques (allergies, traitements)
 3. **Assurance** : Partage de documents spécifiques pour remboursement
@@ -265,6 +290,7 @@ DELETE /api/v1/shares/{id}                  # Révoquer un partage
 ```
 
 ### Modèle de données
+
 ```sql
 TABLE medical_record_shares (
   id, patient_id, shared_by_user_id,
@@ -281,6 +307,7 @@ TABLE medical_record_shares (
 ### Exemple d'utilisation
 
 **1. Créer un partage**
+
 ```json
 POST /api/v1/shares/
 {
@@ -305,6 +332,7 @@ Response:
 ```
 
 **2. Accéder au dossier partagé** (sans authentification)
+
 ```json
 POST /api/v1/shares/access
 {
@@ -331,6 +359,7 @@ Response:
 ```
 
 ### Sécurité
+
 - ✅ Tokens sécurisés (secrets.token_urlsafe)
 - ✅ PINs aléatoires 6 chiffres
 - ✅ Expiration automatique
@@ -341,6 +370,7 @@ Response:
 - ✅ Consentement patient requis
 
 ### Migration
+
 ```bash
 alembic upgrade head  # Applique 012_add_medical_record_shares
 ```
@@ -350,9 +380,11 @@ alembic upgrade head  # Applique 012_add_medical_record_shares
 ## 5. 📊 Statistiques et Tableaux de Bord Professionnels (À venir)
 
 ### Description
+
 Analytics avancés pour le suivi des patients chroniques et KPIs médicaux.
 
 ### Fonctionnalités prévues
+
 - Suivi patients chroniques
 - Alertes pathologies
 - Graphiques tendances
@@ -364,9 +396,11 @@ Analytics avancés pour le suivi des patients chroniques et KPIs médicaux.
 ## 6. 💳 Intégration Paiement en Ligne (À venir)
 
 ### Description
+
 Module de paiement pour téléconsultations.
 
 ### Fonctionnalités prévues
+
 - Intégration Stripe/PayPal
 - Gestion transactions
 - Facturation automatique
@@ -377,9 +411,11 @@ Module de paiement pour téléconsultations.
 ## 7. 📹 Module Téléconsultation (À venir)
 
 ### Description
+
 Visioconférence intégrée pour consultations à distance.
 
 ### Fonctionnalités prévues
+
 - WebRTC ou Twilio Video
 - Salles d'attente virtuelles
 - Enregistrement consultations (avec consentement)
@@ -390,16 +426,19 @@ Visioconférence intégrée pour consultations à distance.
 ## Installation et Configuration
 
 ### 1. Installer les dépendances
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### 2. Appliquer les migrations
+
 ```bash
 alembic upgrade head
 ```
 
 ### 3. Configurer les variables d'environnement
+
 ```bash
 # Créer .env avec les configs SMTP, Twilio, etc.
 cp .env.example .env
@@ -407,6 +446,7 @@ nano .env
 ```
 
 ### 4. Redémarrer les services
+
 ```bash
 # Backend
 uvicorn app.main:app --reload
@@ -423,6 +463,7 @@ celery -A app.core.celery_app beat --loglevel=info
 ## Tests
 
 ### Tests unitaires
+
 ```bash
 # Tester messagerie
 pytest tests/test_messages.py -v
@@ -438,6 +479,7 @@ pytest tests/test_notifications.py -v
 ```
 
 ### Tests d'intégration
+
 ```bash
 # Full suite
 pytest tests/ -v --cov=app
@@ -448,6 +490,7 @@ pytest tests/ -v --cov=app
 ## Conformité et Sécurité
 
 ### RGPD
+
 - ✅ Droit d'accès (partages avec tokens)
 - ✅ Droit à l'effacement (soft deletes)
 - ✅ Portabilité (exports futurs)
@@ -455,6 +498,7 @@ pytest tests/ -v --cov=app
 - ✅ Audit complet
 
 ### HIPAA
+
 - ✅ Chiffrement au repos (AES-256)
 - ✅ Chiffrement en transit (TLS)
 - ✅ Contrôle d'accès (RBAC)
@@ -462,6 +506,7 @@ pytest tests/ -v --cov=app
 - ✅ Authentification forte
 
 ### HDS (France)
+
 - ✅ Hébergement sécurisé
 - ✅ Traçabilité accès
 - ✅ Chiffrement données santé
@@ -472,6 +517,7 @@ pytest tests/ -v --cov=app
 ## Métriques et Monitoring
 
 ### Nouvelles métriques Prometheus
+
 ```python
 # Messages
 messages_sent_total
@@ -495,7 +541,9 @@ notifications_failed_total
 ```
 
 ### Logs structurés
+
 Tous les événements sont loggés en JSON pour analyse:
+
 ```json
 {
   "event": "document_uploaded",
@@ -512,34 +560,40 @@ Tous les événements sont loggés en JSON pour analyse:
 ## Support et Documentation
 
 ### Documentation API
+
 - Swagger UI : `http://localhost:8000/api/v1/docs`
 - ReDoc : `http://localhost:8000/api/v1/redoc`
 
 ### Guides
+
 - [Guide développeur](DEVELOPMENT.md)
 - [Guide déploiement](DEPLOYMENT.md)
 - [Guide sécurité](SECURITY.md)
 
 ### Contact
-📧 contact@isdataconsulting.com
+
+📧 <contact@isdataconsulting.com>
 
 ---
 
 ## Roadmap
 
 ### Q1 2026
+
 - ✅ Messagerie sécurisée
 - ✅ Upload documents
 - ✅ Notifications automatiques
 - ✅ Partage dossiers
 
 ### Q2 2026
+
 - 📊 Statistiques avancées
 - 💳 Paiements en ligne
 - 📹 Téléconsultation
 - 📱 Application mobile React Native
 
 ### Q3 2026
+
 - 🤖 IA pour analyse prédictive
 - 🌍 Multi-langue
 - 📊 Business Intelligence
@@ -547,7 +601,7 @@ Tous les événements sont loggés en JSON pour analyse:
 
 ---
 
-**Version**: 3.0.0  
-**Date**: 2 novembre 2025  
-**Auteur**: ISDATA Consulting  
+**Version**: 3.0.0
+**Date**: 2 novembre 2025
+**Auteur**: ISDATA Consulting
 **License**: Proprietary

@@ -3,18 +3,19 @@ API routes for medical record sharing with temporary secure links.
 """
 
 from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_db, get_current_active_user
+from app.core.dependencies import get_current_active_user, get_db
 from app.core.rate_limit import limiter
 from app.models.user import User
 from app.schemas.medical_record_share import (
+    ShareAccessRequest,
     ShareCreate,
+    SharedMedicalRecord,
     ShareResponse,
     ShareSummary,
-    ShareAccessRequest,
-    SharedMedicalRecord,
 )
 from app.services import share_service
 

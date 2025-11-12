@@ -36,6 +36,7 @@ KeneyApp exposes metrics at the `/metrics` endpoint in Prometheus format.
 #### Available Metrics
 
 **HTTP Metrics**
+
 ```
 # Total requests
 http_requests_total{method="GET", endpoint="/api/v1/patients", status="200"}
@@ -48,6 +49,7 @@ http_request_duration_seconds_count{method="GET", endpoint="/api/v1/patients"}
 ```
 
 **Business Metrics**
+
 ```
 # Patient operations
 patient_operations_total{operation="create"}
@@ -64,6 +66,7 @@ prescription_created_total
 ```
 
 **System Metrics**
+
 ```
 # Active users
 active_users
@@ -92,17 +95,17 @@ scrape_configs:
       - targets: ['backend:8000']
     metrics_path: '/metrics'
     scrape_interval: 10s
-    
+
   # PostgreSQL Exporter
   - job_name: 'postgres'
     static_configs:
       - targets: ['postgres-exporter:9187']
-    
+
   # Redis Exporter
   - job_name: 'redis'
     static_configs:
       - targets: ['redis-exporter:9121']
-    
+
   # Node Exporter (System metrics)
   - job_name: 'node'
     static_configs:
@@ -124,21 +127,22 @@ rule_files:
 **Location**: `monitoring/grafana-dashboard.json`
 
 **Panels:**
+
 1. **API Performance**
    - Request Rate (req/s)
    - Response Time (p50, p95, p99)
    - Error Rate (%)
-   
+
 2. **Database Health**
    - Connection Pool Usage
    - Query Duration
    - Transaction Rate
-   
+
 3. **Redis Cache**
    - Hit Rate
    - Memory Usage
    - Key Count
-   
+
 4. **System Resources**
    - CPU Usage
    - Memory Usage
@@ -149,22 +153,23 @@ rule_files:
 **Location**: `monitoring/grafana-business-kpi-dashboard.json`
 
 **Panels:**
+
 1. **Patient Management**
    - New Patients Today
    - Total Active Patients
    - Patient Registration Rate
-   
+
 2. **Appointments**
    - Scheduled Today
    - Completion Rate
    - Cancellation Rate
    - Average Duration
-   
+
 3. **Prescriptions**
    - Prescriptions Created Today
    - Total Active Prescriptions
    - Top Medications
-   
+
 4. **User Activity**
    - Active Users
    - Login Rate
@@ -197,6 +202,7 @@ http://grafana.yourdomain.com
 ### Critical Alerts
 
 #### API Down
+
 ```yaml
 - alert: APIDown
   expr: up{job="keneyapp-backend"} == 0
@@ -211,6 +217,7 @@ http://grafana.yourdomain.com
 ```
 
 #### High Error Rate
+
 ```yaml
 - alert: HighErrorRate
   expr: |
@@ -226,6 +233,7 @@ http://grafana.yourdomain.com
 ```
 
 #### Database Connection Pool Exhausted
+
 ```yaml
 - alert: DatabaseConnectionPoolExhausted
   expr: database_connections{state="active"} / database_connections_total > 0.9
@@ -241,10 +249,11 @@ http://grafana.yourdomain.com
 ### High Priority Alerts
 
 #### High Response Time
+
 ```yaml
 - alert: HighResponseTime
   expr: |
-    histogram_quantile(0.95, 
+    histogram_quantile(0.95,
       rate(http_request_duration_seconds_bucket[5m])
     ) > 1.0
   for: 10m
@@ -257,6 +266,7 @@ http://grafana.yourdomain.com
 ```
 
 #### Low Cache Hit Rate
+
 ```yaml
 - alert: LowCacheHitRate
   expr: |
@@ -272,6 +282,7 @@ http://grafana.yourdomain.com
 ```
 
 #### High Memory Usage
+
 ```yaml
 - alert: HighMemoryUsage
   expr: |
@@ -288,6 +299,7 @@ http://grafana.yourdomain.com
 ### Medium Priority Alerts
 
 #### Failed Login Attempts
+
 ```yaml
 - alert: HighFailedLoginAttempts
   expr: increase(failed_login_attempts_total[5m]) > 10
@@ -301,6 +313,7 @@ http://grafana.yourdomain.com
 ```
 
 #### Celery Queue Building Up
+
 ```yaml
 - alert: CeleryQueueBacklog
   expr: celery_queue_length > 100
@@ -331,20 +344,20 @@ route:
   group_interval: 10s
   repeat_interval: 12h
   receiver: 'default-receiver'
-  
+
   routes:
     # Critical alerts go to PagerDuty
     - match:
         severity: critical
       receiver: 'pagerduty-critical'
       continue: true
-    
+
     # All alerts go to Slack
     - match_re:
         severity: critical|high|medium
       receiver: 'slack-alerts'
       continue: true
-    
+
     # High and critical alerts go to email
     - match_re:
         severity: critical|high
@@ -357,12 +370,12 @@ receivers:
         channel: '#keneyapp-alerts'
         title: 'KeneyApp Alert'
         text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
-  
+
   - name: 'pagerduty-critical'
     pagerduty_configs:
       - service_key: '<pagerduty-service-key>'
         description: '{{ .CommonAnnotations.summary }}'
-  
+
   - name: 'slack-alerts'
     slack_configs:
       - api_url: '<slack-webhook-url>'
@@ -374,7 +387,7 @@ receivers:
           *Runbook:* {{ .Annotations.runbook }}
           {{ end }}
         color: '{{ if eq .CommonLabels.severity "critical" }}danger{{ else if eq .CommonLabels.severity "high" }}warning{{ else }}good{{ end }}'
-  
+
   - name: 'email-ops'
     email_configs:
       - to: 'ops@isdataconsulting.com'
@@ -430,6 +443,7 @@ def my_function():
 KeneyApp uses structured JSON logging with correlation IDs.
 
 **Example Log Entry:**
+
 ```json
 {
   "timestamp": "2024-10-31T22:00:00.000Z",
@@ -471,6 +485,7 @@ output.elasticsearch:
 **Endpoint**: `/health`
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -487,6 +502,7 @@ output.elasticsearch:
 ### Liveness and Readiness Probes
 
 **Kubernetes Configuration:**
+
 ```yaml
 livenessProbe:
   httpGet:
@@ -513,11 +529,13 @@ readinessProbe:
 ### 1. Define SLIs and SLOs
 
 **Service Level Indicators (SLIs):**
+
 - Availability: % of successful requests
 - Latency: Response time (p50, p95, p99)
 - Error rate: % of failed requests
 
 **Service Level Objectives (SLOs):**
+
 - Availability: 99.9% uptime
 - Latency: p95 < 500ms, p99 < 1000ms
 - Error rate: < 1%
@@ -537,6 +555,7 @@ readinessProbe:
 ### 4. Runbooks for Alerts
 
 Every alert should have:
+
 - Clear description
 - Impact assessment
 - Troubleshooting steps
@@ -565,40 +584,47 @@ See [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) for detailed procedures.
 ## Dashboard Access
 
 ### Production
-- Grafana: https://grafana.keneyapp.com
-- Prometheus: https://prometheus.keneyapp.com (Internal only)
-- Alert Manager: https://alerts.keneyapp.com (Internal only)
+
+- Grafana: <https://grafana.keneyapp.com>
+- Prometheus: <https://prometheus.keneyapp.com> (Internal only)
+- Alert Manager: <https://alerts.keneyapp.com> (Internal only)
 
 ### Staging
-- Grafana: https://grafana.staging.keneyapp.com
-- Prometheus: https://prometheus.staging.keneyapp.com
+
+- Grafana: <https://grafana.staging.keneyapp.com>
+- Prometheus: <https://prometheus.staging.keneyapp.com>
 
 ## Useful Queries
 
 ### PromQL Examples
 
 **Request rate (per second):**
+
 ```promql
 rate(http_requests_total[5m])
 ```
 
 **Error rate (percentage):**
+
 ```promql
 rate(http_requests_total{status=~"5.."}[5m]) /
 rate(http_requests_total[5m]) * 100
 ```
 
 **Response time p95:**
+
 ```promql
 histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
 ```
 
 **Active database connections:**
+
 ```promql
 database_connections{state="active"}
 ```
 
 **Cache hit rate:**
+
 ```promql
 rate(redis_keyspace_hits_total[5m]) /
 (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m])) * 100
@@ -607,11 +633,12 @@ rate(redis_keyspace_hits_total[5m]) /
 ## Support
 
 For monitoring questions:
+
 - Slack: #monitoring
-- Email: devops@isdataconsulting.com
+- Email: <devops@isdataconsulting.com>
 
 ---
 
-**Document Version**: 1.0.0  
-**Last Updated**: 2024-10-31  
+**Document Version**: 1.0.0
+**Last Updated**: 2024-10-31
 **Review**: Quarterly

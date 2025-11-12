@@ -21,37 +21,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-      
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install sphinx sphinx-rtd-theme sphinx-autodoc-typehints
-      
+
       - name: Generate OpenAPI spec
         run: |
           python -c "
           from app.main import app
           import json
-          
+
           with open('docs/api/openapi.json', 'w') as f:
               json.dump(app.openapi(), f, indent=2)
-          
+
           print('OpenAPI spec generated successfully!')
           "
-      
+
       - name: Generate Sphinx documentation
         run: |
           cd docs
           sphinx-quickstart -q -p KeneyApp -a "ISData Consulting" -v 3.0 --ext-autodoc --ext-viewcode
           sphinx-build -b html . _build/html
-      
+
       - name: Upload API documentation
         uses: actions/upload-artifact@v4
         with:
@@ -69,20 +69,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: './frontend/package-lock.json'
-      
+
       - name: Install dependencies
         working-directory: ./frontend
         run: |
           npm ci
           npm install --save-dev typedoc typedoc-plugin-markdown
-      
+
       - name: Generate TypeDoc documentation
         working-directory: ./frontend
         run: |
@@ -91,7 +91,7 @@ jobs:
             --entryPoints src/index.tsx \
             --exclude "**/*.test.ts" \
             --exclude "**/*.test.tsx"
-      
+
       - name: Upload frontend documentation
         uses: actions/upload-artifact@v4
         with:
@@ -121,37 +121,37 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install eralchemy2
-      
+
       - name: Run database migrations
         env:
           DATABASE_URL: postgresql://keneyapp:keneyapp@localhost:5432/keneyapp_docs
         run: |
           alembic upgrade head
-      
+
       - name: Generate ERD diagram
         env:
           DATABASE_URL: postgresql://keneyapp:keneyapp@localhost:5432/keneyapp_docs
         run: |
           eralchemy2 -i "$DATABASE_URL" -o docs/database/erd.png
           eralchemy2 -i "$DATABASE_URL" -o docs/database/erd.pdf
-      
+
       - name: Generate schema documentation
         env:
           DATABASE_URL: postgresql://keneyapp:keneyapp@localhost:5432/keneyapp_docs
         run: |
           python scripts/generate_db_docs.py > docs/database/schema.md
-      
+
       - name: Upload database documentation
         uses: actions/upload-artifact@v4
         with:
@@ -168,39 +168,39 @@ jobs:
     needs: [generate-api-docs, generate-frontend-docs, generate-db-docs]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Download all documentation
         uses: actions/download-artifact@v4
         with:
           path: docs-artifacts/
-      
+
       - name: Set up Node.js for Docusaurus
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
+
       - name: Install Docusaurus (if not exists)
         run: |
           if [ ! -d "website" ]; then
             npx create-docusaurus@latest website classic --typescript
           fi
-      
+
       - name: Copy documentation to Docusaurus
         run: |
           mkdir -p website/static/api
           mkdir -p website/static/db
           mkdir -p website/docs
-          
+
           cp docs-artifacts/api-documentation/docs/api/openapi.json website/static/api/
           cp -r docs-artifacts/frontend-documentation/* website/docs/ || true
           cp -r docs-artifacts/database-documentation/* website/static/db/ || true
-      
+
       - name: Build Docusaurus site
         working-directory: ./website
         run: |
           npm install
           npm run build
-      
+
       - name: Upload documentation site
         uses: actions/upload-pages-artifact@v3
         with:
@@ -222,7 +222,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-      
+
       - name: Comment PR with documentation link
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
@@ -247,17 +247,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Update badges in README
         run: |
           # Get latest version
           VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v2.0.0")
-          
+
           # Update badges (simplified example)
           sed -i "s|!\[Version\].*|![Version](https://img.shields.io/badge/version-${VERSION}-blue)|" README.md
-          
+
           # Add more badge updates as needed
-      
+
       - name: Commit README updates
         uses: stefanzweifel/git-auto-commit-action@v5
         with:

@@ -13,21 +13,21 @@ scrape_configs:
         labels:
           service: 'backend'
     metrics_path: '/metrics'
-    
+
   # PostgreSQL
   - job_name: 'postgres'
     static_configs:
       - targets: ['postgres-exporter:9187']
         labels:
           service: 'postgres'
-    
+
   # Redis
   - job_name: 'redis'
     static_configs:
       - targets: ['redis-exporter:9121']
         labels:
           service: 'redis'
-  
+
   # Kubernetes Metrics
   - job_name: 'kubernetes-apiservers'
     kubernetes_sd_configs:

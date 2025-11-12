@@ -1,9 +1,11 @@
 # API Best Practices for KeneyApp
 
 ## Overview
+
 This guide provides best practices for consuming and implementing the KeneyApp API, ensuring reliability, performance, and security.
 
 ## Table of Contents
+
 1. [Authentication](#authentication)
 2. [Request Guidelines](#request-guidelines)
 3. [Response Handling](#response-handling)
@@ -20,6 +22,7 @@ This guide provides best practices for consuming and implementing the KeneyApp A
 ### JWT Token Management
 
 #### Obtaining a Token
+
 ```bash
 curl -X POST http://localhost:8000/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -30,6 +33,7 @@ curl -X POST http://localhost:8000/api/v1/auth/login \
 ```
 
 Response:
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -38,12 +42,14 @@ Response:
 ```
 
 #### Using the Token
+
 ```bash
 curl -X GET http://localhost:8000/api/v1/patients/ \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 #### Token Best Practices
+
 - Store tokens securely (httpOnly cookies or secure storage)
 - Never log tokens or expose them in URLs
 - Implement token refresh before expiration
@@ -78,6 +84,7 @@ api.interceptors.response.use(
 ## Request Guidelines
 
 ### HTTP Methods
+
 Follow RESTful conventions:
 
 - **GET**: Retrieve resources (idempotent)
@@ -89,12 +96,14 @@ Follow RESTful conventions:
 ### Headers
 
 #### Required Headers
+
 ```http
 Content-Type: application/json
 Authorization: Bearer YOUR_TOKEN
 ```
 
 #### Optional Headers
+
 ```http
 Accept: application/json
 Accept-Language: en-US
@@ -104,6 +113,7 @@ User-Agent: KeneyApp-Client/1.0
 ### Request Body
 
 #### Good Example
+
 ```json
 {
   "first_name": "John",
@@ -116,6 +126,7 @@ User-Agent: KeneyApp-Client/1.0
 ```
 
 #### Best Practices
+
 - Use camelCase for JavaScript clients, snake_case for Python
 - Include only required and modified fields
 - Validate data on client side before sending
@@ -127,11 +138,13 @@ User-Agent: KeneyApp-Client/1.0
 ### Status Codes
 
 #### Success Codes
+
 - **200 OK**: Request succeeded
 - **201 Created**: Resource created successfully
 - **204 No Content**: Request succeeded, no content to return
 
 #### Client Error Codes
+
 - **400 Bad Request**: Invalid request data
 - **401 Unauthorized**: Authentication required
 - **403 Forbidden**: Insufficient permissions
@@ -140,12 +153,14 @@ User-Agent: KeneyApp-Client/1.0
 - **422 Unprocessable Entity**: Validation error
 
 #### Server Error Codes
+
 - **500 Internal Server Error**: Server-side error
 - **503 Service Unavailable**: Service temporarily unavailable
 
 ### Response Format
 
 #### Success Response
+
 ```json
 {
   "id": 123,
@@ -157,6 +172,7 @@ User-Agent: KeneyApp-Client/1.0
 ```
 
 #### Error Response
+
 ```json
 {
   "detail": "Email already registered"
@@ -164,6 +180,7 @@ User-Agent: KeneyApp-Client/1.0
 ```
 
 #### Validation Error Response
+
 ```json
 {
   "detail": [
@@ -226,25 +243,25 @@ async function apiRequestWithRetry(
   delay = 1000
 ): Promise<any> {
   let lastError: Error;
-  
+
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await requestFn();
     } catch (error) {
       lastError = error;
-      
+
       // Don't retry client errors (4xx)
       if (error.response?.status >= 400 && error.response?.status < 500) {
         throw error;
       }
-      
+
       // Wait before retrying
       if (i < maxRetries - 1) {
         await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
       }
     }
   }
-  
+
   throw lastError;
 }
 
@@ -257,6 +274,7 @@ const patients = await apiRequestWithRetry(() => api.get('/patients/'));
 ### Understanding Rate Limits
 
 KeneyApp implements rate limiting to prevent abuse:
+
 - **Default**: 100 requests per minute per IP
 - **Authentication**: 10 requests per minute
 - **Create Operations**: 10 requests per minute
@@ -282,10 +300,10 @@ async function makeRequestWithRateLimit(requestFn: () => Promise<any>): Promise<
       // Rate limit exceeded
       const resetTime = parseInt(error.response.headers['x-ratelimit-reset']);
       const waitTime = resetTime - Math.floor(Date.now() / 1000);
-      
+
       console.log(`Rate limit exceeded. Waiting ${waitTime} seconds...`);
       await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
-      
+
       // Retry request
       return await requestFn();
     }
@@ -297,6 +315,7 @@ async function makeRequestWithRateLimit(requestFn: () => Promise<any>): Promise<
 ### Rate Limit Best Practices
 
 1. **Implement Exponential Backoff**
+
 ```typescript
 async function exponentialBackoff(
   requestFn: () => Promise<any>,
@@ -317,6 +336,7 @@ async function exponentialBackoff(
 ```
 
 2. **Batch Requests**
+
 ```typescript
 // Bad - Makes 100 separate requests
 for (const patientId of patientIds) {
@@ -330,6 +350,7 @@ const patients = await api.get('/patients/', {
 ```
 
 3. **Cache Results**
+
 ```typescript
 const cache = new Map();
 
@@ -337,13 +358,13 @@ async function getCachedPatient(patientId: number): Promise<any> {
   if (cache.has(patientId)) {
     return cache.get(patientId);
   }
-  
+
   const patient = await api.get(`/patients/${patientId}`);
   cache.set(patientId, patient.data);
-  
+
   // Clear cache after 5 minutes
   setTimeout(() => cache.delete(patientId), 5 * 60 * 1000);
-  
+
   return patient.data;
 }
 ```
@@ -359,6 +380,7 @@ GET /api/v1/patients/?skip=0&limit=100
 ```
 
 ### Pagination Parameters
+
 - `skip`: Number of records to skip (default: 0)
 - `limit`: Number of records to return (default: 100, max: 100)
 
@@ -374,23 +396,23 @@ async function getAllPatients(): Promise<any[]> {
   const allPatients: any[] = [];
   let skip = 0;
   const limit = 100;
-  
+
   while (true) {
     const response = await api.get('/patients/', {
       params: { skip, limit }
     });
-    
+
     const patients = response.data;
     allPatients.push(...patients);
-    
+
     // If we got fewer than limit, we've reached the end
     if (patients.length < limit) {
       break;
     }
-    
+
     skip += limit;
   }
-  
+
   return allPatients;
 }
 ```
@@ -425,12 +447,12 @@ class APICache {
   get(key: string): any | null {
     const cached = this.cache.get(key);
     if (!cached) return null;
-    
+
     if (Date.now() - cached.timestamp > this.ttl) {
       this.cache.delete(key);
       return null;
     }
-    
+
     return cached.data;
   }
 
@@ -466,12 +488,12 @@ if (!patient) {
 // Invalidate cache after updates
 async function updatePatient(id: number, data: any): Promise<any> {
   const response = await api.put(`/patients/${id}`, data);
-  
+
   // Invalidate related caches
   apiCache.invalidate(`/patients/${id}`);
   apiCache.invalidate('/patients/');
   apiCache.invalidate('/dashboard/');
-  
+
   return response.data;
 }
 ```
@@ -500,7 +522,7 @@ function verifyWebhookSignature(
     .createHmac('sha256', secret)
     .update(payload)
     .digest('hex');
-  
+
   return signature === expectedSignature;
 }
 ```
@@ -508,10 +530,12 @@ function verifyWebhookSignature(
 ## API Versioning
 
 ### Current Version
+
 - Base URL: `/api/v1/`
 - Version: 1.0
 
 ### Version Strategy
+
 - URL-based versioning: `/api/v1/`, `/api/v2/`
 - Backward compatibility maintained for at least one major version
 - Deprecation notices provided 6 months in advance
@@ -607,7 +631,7 @@ def test_patient_workflow():
     assert response.status_code == 200
     token = response.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
-    
+
     # 2. Create patient
     response = client.post("/api/v1/patients/", json={
         "first_name": "John",
@@ -619,7 +643,7 @@ def test_patient_workflow():
     }, headers=headers)
     assert response.status_code == 201
     patient_id = response.json()["id"]
-    
+
     # 3. Get patient
     response = client.get(f"/api/v1/patients/{patient_id}", headers=headers)
     assert response.status_code == 200
@@ -629,6 +653,7 @@ def test_patient_workflow():
 ## Performance Tips
 
 1. **Use Compression**
+
 ```typescript
 import axios from 'axios';
 import zlib from 'zlib';
@@ -642,6 +667,7 @@ const api = axios.create({
 ```
 
 2. **Parallel Requests**
+
 ```typescript
 // Bad - Sequential
 const patient = await api.get('/patients/1');
@@ -657,6 +683,7 @@ const [patient, appointments, prescriptions] = await Promise.all([
 ```
 
 3. **Request Cancellation**
+
 ```typescript
 const controller = new AbortController();
 

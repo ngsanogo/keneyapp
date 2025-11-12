@@ -20,11 +20,13 @@ Ce document décrit toutes les automatisations mises en place pour optimiser le 
 ## ✅ Automatisations Mises en Place
 
 ### 1. **Pre-commit Hooks** ✨
+
 Validation automatique avant chaque commit pour garantir la qualité du code.
 
 **Fichier**: `.pre-commit-config.yaml`
 
 **Hooks configurés**:
+
 - **Black**: Formatage automatique Python
 - **isort**: Tri des imports Python
 - **Flake8**: Linting Python
@@ -39,6 +41,7 @@ Validation automatique avant chaque commit pour garantir la qualité du code.
 - **detect-secrets**: Détection de secrets/credentials
 
 **Installation**:
+
 ```bash
 make hooks-install
 # ou
@@ -47,6 +50,7 @@ pre-commit install
 ```
 
 **Exécution manuelle**:
+
 ```bash
 make hooks-run
 # ou
@@ -62,6 +66,7 @@ pre-commit run --all-files
 **Déclencheurs**: Push sur `main`/`develop`, Pull Requests
 
 **Jobs parallélisés**:
+
 1. **Backend Lint & Security** (5 min)
    - Black, isort, Flake8
    - Bandit, Safety, pip-audit
@@ -105,15 +110,16 @@ pre-commit run --all-files
 9. **Deploy Staging** (si branch `develop`)
    - Déploiement automatique vers staging
    - Smoke tests sur staging
-   - URL: https://staging.keneyapp.com
+   - URL: <https://staging.keneyapp.com>
 
 10. **Deploy Production** (si branch `main`)
     - Déploiement vers production
     - Smoke tests sur production
     - Notifications Slack
-    - URL: https://keneyapp.com
+    - URL: <https://keneyapp.com>
 
 **Notifications**:
+
 - Slack webhook pour succès/échec
 - GitHub Check Summary avec statuts
 
@@ -124,6 +130,7 @@ pre-commit run --all-files
 **Déclencheurs**: Push, PR, Lundi 2h UTC
 
 **Analyses**:
+
 - Coverage Python (coverage.xml)
 - Coverage Frontend (lcov.info)
 - Quality Gates enforcement
@@ -131,6 +138,7 @@ pre-commit run --all-files
 - Lien vers dashboard SonarCloud
 
 **Quality Gates**:
+
 - Coverage > 80%
 - 0 vulnerabilités critiques
 - 0 bugs bloquants
@@ -138,6 +146,7 @@ pre-commit run --all-files
 - Duplication < 3%
 
 **Configuration requise**:
+
 ```yaml
 # Secrets GitHub à configurer:
 SONAR_TOKEN: your-sonarcloud-token
@@ -150,6 +159,7 @@ SONAR_TOKEN: your-sonarcloud-token
 **Déclencheurs**: Push, PR, Quotidien 4h UTC
 
 **Browsers testés**:
+
 - Chromium
 - Firefox
 - WebKit (Safari)
@@ -157,6 +167,7 @@ SONAR_TOKEN: your-sonarcloud-token
 - Mobile Safari (iPhone 12)
 
 **Scénarios E2E** (fichier: `tests/e2e/critical-flows.spec.ts`):
+
 1. **Authentication**
    - Login/Logout
    - Session persistence
@@ -179,12 +190,14 @@ SONAR_TOKEN: your-sonarcloud-token
    - DICOM support
 
 **Artifacts**:
+
 - Screenshots (en cas d'échec)
 - Vidéos (en cas d'échec)
 - HTML reports
 - Logs Docker
 
 **Installation locale**:
+
 ```bash
 make e2e-install
 make e2e-test
@@ -228,11 +241,13 @@ make e2e-ui  # UI interactive
    - Niveau moderate minimum
 
 **Notifications**:
+
 - Slack en cas de vulnérabilités
 - GitHub Security Alerts
 - Summary dans PR
 
 **Configuration requise**:
+
 ```yaml
 # Secrets GitHub:
 SNYK_TOKEN: your-snyk-token
@@ -246,6 +261,7 @@ GITLEAKS_LICENSE: your-gitleaks-license (optionnel)
 **Déclencheur**: Push sur `main` avec conventional commits
 
 **Semantic Release**:
+
 - Analyse des commits (conventional)
 - Détermination version (major/minor/patch)
 - Génération CHANGELOG.md
@@ -254,6 +270,7 @@ GITLEAKS_LICENSE: your-gitleaks-license (optionnel)
 - Tag Docker images
 
 **Types de commits**:
+
 ```bash
 feat: nouvelle fonctionnalité → minor release
 fix: correction bug → patch release
@@ -263,6 +280,7 @@ docs, style, test, chore → no release
 ```
 
 **Exemple**:
+
 ```bash
 git commit -m "feat(messaging): add message encryption v3.0"
 # → Release v3.1.0
@@ -277,6 +295,7 @@ git commit -m "feat(api): redesign REST API\n\nBREAKING CHANGE: endpoints rename
 **Configuration**: `.releaserc.json`
 
 **Génération changelog manuel**:
+
 ```bash
 make changelog-generate
 # ou
@@ -309,9 +328,10 @@ git-cliff --output CHANGELOG.md
 4. **Documentation Site** (Docusaurus)
    - Site statique généré
    - Déployé sur GitHub Pages
-   - URL: https://isdata-consulting.github.io/keneyapp
+   - URL: <https://isdata-consulting.github.io/keneyapp>
 
 **Génération locale**:
+
 ```bash
 make docs-api
 make docs-db
@@ -391,6 +411,7 @@ make perf-ui
 #### SonarCloud Integration
 
 **Métriques suivies**:
+
 - Code Coverage
 - Code Smells
 - Bugs
@@ -399,13 +420,15 @@ make perf-ui
 - Technical Debt
 - Duplication
 
-**Dashboard**: https://sonarcloud.io/dashboard?id=ISData-consulting_keneyapp
+**Dashboard**: <https://sonarcloud.io/dashboard?id=ISData-consulting_keneyapp>
 
 **Quality Profile**:
+
 - Python: Sonar way (recommended)
 - TypeScript: Sonar way (recommended)
 
 **Exclusions**:
+
 ```
 **/node_modules/**
 **/migrations/**
@@ -432,11 +455,13 @@ make perf-ui
 7. **NPM Audit**: Vulnérabilités Node
 
 **Fréquence**:
+
 - Chaque push/PR
 - Hebdomadaire (Lundi 3h UTC)
 - Manuel via workflow_dispatch
 
 **Commandes locales**:
+
 ```bash
 make security        # Checks de base
 make security-full   # Scan complet
@@ -448,6 +473,7 @@ make container-scan  # Scan Docker
 **Script**: `scripts/validate_env.sh`
 
 Valide:
+
 - Variables requises présentes
 - Valeurs par défaut non sécurisées
 - Longueur minimale secrets (32 chars)
@@ -456,6 +482,7 @@ Valide:
 - Permissions .env (600/400)
 
 **Exécution**:
+
 ```bash
 make validate-env
 # ou
@@ -469,6 +496,7 @@ make validate-env
 #### Documentation Auto-générée
 
 1. **API REST**
+
    ```bash
    make docs-api
    # Génère: docs/api/openapi.json
@@ -476,6 +504,7 @@ make validate-env
    ```
 
 2. **Base de données**
+
    ```bash
    make docs-db
    # Génère: docs/database/schema.md
@@ -483,6 +512,7 @@ make validate-env
    ```
 
 3. **Frontend TypeScript**
+
    ```bash
    cd frontend
    npx typedoc
@@ -494,6 +524,7 @@ make validate-env
 **Tech stack**: Docusaurus + GitHub Pages
 
 **Build local**:
+
 ```bash
 cd website
 npm install
@@ -510,11 +541,13 @@ npm run start
 #### Semantic Versioning
 
 **Convention**:
+
 ```
 vMAJOR.MINOR.PATCH
 ```
 
 **Exemples**:
+
 - `v3.0.0` → Version majeure (breaking changes)
 - `v3.1.0` → Version mineure (nouvelles fonctionnalités)
 - `v3.1.1` → Patch (corrections de bugs)
@@ -522,6 +555,7 @@ vMAJOR.MINOR.PATCH
 #### Conventional Commits
 
 **Format**:
+
 ```
 <type>(<scope>): <description>
 
@@ -531,6 +565,7 @@ vMAJOR.MINOR.PATCH
 ```
 
 **Types valides**:
+
 - `feat`: Nouvelle fonctionnalité
 - `fix`: Correction de bug
 - `docs`: Documentation
@@ -543,9 +578,11 @@ vMAJOR.MINOR.PATCH
 - `chore`: Maintenance
 
 **Scopes** (optionnels):
+
 - `messaging`, `documents`, `shares`, `auth`, `api`, etc.
 
 **Exemples**:
+
 ```bash
 git commit -m "feat(messaging): implement message encryption
 
@@ -686,6 +723,7 @@ GITLEAKS_LICENSE: <license-gitleaks> (optionnel)
 **Fichier**: `.env` (copier depuis `.env.example`)
 
 **Variables critiques**:
+
 ```bash
 SECRET_KEY=<32+ chars random string>
 ENCRYPTION_KEY=<32+ chars random string>
@@ -700,6 +738,7 @@ Valider avec: `make validate-env`
 ### Outils Locaux
 
 **Requis**:
+
 - Python 3.11+
 - Node.js 18+
 - Docker & Docker Compose
@@ -707,6 +746,7 @@ Valider avec: `make validate-env`
 - Make
 
 **Optionnels** (pour développement avancé):
+
 ```bash
 # Pre-commit hooks
 pip install pre-commit
@@ -741,7 +781,7 @@ npm install -D @playwright/test
 
 ### Workflows Status
 
-Voir: https://github.com/ISData-consulting/keneyapp/actions
+Voir: <https://github.com/ISData-consulting/keneyapp/actions>
 
 ---
 
@@ -775,6 +815,7 @@ make validate-env     # Valider environnement
 ### 4. Messages de Commit
 
 Utiliser **conventional commits**:
+
 ```bash
 feat(scope): add new feature
 fix(scope): correct bug
@@ -855,14 +896,14 @@ npx playwright test --debug
 ## 📖 Ressources
 
 - **Documentation projet**: `docs/`
-- **API Docs**: http://localhost:8000/docs
-- **SonarCloud**: https://sonarcloud.io/dashboard?id=ISData-consulting_keneyapp
-- **GitHub Actions**: https://github.com/ISData-consulting/keneyapp/actions
+- **API Docs**: <http://localhost:8000/docs>
+- **SonarCloud**: <https://sonarcloud.io/dashboard?id=ISData-consulting_keneyapp>
+- **GitHub Actions**: <https://github.com/ISData-consulting/keneyapp/actions>
 - **Coverage Reports**: Artifacts dans GitHub Actions
 
 ---
 
-**Date de création**: 2025-01-10  
-**Dernière mise à jour**: 2025-01-10  
-**Version**: 3.0.0  
+**Date de création**: 2025-01-10
+**Dernière mise à jour**: 2025-01-10
+**Version**: 3.0.0
 **Mainteneur**: ISData Consulting

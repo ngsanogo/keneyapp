@@ -7,9 +7,10 @@ This is used in tests to avoid hitting decorator-enforced limits across
 the suite without changing route code.
 """
 
+from typing import Any
+
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from typing import Any
 
 
 def _context_aware_key_func(request: Any) -> str:

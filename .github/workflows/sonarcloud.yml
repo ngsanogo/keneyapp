@@ -89,9 +89,9 @@ jobs:
           QUALITY_GATE_STATUS=$(curl -s -u ${{ secrets.SONAR_TOKEN }}: \
             "https://sonarcloud.io/api/qualitygates/project_status?projectKey=ISData-consulting_keneyapp" \
             | jq -r '.projectStatus.status')
-          
+
           echo "Quality Gate Status: $QUALITY_GATE_STATUS"
-          
+
           if [ "$QUALITY_GATE_STATUS" != "OK" ]; then
             echo "❌ Quality Gate Failed!"
             exit 1
@@ -107,13 +107,13 @@ jobs:
           script: |
             const projectKey = 'ISData-consulting_keneyapp';
             const prNumber = context.payload.pull_request.number;
-            
+
             const comment = `## SonarCloud Analysis Results
-            
+
             [📊 View detailed report on SonarCloud](https://sonarcloud.io/dashboard?id=${projectKey})
-            
+
             Please check the quality gate status and address any issues before merging.`;
-            
+
             github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,

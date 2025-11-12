@@ -1,7 +1,7 @@
 """Initial schema
 
 Revision ID: 000
-Revises: 
+Revises:
 Create Date: 2025-10-28
 
 """
@@ -19,7 +19,7 @@ depends_on = None
 def upgrade() -> None:
     # The enums are automatically created by SQLAlchemy when the tables are created,
     # so we don't need to explicitly create them here
-    
+
     # Create users table (without tenant_id initially, will be added in migration 003)
     op.create_table(
         'users',
@@ -35,7 +35,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
-    
+
     # Create patients table (without tenant_id initially, will be added in migration 003)
     # Note: email is nullable but has a unique constraint; migration 003 will drop this
     # constraint and add a composite unique constraint on (tenant_id, email)
@@ -59,7 +59,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_patients_id'), 'patients', ['id'], unique=False)
     op.create_index(op.f('ix_patients_email'), 'patients', ['email'], unique=False)
-    
+
     # Create appointments table (without tenant_id initially, will be added in migration 003)
     op.create_table(
         'appointments',
@@ -77,7 +77,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_appointments_id'), 'appointments', ['id'], unique=False)
     op.create_index(op.f('ix_appointments_appointment_date'), 'appointments', ['appointment_date'], unique=False)
-    
+
     # Create prescriptions table (without tenant_id initially, will be added in migration 003)
     op.create_table(
         'prescriptions',
@@ -102,23 +102,23 @@ def downgrade() -> None:
     # Drop prescriptions table
     op.drop_index(op.f('ix_prescriptions_id'), table_name='prescriptions')
     op.drop_table('prescriptions')
-    
+
     # Drop appointments table
     op.drop_index(op.f('ix_appointments_appointment_date'), table_name='appointments')
     op.drop_index(op.f('ix_appointments_id'), table_name='appointments')
     op.drop_table('appointments')
-    
+
     # Drop patients table
     op.drop_index(op.f('ix_patients_email'), table_name='patients')
     op.drop_index(op.f('ix_patients_id'), table_name='patients')
     op.drop_table('patients')
-    
+
     # Drop users table
     op.drop_index(op.f('ix_users_username'), table_name='users')
     op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_table('users')
-    
+
     # Drop enums (SQLAlchemy handles enum cleanup when dropping tables automatically)
     # We explicitly drop them here to be thorough
     op.execute('DROP TYPE IF EXISTS appointmentstatus')

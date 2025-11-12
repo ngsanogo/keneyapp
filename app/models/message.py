@@ -2,19 +2,13 @@
 Message model for secure patient-doctor communication.
 """
 
-from datetime import datetime, timezone
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Text,
-    DateTime,
-    ForeignKey,
-    Boolean,
-    Enum as SQLEnum,
-)
-from sqlalchemy.orm import relationship
 import enum
+from datetime import datetime, timezone
+
+from sqlalchemy import Boolean, Column, DateTime
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
 
 from app.core.database import Base
 
@@ -61,21 +55,15 @@ class Message(Base):
     tenant_id = Column(String(255), nullable=False, index=True)
 
     # Audit fields
-    created_at = Column(
-        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
-    )
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     read_at = Column(DateTime, nullable=True)
     deleted_by_sender = Column(Boolean, default=False)
     deleted_by_receiver = Column(Boolean, default=False)
 
     # Relationships
     sender = relationship("User", foreign_keys=[sender_id], backref="sent_messages")
-    receiver = relationship(
-        "User", foreign_keys=[receiver_id], backref="received_messages"
-    )
+    receiver = relationship("User", foreign_keys=[receiver_id], backref="received_messages")
     replies = relationship("Message", backref="parent_message", remote_side=[id])
 
     def __repr__(self):
-        return (
-            f"<Message {self.id} from User {self.sender_id} to User {self.receiver_id}>"
-        )
+        return f"<Message {self.id} from User {self.sender_id} to User {self.receiver_id}>"

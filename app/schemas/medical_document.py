@@ -3,10 +3,11 @@ Pydantic schemas for medical documents.
 """
 
 from datetime import datetime
-from typing import Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from typing import List, Optional
 
-from app.models.medical_document import DocumentType, DocumentFormat, DocumentStatus
+from pydantic import BaseModel, ConfigDict, Field
+
+from app.models.medical_document import DocumentFormat, DocumentStatus, DocumentType
 
 
 class DocumentUpload(BaseModel):
@@ -14,12 +15,8 @@ class DocumentUpload(BaseModel):
 
     patient_id: int = Field(..., description="Patient ID this document belongs to")
     document_type: DocumentType = Field(..., description="Type of medical document")
-    description: Optional[str] = Field(
-        None, max_length=1000, description="Document description"
-    )
-    tags: Optional[List[str]] = Field(
-        None, description="Document tags for categorization"
-    )
+    description: Optional[str] = Field(None, max_length=1000, description="Document description")
+    tags: Optional[List[str]] = Field(None, description="Document tags for categorization")
     appointment_id: Optional[int] = Field(None, description="Related appointment ID")
     prescription_id: Optional[int] = Field(None, description="Related prescription ID")
     is_sensitive: bool = Field(True, description="Mark as sensitive/PHI")

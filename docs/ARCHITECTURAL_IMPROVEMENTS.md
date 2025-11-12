@@ -1,6 +1,6 @@
 # Architectural Improvements from tmp Analysis
 
-**Date**: November 5, 2025  
+**Date**: November 5, 2025
 **Purpose**: Document architectural patterns learned from GNU Health, Thalamus, and ERPNext/Frappe to enhance KeneyApp
 
 ---
@@ -10,11 +10,13 @@
 After deep analysis of three major healthcare/business systems in tmp/, we've identified **10 key architectural patterns** that can significantly improve KeneyApp's design, maintainability, and extensibility.
 
 **Systems Analyzed**:
+
 1. **GNU Health (Tryton)** - Hospital management with 30+ modules
 2. **Thalamus** - Federation server with ACL-based authorization
 3. **ERPNext (Frappe)** - Modular ERP with hooks system
 
 **Key Findings**:
+
 - All three systems prioritize **modularity** over monolithic design
 - **State machines** are critical for workflow management
 - **Hook systems** enable extensibility without core modification
@@ -28,6 +30,7 @@ After deep analysis of three major healthcare/business systems in tmp/, we've id
 ### What We Learned (GNU Health Lab)
 
 GNU Health uses explicit state machines for lab results:
+
 ```python
 # From tmp/his/tryton/health_lab/health_lab.py
 state = fields.Selection([
@@ -49,6 +52,7 @@ def generate_document(cls, documents):
 ```
 
 **Benefits**:
+
 - Clear audit trail of who did what when
 - Enforces business rules (can't validate before completion)
 - UI buttons automatically enable/disable based on state
@@ -75,25 +79,25 @@ class LabResultState(str, Enum):
 
 class LabResult(Base):
     __tablename__ = "lab_results"
-    
+
     # ... existing fields ...
-    
+
     state = Column(
         Enum(LabResultState),
         default=LabResultState.DRAFT,
         nullable=False,
         index=True
     )
-    
+
     # Audit fields for each state transition
     reviewed_by_id = Column(Integer, ForeignKey("users.id"))
     reviewed_at = Column(DateTime)
     reviewed_by = relationship("User", foreign_keys=[reviewed_by_id])
-    
+
     validated_by_id = Column(Integer, ForeignKey("users.id"))
     validated_at = Column(DateTime)
     validated_by = relationship("User", foreign_keys=[validated_by_id])
-    
+
     @validates('state')
     def validate_state_transition(self, key, new_state):
         """Enforce valid state transitions"""
@@ -105,7 +109,7 @@ class LabResult(Base):
             LabResultState.AMENDED: [LabResultState.PENDING_REVIEW],
             LabResultState.CANCELLED: [],  # Terminal state
         }
-        
+
         if self.state and new_state not in valid_transitions.get(self.state, []):
             raise ValueError(
                 f"Invalid state transition from {self.state} to {new_state}"
@@ -114,13 +118,14 @@ class LabResult(Base):
 ```
 
 **Implementation Steps**:
+
 1. Add state enum and audit fields to LabResult model
 2. Create migration: `alembic revision --autogenerate -m "add_lab_result_states"`
 3. Add router endpoints: `POST /lab-results/{id}/submit`, `/review`, `/validate`
 4. Add state transition service methods with RBAC checks
 5. Update frontend to show state-specific actions
 
-**Effort**: 1 sprint  
+**Effort**: 1 sprint
 **Priority**: High (improves compliance and audit trail)
 
 ---
@@ -143,7 +148,7 @@ def register():
         sequences.LabTestSequence,
         module='health_lab', type_='model'
     )
-    
+
     Pool.register(
         wizard.CreateLabTestOrder,
         module='health_lab', type_='wizard'
@@ -160,6 +165,7 @@ xml:
 ```
 
 **Benefits**:
+
 - Modules can be enabled/disabled independently
 - Clear dependency graph prevents circular imports
 - Each module has its own:
@@ -210,19 +216,19 @@ from fastapi import FastAPI
 
 class Module:
     """Base class for KeneyApp modules"""
-    
+
     name: str
     version: str
     depends: List[str] = []
-    
+
     def register_models(self, app: FastAPI):
         """Register SQLAlchemy models"""
         pass
-    
+
     def register_routers(self, app: FastAPI):
         """Register API routers"""
         pass
-    
+
     def register_tasks(self, app: FastAPI):
         """Register Celery tasks"""
         pass
@@ -235,7 +241,7 @@ class LabModule(Module):
     name = "lab"
     version = "1.0.0"
     depends = ["patients"]  # Requires patients module
-    
+
     def register_routers(self, app):
         from app.core.config import settings
         app.include_router(
@@ -258,19 +264,21 @@ for module in modules:
 ```
 
 **Benefits**:
+
 - Easier to add/remove features
 - Teams can work on modules independently
 - Clearer code organization
 - Facilitates plugin system in future
 
 **Implementation Steps**:
+
 1. Create `app/modules/` directory structure
 2. Migrate patients code to `app/modules/patients/`
 3. Migrate lab code to `app/modules/lab/`
 4. Create Module base class and registration system
 5. Update imports and tests
 
-**Effort**: 2-3 sprints (refactoring existing code)  
+**Effort**: 2-3 sprints (refactoring existing code)
 **Priority**: Medium (improves long-term maintainability)
 
 ---
@@ -299,6 +307,7 @@ specimen_type = fields.Char(
 ```
 
 **Benefits**:
+
 - Fields can be conditionally required/hidden/readonly
 - Business logic tied to field definitions
 - Reduces boilerplate validation code
@@ -316,25 +325,25 @@ from typing import Optional, Callable, Dict, Any
 
 class DynamicSchemaBase(BaseModel):
     """Base schema with dynamic field validation"""
-    
+
     @classmethod
     def get_field_rules(cls, values: Dict[str, Any]) -> Dict[str, Dict]:
         """Override to define dynamic field rules based on other field values"""
         return {}
-    
+
     @model_validator(mode='after')
     def apply_dynamic_rules(self):
         rules = self.get_field_rules(self.model_dump())
-        
+
         for field_name, rule in rules.items():
             value = getattr(self, field_name)
-            
+
             if rule.get('required') and not value:
                 raise ValueError(f"{field_name} is required when {rule.get('condition')}")
-            
+
             if rule.get('readonly') and value != getattr(self.__class__, field_name).default:
                 raise ValueError(f"{field_name} is readonly when {rule.get('condition')}")
-        
+
         return self
 
 # app/schemas/lab.py - ENHANCED
@@ -343,29 +352,29 @@ class LabResultUpdate(DynamicSchemaBase):
     result_text: Optional[str] = None
     validated_by_id: Optional[int] = None
     state: Optional[LabResultState] = None
-    
+
     @classmethod
     def get_field_rules(cls, values):
         rules = {}
-        
+
         # If state is VALIDATED, validated_by_id is required
         if values.get('state') == LabResultState.VALIDATED:
             rules['validated_by_id'] = {
                 'required': True,
                 'condition': 'state is VALIDATED'
             }
-        
+
         # If state is VALIDATED, can't change result
         if values.get('state') == LabResultState.VALIDATED:
             rules['result_value'] = {
                 'readonly': True,
                 'condition': 'state is VALIDATED'
             }
-        
+
         return rules
 ```
 
-**Effort**: 1 sprint  
+**Effort**: 1 sprint
 **Priority**: Medium
 
 ---
@@ -408,6 +417,7 @@ def access_control(username, roles, method, endpoint, view_args):
 ```
 
 **Benefits**:
+
 - Centralized permission management
 - Easier to audit who can do what
 - Supports "own records only" vs "global access"
@@ -428,11 +438,11 @@ from fastapi import Request, HTTPException
 
 class ACLManager:
     """Fine-grained access control list manager"""
-    
+
     def __init__(self, acl_file: Path):
         with open(acl_file) as f:
             self.acl: List[Dict] = json.load(f)
-    
+
     def check_access(
         self,
         user_roles: List[str],
@@ -443,25 +453,25 @@ class ACLManager:
         owner_id: Optional[int] = None
     ) -> bool:
         """Check if any of user's roles grant access"""
-        
+
         for role in user_roles:
             for entry in self.acl:
                 if entry["role"] != role:
                     continue
-                
+
                 permissions = entry["permissions"]
-                
+
                 # Check if method+resource is allowed
                 if resource not in permissions.get(method, []):
                     continue
-                
+
                 # Check ownership if resource has owner
                 if resource_id and owner_id:
                     if permissions.get("scope") == "own" and user_id != owner_id:
                         continue
-                
+
                 return True  # Access granted
-        
+
         return False  # No role grants access
 
 # config/acl.json - NEW
@@ -521,12 +531,12 @@ def require_resource_access(resource: str, owner_field: str = None):
         current_user: User = Depends(get_current_active_user)
     ):
         method = request.method
-        
+
         # Extract resource owner if applicable
         owner_id = None
         if owner_field and hasattr(request.state, 'resource'):
             owner_id = getattr(request.state.resource, owner_field)
-        
+
         if not acl_manager.check_access(
             user_roles=[current_user.role],
             method=method,
@@ -538,9 +548,9 @@ def require_resource_access(resource: str, owner_field: str = None):
                 status_code=403,
                 detail=f"Insufficient permissions for {method} {resource}"
             )
-        
+
         return current_user
-    
+
     return dependency
 
 # Usage in routers
@@ -554,19 +564,21 @@ async def get_patient(
 ```
 
 **Benefits**:
+
 - Permissions configurable without code changes
 - Auditable permission matrix
 - Easier compliance reporting
 - Supports future multi-tenancy with "own" vs "tenant" vs "global" scopes
 
 **Implementation Steps**:
+
 1. Create `app/core/acl.py` and ACLManager class
 2. Define initial `config/acl.json`
 3. Add `require_resource_access()` dependency
 4. Gradually migrate from `require_roles()` to ACL
 5. Add tests for permission matrix
 
-**Effort**: 2 sprints  
+**Effort**: 2 sprints
 **Priority**: Medium-High (enhances security model)
 
 ---
@@ -602,6 +614,7 @@ on_session_creation = "erpnext.portal.utils.create_customer_or_supplier"
 ```
 
 **Benefits**:
+
 - Third-party apps can extend core without modifying it
 - Clear extension points
 - Lifecycle hooks for initialization
@@ -631,16 +644,16 @@ class HookPoint(str, Enum):
 
 class HookManager:
     """Manages extension hooks throughout the application"""
-    
+
     def __init__(self):
         self._hooks: Dict[HookPoint, List[Callable]] = {
             hook: [] for hook in HookPoint
         }
-    
+
     def register(self, hook_point: HookPoint, handler: Callable):
         """Register a handler for a hook point"""
         self._hooks[hook_point].append(handler)
-    
+
     async def execute(self, hook_point: HookPoint, context: Dict[str, Any]):
         """Execute all handlers for a hook point"""
         for handler in self._hooks[hook_point]:
@@ -661,15 +674,15 @@ hook_manager = HookManager()
 
 class Plugin:
     """Base class for KeneyApp plugins"""
-    
+
     name: str
     version: str
     author: str
-    
+
     def register_hooks(self, hook_manager: HookManager):
         """Register plugin hooks"""
         pass
-    
+
     def register_routers(self, app: FastAPI):
         """Register plugin routers"""
         pass
@@ -682,7 +695,7 @@ class AuditPlugin(Plugin):
     name = "Enhanced Audit Logger"
     version = "1.0.0"
     author = "KeneyApp Team"
-    
+
     def register_hooks(self, hook_manager):
         hook_manager.register(
             HookPoint.AFTER_PATIENT_CREATE,
@@ -692,12 +705,12 @@ class AuditPlugin(Plugin):
             HookPoint.AFTER_LAB_RESULT_VALIDATE,
             self.notify_lab_validation
         )
-    
+
     def log_patient_creation(self, context):
         patient = context['patient']
         user = context['user']
         print(f"[AUDIT] Patient {patient.id} created by {user.username}")
-    
+
     async def notify_lab_validation(self, context):
         lab_result = context['lab_result']
         # Send notification to doctor
@@ -712,31 +725,33 @@ from app.core.hooks import hook_manager, HookPoint
 
 async def create_patient(data: PatientCreate, db: Session, user: User):
     # ... create patient ...
-    
+
     # Execute hooks
     await hook_manager.execute(HookPoint.AFTER_PATIENT_CREATE, {
         'patient': patient,
         'user': user,
         'db': db
     })
-    
+
     return patient
 ```
 
 **Benefits**:
+
 - Plugins can extend core functionality
 - Easier to add custom business logic per deployment
 - No core code modification needed
 - Testable in isolation
 
 **Implementation Steps**:
+
 1. Create `app/core/hooks.py` with HookManager
 2. Create `app/plugins/` directory structure
 3. Add hook execution points in key services
 4. Document available hooks and their contexts
 5. Create example plugin
 
-**Effort**: 1-2 sprints  
+**Effort**: 1-2 sprints
 **Priority**: Medium (enables future extensibility)
 
 ---
@@ -761,6 +776,7 @@ class LabOrderExists(UserError):
 ```
 
 **Benefits**:
+
 - Clearer error semantics
 - Easier to catch specific errors
 - Better error messages
@@ -780,7 +796,7 @@ class KeneyAppException(HTTPException):
     """Base exception for KeneyApp"""
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     detail = "An error occurred"
-    
+
     def __init__(self, detail: str = None):
         super().__init__(
             status_code=self.status_code,
@@ -824,7 +840,7 @@ class TenantQuotaExceededError(KeneyAppException):
 def validate_lab_result(lab_result: LabResult, new_state: LabResultState):
     if lab_result.state == LabResultState.VALIDATED:
         raise LabResultAlreadyValidatedError()
-    
+
     if lab_result.state == LabResultState.CANCELLED:
         raise InvalidStateTransitionError(lab_result.state, new_state)
 
@@ -841,7 +857,7 @@ async def keneyapp_exception_handler(request: Request, exc: KeneyAppException):
     )
 ```
 
-**Effort**: 1 sprint  
+**Effort**: 1 sprint
 **Priority**: Medium
 
 ---
@@ -869,6 +885,7 @@ def generate_code(cls, **pattern):
 ```
 
 **Benefits**:
+
 - Human-readable IDs (LAB-2025-001234)
 - Configurable per tenant
 - Sequential but readable
@@ -891,7 +908,7 @@ _sequence_locks = {}
 
 class Sequence(Base):
     __tablename__ = "sequences"
-    
+
     id = Column(Integer, primary_key=True)
     tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
     name = Column(String(50), nullable=False)  # e.g., "lab_result"
@@ -901,14 +918,14 @@ class Sequence(Base):
     current_value = Column(Integer, default=0)
     reset_period = Column(String(20))  # daily, monthly, yearly, never
     last_reset = Column(DateTime)
-    
+
     __table_args__ = (
         UniqueConstraint('tenant_id', 'name', name='uq_tenant_sequence'),
     )
 
 class SequenceGenerator:
     """Thread-safe sequence number generator"""
-    
+
     @classmethod
     def next_value(
         cls,
@@ -917,25 +934,25 @@ class SequenceGenerator:
         sequence_name: str
     ) -> str:
         """Generate next sequence value"""
-        
+
         # Thread-safe lock per tenant+sequence
         lock_key = f"{tenant_id}:{sequence_name}"
         if lock_key not in _sequence_locks:
             _sequence_locks[lock_key] = threading.Lock()
-        
+
         with _sequence_locks[lock_key]:
             sequence = db.query(Sequence).filter(
                 Sequence.tenant_id == tenant_id,
                 Sequence.name == sequence_name
             ).with_for_update().first()
-            
+
             if not sequence:
                 raise ValueError(f"Sequence {sequence_name} not configured")
-            
+
             # Check if reset needed
             now = datetime.now()
             should_reset = False
-            
+
             if sequence.reset_period == 'daily' and sequence.last_reset:
                 should_reset = sequence.last_reset.date() < now.date()
             elif sequence.reset_period == 'monthly' and sequence.last_reset:
@@ -945,23 +962,23 @@ class SequenceGenerator:
                 )
             elif sequence.reset_period == 'yearly' and sequence.last_reset:
                 should_reset = sequence.last_reset.year < now.year
-            
+
             if should_reset:
                 sequence.current_value = 0
                 sequence.last_reset = now
-            
+
             # Increment
             sequence.current_value += 1
             db.commit()
-            
+
             # Format
             parts = []
             if sequence.prefix:
                 parts.append(sequence.prefix)
-            
+
             # Add padded number
             parts.append(str(sequence.current_value).zfill(sequence.padding))
-            
+
             # Process suffix (supports {year}, {month}, {day})
             if sequence.suffix:
                 suffix = sequence.suffix.format(
@@ -970,13 +987,13 @@ class SequenceGenerator:
                     day=str(now.day).zfill(2)
                 )
                 parts.append(suffix)
-            
+
             return '-'.join(parts)
 
 # Usage in models
 class LabResult(Base):
     __tablename__ = "lab_results"
-    
+
     id = Column(Integer, primary_key=True)
     code = Column(String(50), unique=True, index=True)  # LAB-000123-2025
     # ... other fields ...
@@ -984,14 +1001,14 @@ class LabResult(Base):
 # In service
 def create_lab_result(data: LabResultCreate, db: Session, user: User):
     lab_result = LabResult(**data.dict())
-    
+
     # Generate code
     lab_result.code = SequenceGenerator.next_value(
         db=db,
         tenant_id=user.tenant_id,
         sequence_name="lab_result"
     )
-    
+
     db.add(lab_result)
     db.commit()
     return lab_result
@@ -1004,12 +1021,13 @@ INSERT INTO sequences (tenant_id, name, prefix, suffix, padding, reset_period) V
 ```
 
 **Benefits**:
+
 - Easier verbal communication ("Lab result LAB-123-2025")
 - Tenant-specific sequences
 - Configurable formats per deployment
 - Better for printed forms
 
-**Effort**: 1-2 sprints  
+**Effort**: 1-2 sprints
 **Priority**: Medium-Low (nice to have)
 
 ---
@@ -1037,6 +1055,7 @@ def has_tag(self, tag):
 ```
 
 **Benefits**:
+
 - Different report layouts per test type
 - Template-driven report generation
 - Conditional sections based on tags
@@ -1055,25 +1074,25 @@ class ReportGenerator:
         self.env = Environment(
             loader=FileSystemLoader('app/templates/reports/')
         )
-    
+
     def generate_lab_report(self, lab_result: LabResult) -> bytes:
         """Generate PDF lab report"""
-        
+
         # Select template based on test type report_style
         template_name = f"lab_report_{lab_result.test_type.report_style}.html"
         template = self.env.get_template(template_name)
-        
+
         html_content = template.render(
             lab_result=lab_result,
             patient=lab_result.patient,
             criteria=lab_result.criteria,
             generated_at=datetime.now()
         )
-        
+
         return HTML(string=html_content).write_pdf()
 ```
 
-**Effort**: 1 sprint  
+**Effort**: 1 sprint
 **Priority**: Medium
 
 ---
@@ -1099,6 +1118,7 @@ def search_rec_name(cls, name, clause):
 ```
 
 **Benefits**:
+
 - Search across multiple fields
 - Consistent API for filtering
 
@@ -1113,7 +1133,7 @@ from sqlalchemy.orm import Query
 
 class SearchFilter:
     """Helper for building SQLAlchemy queries from API filters"""
-    
+
     @staticmethod
     def apply_filters(
         query: Query,
@@ -1121,7 +1141,7 @@ class SearchFilter:
         filters: dict
     ) -> Query:
         """Apply filters to query"""
-        
+
         for field, value in filters.items():
             if hasattr(model, field):
                 if isinstance(value, str) and '*' in value:
@@ -1134,7 +1154,7 @@ class SearchFilter:
                 else:
                     # Exact match
                     query = query.filter(getattr(model, field) == value)
-        
+
         return query
 
 # Usage
@@ -1145,18 +1165,18 @@ def list_patients(
     db: Session = Depends(get_db)
 ):
     query = db.query(Patient)
-    
+
     filters = {}
     if name:
         filters['name'] = f"*{name}*"  # Wildcard
     if status:
         filters['status'] = status  # IN filter
-    
+
     query = SearchFilter.apply_filters(query, Patient, filters)
     return query.all()
 ```
 
-**Effort**: 1 sprint  
+**Effort**: 1 sprint
 **Priority**: Low-Medium
 
 ---
@@ -1179,6 +1199,7 @@ features = {
 ```
 
 **Benefits**:
+
 - Enable features per tenant
 - A/B testing
 - Gradual rollouts
@@ -1192,14 +1213,14 @@ from functools import wraps
 
 class FeatureFlags:
     """Manage feature flags per tenant"""
-    
+
     def __init__(self):
         self._flags: Dict[int, Dict[str, bool]] = {}
-    
+
     def is_enabled(self, tenant_id: int, feature: str) -> bool:
         """Check if feature is enabled for tenant"""
         return self._flags.get(tenant_id, {}).get(feature, False)
-    
+
     def require_feature(feature: str):
         """Decorator to require feature flag"""
         def decorator(func):
@@ -1229,7 +1250,7 @@ async def validate_lab_result(
     pass
 ```
 
-**Effort**: 1 sprint  
+**Effort**: 1 sprint
 **Priority**: Low (future-proofing)
 
 ---
@@ -1237,53 +1258,57 @@ async def validate_lab_result(
 ## Implementation Roadmap
 
 ### Phase 1: Foundation (Sprints 1-2)
+
 **Goal**: Core improvements that benefit everything
 
 1. ✅ **State Machine Workflows** - Lab results (HIGH PRIORITY)
    - Effort: 1 sprint
    - Impact: Compliance, audit trail
-   
+
 2. ✅ **Custom Exception Hierarchy** - Better error handling
    - Effort: 1 sprint
    - Impact: Debugging, API clarity
 
 ### Phase 2: Architecture (Sprints 3-5)
+
 **Goal**: Structural improvements
 
 3. **Modular Package Structure** - Reorganize code
    - Effort: 2-3 sprints
    - Impact: Long-term maintainability
-   
+
 4. **ACL-Based Authorization** - Fine-grained permissions
    - Effort: 2 sprints
    - Impact: Security, compliance
 
 ### Phase 3: Extensibility (Sprints 6-7)
+
 **Goal**: Plugin system and dynamic behavior
 
 5. **Hooks System** - Extension points
    - Effort: 1-2 sprints
    - Impact: Customization without core changes
-   
+
 6. **Dynamic Field Validation** - Context-aware validation
    - Effort: 1 sprint
    - Impact: Better UX, fewer errors
 
 ### Phase 4: Polish (Sprints 8-10)
+
 **Goal**: Nice-to-have improvements
 
 7. **Sequence Generators** - Human-readable IDs
    - Effort: 1-2 sprints
    - Impact: Usability
-   
+
 8. **Report Template System** - Flexible reports
    - Effort: 1 sprint
    - Impact: Professional output
-   
+
 9. **Search/Filter DSL** - Better queries
    - Effort: 1 sprint
    - Impact: API usability
-   
+
 10. **Feature Flags** - Tenant-specific features
     - Effort: 1 sprint
     - Impact: Gradual rollouts
@@ -1315,13 +1340,14 @@ async def validate_lab_result(
 
 By adopting these 10 architectural patterns from GNU Health, Thalamus, and ERPNext, KeneyApp will gain:
 
-✅ **Better Modularity** - Easier to add/remove features  
-✅ **Stronger Security** - Fine-grained ACL system  
-✅ **Improved Compliance** - State machines and audit trails  
-✅ **Enhanced Extensibility** - Plugin system for customization  
-✅ **Professional UX** - Better IDs, reports, and error messages  
+✅ **Better Modularity** - Easier to add/remove features
+✅ **Stronger Security** - Fine-grained ACL system
+✅ **Improved Compliance** - State machines and audit trails
+✅ **Enhanced Extensibility** - Plugin system for customization
+✅ **Professional UX** - Better IDs, reports, and error messages
 
 **Next Steps**:
+
 1. Review this document with team
 2. Prioritize Phase 1 items for immediate implementation
 3. Create detailed technical specs for approved patterns
@@ -1329,6 +1355,6 @@ By adopting these 10 architectural patterns from GNU Health, Thalamus, and ERPNe
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: November 5, 2025  
+**Document Version**: 1.0
+**Last Updated**: November 5, 2025
 **Status**: Ready for team review

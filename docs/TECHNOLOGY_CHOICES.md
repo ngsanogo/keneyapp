@@ -11,6 +11,7 @@ KeneyApp's technology stack has been carefully selected to meet the stringent re
 **Choice**: FastAPI with Python 3.11+
 
 **Justification**:
+
 - **Type Safety**: Full Pydantic integration provides strong runtime type validation similar to TypeScript
 - **Performance**: Asynchronous by default, comparable to Node.js performance
 - **Healthcare Ecosystem**: Rich Python ecosystem for healthcare (HL7 FHIR, DICOM, medical terminologies)
@@ -21,10 +22,12 @@ KeneyApp's technology stack has been carefully selected to meet the stringent re
 **Comparison to Recommendations**:
 
 The specifications recommended either:
+
 1. **Java with Spring Boot** - For enterprise stability and healthcare ecosystem
 2. **Node.js with NestJS** - For real-time capabilities and TypeScript
 
 Our choice of **Python/FastAPI** provides:
+
 - ✅ Type safety through Pydantic (equivalent to TypeScript)
 - ✅ Asynchronous/non-blocking like Node.js
 - ✅ Enterprise stability and healthcare libraries like Java
@@ -33,6 +36,7 @@ Our choice of **Python/FastAPI** provides:
 - ✅ Strong security ecosystem for healthcare compliance
 
 **Key Advantages**:
+
 - Native FHIR support via `fhir.resources` library
 - Medical terminology libraries (ICD-11, SNOMED CT, LOINC, ATC)
 - DICOM support for medical imaging
@@ -46,6 +50,7 @@ Our choice of **Python/FastAPI** provides:
 **Justification**: ✅ **Exactly as recommended**
 
 The specifications recommended React with TypeScript as one of the top choices:
+
 - **Flexibility**: Ideal for complex, component-based healthcare UIs
 - **Ecosystem**: Vast library ecosystem (calendars, charts, forms, video calls)
 - **Type Safety**: Full TypeScript integration prevents bugs
@@ -54,6 +59,7 @@ The specifications recommended React with TypeScript as one of the top choices:
 - **Developer Experience**: Excellent tooling and hot-reload
 
 **Implementation Details**:
+
 - React 18.3.1 with concurrent features
 - Full TypeScript 4.9+ for type safety
 - React Router v6 for routing
@@ -63,6 +69,7 @@ The specifications recommended React with TypeScript as one of the top choices:
 - ESLint + Prettier for code quality
 
 **Why React over Angular/Vue**:
+
 - More flexible for healthcare-specific UIs
 - Better ecosystem for medical components (charting, imaging viewers)
 - Easier integration with WebRTC for telemedicine
@@ -76,6 +83,7 @@ The specifications recommended React with TypeScript as one of the top choices:
 **Justification**: ✅ **Exactly as recommended**
 
 The specifications specifically recommended PostgreSQL:
+
 - **Healthcare Proven**: Used in major healthcare systems worldwide
 - **JSONB Support**: Perfect for storing FHIR resources
 - **Full-Text Search**: Built-in capabilities for medical records search
@@ -87,6 +95,7 @@ The specifications specifically recommended PostgreSQL:
 - **Open Source**: No licensing costs, full control
 
 **Implementation**:
+
 - PostgreSQL 15 (latest stable)
 - Connection pooling via SQLAlchemy
 - Alembic for migrations
@@ -96,6 +105,7 @@ The specifications specifically recommended PostgreSQL:
 - Automated backups
 
 **Additional Database Components**:
+
 - **Redis 7**: For caching, session management, and Celery queue (✅ as recommended)
 - **Future**: TimescaleDB extension for time-series medical data
 
@@ -106,6 +116,7 @@ The specifications specifically recommended PostgreSQL:
 **Justification**: ✅ **Exactly as recommended**
 
 The specifications recommended Redis for:
+
 - **Session Management**: JWT token blacklisting, refresh tokens
 - **Caching**: Frequently accessed patient data, dashboard stats
 - **Queue**: Background job processing (Celery broker)
@@ -113,6 +124,7 @@ The specifications recommended Redis for:
 - **Performance**: Sub-millisecond latency
 
 **Implementation**:
+
 - Redis 7 (latest stable)
 - Celery 5.3 for background tasks
 - Flower for monitoring
@@ -129,11 +141,13 @@ The specifications recommended Redis for:
 **Justification**: ✅ **Aligned with recommendations**
 
 The specifications recommended:
+
 - **Telemedicine**: WebRTC peer-to-peer encrypted video calls
 - **STUN/TURN**: Coturn for NAT traversal
 - **Alternatives**: Twilio Video, Vonage, Jitsi Meet
 
 **Our Approach**:
+
 1. **Phase 1 (Current)**: Secure WebSocket messaging for text chat
 2. **Phase 2 (Q2 2026)**: WebRTC integration with:
    - Self-hosted Coturn TURN server
@@ -143,6 +157,7 @@ The specifications recommended:
    - Session audit logging
 
 **Current Messaging**:
+
 - End-to-end encrypted messaging (v3.0)
 - Threaded conversations
 - Document sharing
@@ -156,6 +171,7 @@ The specifications recommended:
 **Justification**: ✅ **Exactly as recommended**
 
 The specifications recommended Nginx or Apache, we chose Nginx:
+
 - **Performance**: Superior for serving static files and proxying
 - **TLS Termination**: Handles SSL/TLS certificates
 - **Load Balancing**: Distributes traffic to backend instances
@@ -165,6 +181,7 @@ The specifications recommended Nginx or Apache, we chose Nginx:
 - **Kubernetes**: Nginx Ingress Controller for K8s deployments
 
 **Implementation**:
+
 - Nginx Ingress Controller for Kubernetes
 - TLS 1.3 with strong ciphers
 - HTTP/2 support
@@ -181,11 +198,13 @@ The specifications recommended Nginx or Apache, we chose Nginx:
 **Justification**: ✅ **Aligned with recommendations**
 
 The specifications recommended:
+
 - **Cloud**: AWS S3, Google Cloud Storage, Azure Blob
 - **On-Premise**: MinIO (S3-compatible)
 - **Encryption**: At-rest encryption mandatory
 
 **Our Strategy**:
+
 1. **Development/Small Deployments**: Encrypted local filesystem
 2. **Production**: MinIO or cloud object storage (AWS S3, Azure Blob)
 3. **Encryption**: AES-256-GCM at application level
@@ -193,6 +212,7 @@ The specifications recommended:
 5. **Compliance**: HDS-certified storage providers
 
 **Current Implementation**:
+
 - PHI fields encrypted at application level (AES-256-GCM)
 - Document storage with MIME type detection
 - Medical imaging support (DICOM references)
@@ -205,11 +225,13 @@ The specifications recommended:
 **Justification**: ✅ **Exactly as recommended**
 
 The specifications recommended:
+
 - **Development**: Docker for consistency
 - **Production**: Kubernetes (AWS EKS, Azure AKS) or cloud VMs
 - **Compliance**: HDS-certified hosting (OVHCloud, AWS, Azure)
 
 **Our Implementation**:
+
 - **Containerization**: Docker for all services
 - **Orchestration**: Kubernetes with Helm charts
 - **Auto-scaling**: Horizontal Pod Autoscaler (3-10 replicas)
@@ -218,6 +240,7 @@ The specifications recommended:
 - **CI/CD**: GitHub Actions with automated deployment
 
 **Deployment Options**:
+
 1. **Development**: Docker Compose
 2. **Staging/Production**: Kubernetes cluster
 3. **Cloud Providers**: AWS, Azure, Google Cloud, OVHCloud
@@ -232,10 +255,12 @@ The specifications recommended:
 **Justification**: ✅ **Aligned with recommendations**
 
 The specifications recommended:
+
 - **Email**: SendGrid, Mailjet for transactional emails
 - **SMS**: Twilio, Nexmo for appointment reminders and 2FA
 
 **Our Integration**:
+
 - Twilio SDK integrated for SMS notifications
 - Email service abstraction (multiple providers supported)
 - PHI-safe messages (no sensitive data in SMS/email)
@@ -249,10 +274,12 @@ The specifications recommended:
 **Justification**: ✅ **Aligned with recommendations**
 
 The specifications recommended:
+
 - **Metrics**: ELK or Prometheus
 - **Analytics**: Google Analytics or Matomo (privacy-focused)
 
 **Our Implementation**:
+
 - **Metrics**: Prometheus with custom healthcare KPIs
 - **Visualization**: Grafana dashboards
 - **Logging**: Structured JSON logs with correlation IDs
@@ -261,6 +288,7 @@ The specifications recommended:
 - **Privacy**: No PHI in metrics or logs
 
 **Metrics Collected**:
+
 - API performance (latency, throughput)
 - Database connections and query performance
 - Cache hit rates
@@ -275,6 +303,7 @@ The specifications recommended:
 **Implementation**: ✅ **Exceeds recommendations**
 
 **Authentication & Authorization**:
+
 - JWT tokens with RS256 algorithm
 - OAuth2/OIDC (Google, Microsoft, Okta)
 - Pro Santé Connect ready (French healthcare SSO)
@@ -285,12 +314,14 @@ The specifications recommended:
 - Token blacklisting support
 
 **Encryption**:
+
 - **At Rest**: AES-256-GCM for PHI fields
 - **In Transit**: TLS 1.3 with strong ciphers
 - **Passwords**: Bcrypt with 12 rounds
 - **Tokens**: Encrypted and signed JWTs
 
 **Security Headers**:
+
 - X-Content-Type-Options: nosniff
 - X-Frame-Options: DENY
 - X-XSS-Protection: 1; mode=block
@@ -299,6 +330,7 @@ The specifications recommended:
 - Referrer-Policy: no-referrer
 
 **Compliance**:
+
 - GDPR compliant architecture
 - HIPAA security controls implemented
 - HDS certification-ready architecture
@@ -319,12 +351,14 @@ The specifications recommended:
 **Justification**: ✅ **Aligned with recommendations**
 
 The specifications recommended extensive testing:
+
 - Unit tests (80%+ coverage goal)
 - Integration tests
 - Security testing
 - Beta testing with real users
 
 **Our Testing Strategy**:
+
 - 77% backend test coverage (155 tests)
 - Contract tests (JSON Schema validation)
 - Smoke tests for critical flows
@@ -360,6 +394,7 @@ The specifications recommended extensive testing:
 **Decision**: Use Python/FastAPI instead of Node.js/NestJS
 
 **Rationale**:
+
 1. **Healthcare Ecosystem**: Superior libraries for FHIR, DICOM, medical terminologies
 2. **Type Safety**: Pydantic provides runtime validation equivalent to TypeScript
 3. **Performance**: Async/await performance comparable to Node.js
@@ -368,6 +403,7 @@ The specifications recommended extensive testing:
 6. **Future-Proof**: ML/AI integration for future analytics features
 
 **Trade-offs**:
+
 - Node.js might have slightly better raw performance for I/O-heavy operations
 - NestJS has more Angular-like structure (but we chose React anyway)
 - Node.js has larger package ecosystem (but Python has healthcare-specific packages)
@@ -379,6 +415,7 @@ The specifications recommended extensive testing:
 **Decision**: Use React instead of Angular
 
 **Rationale**:
+
 1. **Flexibility**: Better for complex, custom healthcare UIs
 2. **Ecosystem**: More third-party components for healthcare (charts, imaging, video)
 3. **Performance**: Lighter weight, faster initial load
@@ -386,6 +423,7 @@ The specifications recommended extensive testing:
 5. **Learning Curve**: Easier for team to adopt
 
 **Trade-offs**:
+
 - Angular provides more structure out-of-the-box
 - Angular has better built-in form handling
 - Angular + NestJS would provide consistent architecture
@@ -397,6 +435,7 @@ The specifications recommended extensive testing:
 **Decision**: Use PostgreSQL instead of MySQL/MariaDB
 
 **Rationale**:
+
 1. **JSONB**: Native JSON support for FHIR resources
 2. **Full-Text Search**: Built-in capabilities
 3. **Extensions**: Rich extension ecosystem (PostGIS, pg_trgm, pgcrypto)
@@ -405,6 +444,7 @@ The specifications recommended extensive testing:
 6. **Performance**: Superior query optimizer
 
 **Trade-offs**:
+
 - MySQL might be more familiar to some developers
 - MySQL has simpler replication setup
 
@@ -413,6 +453,7 @@ The specifications recommended extensive testing:
 ## Future Technology Evolution
 
 ### Short-term (2024-2025)
+
 - ✅ OAuth2/OIDC integration (Completed v2.0)
 - ✅ Data encryption at rest (Completed v2.0)
 - ✅ GraphQL API (Completed v2.0)
@@ -421,6 +462,7 @@ The specifications recommended extensive testing:
 - ✅ Document management (Completed v3.0)
 
 ### Medium-term (2026)
+
 - 🔄 WebRTC telemedicine (Q2 2026)
 - 🔄 Payment integration (Q2 2026)
 - 🔄 Advanced analytics (Q2 2026)
@@ -429,6 +471,7 @@ The specifications recommended extensive testing:
 - 🔄 DMP integration (French shared medical record)
 
 ### Long-term (2027+)
+
 - 📋 INS integration (French national patient identifier)
 - 📋 Mobile apps (React Native)
 - 📋 ML/AI for clinical decision support
@@ -438,6 +481,7 @@ The specifications recommended extensive testing:
 ## Compliance & Standards
 
 ### Current Compliance
+
 - ✅ GDPR (Europe)
 - ✅ HIPAA-ready (US)
 - ✅ HDS-ready architecture (France)
@@ -448,6 +492,7 @@ The specifications recommended extensive testing:
 - ✅ FHIR R4 (interoperability)
 
 ### Planned Compliance
+
 - 🔄 INS integration (French patient ID)
 - 🔄 Pro Santé Connect (French SSO)
 - 🔄 Ségur FHIR profiles (French interop)

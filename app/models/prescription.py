@@ -4,7 +4,7 @@ Prescription model for managing patient prescriptions and medications.
 
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -31,13 +31,9 @@ class Prescription(Base):
     frequency = Column(String, nullable=False)
     duration = Column(String, nullable=False)
     instructions = Column(Text)
-    prescribed_date = Column(
-        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
-    )
+    prescribed_date = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     refills = Column(Integer, default=0)
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),

@@ -5,6 +5,7 @@
 ### 1.1 Vision Globale
 
 Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution cloud-native, interopérable et sécurisée pour la gestion complète des dossiers médicaux, utilisable par :
+
 - **GHU (Groupement Hospitalier Universitaire)** : gestion de milliers de patients, coordination multi-services
 - **Petits hôpitaux** : solution adaptable avec fonctionnalités essentielles
 - **Cabinets médicaux** : interface simplifiée, mode offline-first
@@ -13,6 +14,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 ### 1.2 Problèmes à Résoudre
 
 #### Pour les Soignants
+
 - ❌ Saisie manuelle répétitive et chronophage
 - ❌ Données éparpillées dans plusieurs systèmes
 - ❌ Manque de traçabilité et historique incomplet
@@ -20,6 +22,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 - ❌ Alertes cliniques tardives ou manquantes
 
 #### Pour les Établissements
+
 - ❌ Interopérabilité limitée avec les SI existants
 - ❌ Non-conformité RGPD/HDS
 - ❌ Coûts d'intégration élevés
@@ -27,6 +30,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 - ❌ Processus de facturation complexes
 
 #### Pour les Patients
+
 - ❌ Perte d'informations lors des transferts
 - ❌ Redondance des examens
 - ❌ Manque d'accès à leur propre dossier
@@ -35,9 +39,11 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 ### 1.3 Cas d'Usage Prioritaires
 
 #### Cas d'Usage 1 : Consultation Ambulatoire
-**Acteur** : Médecin généraliste  
-**Objectif** : Consulter un patient en moins de 10 minutes avec saisie structurée  
+
+**Acteur** : Médecin généraliste
+**Objectif** : Consulter un patient en moins de 10 minutes avec saisie structurée
 **Flux** :
+
 1. Recherche/création patient avec INS
 2. Consultation de l'historique (dernières consultations, allergies, traitements en cours)
 3. Saisie anamnèse et examen clinique avec templates
@@ -45,15 +51,18 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 5. Génération ordonnance et CR automatiques
 
 **Critères de succès** :
+
 - Temps de saisie < 5 minutes
 - 0 erreur d'identification patient
 - Détection automatique des interactions médicamenteuses
 - Ordonnance générée conforme réglementations
 
 #### Cas d'Usage 2 : Urgences Hospitalières
-**Acteur** : Urgentiste  
-**Objectif** : Trier, évaluer et traiter un patient aux urgences  
+
+**Acteur** : Urgentiste
+**Objectif** : Trier, évaluer et traiter un patient aux urgences
 **Flux** :
+
 1. Admission rapide avec identito-vigilance
 2. Triage IAO (infirmier d'accueil et d'orientation)
 3. Saisie constantes et scores d'urgence (Glasgow, NEWS)
@@ -62,15 +71,18 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 6. Décision (hospitalisation, sortie, transfert)
 
 **Critères de succès** :
+
 - Admission < 2 minutes
 - Disponibilité résultats labo < 30 minutes
 - Traçabilité complète des actes
 - Score de gravité calculé automatiquement
 
 #### Cas d'Usage 3 : Prescription et Suivi Pharmaceutique
-**Acteur** : Pharmacien hospitalier  
-**Objectif** : Valider et optimiser les prescriptions  
+
+**Acteur** : Pharmacien hospitalier
+**Objectif** : Valider et optimiser les prescriptions
 **Flux** :
+
 1. Réception prescription médicale
 2. Vérification interactions médicamenteuses
 3. Adaptation posologie selon fonction rénale/hépatique
@@ -78,14 +90,17 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 5. Traçabilité des dispensations
 
 **Critères de succès** :
+
 - Détection 100% interactions critiques
 - Validation < 15 minutes
 - Alerte si contre-indication
 
 #### Cas d'Usage 4 : Résultats de Laboratoire
-**Acteur** : Biologiste  
-**Objectif** : Transmettre résultats structurés avec alertes  
+
+**Acteur** : Biologiste
+**Objectif** : Transmettre résultats structurés avec alertes
 **Flux** :
+
 1. Réception demande d'examen (HL7 ORM)
 2. Réalisation analyses
 3. Transmission résultats (HL7 ORU) avec codes LOINC
@@ -93,6 +108,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 5. Intégration automatique au dossier patient
 
 **Critères de succès** :
+
 - Latence transmission < 2 minutes (p95)
 - 100% résultats avec codes LOINC
 - Alerte temps réel pour valeurs critiques
@@ -100,6 +116,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 ### 1.4 Non-Objectifs (Out of Scope MVP)
 
 #### Hors Périmètre Initial
+
 - ❌ Télémédecine avec visioconférence (prévu V2)
 - ❌ Intelligence artificielle pour aide au diagnostic (R&D)
 - ❌ Blockchain pour traçabilité (non prioritaire)
@@ -109,6 +126,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 - ❌ Module de recherche clinique avancé
 
 #### Fonctionnalités Reportées
+
 - Module de téléconsultation vidéo → V2 (Q2 2026)
 - Analytics prédictifs → V3
 - IA assistant médical → Phase R&D
@@ -120,39 +138,47 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 ### 2.1 MVP (Minimum Viable Product) - 6 mois
 
 #### Modules Essentiels
+
 ✅ **Identito-vigilance**
+
 - Création/recherche patient avec INS
 - Gestion doublons et fusion manuelle
 - Intégration téléservice INS
 
 ✅ **Dossier Patient**
+
 - Fiche patient complète
 - Antécédents médicaux structurés
 - Allergies et intolérances
 - Traitements en cours
 
 ✅ **Consultation**
+
 - Saisie anamnèse et examen
 - Constantes vitales
 - Scores cliniques de base (IMC, clairance rénale)
 
 ✅ **Prescription**
+
 - Prescription médicamenteuse avec BDM (Base de Données Médicamenteuses)
 - Détection interactions de base
 - Génération ordonnance PDF
 
 ✅ **Documents**
+
 - Stockage documents (PDF, images)
 - Génération comptes-rendus simples
 - Signature électronique basique
 
 ✅ **Sécurité & Conformité**
+
 - RBAC (4 rôles : Admin, Médecin, Infirmier, Secrétaire)
 - Chiffrement données au repos
 - Journal d'audit RGPD
 - Consentement patient
 
 #### Standards & Interopérabilité MVP
+
 - FHIR R4 : Patient, Encounter, Observation, Condition, MedicationRequest
 - Terminologies : LOINC (résultats bio), ATC (médicaments), CIM-10 (diagnostics)
 - APIs REST sécurisées
@@ -160,32 +186,39 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 ### 2.2 V1 - Production Multi-Site (6-12 mois)
 
 #### Modules Additionnels
+
 ✅ **Agenda & Admission**
+
 - Gestion rendez-vous multi-praticiens
 - Planning salles et ressources
 - Gestion lits et UF (Unités Fonctionnelles)
 
 ✅ **Laboratoire**
+
 - Intégration HL7 v2 (ORM/ORU)
 - Résultats structurés avec codes LOINC
 - Alertes valeurs critiques
 
 ✅ **Imagerie**
+
 - Intégration PACS (DICOM)
 - Visionneuse DICOM web
 - Liens ImagingStudy FHIR
 
 ✅ **Messagerie**
+
 - Messagerie sécurisée MSSanté
 - Échange documents IHE XDS
 - Notifications multi-canal
 
 ✅ **Tableaux de Bord**
+
 - File d'attente temps réel
 - Indicateurs cliniques
 - Alertes personnalisées
 
 #### Standards & Interopérabilité V1
+
 - HL7 v2 : ADT, ORM, ORU
 - DICOM : SR, WADO-RS
 - IHE profils : XDS.b, PIX, PDQ
@@ -194,27 +227,33 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 ### 2.3 V2 - Fonctionnalités Avancées (12-18 mois)
 
 #### Modules Avancés
+
 ✅ **Recherche Avancée**
+
 - Recherche plein-texte ElasticSearch
 - Filtres multi-critères
 - Historique recherches
 
 ✅ **Télémédecine**
+
 - Visioconférence WebRTC
 - Téléconsultation structurée
 - E-prescription
 
 ✅ **Analytics**
+
 - Dashboards personnalisables
 - Export données anonymisées
 - Requêtes OLAP
 
 ✅ **Portail Patient**
+
 - Accès dossier patient
 - Prise RDV en ligne
 - Demande renouvellement ordonnance
 
 #### Intelligence & Automatisation
+
 - Validation pharmaceutique assistée par IA
 - Détection interactions avancées
 - Suggestions diagnostiques contextuelles
@@ -241,6 +280,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 ### 3.2 Comités de Pilotage
 
 #### Comité Stratégique (Mensuel)
+
 - Direction Médicale
 - DSI
 - Direction Générale
@@ -250,6 +290,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 **Décisions** : Roadmap, budget, priorités, conformité
 
 #### Comité Technique (Bi-mensuel)
+
 - Architecte Solution
 - Tech Lead Backend/Frontend
 - DevOps Lead
@@ -259,6 +300,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 **Décisions** : Choix techniques, architecture, performance, sécurité
 
 #### Comité Utilisateurs (Mensuel)
+
 - Médecins représentants par service
 - IDE référentes
 - Secrétaires médicales
@@ -272,6 +314,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 ### 4.1 KPI Utilisateurs
 
 #### Efficacité Clinique
+
 | KPI | Cible MVP | Cible V1 | Mesure |
 |-----|-----------|----------|--------|
 | **Temps de saisie consultation** | < 7 min | < 5 min | Temps moyen workflow complet |
@@ -280,6 +323,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 | **Nombre de clics création RDV** | < 10 | < 5 | Parcours optimisé |
 
 #### Qualité des Données
+
 | KPI | Cible MVP | Cible V1 | Mesure |
 |-----|-----------|----------|--------|
 | **Complétude INS** | > 95% | > 98% | % patients avec INS validé |
@@ -288,6 +332,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 | **Doublons détectés** | < 0.5% | < 0.2% | % doublons dans base |
 
 #### Adoption
+
 | KPI | Cible MVP | Cible V1 | Mesure |
 |-----|-----------|----------|--------|
 | **Taux d'adoption** | > 70% | > 90% | % utilisateurs actifs/total |
@@ -298,6 +343,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 ### 4.2 KPI Techniques
 
 #### Performance
+
 | KPI | Cible MVP | Cible V1 | Mesure |
 |-----|-----------|----------|--------|
 | **Latence API (p95)** | < 500 ms | < 300 ms | Temps réponse endpoints |
@@ -306,6 +352,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 | **Temps chargement page** | < 3 sec | < 2 sec | Time to Interactive |
 
 #### Sécurité & Conformité
+
 | KPI | Cible MVP | Cible V1 | Mesure |
 |-----|-----------|----------|--------|
 | **Incidents sécurité** | 0 | 0 | Incidents majeurs/mois |
@@ -314,6 +361,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 | **Chiffrement données sensibles** | 100% | 100% | % données PHI chiffrées |
 
 #### Scalabilité
+
 | KPI | Cible MVP | Cible V1 | Mesure |
 |-----|-----------|----------|--------|
 | **Utilisateurs concurrents** | 100 | 500 | Capacité pic |
@@ -324,6 +372,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 ### 4.3 KPI Business
 
 #### ROI et Efficience
+
 | KPI | Cible MVP | Cible V1 | Mesure |
 |-----|-----------|----------|--------|
 | **Réduction temps admin** | -20% | -30% | Temps tâches administratives |
@@ -336,7 +385,9 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 ### 5.1 Processus de Décision
 
 #### Prioritisation Fonctionnalités
+
 **Framework RICE** :
+
 - **R**each (Portée) : Nombre d'utilisateurs impactés
 - **I**mpact : Impact métier (0.25, 0.5, 1, 2, 3)
 - **C**onfidence : Niveau de confiance (0-100%)
@@ -345,6 +396,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 **Score RICE** = (Reach × Impact × Confidence) / Effort
 
 #### Critères d'Acceptation Feature
+
 - ✅ User stories INVEST complètes
 - ✅ Critères d'acceptation Gherkin
 - ✅ Maquettes validées
@@ -374,6 +426,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 ## 6. Success Metrics - Synthèse
 
 ### Objectifs 6 Mois (MVP)
+
 - ✅ 70% adoption utilisateurs pilotes
 - ✅ < 7 min temps saisie consultation
 - ✅ 95% complétude INS
@@ -382,6 +435,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 - ✅ Satisfaction > 3.5/5
 
 ### Objectifs 12 Mois (V1)
+
 - ✅ 90% adoption multi-sites
 - ✅ < 5 min temps saisie consultation
 - ✅ 98% complétude INS
@@ -390,6 +444,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 - ✅ ROI positif
 
 ### Objectifs 18 Mois (V2)
+
 - ✅ Déploiement GHU complet
 - ✅ Télémédecine opérationnelle
 - ✅ Analytics avancés
@@ -399,7 +454,7 @@ Le DMI (Dossier Médical Informatisé) de KeneyApp vise à créer une solution c
 
 ---
 
-**Document validé par** : Direction Médicale, DSI, Product Owner  
-**Date** : 2025-01-10  
-**Version** : 1.0  
+**Document validé par** : Direction Médicale, DSI, Product Owner
+**Date** : 2025-01-10
+**Version** : 1.0
 **Prochaine revue** : 2025-04-10

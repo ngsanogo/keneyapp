@@ -18,13 +18,13 @@ test.describe('Authentication', () => {
     // Fill login form
     await page.fill('input[name="username"]', 'admin');
     await page.fill('input[name="password"]', 'admin123');
-    
+
     // Click login button
     await page.click('button[type="submit"]');
-    
+
     // Wait for navigation
     await page.waitForURL('**/dashboard');
-    
+
     // Verify successful login
     await expect(page.locator('[data-testid="user-menu"]')).toBeVisible();
   });
@@ -33,7 +33,7 @@ test.describe('Authentication', () => {
     await page.fill('input[name="username"]', 'invalid');
     await page.fill('input[name="password"]', 'wrong');
     await page.click('button[type="submit"]');
-    
+
     // Verify error message
     await expect(page.locator('.error-message')).toContainText('Invalid credentials');
   });
@@ -44,11 +44,11 @@ test.describe('Authentication', () => {
     await page.fill('input[name="password"]', 'admin123');
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard');
-    
+
     // Logout
     await page.click('[data-testid="user-menu"]');
     await page.click('text=Logout');
-    
+
     // Verify redirect to login
     await page.waitForURL('**/login');
     await expect(page.locator('h1')).toContainText('Sign In');

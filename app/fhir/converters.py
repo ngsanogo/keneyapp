@@ -3,15 +3,16 @@ FHIR Resource Converters for KeneyApp.
 Converts between KeneyApp models and FHIR resources for interoperability.
 """
 
-from typing import Dict, Any
-from fhir.resources.patient import Patient as FHIRPatient
-from fhir.resources.humanname import HumanName
-from fhir.resources.contactpoint import ContactPoint
-from fhir.resources.address import Address
-from fhir.resources.identifier import Identifier
+from typing import Any, Dict
 
-from app.models.patient import Patient
+from fhir.resources.address import Address
+from fhir.resources.contactpoint import ContactPoint
+from fhir.resources.humanname import HumanName
+from fhir.resources.identifier import Identifier
+from fhir.resources.patient import Patient as FHIRPatient
+
 from app.models.appointment import Appointment
+from app.models.patient import Patient
 from app.models.prescription import Prescription
 from app.services.patient_security import serialize_patient_dict
 
@@ -244,9 +245,7 @@ class FHIRConverter:
             "dosageInstruction": [
                 {
                     "text": f"{prescription.dosage} {prescription.frequency} for {prescription.duration}",
-                    "timing": {
-                        "repeat": {"frequency": 1, "period": 1, "periodUnit": "d"}
-                    },
+                    "timing": {"repeat": {"frequency": 1, "period": 1, "periodUnit": "d"}},
                 }
             ],
         }
@@ -391,9 +390,7 @@ class FHIRConverter:
         if observation.value_quantity and observation.value_unit:
             fhir_observation["valueQuantity"] = {
                 "value": (
-                    float(observation.value_quantity)
-                    if observation.value_quantity
-                    else None
+                    float(observation.value_quantity) if observation.value_quantity else None
                 ),
                 "unit": observation.value_unit,
             }

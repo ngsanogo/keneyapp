@@ -1,6 +1,7 @@
 # Dependency Updates - November 2025
 
 ## Overview
+
 This document summarizes the dependency updates performed to bring all packages to their latest compatible versions.
 
 ## Python Backend Dependencies
@@ -25,6 +26,7 @@ This document summarizes the dependency updates performed to bring all packages 
 | pycryptodome | 3.20.0 | 3.23.0 | Patch |
 
 ### Security Status
+
 All updated Python packages were scanned against GitHub Advisory Database - **No vulnerabilities found**.
 
 ## Frontend Dependencies
@@ -66,10 +68,11 @@ The following packages have newer major versions available but were **not update
 The frontend has **9 vulnerabilities (3 moderate, 6 high)** in development dependencies:
 
 - **nth-check** (high): Inefficient Regular Expression Complexity - affects svgo (dev dependency)
-- **postcss** (moderate): Line return parsing error - affects resolve-url-loader (dev dependency)  
+- **postcss** (moderate): Line return parsing error - affects resolve-url-loader (dev dependency)
 - **webpack-dev-server** (moderate): Potential source code exposure - affects react-scripts (dev only)
 
 **Impact Assessment:**
+
 - All vulnerabilities are in **development dependencies only**
 - They do NOT affect production builds
 - The suggested fix (`npm audit fix --force`) would break react-scripts
@@ -78,6 +81,7 @@ The frontend has **9 vulnerabilities (3 moderate, 6 high)** in development depen
 ### Frontend Build Configuration
 
 Added `.npmrc` file with:
+
 ```
 legacy-peer-deps=true
 ```
@@ -87,11 +91,13 @@ This is required to handle peer dependency conflicts between newer packages and 
 ## Recommendations for Future Updates
 
 ### Short Term
+
 1. Continue monitoring security advisories for the current dependencies
 2. Apply patch and minor updates within current major version constraints
 3. Test thoroughly before deploying updated dependencies to production
 
 ### Long Term
+
 To update to the latest major versions (React 19, TypeScript 5, etc.), consider:
 
 1. **Migration Path Options:**
@@ -114,12 +120,14 @@ To update to the latest major versions (React 19, TypeScript 5, etc.), consider:
 ## Testing Performed
 
 ### Backend
+
 - ✅ All dependency version constraints verified
 - ✅ Security scan completed (no vulnerabilities)
 - ⚠️ PyPI connection issues prevented full installation test in CI environment
 - ℹ️ Manual verification confirms all versions exist and are valid
 
 ### Frontend
+
 - ✅ Clean install successful with `--legacy-peer-deps`
 - ✅ Production build successful
 - ✅ All updated packages verified for compatibility
@@ -128,11 +136,13 @@ To update to the latest major versions (React 19, TypeScript 5, etc.), consider:
 ## Compatibility Notes
 
 ### Python
+
 - All updates maintain backward compatibility
 - Major version updates (pytest-asyncio, redis, black, pytest-cov) have been tested for breaking changes
 - No code changes required for the updates
 
-### Frontend  
+### Frontend
+
 - All updates are within compatible major version ranges
 - No breaking changes expected in the updated versions
 - Build and runtime compatibility verified
@@ -155,6 +165,7 @@ cd frontend && npm install --legacy-peer-deps
 Successfully updated **14 Python packages** and **13 frontend packages** to their latest compatible versions. All security-scannable packages are vulnerability-free. Frontend is constrained by react-scripts 5.0.1 but all possible updates within those constraints have been applied.
 
 **Next Steps:**
+
 1. Deploy to staging environment for integration testing
 2. Monitor application behavior with updated dependencies
 3. Plan migration from react-scripts for future major version updates

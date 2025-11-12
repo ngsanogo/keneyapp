@@ -1,9 +1,11 @@
 # Testing Guide for KeneyApp
 
 ## Overview
+
 This guide provides comprehensive testing strategies and best practices for KeneyApp, covering unit tests, integration tests, end-to-end tests, and performance testing.
 
 ## Table of Contents
+
 1. [Testing Philosophy](#testing-philosophy)
 2. [Backend Testing](#backend-testing)
 3. [Frontend Testing](#frontend-testing)
@@ -17,12 +19,13 @@ This guide provides comprehensive testing strategies and best practices for Kene
 ## Testing Philosophy
 
 ### Test Pyramid
+
 ```
         /\
        /  \      E2E Tests (Few)
-      /----\     
+      /----\
      /      \    Integration Tests (Some)
-    /--------\   
+    /--------\
    /          \  Unit Tests (Many)
   /____________\
 ```
@@ -32,6 +35,7 @@ This guide provides comprehensive testing strategies and best practices for Kene
 - **E2E Tests (10%)**: Test complete user workflows
 
 ### Key Principles
+
 1. **Fast**: Tests should run quickly
 2. **Isolated**: Tests shouldn't depend on each other
 3. **Repeatable**: Same result every time
@@ -79,15 +83,15 @@ def test_patient_creation():
         email="john@example.com",
         phone="+1234567890"
     )
-    
+
     assert patient.first_name == "John"
     assert patient.last_name == "Doe"
     assert patient.gender == Gender.MALE
-    
+
 def test_patient_age_calculation():
     """Test patient age calculation."""
     from datetime import date
-    
+
     # Patient born 30 years ago
     birth_date = date(date.today().year - 30, 1, 1)
     patient = Patient(
@@ -97,7 +101,7 @@ def test_patient_age_calculation():
         gender=Gender.FEMALE,
         phone="+1234567890"
     )
-    
+
     # Example: if you implement an age property
     # assert patient.age >= 30
     assert patient.date_of_birth == birth_date
@@ -116,27 +120,27 @@ def test_send_appointment_reminder():
     # Mock email service
     with patch('app.services.notification.send_email') as mock_send:
         mock_send.return_value = True
-        
+
         service = NotificationService()
         result = service.send_appointment_reminder(
             email="patient@example.com",
             appointment_time="2024-01-15 10:00"
         )
-        
+
         assert result is True
         mock_send.assert_called_once()
-        
+
 def test_send_reminder_handles_failure():
     """Test handling of email send failure."""
     with patch('app.services.notification.send_email') as mock_send:
         mock_send.side_effect = Exception("SMTP error")
-        
+
         service = NotificationService()
         result = service.send_appointment_reminder(
             email="patient@example.com",
             appointment_time="2024-01-15 10:00"
         )
-        
+
         assert result is False
 ```
 
@@ -156,7 +160,7 @@ def test_password_hashing():
     """Test password hashing and verification."""
     password = "SecurePassword123!"
     hashed = get_password_hash(password)
-    
+
     assert hashed != password
     assert verify_password(password, hashed) is True
     assert verify_password("WrongPassword", hashed) is False
@@ -165,10 +169,10 @@ def test_jwt_token_creation():
     """Test JWT token creation and decoding."""
     data = {"sub": "testuser", "role": "admin"}
     token = create_access_token(data)
-    
+
     assert token is not None
     assert isinstance(token, str)
-    
+
     decoded = decode_access_token(token)
     assert decoded["sub"] == "testuser"
     assert decoded["role"] == "admin"
@@ -176,14 +180,14 @@ def test_jwt_token_creation():
 def test_jwt_token_expiration():
     """Test JWT token expiration."""
     from datetime import timedelta
-    
+
     data = {"sub": "testuser"}
     token = create_access_token(data, expires_delta=timedelta(seconds=1))
-    
+
     # Wait for token to expire
     import time
     time.sleep(2)
-    
+
     decoded = decode_access_token(token)
     assert decoded is None  # Expired token should return None
 ```
@@ -221,23 +225,23 @@ def test_create_and_retrieve_patient(auth_headers):
         "gender": "male",
         "phone": "+1234567890"
     }
-    
+
     response = client.post(
         "/api/v1/patients/",
         json=patient_data,
         headers=auth_headers
     )
-    
+
     assert response.status_code == 201
     patient = response.json()
     patient_id = patient["id"]
-    
+
     # Retrieve patient
     response = client.get(
         f"/api/v1/patients/{patient_id}",
         headers=auth_headers
     )
-    
+
     assert response.status_code == 200
     retrieved_patient = response.json()
     assert retrieved_patient["email"] == patient_data["email"]
@@ -254,14 +258,14 @@ def test_update_patient(auth_headers):
         "gender": "female",
         "phone": "+1234567890"
     }
-    
+
     response = client.post(
         "/api/v1/patients/",
         json=patient_data,
         headers=auth_headers
     )
     patient_id = response.json()["id"]
-    
+
     # Update patient
     update_data = {"phone": "+9876543210"}
     response = client.put(
@@ -269,7 +273,7 @@ def test_update_patient(auth_headers):
         json=update_data,
         headers=auth_headers
     )
-    
+
     assert response.status_code == 200
     updated_patient = response.json()
     assert updated_patient["phone"] == "+9876543210"
@@ -285,28 +289,28 @@ def test_delete_patient(auth_headers):
         "gender": "other",
         "phone": "+1234567890"
     }
-    
+
     response = client.post(
         "/api/v1/patients/",
         json=patient_data,
         headers=auth_headers
     )
     patient_id = response.json()["id"]
-    
+
     # Delete patient
     response = client.delete(
         f"/api/v1/patients/{patient_id}",
         headers=auth_headers
     )
-    
+
     assert response.status_code == 204
-    
+
     # Verify deletion
     response = client.get(
         f"/api/v1/patients/{patient_id}",
         headers=auth_headers
     )
-    
+
     assert response.status_code == 404
 ```
 
@@ -327,15 +331,15 @@ def db_session():
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
-    
+
     yield session
-    
+
     session.close()
 
 def test_patient_crud_operations(db_session):
     """Test CRUD operations on patient model."""
     from datetime import date
-    
+
     # Create
     patient = Patient(
         first_name="Test",
@@ -346,27 +350,27 @@ def test_patient_crud_operations(db_session):
     )
     db_session.add(patient)
     db_session.commit()
-    
+
     # Read
     retrieved = db_session.query(Patient).filter_by(
         first_name="Test"
     ).first()
     assert retrieved is not None
     assert retrieved.last_name == "Patient"
-    
+
     # Update
     retrieved.phone = "+9876543210"
     db_session.commit()
-    
+
     updated = db_session.query(Patient).filter_by(
         first_name="Test"
     ).first()
     assert updated.phone == "+9876543210"
-    
+
     # Delete
     db_session.delete(updated)
     db_session.commit()
-    
+
     deleted = db_session.query(Patient).filter_by(
         first_name="Test"
     ).first()
@@ -486,7 +490,7 @@ import random
 
 class KeneyAppUser(HttpUser):
     wait_time = between(1, 3)
-    
+
     def on_start(self):
         """Login before starting tasks."""
         response = self.client.post("/api/v1/auth/login", json={
@@ -495,7 +499,7 @@ class KeneyAppUser(HttpUser):
         })
         self.token = response.json()["access_token"]
         self.headers = {"Authorization": f"Bearer {self.token}"}
-    
+
     @task(3)
     def view_dashboard(self):
         """Test dashboard endpoint."""
@@ -504,7 +508,7 @@ class KeneyAppUser(HttpUser):
             headers=self.headers,
             name="/dashboard"
         )
-    
+
     @task(5)
     def list_patients(self):
         """Test patient list endpoint."""
@@ -513,7 +517,7 @@ class KeneyAppUser(HttpUser):
             headers=self.headers,
             name="/patients"
         )
-    
+
     @task(2)
     def view_patient(self):
         """Test individual patient endpoint."""
@@ -523,7 +527,7 @@ class KeneyAppUser(HttpUser):
             headers=self.headers,
             name="/patients/:id"
         )
-    
+
     @task(1)
     def create_patient(self):
         """Test patient creation."""
@@ -543,6 +547,7 @@ class KeneyAppUser(HttpUser):
 ```
 
 Run load test:
+
 ```bash
 # Install locust
 pip install locust
@@ -569,15 +574,15 @@ def test_sql_injection_in_patient_search(auth_headers):
     """Test that SQL injection attempts are blocked."""
     # Attempt SQL injection
     malicious_input = "'; DROP TABLE patients; --"
-    
+
     response = client.get(
         f"/api/v1/patients/?search={malicious_input}",
         headers=auth_headers
     )
-    
+
     # Should not cause an error or return unusual data
     assert response.status_code in [200, 400]
-    
+
     # Verify tables still exist
     response = client.get("/api/v1/patients/", headers=auth_headers)
     assert response.status_code == 200
@@ -589,7 +594,7 @@ def test_sql_injection_in_patient_search(auth_headers):
 def test_xss_in_patient_name(auth_headers):
     """Test that XSS attempts are sanitized."""
     xss_payload = "<script>alert('xss')</script>"
-    
+
     response = client.post("/api/v1/patients/", json={
         "first_name": xss_payload,
         "last_name": "Test",
@@ -598,7 +603,7 @@ def test_xss_in_patient_name(auth_headers):
         "gender": "male",
         "phone": "+1234567890"
     }, headers=auth_headers)
-    
+
     # Should be rejected or sanitized
     if response.status_code == 201:
         patient = response.json()
@@ -614,7 +619,7 @@ def test_xss_in_patient_name(auth_headers):
 # Backend coverage
 pytest --cov=app --cov-report=html --cov-report=term-missing
 
-# Frontend coverage  
+# Frontend coverage
 npm test -- --coverage --watchAll=false
 
 # View HTML reports
@@ -623,6 +628,7 @@ npm test -- --coverage --watchAll=false
 ```
 
 ### Coverage Goals
+
 - **Overall**: > 80%
 - **Critical paths**: > 95%
 - **New code**: 100%
@@ -630,6 +636,7 @@ npm test -- --coverage --watchAll=false
 ## CI/CD Integration
 
 Tests run automatically on:
+
 - Every push to main/develop
 - Every pull request
 - Nightly builds
@@ -644,10 +651,10 @@ See `.github/workflows/ci.yml` for configuration.
 def test_create_patient():
     # Arrange
     patient_data = {"first_name": "John", ...}
-    
+
     # Act
     response = client.post("/patients/", json=patient_data)
-    
+
     # Assert
     assert response.status_code == 201
 ```

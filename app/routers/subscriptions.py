@@ -9,22 +9,21 @@ Notes: Minimal FHIR-like shape; persistence via SQLAlchemy model.
 """
 
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.rate_limit import limiter
 from app.core.dependencies import require_roles
-from app.models.user import User, UserRole
+from app.core.rate_limit import limiter
 from app.models.subscription import Subscription, SubscriptionStatus
+from app.models.user import User, UserRole
 from app.schemas.subscription import SubscriptionCreate, SubscriptionResponse
 
 router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 
 
-@router.post(
-    "/", response_model=SubscriptionResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("/", response_model=SubscriptionResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit("20/minute")
 def create_subscription(
     payload: SubscriptionCreate,
@@ -35,9 +34,7 @@ def create_subscription(
     # Minimal validation: criteria must start with supported resource
     SUPPORTED = ("Patient", "Appointment", "MedicationRequest")
     if not any(payload.criteria.startswith(rt) for rt in SUPPORTED):
-        raise HTTPException(
-            status_code=400, detail="Unsupported criteria resource type"
-        )
+        raise HTTPException(status_code=400, detail="Unsupported criteria resource type")
     sub = Subscription(
         tenant_id=current_user.tenant_id,
         status=SubscriptionStatus.requested,

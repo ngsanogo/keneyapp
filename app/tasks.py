@@ -3,8 +3,10 @@ Celery background tasks for asynchronous processing.
 """
 
 import logging
-from app.core.celery_app import celery_app
+
 import requests
+
+from app.core.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
 
@@ -88,25 +90,17 @@ def deliver_subscription_webhook(subscription_id: int, resource: dict):
     try:
         sub = db.query(Subscription).filter(Subscription.id == subscription_id).first()
         if not sub:
-            logger.error(
-                "Subscription %s not found for webhook delivery", subscription_id
-            )
+            logger.error("Subscription %s not found for webhook delivery", subscription_id)
             return {"status": "error", "reason": "subscription_not_found"}
 
         headers = {"Content-Type": sub.payload or "application/fhir+json"}
         try:
             # Use json param to ensure proper serialization
-            resp = requests.post(
-                sub.endpoint, json=resource, headers=headers, timeout=5
-            )
-            logger.info(
-                "Delivered webhook to %s status=%s", sub.endpoint, resp.status_code
-            )
+            resp = requests.post(sub.endpoint, json=resource, headers=headers, timeout=5)
+            logger.info("Delivered webhook to %s status=%s", sub.endpoint, resp.status_code)
             return {"status": "ok", "http_status": resp.status_code}
         except Exception as exc:  # pragma: no cover - best effort
-            logger.warning(
-                "Webhook delivery failed for subscription %s: %s", subscription_id, exc
-            )
+            logger.warning("Webhook delivery failed for subscription %s: %s", subscription_id, exc)
             return {"status": "error", "reason": str(exc)}
     finally:
         try:
@@ -247,10 +241,11 @@ def send_upcoming_appointment_reminders():
     Send reminders for appointments happening in the next 24 hours.
     Runs daily to notify patients.
     """
+    from datetime import datetime, timedelta, timezone
+
     from app.core.database import SessionLocal
     from app.models.appointment import Appointment
     from app.services.notification_service import NotificationService
-    from datetime import datetime, timedelta, timezone
 
     logger.info("Starting upcoming appointment reminders")
 
@@ -277,9 +272,7 @@ def send_upcoming_appointment_reminders():
                     patient_email=appt.patient.email,
                     patient_name=f"{appt.patient.first_name} {appt.patient.last_name}",
                     appointment_date=appt.appointment_date,
-                    doctor_name=(
-                        appt.doctor.full_name if appt.doctor else "votre médecin"
-                    ),
+                    doctor_name=(appt.doctor.full_name if appt.doctor else "votre médecin"),
                     phone=appt.patient.phone,
                 )
                 sent_count += 1
@@ -304,8 +297,8 @@ def send_lab_results_notifications(document_id: int, patient_id: int):
         patient_id: ID of the patient
     """
     from app.core.database import SessionLocal
-    from app.models.patient import Patient
     from app.models.medical_document import MedicalDocument
+    from app.models.patient import Patient
     from app.services.notification_service import NotificationService
 
     logger.info("Sending lab results notification")
@@ -313,9 +306,7 @@ def send_lab_results_notifications(document_id: int, patient_id: int):
     db = SessionLocal()
     try:
         patient = db.query(Patient).filter(Patient.id == patient_id).first()
-        document = (
-            db.query(MedicalDocument).filter(MedicalDocument.id == document_id).first()
-        )
+        document = db.query(MedicalDocument).filter(MedicalDocument.id == document_id).first()
 
         if patient and document and patient.email:
             NotificationService.send_lab_results_notification(
@@ -342,10 +333,11 @@ def send_prescription_renewal_reminders():
     Send reminders for prescriptions expiring in the next 7 days.
     Runs daily.
     """
+    from datetime import datetime, timedelta, timezone
+
     from app.core.database import SessionLocal
     from app.models.prescription import Prescription
     from app.services.notification_service import NotificationService
-    from datetime import datetime, timedelta, timezone
 
     logger.info("Starting prescription renewal reminders")
 
@@ -357,9 +349,7 @@ def send_prescription_renewal_reminders():
 
         prescriptions = (
             db.query(Prescription)
-            .filter(
-                Prescription.refill_date >= now, Prescription.refill_date <= next_week
-            )
+            .filter(Prescription.refill_date >= now, Prescription.refill_date <= next_week)
             .all()
         )
 
@@ -395,8 +385,8 @@ def send_new_message_notification(message_id: int, receiver_id: int):
         receiver_id: ID of the receiver
     """
     from app.core.database import SessionLocal
-    from app.models.user import User
     from app.models.message import Message
+    from app.models.user import User
     from app.services.notification_service import NotificationService
 
     logger.info("Sending new message notification")

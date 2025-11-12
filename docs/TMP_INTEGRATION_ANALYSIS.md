@@ -1,6 +1,6 @@
 # tmp Folder Integration Analysis & Recommendations
 
-**Date**: November 5, 2025  
+**Date**: November 5, 2025
 **Purpose**: Systematic analysis of tmp/ resources to identify high-value components for KeneyApp integration
 
 ---
@@ -8,6 +8,7 @@
 ## Executive Summary
 
 The tmp/ folder contains 5 major open-source healthcare and business management systems:
+
 - **GNU Health HIS** (his/): Comprehensive hospital management with ~30 modules
 - **Thalamus**: Federation server for multi-institution data sharing
 - **LimeSurvey**: Survey platform for questionnaires and assessments
@@ -21,21 +22,25 @@ The tmp/ folder contains 5 major open-source healthcare and business management 
 ## 1. GNU Health HIS Analysis
 
 ### 1.1 ICD-11 Disease Codes ✅ **INTEGRATED**
+
 **Location**: `tmp/his/tryton/health_icd11/data/diseases.xml`
 
 **Value Proposition**:
+
 - Complete ICD-11 taxonomy with 24,824+ disease codes
 - Hierarchical structure with parent-child relationships
 - Multilingual descriptions (English, Spanish, French)
 - Chapter-based organization (e.g., 01-Infectious diseases, 02-Neoplasms)
 
 **Integration Status**: ✅ **COMPLETED**
+
 - Script created: `scripts/import_icd11_from_tmp.py`
 - Imports to: `medical_codes` table
 - Features: Streaming XML parser, batch commits, active filtering
 - Usage: `python scripts/import_icd11_from_tmp.py --batch-size 500 --limit 1000`
 
 **Immediate Benefits**:
+
 - Rich disease lookup for diagnoses
 - Standards-compliant coding for insurance/reporting
 - Foundation for FHIR Condition resources
@@ -43,11 +48,13 @@ The tmp/ folder contains 5 major open-source healthcare and business management 
 ---
 
 ### 1.2 Laboratory Module ✅ **SCAFFOLDED**
+
 **Location**: `tmp/his/tryton/health_lab/health_lab.py`
 
 **Key Models Identified**:
 
 #### TestType (Lab Test Catalog)
+
 ```python
 # Fields we should enhance our LabTestType with:
 - specimen_type: Char  # whole blood, plasma, urine, feces
@@ -64,6 +71,7 @@ The tmp/ folder contains 5 major open-source healthcare and business management 
 ```
 
 #### GnuHealthTestCritearea (Test Criteria/Analytes)
+
 ```python
 # Enhanced fields for our LabTestCriterion:
 - test_method: Char  # e.g., "Real-time PCR"
@@ -80,6 +88,7 @@ The tmp/ folder contains 5 major open-source healthcare and business management 
 ```
 
 **Integration Status**: ✅ **PARTIALLY IMPLEMENTED**
+
 - Models: `app/models/lab.py` has LabTestType and LabTestCriterion
 - Enhancements needed:
   - Add `category` enum field to LabTestType
@@ -88,6 +97,7 @@ The tmp/ folder contains 5 major open-source healthcare and business management 
   - Implement `limits_verified` workflow flag
 
 **Recommended Actions**:
+
 1. **Immediate** (v1.1):
    - Add category enum to LabTestType (use GNU Health's categories)
    - Add test_method and warning fields to LabTestCriterion
@@ -106,11 +116,13 @@ The tmp/ folder contains 5 major open-source healthcare and business management 
 ---
 
 ### 1.3 Socioeconomic Status (SES) Module 🎯 **HIGH VALUE**
+
 **Location**: `tmp/his/tryton/health_socioeconomics/health_socioeconomics.py`
 
 **Model**: PatientSESAssessment
 
 **Core Fields**:
+
 ```python
 # Patient demographics & SES
 education: Selection [
@@ -145,6 +157,7 @@ signed_by: Many2One  # Validates assessment
 ```
 
 **Value Proposition**:
+
 - **Social Determinants of Health (SDOH)**: Essential for comprehensive care
 - **Risk Stratification**: Identify vulnerable populations
 - **Family Dynamics**: APGAR score predicts health outcomes
@@ -154,6 +167,7 @@ signed_by: Many2One  # Validates assessment
 **Integration Plan**:
 
 #### Phase 1: Data Model (Sprint 1)
+
 ```python
 # New models to create:
 app/models/socioeconomic.py
@@ -172,11 +186,13 @@ app/routers/socioeconomic.py
 ```
 
 #### Phase 2: FHIR Integration (Sprint 2)
+
 - Map SES to FHIR Observation resources
 - Use LOINC codes for standardized SDOH reporting
 - Expose via `/fhir/Observation?category=social-history`
 
 #### Phase 3: Analytics (Sprint 3)
+
 - Dashboard widget: SES distribution
 - Risk scoring algorithms
 - Population health segmentation
@@ -188,24 +204,28 @@ app/routers/socioeconomic.py
 ### 1.4 Other Notable GNU Health Modules
 
 #### Pediatrics (`health_pediatrics`)
+
 - Growth charts (WHO standards)
 - Immunization schedules
 - Developmental milestones
 - **Consideration**: Integrate if targeting maternal/child health
 
 #### Gynecology & Obstetrics (`health_gyneco`, `health_obstetrics`)
+
 - Pregnancy tracking
 - Prenatal assessments
 - Delivery records
 - **Consideration**: High-value for women's health clinics
 
 #### Surgery (`health_surgery`)
+
 - Surgical procedures
 - Operating room scheduling
 - Anesthesia records
 - **Consideration**: Complex; defer until OR management needed
 
 #### Nursing (`health_nursing`)
+
 - Nursing assessments
 - Care plans
 - Ambulatory care
@@ -222,12 +242,14 @@ app/routers/socioeconomic.py
 **Key Concepts**:
 
 ### 2.1 Architecture
+
 - **Message Relay**: Concentrator for distributed health nodes
 - **Authentication**: bcrypt-hashed passwords, role-based access
 - **Authorization**: ACL with endpoint/method/role mappings
 - **Resources**: People, Pages of Life (health records), Domiciliary Units
 
 ### 2.2 ACL Model (Access Control List)
+
 ```json
 {
   "role": "health_professional",
@@ -242,6 +264,7 @@ app/routers/socioeconomic.py
 ```
 
 ### 2.3 Federation Patterns
+
 - **Federated Identity**: `person_id` as unique identifier across institutions
 - **Personal Health Record (PHR)**: "Pages of Life" model for lifelong health data
 - **Consent Management**: Patient controls who accesses their records
@@ -249,11 +272,13 @@ app/routers/socioeconomic.py
 
 **Value for KeneyApp**:
 
-#### Short-term (Not Immediate):
+#### Short-term (Not Immediate)
+
 - Study ACL structure for our RBAC enhancements
 - Consider "super admin" vs "tenant admin" vs "health professional" hierarchy
 
-#### Long-term (Roadmap):
+#### Long-term (Roadmap)
+
 - **Multi-Institution Sharing**: Allow patients to grant access to records across KeneyApp tenants
 - **Referral Networks**: Seamless data exchange when referring to specialists
 - **Research Consortiums**: Aggregate de-identified data across sites
@@ -270,6 +295,7 @@ app/routers/socioeconomic.py
 **Purpose**: Open-source survey platform for questionnaires and assessments
 
 **Features**:
+
 - 30+ question types (multiple choice, scale, matrix, text, etc.)
 - Conditional logic and branching
 - Multilingual support (80+ languages)
@@ -278,6 +304,7 @@ app/routers/socioeconomic.py
 - 900+ templates
 
 **Healthcare Use Cases**:
+
 - Patient satisfaction surveys (HCAHPS)
 - Health risk assessments (HRA)
 - Mental health screening (PHQ-9, GAD-7)
@@ -288,10 +315,12 @@ app/routers/socioeconomic.py
 **Integration Approach**:
 
 ### Option A: Embedded (Recommended for MVP)
+
 **Pros**: Full control, seamless UX, patient data stays in KeneyApp
 **Cons**: Must build survey engine from scratch
 
 **Implementation**:
+
 ```python
 # New models
 app/models/survey.py
@@ -310,10 +339,12 @@ app/models/survey.py
 **Effort**: Medium (2-3 sprints for basic engine)
 
 ### Option B: API Integration
+
 **Pros**: Leverage LimeSurvey's mature feature set
 **Cons**: External dependency, data sync complexity, additional infrastructure
 
 **Implementation**:
+
 - Deploy LimeSurvey instance (Docker)
 - Use RemoteControl API to create/manage surveys
 - Iframe survey links in KeneyApp patient portal
@@ -321,7 +352,8 @@ app/models/survey.py
 
 **Effort**: Low (1 sprint for basic integration)
 
-**Recommendation**: 
+**Recommendation**:
+
 - **Phase 1**: Build minimal embedded survey engine for common assessments (PHQ-9, GAD-7)
 - **Phase 2**: Offer LimeSurvey integration as enterprise feature for advanced users
 
@@ -334,6 +366,7 @@ app/models/survey.py
 **Purpose**: Full-featured open-source ERP system (accounting, inventory, HR, projects)
 
 **Relevant Modules**:
+
 - **Accounting**: Invoicing, payments, financial reports
 - **Asset Management**: Medical equipment tracking
 - **Projects**: Care delivery programs, research studies
@@ -341,12 +374,14 @@ app/models/survey.py
 
 **Healthcare Considerations**:
 ERPNext is primarily designed for general business operations, but has healthcare extensions for:
+
 - Patient billing
 - Insurance claims
 - Pharmacy inventory
 - Laboratory billing
 
-**Recommendation**: 
+**Recommendation**:
+
 - **Not a direct fit** for core clinical workflows (our FastAPI/FHIR architecture is better suited)
 - **Potential integration** for back-office operations:
   - Billing module → KeneyApp generates invoices → push to ERPNext for accounting
@@ -360,12 +395,15 @@ ERPNext is primarily designed for general business operations, but has healthcar
 ## Priority Matrix & Implementation Roadmap
 
 ### Immediate (v1.1 - Current Sprint)
+
 ✅ **ICD-11 Import** - DONE
+
 - Run import script in dev/staging
 - Validate code counts and hierarchy
 - Add to seed data process
 
 ✅ **Lab Model Enhancements** - IN PROGRESS
+
 - Add category enum to LabTestType
 - Add test_method, warning to LabTestCriterion
 - Create migration and test endpoints
@@ -373,17 +411,20 @@ ERPNext is primarily designed for general business operations, but has healthcar
 ### Short-term (v1.2 - Next 2 Sprints)
 
 🎯 **Priority 1: Socioeconomic Module**
+
 - Sprint 1: Models, schemas, CRUD endpoints
 - Sprint 2: Dashboard integration, FHIR mapping
 - **Impact**: High (SDOH required for grants, patient stratification)
 
 🎯 **Priority 2: Enhanced Lab Workflows**
+
 - Lab result states (draft → validated)
 - Professional assignment (requestor, pathologist)
 - Report generation with configurable styles
 - **Impact**: High (improves lab usability, workflow compliance)
 
 🎯 **Priority 3: Basic Survey Engine**
+
 - Models for surveys, questions, responses
 - PHQ-9 and GAD-7 templates
 - Score calculation and flagging
@@ -392,18 +433,21 @@ ERPNext is primarily designed for general business operations, but has healthcar
 ### Medium-term (v1.3-1.4 - Next Quarter)
 
 📋 **Nursing & Care Plan Module**
+
 - Nursing assessments and care plans
 - Task management for care team
 - Patient education tracking
 - **Impact**: Medium (enhances nursing workflows)
 
 📋 **Growth Charts & Pediatrics**
+
 - WHO growth standards
 - Immunization scheduler
 - Developmental milestones
 - **Impact**: Medium (valuable for family clinics)
 
 📋 **Survey Advanced Features**
+
 - Conditional logic/branching
 - Additional question types (matrix, ranking)
 - Survey templates library
@@ -412,18 +456,21 @@ ERPNext is primarily designed for general business operations, but has healthcar
 ### Long-term (v2.0+ - Future Roadmap)
 
 🔮 **Federation & Multi-Institution Sharing**
+
 - Adapt Thalamus federation concepts
 - Patient-controlled data sharing
 - Referral network with data exchange
 - **Impact**: Transformative (enables collaborative care networks)
 
 🔮 **ERP Integration (Enterprise Feature)**
+
 - Billing/accounting sync
 - Inventory management for supplies
 - HR/staff scheduling integration
 - **Impact**: High for large enterprises
 
 🔮 **Specialized Clinical Modules**
+
 - Surgery/OR management
 - Gynecology/Obstetrics
 - Radiology (DICOM integration)
@@ -433,7 +480,7 @@ ERPNext is primarily designed for general business operations, but has healthcar
 
 ## Technical Integration Guidelines
 
-### For Any New Module:
+### For Any New Module
 
 1. **Follow KeneyApp Conventions** (from `.github/copilot-instructions.md`):
    - Router in `app/routers/` with RBAC decorators
@@ -468,12 +515,14 @@ ERPNext is primarily designed for general business operations, but has healthcar
 
 ## Data Extraction Scripts
 
-### Already Created:
+### Already Created
+
 ✅ `scripts/import_icd11_from_tmp.py` - ICD-11 disease codes
 
-### To Be Created:
+### To Be Created
 
 #### Lab Reference Data
+
 ```python
 # scripts/import_lab_categories.py
 """
@@ -483,6 +532,7 @@ Populate lab_test_categories and lab_test_units tables
 ```
 
 #### Socioeconomic Lookups
+
 ```python
 # scripts/import_occupations.py
 """
@@ -492,6 +542,7 @@ Populate occupations table with standard codes
 ```
 
 #### Survey Templates
+
 ```python
 # scripts/import_survey_templates.py
 """
@@ -504,26 +555,30 @@ Populate surveys and survey_questions tables
 
 ## Conclusion & Next Steps
 
-### Key Takeaways:
+### Key Takeaways
+
 1. **GNU Health is a goldmine** of healthcare domain models and data
 2. **ICD-11 integration is complete** - ready for use
 3. **Lab enhancements are high ROI** - improve immediately
 4. **SES module is strategic** - unlocks SDOH capabilities for grants
 5. **Federation concepts inform future** - but not urgent now
 
-### Immediate Action Items (This Week):
+### Immediate Action Items (This Week)
+
 - [ ] Run ICD-11 import in staging environment
 - [ ] Create lab model enhancement migration
 - [ ] Add category enum to LabTestType
 - [ ] Update lab router tests
 
-### Next Sprint Planning:
+### Next Sprint Planning
+
 - [ ] Socioeconomic module design review
 - [ ] Create SES models and migration
 - [ ] Build SES CRUD endpoints
 - [ ] Design dashboard SES widgets
 
-### Delete tmp/ When:
+### Delete tmp/ When
+
 - ✅ ICD-11 import validated and documented
 - ✅ GNU Health patterns documented in this analysis
 - ✅ No pending code extraction planned
@@ -534,7 +589,8 @@ Populate surveys and survey_questions tables
 
 ## Appendix: File Inventory
 
-### tmp/ Structure:
+### tmp/ Structure
+
 ```
 tmp/
 ├── his/                      # GNU Health HIS (30+ modules)
@@ -552,22 +608,25 @@ tmp/
 └── frappe_docker/           # ✅ Container orchestration (NOTED)
 ```
 
-### Models Created/Enhanced:
+### Models Created/Enhanced
+
 - ✅ `app/models/lab.py` - LabTestType, LabTestCriterion
 - ⏳ `app/models/socioeconomic.py` - PLANNED
 - ⏳ `app/models/survey.py` - PLANNED
 
-### Scripts Created:
+### Scripts Created
+
 - ✅ `scripts/import_icd11_from_tmp.py`
 
-### Docs Created:
+### Docs Created
+
 - ✅ `docs/TMP_INTEGRATION_ANALYSIS.md` (this document)
 
 ---
 
-**Document Version**: 2.0  
-**Last Updated**: November 5, 2025  
-**Author**: AI Analysis (via GitHub Copilot)  
+**Document Version**: 2.0
+**Last Updated**: November 5, 2025
+**Author**: AI Analysis (via GitHub Copilot)
 **Status**: Ready for team review
 
 ---

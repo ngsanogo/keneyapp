@@ -8,14 +8,14 @@ import logging
 from typing import Optional
 
 from opentelemetry import trace
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 from opentelemetry.instrumentation.redis import RedisInstrumentor
-from opentelemetry.sdk.resources import Resource, SERVICE_NAME, SERVICE_VERSION
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_VERSION, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 
 from app.core.config import settings
 
@@ -63,9 +63,7 @@ def setup_tracing() -> None:
             )
             exporter = ConsoleSpanExporter()
         else:
-            logger.info(
-                f"Configuring OTLP exporter to {settings.OTEL_EXPORTER_ENDPOINT}"
-            )
+            logger.info(f"Configuring OTLP exporter to {settings.OTEL_EXPORTER_ENDPOINT}")
             exporter = OTLPSpanExporter(endpoint=settings.OTEL_EXPORTER_ENDPOINT)
 
     elif exporter_type == "jaeger":
@@ -94,9 +92,7 @@ def setup_tracing() -> None:
 
     else:  # console or unknown
         if exporter_type != "console":
-            logger.warning(
-                f"Unknown OTEL_EXPORTER_TYPE '{exporter_type}', using console exporter"
-            )
+            logger.warning(f"Unknown OTEL_EXPORTER_TYPE '{exporter_type}', using console exporter")
         logger.info("Configuring console exporter for traces")
         exporter = ConsoleSpanExporter()
 

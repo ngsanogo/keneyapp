@@ -2,20 +2,13 @@
 Medical document model for storing patient files, images, and reports.
 """
 
-from datetime import datetime, timezone
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Text,
-    DateTime,
-    ForeignKey,
-    Boolean,
-    BigInteger,
-    Enum as SQLEnum,
-)
-from sqlalchemy.orm import relationship
 import enum
+from datetime import datetime, timezone
+
+from sqlalchemy import BigInteger, Boolean, Column, DateTime
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
 
 from app.core.database import Base
 
@@ -78,9 +71,7 @@ class MedicalDocument(Base):
     checksum = Column(String(64), nullable=False)  # SHA-256 hash for integrity
 
     # Processing status
-    status = Column(
-        SQLEnum(DocumentStatus), default=DocumentStatus.UPLOADING, nullable=False
-    )
+    status = Column(SQLEnum(DocumentStatus), default=DocumentStatus.UPLOADING, nullable=False)
     processing_error = Column(Text, nullable=True)
 
     # OCR and metadata extraction
@@ -101,17 +92,13 @@ class MedicalDocument(Base):
 
     # Security and privacy
     is_sensitive = Column(Boolean, default=True)  # PHI by default
-    encryption_key_id = Column(
-        String(255), nullable=True
-    )  # Reference to encryption key
+    encryption_key_id = Column(String(255), nullable=True)  # Reference to encryption key
 
     # Multi-tenancy
     tenant_id = Column(String(255), nullable=False, index=True)
 
     # Audit fields
-    created_at = Column(
-        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
-    )
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),

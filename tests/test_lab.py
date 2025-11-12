@@ -156,7 +156,10 @@ def test_lab_test_type_deactivation(
 
 
 def test_create_lab_result_with_test_type(
-    db: Session, test_tenant: Tenant, test_patient: Patient, test_lab_test_type: LabTestType
+    db: Session,
+    test_tenant: Tenant,
+    test_patient: Patient,
+    test_lab_test_type: LabTestType,
 ):
     """Test creating a lab result linked to a test type."""
     result = LabResult(
@@ -181,7 +184,10 @@ def test_create_lab_result_with_test_type(
 
 
 def test_lab_result_state_transitions(
-    db: Session, test_tenant: Tenant, test_patient: Patient, test_lab_test_type: LabTestType
+    db: Session,
+    test_tenant: Tenant,
+    test_patient: Patient,
+    test_lab_test_type: LabTestType,
 ):
     """Test lab result workflow state transitions."""
     result = LabResult(
@@ -212,7 +218,10 @@ def test_lab_result_state_transitions(
 
 
 def test_lab_result_cancellation(
-    db: Session, test_tenant: Tenant, test_patient: Patient, test_lab_test_type: LabTestType
+    db: Session,
+    test_tenant: Tenant,
+    test_patient: Patient,
+    test_lab_test_type: LabTestType,
 ):
     """Test cancelling a lab result."""
     result = LabResult(
@@ -234,7 +243,10 @@ def test_lab_result_cancellation(
 
 
 def test_get_patient_lab_results(
-    db: Session, test_tenant: Tenant, test_patient: Patient, test_lab_test_type: LabTestType
+    db: Session,
+    test_tenant: Tenant,
+    test_patient: Patient,
+    test_lab_test_type: LabTestType,
 ):
     """Test retrieving all lab results for a patient."""
     # Create multiple results
@@ -291,7 +303,10 @@ def test_lab_test_type_tenant_isolation(db: Session, test_tenant: Tenant):
 
 
 def test_lab_result_tenant_isolation(
-    db: Session, test_tenant: Tenant, test_patient: Patient, test_lab_test_type: LabTestType
+    db: Session,
+    test_tenant: Tenant,
+    test_patient: Patient,
+    test_lab_test_type: LabTestType,
 ):
     """Test that lab results are properly isolated by tenant."""
     # Create result in tenant 1
@@ -349,7 +364,10 @@ def test_lab_test_type_filtering_by_category(db: Session, test_tenant: Tenant):
 
 
 def test_lab_result_with_reference_range(
-    db: Session, test_tenant: Tenant, test_patient: Patient, test_lab_test_type: LabTestType
+    db: Session,
+    test_tenant: Tenant,
+    test_patient: Patient,
+    test_lab_test_type: LabTestType,
 ):
     """Test lab result with reference range validation."""
     result = LabResult(

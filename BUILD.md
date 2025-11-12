@@ -29,12 +29,14 @@ make build
 Before building KeneyApp, ensure you have the following installed:
 
 ### Required
+
 - **Python 3.11+** - Backend runtime
 - **Node.js 18+** - Frontend runtime and build tools
 - **npm 8+** - JavaScript package manager
 - **pip** - Python package manager
 
 ### Optional
+
 - **Docker** - For containerized builds and deployments
 - **Docker Compose** - For orchestrating multi-container setups
 - **PostgreSQL 15** - For local database (not required for basic builds)
@@ -204,11 +206,13 @@ docker compose build
 After a successful build, you'll have:
 
 ### Backend
+
 - ✅ All Python dependencies installed in your environment
 - ✅ Code formatted and linted
 - ✅ All tests passing (104 tests)
 
 ### Frontend
+
 - ✅ All npm dependencies installed in `frontend/node_modules/`
 - ✅ Production bundle in `frontend/build/`
   - Optimized JavaScript bundles
@@ -217,6 +221,7 @@ After a successful build, you'll have:
   - `index.html` entry point
 
 ### Docker (if built)
+
 - ✅ `keneyapp-backend:latest` Docker image
 - ✅ `keneyapp-frontend:latest` Docker image
 
@@ -229,6 +234,7 @@ After a successful build, you'll have:
 **Problem**: Requirements fail to install due to Python version
 
 **Solution**:
+
 ```bash
 # Check Python version
 python3 --version
@@ -244,6 +250,7 @@ pip install -r requirements.txt
 **Problem**: Frontend build fails with version errors
 
 **Solution**:
+
 ```bash
 # Check Node version
 node --version
@@ -258,6 +265,7 @@ nvm use 18
 **Problem**: "JavaScript heap out of memory"
 
 **Solution**:
+
 ```bash
 # Increase Node memory limit
 export NODE_OPTIONS="--max-old-space-size=4096"
@@ -269,6 +277,7 @@ cd frontend && npm run build
 **Problem**: SSL certificate verification errors during Docker build
 
 **Solution**:
+
 ```bash
 # Use build args to configure pip
 docker build --build-arg PIP_TRUSTED_HOST=pypi.org \
@@ -281,6 +290,7 @@ docker build --build-arg PIP_TRUSTED_HOST=pypi.org \
 **Problem**: Tests fail due to missing environment variables
 
 **Solution**:
+
 ```bash
 # Copy example environment file
 cp .env.example .env
@@ -297,7 +307,7 @@ If you encounter issues not covered here:
 
 1. Check the [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines
 2. Review the [CI/CD configuration](.github/workflows/ci.yml) for the exact build steps used
-3. Contact support: contact@isdataconsulting.com
+3. Contact support: <contact@isdataconsulting.com>
 
 ## CI/CD Integration
 
@@ -320,6 +330,7 @@ make ci
 ```
 
 This will run:
+
 1. Code linting (backend and frontend)
 2. Tests with coverage
 3. Security checks
@@ -361,4 +372,4 @@ After building:
 
 ---
 
-**Questions or Issues?** Contact: contact@isdataconsulting.com
+**Questions or Issues?** Contact: <contact@isdataconsulting.com>

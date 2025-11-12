@@ -60,11 +60,11 @@ class LabResultNotModifiableError(ValidationError):
 class InvalidAgeForTestError(ValidationError):
     """Raised when patient age doesn't meet test requirements."""
 
-    def __init__(
-        self, patient_age: float, min_age: float = None, max_age: float = None
-    ):
+    def __init__(self, patient_age: float, min_age: float = None, max_age: float = None):
         if min_age is not None and max_age is not None:
-            msg = f"Test requires age between {min_age} and {max_age} years (patient: {patient_age})"
+            msg = (
+                f"Test requires age between {min_age} and {max_age} years (patient: {patient_age})"
+            )
         elif min_age is not None:
             msg = f"Test requires age ≥{min_age} years (patient: {patient_age})"
         else:
@@ -176,9 +176,7 @@ class DuplicateResourceError(ConflictError):
     """Raised when attempting to create duplicate resource."""
 
     def __init__(self, resource_type: str, identifier: str):
-        super().__init__(
-            detail=f"{resource_type} with identifier '{identifier}' already exists"
-        )
+        super().__init__(detail=f"{resource_type} with identifier '{identifier}' already exists")
 
 
 class LabOrderExistsError(ConflictError):
@@ -221,9 +219,7 @@ class FeatureNotEnabledError(BusinessLogicError):
     """Raised when feature is not enabled for tenant."""
 
     def __init__(self, feature_name: str):
-        super().__init__(
-            detail=f"Feature '{feature_name}' is not enabled for this tenant"
-        )
+        super().__init__(detail=f"Feature '{feature_name}' is not enabled for this tenant")
 
 
 # ============================================================================

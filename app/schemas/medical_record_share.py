@@ -3,8 +3,9 @@ Pydantic schemas for medical record sharing.
 """
 
 from datetime import datetime
-from typing import Optional, List
-from pydantic import BaseModel, Field, EmailStr, ConfigDict
+from typing import List, Optional
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.models.medical_record_share import ShareScope, ShareStatus
 
@@ -20,9 +21,7 @@ class ShareCreate(BaseModel):
     recipient_email: Optional[EmailStr] = Field(
         None, description="Optional: restrict access to this email"
     )
-    recipient_name: Optional[str] = Field(
-        None, max_length=255, description="Name of recipient"
-    )
+    recipient_name: Optional[str] = Field(None, max_length=255, description="Name of recipient")
     expires_in_hours: int = Field(
         24, ge=1, le=720, description="Validity duration in hours (1h - 30 days)"
     )
@@ -30,9 +29,7 @@ class ShareCreate(BaseModel):
         None, ge=1, description="Maximum number of accesses allowed"
     )
     require_pin: bool = Field(False, description="Require PIN for access")
-    purpose: Optional[str] = Field(
-        None, max_length=500, description="Purpose of sharing"
-    )
+    purpose: Optional[str] = Field(None, max_length=500, description="Purpose of sharing")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
 
 

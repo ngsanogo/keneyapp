@@ -30,18 +30,21 @@ This project adheres to a Code of Conduct that all contributors are expected to 
 ### Setting Up Development Environment
 
 1. **Fork and clone the repository**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/keneyapp.git
    cd keneyapp
    ```
 
 2. **Install pre-commit hooks**
+
    ```bash
    pip install pre-commit
    pre-commit install
    ```
 
 3. **Start development environment**
+
    ```bash
    # Using Docker Compose (recommended)
    ./scripts/start_stack.sh
@@ -95,12 +98,12 @@ def get_patients(
     limit: int = 100
 ) -> List[Patient]:
     """Retrieve a list of patients with pagination.
-    
+
     Args:
         db: Database session
         skip: Number of records to skip
         limit: Maximum number of records to return
-        
+
     Returns:
         List of patient objects
     """
@@ -108,6 +111,7 @@ def get_patients(
 ```
 
 **Run linting and formatting:**
+
 ```bash
 # Format code
 black app tests
@@ -152,6 +156,7 @@ const fetchPatients = async (limit: number = 100): Promise<Patient[]> => {
 ```
 
 **Run linting and formatting:**
+
 ```bash
 cd frontend
 
@@ -208,16 +213,17 @@ def test_create_patient(client: TestClient, db_session):
         "last_name": "Doe",
         "date_of_birth": "1990-01-01"
     }
-    
+
     # Act
     response = client.post("/api/v1/patients/", json=patient_data)
-    
+
     # Assert
     assert response.status_code == 201
     assert response.json()["first_name"] == "John"
 ```
 
 **Run tests:**
+
 ```bash
 # Run all tests
 pytest
@@ -242,13 +248,14 @@ import PatientList from './PatientList';
 
 test('displays patient list', async () => {
   render(<PatientList />);
-  
+
   const patientName = await screen.findByText('John Doe');
   expect(patientName).toBeInTheDocument();
 });
 ```
 
 **Run tests:**
+
 ```bash
 cd frontend
 
@@ -310,6 +317,7 @@ Closes #123"
 ### Before Creating a PR
 
 1. **Ensure your code is up to date**
+
    ```bash
    git checkout develop
    git pull origin develop
@@ -318,6 +326,7 @@ Closes #123"
    ```
 
 2. **Run all checks locally**
+
    ```bash
    # Backend
    black app tests
@@ -338,6 +347,7 @@ Closes #123"
 ### Creating the PR
 
 1. **Push your branch**
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -415,7 +425,7 @@ Describe the tests you added or ran
 - **Validate all user inputs**
 - Follow **OWASP** security best practices
 - Run `npm audit` and `pip-audit` regularly
-- Report security vulnerabilities privately to contact@isdataconsulting.com
+- Report security vulnerabilities privately to <contact@isdataconsulting.com>
 
 ## 📚 Additional Resources
 
@@ -432,8 +442,8 @@ If you have questions or need help:
 1. Check existing [documentation](docs/)
 2. Search [existing issues](https://github.com/ISData-consulting/keneyapp/issues)
 3. Create a new issue with the `question` label
-4. Contact: contact@isdataconsulting.com
+4. Contact: <contact@isdataconsulting.com>
 
-## 🎉 Thank You!
+## 🎉 Thank You
 
 Thank you for contributing to KeneyApp! Your efforts help make healthcare data management better for everyone.

@@ -5,6 +5,7 @@
 This guide provides step-by-step instructions for deploying KeneyApp to production.
 
 ### Prerequisites Checklist
+
 - [ ] Production server with Docker and Docker Compose installed
 - [ ] PostgreSQL 15+ database provisioned
 - [ ] Redis 7+ instance provisioned
@@ -14,6 +15,7 @@ This guide provides step-by-step instructions for deploying KeneyApp to producti
 - [ ] Backup system configured
 
 ### Deployment Time Estimate
+
 - First-time deployment: 2-4 hours
 - Subsequent deployments: 15-30 minutes
 
@@ -101,6 +103,7 @@ RATELIMIT_DEFAULT=100/minute
 ```
 
 **Generate Secure SECRET_KEY:**
+
 ```bash
 python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
@@ -255,6 +258,7 @@ server {
 ```
 
 **Enable Nginx Configuration:**
+
 ```bash
 sudo ln -s /etc/nginx/sites-available/keneyapp /etc/nginx/sites-enabled/
 sudo nginx -t
@@ -319,7 +323,8 @@ curl https://yourdomain.com
 ```
 
 **Manual Testing:**
-1. Open https://yourdomain.com in browser
+
+1. Open <https://yourdomain.com> in browser
 2. Login with admin credentials
 3. Create a test patient
 4. Schedule a test appointment
@@ -349,6 +354,7 @@ sudo nano /opt/keneyapp/scripts/backup_prod.sh
 ```
 
 **Backup Script:**
+
 ```bash
 #!/bin/bash
 set -e
@@ -377,6 +383,7 @@ echo "Backup completed: $TIMESTAMP"
 ```
 
 **Schedule with cron:**
+
 ```bash
 sudo chmod +x /opt/keneyapp/scripts/backup_prod.sh
 
@@ -392,6 +399,7 @@ sudo crontab -e
 ## Option 2: Kubernetes Deployment (Recommended for Enterprise)
 
 ### Prerequisites
+
 - Kubernetes cluster (1.25+)
 - kubectl configured
 - Helm 3 installed
@@ -719,11 +727,12 @@ kubectl rollout status deployment/backend -n keneyapp
 ## Support
 
 For deployment assistance:
-- Email: contact@isdataconsulting.com
-- Documentation: https://github.com/ISData-consulting/keneyapp/tree/main/docs
+
+- Email: <contact@isdataconsulting.com>
+- Documentation: <https://github.com/ISData-consulting/keneyapp/tree/main/docs>
 
 ---
 
-**Document Version**: 1.0.0  
-**Last Updated**: 2024-10-31  
+**Document Version**: 1.0.0
+**Last Updated**: 2024-10-31
 **Review**: Quarterly

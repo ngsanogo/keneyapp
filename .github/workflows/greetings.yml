@@ -14,37 +14,37 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           issue-message: |
-            👋 Thank you for opening your first issue in KeneyApp! 
-            
+            👋 Thank you for opening your first issue in KeneyApp!
+
             A maintainer will review it soon. In the meantime, please ensure you have:
             - ✅ Filled out the issue template completely
             - ✅ Searched for similar existing issues
             - ✅ Provided all necessary context and details
-            
+
             We appreciate your contribution to making KeneyApp better! 🙏
-            
+
             For questions, check out our:
             - 📚 [Documentation](https://github.com/ISData-consulting/keneyapp/blob/main/README.md)
             - 💬 [Discussions](https://github.com/ISData-consulting/keneyapp/discussions)
             - 🤝 [Contributing Guide](https://github.com/ISData-consulting/keneyapp/blob/main/CONTRIBUTING.md)
-            
+
           pr-message: |
-            👋 Thank you for opening your first pull request in KeneyApp! 
-            
+            👋 Thank you for opening your first pull request in KeneyApp!
+
             A maintainer will review it soon. In the meantime, please ensure:
             - ✅ All CI checks are passing
             - ✅ You've filled out the PR template completely
             - ✅ Your code follows our style guidelines
             - ✅ Tests are added/updated for your changes
             - ✅ Documentation is updated if needed
-            
+
             We appreciate your contribution! 🚀
-            
+
             **Review Checklist:**
             - [ ] Code quality and style
             - [ ] Test coverage
             - [ ] Documentation
             - [ ] Security considerations
             - [ ] Performance impact
-            
+
             For more details, see our [Contributing Guide](https://github.com/ISData-consulting/keneyapp/blob/main/CONTRIBUTING.md).

@@ -12,12 +12,7 @@ from app.core.dependencies import require_roles
 from app.core.rate_limit import limiter
 from app.core.security import get_password_hash
 from app.models.user import User, UserRole
-from app.schemas.user import (
-    UserResponse,
-    UserStatusUpdate,
-    UserRoleUpdate,
-    UserPasswordReset,
-)
+from app.schemas.user import UserPasswordReset, UserResponse, UserRoleUpdate, UserStatusUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -27,9 +22,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 def list_users(
     request: Request,
     db: Session = Depends(get_db),
-    current_admin: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
-    ),
+    current_admin: User = Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ) -> List[User]:
     """Return the full user directory (admin only)."""
 
@@ -45,9 +38,7 @@ def get_user(
     user_id: int,
     request: Request,
     db: Session = Depends(get_db),
-    current_admin: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
-    ),
+    current_admin: User = Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ) -> User:
     """Retrieve a single user."""
 
@@ -56,9 +47,7 @@ def get_user(
         query = query.filter(User.tenant_id == current_admin.tenant_id)
     user = query.first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
 
 
@@ -69,9 +58,7 @@ def update_user_status(
     payload: UserStatusUpdate,
     request: Request,
     db: Session = Depends(get_db),
-    current_admin: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
-    ),
+    current_admin: User = Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ) -> User:
     """Update activation or lock status for a user."""
 
@@ -80,9 +67,7 @@ def update_user_status(
         query = query.filter(User.tenant_id == current_admin.tenant_id)
     user = query.first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     if payload.is_active is not None:
         user.is_active = payload.is_active  # type: ignore[assignment]
@@ -117,9 +102,7 @@ def update_user_role(
     payload: UserRoleUpdate,
     request: Request,
     db: Session = Depends(get_db),
-    current_admin: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
-    ),
+    current_admin: User = Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ):
     """Assign a new role to a user."""
 
@@ -128,9 +111,7 @@ def update_user_role(
         query = query.filter(User.tenant_id == current_admin.tenant_id)
     user = query.first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     user.role = payload.role
     db.commit()
@@ -158,9 +139,7 @@ def reset_user_password(
     payload: UserPasswordReset,
     request: Request,
     db: Session = Depends(get_db),
-    current_admin: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
-    ),
+    current_admin: User = Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ):
     """Reset a user's password and require re-login."""
 
@@ -169,9 +148,7 @@ def reset_user_password(
         query = query.filter(User.tenant_id == current_admin.tenant_id)
     user = query.first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     user.hashed_password = get_password_hash(payload.new_password)
     user.password_changed_at = datetime.now(timezone.utc)

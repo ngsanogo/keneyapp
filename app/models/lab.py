@@ -3,20 +3,12 @@ Laboratory models (test catalogs and results).
 """
 
 from enum import Enum
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Text,
-    DateTime,
-    ForeignKey,
-    Float,
-    Boolean,
-    UniqueConstraint,
-    Enum as SQLEnum,
-)
-from sqlalchemy.sql import func
+
+from sqlalchemy import Boolean, Column, DateTime
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import relationship, validates
+from sqlalchemy.sql import func
 
 from app.core.database import Base
 
@@ -67,9 +59,7 @@ class LabResult(Base):
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False, index=True)
 
     # Link to test type catalog
-    test_type_id = Column(
-        Integer, ForeignKey("lab_test_types.id"), nullable=True, index=True
-    )
+    test_type_id = Column(Integer, ForeignKey("lab_test_types.id"), nullable=True, index=True)
 
     # Legacy field for backward compatibility
     test_name = Column(String(255), nullable=False, index=True)
@@ -99,9 +89,7 @@ class LabResult(Base):
     validated_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     validated_at = Column(DateTime(timezone=True), nullable=True)
 
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -164,9 +152,7 @@ class LabTestType(Base):
     """Catalog of laboratory test types with optional age/gender constraints."""
 
     __tablename__ = "lab_test_types"
-    __table_args__ = (
-        UniqueConstraint("tenant_id", "code", name="uq_lab_test_type_tenant_code"),
-    )
+    __table_args__ = (UniqueConstraint("tenant_id", "code", name="uq_lab_test_type_tenant_code"),)
 
     id = Column(Integer, primary_key=True, index=True)
     tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False, index=True)
@@ -192,9 +178,7 @@ class LabTestType(Base):
 
     active = Column(Boolean, nullable=False, default=True)
 
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -233,9 +217,7 @@ class LabTestCriterion(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False, index=True)
-    test_type_id = Column(
-        Integer, ForeignKey("lab_test_types.id"), nullable=False, index=True
-    )
+    test_type_id = Column(Integer, ForeignKey("lab_test_types.id"), nullable=False, index=True)
 
     # Stable identifier for interfacing/scripting (language-independent)
     code = Column(String(64), nullable=True, index=True)
@@ -263,9 +245,7 @@ class LabTestCriterion(Base):
     max_age_years = Column(Float, nullable=True)
     notes = Column(Text, nullable=True)
 
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),

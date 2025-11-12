@@ -3,27 +3,26 @@ Medical document storage and management service.
 Supports local filesystem and S3-compatible storage.
 """
 
-import os
 import hashlib
-import uuid
 import json
-from typing import Optional, List, Tuple
-from pathlib import Path
+import os
+import uuid
 from datetime import datetime, timezone
-from sqlalchemy.orm import Session
-from fastapi import UploadFile, HTTPException, status
+from pathlib import Path
+from typing import List, Optional, Tuple
 
+from fastapi import HTTPException, Request, UploadFile, status
+from sqlalchemy.orm import Session
+
+from app.core.audit import log_audit_event
 from app.models.medical_document import (
-    MedicalDocument,
-    DocumentType,
     DocumentFormat,
     DocumentStatus,
+    DocumentType,
+    MedicalDocument,
 )
 from app.models.patient import Patient
-from app.schemas.medical_document import DocumentUpload, DocumentStats
-from app.core.audit import log_audit_event
-from fastapi import Request
-
+from app.schemas.medical_document import DocumentStats, DocumentUpload
 
 # Document storage configuration
 UPLOAD_DIR = os.getenv("DOCUMENTS_UPLOAD_DIR", "./uploads/medical_documents")
@@ -76,9 +75,7 @@ def generate_secure_filename(
     secure_filename = f"{tenant_id}_{patient_id}_{unique_id}{ext}"
 
     # Organize by tenant and patient
-    storage_path = os.path.join(
-        UPLOAD_DIR, str(tenant_id), str(patient_id), secure_filename
-    )
+    storage_path = os.path.join(UPLOAD_DIR, str(tenant_id), str(patient_id), secure_filename)
 
     return secure_filename, storage_path
 
@@ -264,12 +261,7 @@ def get_patient_documents(
     if document_type:
         query = query.filter(MedicalDocument.document_type == document_type)
 
-    return (
-        query.order_by(MedicalDocument.created_at.desc())
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    return query.order_by(MedicalDocument.created_at.desc()).offset(skip).limit(limit).all()
 
 
 def delete_document(

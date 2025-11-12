@@ -3,6 +3,7 @@
 ## 🚀 Installation Rapide
 
 ### Prérequis
+
 - Python 3.11+
 - PostgreSQL 15+
 - Redis 7+
@@ -79,19 +80,19 @@ npm start
 
 ### 4. Accès à l'application
 
-- **API Backend** : http://localhost:8000
-- **Documentation API** : http://localhost:8000/api/v1/docs
-- **Frontend** : http://localhost:3000
-- **Flower (Celery)** : http://localhost:5555
+- **API Backend** : <http://localhost:8000>
+- **Documentation API** : <http://localhost:8000/api/v1/docs>
+- **Frontend** : <http://localhost:3000>
+- **Flower (Celery)** : <http://localhost:5555>
 
 ### 5. Comptes de test
 
 | Rôle | Email | Mot de passe |
 |------|-------|--------------|
-| Admin | admin@keneyapp.com | admin123 |
-| Docteur | doctor@keneyapp.com | doctor123 |
-| Infirmière | nurse@keneyapp.com | nurse123 |
-| Réceptionniste | receptionist@keneyapp.com | receptionist123 |
+| Admin | <admin@keneyapp.com> | admin123 |
+| Docteur | <doctor@keneyapp.com> | doctor123 |
+| Infirmière | <nurse@keneyapp.com> | nurse123 |
+| Réceptionniste | <receptionist@keneyapp.com> | receptionist123 |
 
 ---
 
@@ -100,6 +101,7 @@ npm start
 ### 💬 Messagerie Sécurisée
 
 #### Envoyer un message
+
 ```bash
 curl -X POST http://localhost:8000/api/v1/messages/ \
   -H "Authorization: Bearer $TOKEN" \
@@ -113,12 +115,14 @@ curl -X POST http://localhost:8000/api/v1/messages/ \
 ```
 
 #### Lire les messages non lus
+
 ```bash
 curl http://localhost:8000/api/v1/messages/?unread_only=true \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 #### Statistiques
+
 ```bash
 curl http://localhost:8000/api/v1/messages/stats \
   -H "Authorization: Bearer $TOKEN"
@@ -129,6 +133,7 @@ curl http://localhost:8000/api/v1/messages/stats \
 ### 📄 Upload de Documents
 
 #### Upload via curl
+
 ```bash
 curl -X POST http://localhost:8000/api/v1/documents/upload \
   -H "Authorization: Bearer $TOKEN" \
@@ -140,6 +145,7 @@ curl -X POST http://localhost:8000/api/v1/documents/upload \
 ```
 
 #### Upload via Python
+
 ```python
 import requests
 
@@ -163,6 +169,7 @@ print(response.json())
 ```
 
 #### Télécharger un document
+
 ```bash
 curl http://localhost:8000/api/v1/documents/123/download \
   -H "Authorization: Bearer $TOKEN" \
@@ -176,15 +183,17 @@ curl http://localhost:8000/api/v1/documents/123/download \
 #### Configurer notifications email
 
 1. **Gmail App Password**
-   - Aller sur https://myaccount.google.com/apppasswords
+   - Aller sur <https://myaccount.google.com/apppasswords>
    - Créer un mot de passe d'application
    - Ajouter dans `.env`:
+
      ```env
      SMTP_USER=your-email@gmail.com
      SMTP_PASSWORD=generated-app-password
      ```
 
 2. **Test notification**
+
 ```python
 from app.services.notification_service import NotificationService
 from datetime import datetime, timedelta
@@ -201,6 +210,7 @@ NotificationService.send_appointment_reminder(
 #### Configurer Celery Beat
 
 Dans `app/core/celery_app.py`, ajouter:
+
 ```python
 from celery.schedules import crontab
 
@@ -221,6 +231,7 @@ app.conf.beat_schedule = {
 ### 🔗 Partage de Dossier Médical
 
 #### Créer un partage
+
 ```python
 import requests
 
@@ -247,6 +258,7 @@ print(f"Expires: {share['expires_at']}")
 ```
 
 #### Accéder au dossier partagé (sans authentification)
+
 ```python
 url = "http://localhost:8000/api/v1/shares/access"
 
@@ -264,6 +276,7 @@ print(f"Rendez-vous: {len(record['appointments'])}")
 ```
 
 #### Révoquer un partage
+
 ```bash
 curl -X DELETE http://localhost:8000/api/v1/shares/123 \
   -H "Authorization: Bearer $TOKEN"
@@ -274,6 +287,7 @@ curl -X DELETE http://localhost:8000/api/v1/shares/123 \
 ## 🧪 Tests
 
 ### Tests unitaires
+
 ```bash
 # Tous les tests
 pytest tests/ -v
@@ -290,6 +304,7 @@ pytest --cov=app --cov-report=html tests/
 ### Tests API avec Postman
 
 Importer collection Postman:
+
 ```bash
 # À venir
 ```
@@ -297,6 +312,7 @@ Importer collection Postman:
 ### Tests de charge
 
 Avec Locust:
+
 ```bash
 pip install locust
 locust -f tests/load_test.py
@@ -307,6 +323,7 @@ locust -f tests/load_test.py
 ## 🐳 Déploiement Docker
 
 ### Development
+
 ```bash
 # Tout en un
 ./scripts/start_stack.sh
@@ -319,6 +336,7 @@ docker-compose logs -f backend
 ```
 
 ### Production
+
 ```bash
 docker-compose -f docker-compose.prod.yml up -d
 ```
@@ -328,17 +346,20 @@ docker-compose -f docker-compose.prod.yml up -d
 ## 📊 Monitoring
 
 ### Prometheus Metrics
+
 ```bash
 curl http://localhost:8000/metrics
 ```
 
 ### Flower (Celery)
+
 ```bash
 celery -A app.core.celery_app flower --port=5555
 # Accès: http://localhost:5555
 ```
 
 ### Logs
+
 ```bash
 # Logs backend
 tail -f logs/app.log
@@ -352,6 +373,7 @@ tail -f logs/celery.log
 ## 🔧 Troubleshooting
 
 ### Problème : Migrations échouent
+
 ```bash
 # Reset migrations (ATTENTION : perte de données)
 alembic downgrade base
@@ -362,6 +384,7 @@ alembic upgrade 010_add_messages
 ```
 
 ### Problème : Celery ne démarre pas
+
 ```bash
 # Vérifier Redis
 redis-cli ping  # Doit retourner PONG
@@ -371,6 +394,7 @@ celery -A app.core.celery_app inspect active
 ```
 
 ### Problème : Upload documents échoue
+
 ```bash
 # Vérifier permissions dossier
 mkdir -p ./uploads/medical_documents
@@ -381,6 +405,7 @@ echo "MAX_DOCUMENT_SIZE=52428800" >> .env
 ```
 
 ### Problème : Notifications ne partent pas
+
 ```bash
 # Test SMTP
 python -c "
@@ -400,19 +425,22 @@ SMSNotification.send_sms('+33612345678', 'Test message')
 ## 📚 Ressources
 
 ### Documentation
+
 - [API Reference](API_REFERENCE.md)
 - [Architecture](../ARCHITECTURE.md)
 - [Sécurité](SECURITY_BEST_PRACTICES.md)
 - [FHIR Guide](FHIR_GUIDE.md)
 
 ### Liens utiles
-- **FastAPI** : https://fastapi.tiangolo.com
-- **Celery** : https://docs.celeryq.dev
-- **Twilio** : https://www.twilio.com/docs
-- **FHIR** : https://www.hl7.org/fhir
+
+- **FastAPI** : <https://fastapi.tiangolo.com>
+- **Celery** : <https://docs.celeryq.dev>
+- **Twilio** : <https://www.twilio.com/docs>
+- **FHIR** : <https://www.hl7.org/fhir>
 
 ### Support
-📧 contact@isdataconsulting.com
+
+📧 <contact@isdataconsulting.com>
 
 ---
 

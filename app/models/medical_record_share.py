@@ -2,20 +2,14 @@
 Medical record sharing model for controlled access.
 """
 
-from datetime import datetime, timezone
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Text,
-    DateTime,
-    ForeignKey,
-    Boolean,
-    Enum as SQLEnum,
-)
-from sqlalchemy.orm import relationship
 import enum
 import secrets
+from datetime import datetime, timezone
+
+from sqlalchemy import Boolean, Column, DateTime
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
 
 from app.core.database import Base
 
@@ -91,9 +85,7 @@ class MedicalRecordShare(Base):
     tenant_id = Column(String(255), nullable=False, index=True)
 
     # Audit fields
-    created_at = Column(
-        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
-    )
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),

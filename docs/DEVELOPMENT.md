@@ -229,7 +229,7 @@ from app.core.database import Base
 
 class Patient(Base):
     __tablename__ = "patients"
-    
+
     id = Column(Integer, primary_key=True)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
@@ -408,10 +408,10 @@ def test_create_patient(client: TestClient):
         "last_name": "Doe",
         "date_of_birth": "1990-01-01"
     }
-    
+
     # Act
     response = client.post("/api/v1/patients/", json=patient_data)
-    
+
     # Assert
     assert response.status_code == 201
     assert response.json()["first_name"] == "John"
@@ -431,13 +431,13 @@ import PatientCard from './PatientCard';
 
 test('renders patient information', () => {
   render(
-    <PatientCard 
+    <PatientCard
       firstName="John"
       lastName="Doe"
       dateOfBirth="1990-01-01"
     />
   );
-  
+
   expect(screen.getByText('John Doe')).toBeInTheDocument();
   expect(screen.getByText('DOB: 1990-01-01')).toBeInTheDocument();
 });
@@ -448,17 +448,20 @@ test('renders patient information', () => {
 ### Backend Debugging
 
 **Using print statements:**
+
 ```python
 print(f"Patient data: {patient}")
 ```
 
 **Using Python debugger:**
+
 ```python
 import pdb; pdb.set_trace()
 ```
 
 **Using VS Code debugger:**
 Create `.vscode/launch.json`:
+
 ```json
 {
   "version": "0.2.0",
@@ -478,12 +481,14 @@ Create `.vscode/launch.json`:
 ### Frontend Debugging
 
 **Using browser DevTools:**
+
 - Open Chrome/Firefox DevTools
 - Use React DevTools extension
 - Check Network tab for API calls
 - Use Console for logging
 
 **React component debugging:**
+
 ```typescript
 console.log('Component props:', props);
 console.log('Component state:', state);
@@ -494,6 +499,7 @@ console.log('Component state:', state);
 ### Backend Optimization
 
 **Database queries:**
+
 ```python
 # Bad - N+1 query problem
 patients = db.query(Patient).all()
@@ -507,6 +513,7 @@ patients = db.query(Patient).options(
 ```
 
 **Caching with Redis:**
+
 ```python
 from redis import Redis
 
@@ -527,6 +534,7 @@ return data
 ### Frontend Optimization
 
 **Code splitting:**
+
 ```typescript
 // Lazy load components
 const Dashboard = React.lazy(() => import('./pages/DashboardPage'));
@@ -541,6 +549,7 @@ function App() {
 ```
 
 **Memoization:**
+
 ```typescript
 import { useMemo } from 'react';
 
@@ -548,7 +557,7 @@ const ExpensiveComponent = ({ data }) => {
   const processedData = useMemo(() => {
     return expensiveOperation(data);
   }, [data]);
-  
+
   return <div>{processedData}</div>;
 };
 ```
@@ -594,4 +603,4 @@ make db-reset     # Reset database
 - Check the [README](../README.md) for basic information
 - Read [CONTRIBUTING.md](../CONTRIBUTING.md) for contribution guidelines
 - Create an issue on GitHub
-- Contact: contact@isdataconsulting.com
+- Contact: <contact@isdataconsulting.com>

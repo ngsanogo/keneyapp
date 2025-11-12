@@ -5,6 +5,7 @@ This directory contains GitHub's community health files that help manage and gov
 ## Files Overview
 
 ### Core Documentation
+
 - **[CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)** - Community standards and behavior expectations
 - **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Guidelines for contributors
 - **[SECURITY.md](../SECURITY.md)** - Security policy and vulnerability reporting
@@ -14,6 +15,7 @@ This directory contains GitHub's community health files that help manage and gov
 ### GitHub-Specific Files
 
 #### Issue Templates (`ISSUE_TEMPLATE/`)
+
 - **bug_report.md** - Template for bug reports
 - **feature_request.md** - Template for feature requests
 - **documentation.md** - Template for documentation issues
@@ -21,10 +23,12 @@ This directory contains GitHub's community health files that help manage and gov
 - **config.yml** - Issue template configuration with helpful links
 
 #### Pull Request Management
+
 - **pull_request_template.md** - PR template with comprehensive checklist
 - **CODEOWNERS** - Defines code ownership and automatic review requests
 
 #### Repository Configuration
+
 - **copilot-instructions.md** - Instructions for AI coding assistants
 - **ai-commit-checklist.md** - Quality checklist for automated contributions
 - **dependabot.yml** - Automated dependency updates configuration
@@ -33,6 +37,7 @@ This directory contains GitHub's community health files that help manage and gov
 - **SECURITY_CONTACTS.md** - Security team contact information
 
 #### Workflows (`workflows/`)
+
 - **ci.yml** - Continuous Integration pipeline
 - **security-scan.yml** - Security scanning workflow
 - **release.yml** - Automated release process
@@ -43,19 +48,25 @@ This directory contains GitHub's community health files that help manage and gov
 ## Purpose of Each File
 
 ### Issue Templates
+
 Help contributors provide consistent, high-quality issue reports with all necessary information.
 
 ### Pull Request Template
+
 Ensures PRs include proper context, testing evidence, and follow quality standards.
 
 ### CODEOWNERS
+
 Automatically requests reviews from relevant team members based on files changed.
 
 ### Dependabot
+
 Keeps dependencies up-to-date automatically with weekly scans for Python, npm, Docker, and GitHub Actions.
 
 ### Workflows
+
 Automate critical processes:
+
 - Testing and quality checks (CI)
 - Security scanning
 - Release management
@@ -64,6 +75,7 @@ Automate critical processes:
 ## Best Practices
 
 ### For Maintainers
+
 1. **Review and update** templates regularly based on community feedback
 2. **Keep labels synchronized** using the label-sync workflow
 3. **Monitor security** through automated scans and Dependabot
@@ -71,6 +83,7 @@ Automate critical processes:
 5. **Manage stale issues** to keep the backlog clean
 
 ### For Contributors
+
 1. **Use the appropriate template** when creating issues or PRs
 2. **Fill out all sections** - they're there to ensure quality
 3. **Reference related issues** using GitHub's linking syntax
@@ -98,6 +111,7 @@ When making changes to these files:
 ## Questions or Suggestions?
 
 If you have questions about any of these community health files or suggestions for improvement, please:
+
 - Open an issue using the appropriate template
 - Start a discussion in [GitHub Discussions](https://github.com/ISData-consulting/keneyapp/discussions)
-- Contact the maintainers at contact@isdataconsulting.com
+- Contact the maintainers at <contact@isdataconsulting.com>

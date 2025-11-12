@@ -30,7 +30,7 @@ class TestMessageEncryption:
         """Test encrypting message content."""
         original = "Résultats d'analyses disponibles"
         encrypted = encrypt_data(original, context={"type": "message"})
-        
+
         assert encrypted != original
         assert encrypted is not None
         assert len(encrypted) > len(original)
@@ -40,7 +40,7 @@ class TestMessageEncryption:
         original = "Votre ordonnance est prête"
         encrypted = encrypt_data(original, context={"type": "message"})
         decrypted = decrypt_data(encrypted, context={"type": "message"})
-        
+
         assert decrypted == original
 
     def test_encryption_uniqueness(self):
@@ -48,7 +48,7 @@ class TestMessageEncryption:
         content = "Message confidentiel"
         encrypted1 = encrypt_data(content, context={"type": "message"})
         encrypted2 = encrypt_data(content, context={"type": "message"})
-        
+
         assert encrypted1 != encrypted2  # Nonce ensures uniqueness
 
 
@@ -62,15 +62,11 @@ class TestMessageCRUD:
             "receiver_id": 2,
             "subject": "Résultats disponibles",
             "content": "Vos résultats d'analyses sont disponibles.",
-            "is_urgent": False
+            "is_urgent": False,
         }
-        
-        response = client.post(
-            "/api/v1/messages/",
-            json=payload,
-            headers=auth_headers
-        )
-        
+
+        response = client.post("/api/v1/messages/", json=payload, headers=auth_headers)
+
         assert response.status_code == 201
         data = response.json()
         assert data["subject"] == payload["subject"]
@@ -83,62 +79,44 @@ class TestMessageCRUD:
             "receiver_id": 2,
             "subject": "URGENT - Résultats anormaux",
             "content": "Veuillez me contacter immédiatement.",
-            "is_urgent": True
+            "is_urgent": True,
         }
-        
-        response = client.post(
-            "/api/v1/messages/",
-            json=payload,
-            headers=auth_headers
-        )
-        
+
+        response = client.post("/api/v1/messages/", json=payload, headers=auth_headers)
+
         assert response.status_code == 201
         data = response.json()
         assert data["is_urgent"] is True
 
     def test_send_message_unauthorized(self, client: TestClient):
         """Test sending message without authentication."""
-        payload = {
-            "receiver_id": 2,
-            "subject": "Test",
-            "content": "Test message"
-        }
-        
+        payload = {"receiver_id": 2, "subject": "Test", "content": "Test message"}
+
         response = client.post("/api/v1/messages/", json=payload)
         assert response.status_code == 401
 
     def test_get_messages_inbox(self, client: TestClient, auth_headers: dict):
         """Test retrieving inbox messages."""
-        response = client.get(
-            "/api/v1/messages/",
-            headers=auth_headers
-        )
-        
+        response = client.get("/api/v1/messages/", headers=auth_headers)
+
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
 
-    def test_get_message_details(self, client: TestClient, auth_headers: dict, db_session: Session):
+    def test_get_message_details(
+        self, client: TestClient, auth_headers: dict, db_session: Session
+    ):
         """Test retrieving message details."""
         # First send a message
-        payload = {
-            "receiver_id": 2,
-            "subject": "Test",
-            "content": "Test content"
-        }
+        payload = {"receiver_id": 2, "subject": "Test", "content": "Test content"}
         send_response = client.post(
-            "/api/v1/messages/",
-            json=payload,
-            headers=auth_headers
+            "/api/v1/messages/", json=payload, headers=auth_headers
         )
         message_id = send_response.json()["id"]
-        
+
         # Retrieve message
-        response = client.get(
-            f"/api/v1/messages/{message_id}",
-            headers=auth_headers
-        )
-        
+        response = client.get(f"/api/v1/messages/{message_id}", headers=auth_headers)
+
         assert response.status_code == 200
         data = response.json()
         assert data["id"] == message_id
@@ -147,11 +125,8 @@ class TestMessageCRUD:
     def test_get_message_forbidden(self, client: TestClient, auth_headers: dict):
         """Test retrieving message belonging to another user."""
         # Try to access a non-existent or unauthorized message
-        response = client.get(
-            "/api/v1/messages/99999",
-            headers=auth_headers
-        )
-        
+        response = client.get("/api/v1/messages/99999", headers=auth_headers)
+
         assert response.status_code in [403, 404]
 
 
@@ -165,17 +140,15 @@ class TestMessageThreads:
         payload1 = {
             "receiver_id": 2,
             "subject": "Question médicale",
-            "content": "Bonjour Docteur, j'ai une question."
+            "content": "Bonjour Docteur, j'ai une question.",
         }
         response1 = client.post(
-            "/api/v1/messages/",
-            json=payload1,
-            headers=auth_headers
+            "/api/v1/messages/", json=payload1, headers=auth_headers
         )
         assert response1.status_code == 201
         message1_id = response1.json()["id"]
         thread_id = response1.json().get("thread_id")
-        
+
         # Send reply (would need receiver's auth)
         # This tests the thread_id is consistent
         assert thread_id is not None or message1_id is not None
@@ -187,16 +160,13 @@ class TestMessageThreads:
             payload = {
                 "receiver_id": 2,
                 "subject": f"Message {i+1}",
-                "content": f"Contenu {i+1}"
+                "content": f"Contenu {i+1}",
             }
             client.post("/api/v1/messages/", json=payload, headers=auth_headers)
-        
+
         # Get conversation
-        response = client.get(
-            "/api/v1/messages/conversation/2",
-            headers=auth_headers
-        )
-        
+        response = client.get("/api/v1/messages/conversation/2", headers=auth_headers)
+
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
@@ -210,54 +180,49 @@ class TestMessageReadStatus:
     def test_mark_message_as_read(self, client: TestClient, auth_headers: dict):
         """Test marking message as read."""
         # Send message
-        payload = {
-            "receiver_id": 2,
-            "subject": "Test",
-            "content": "Test"
-        }
+        payload = {"receiver_id": 2, "subject": "Test", "content": "Test"}
         send_response = client.post(
-            "/api/v1/messages/",
-            json=payload,
-            headers=auth_headers
+            "/api/v1/messages/", json=payload, headers=auth_headers
         )
         message_id = send_response.json()["id"]
-        
+
         # Mark as read (would need receiver auth in real scenario)
         # For now, test endpoint exists
         read_response = client.post(
-            f"/api/v1/messages/{message_id}/read",
-            headers=auth_headers
+            f"/api/v1/messages/{message_id}/read", headers=auth_headers
         )
-        
+
         # Expect 200 or 403 (if sender tries to mark own message as read)
         assert read_response.status_code in [200, 403]
 
-    def test_read_at_timestamp_set(self, client: TestClient, auth_headers: dict, db_session: Session):
+    def test_read_at_timestamp_set(
+        self, client: TestClient, auth_headers: dict, db_session: Session
+    ):
         """Test that read_at timestamp is set correctly."""
         # Create message in DB
         from app.models.message import Message
         from app.core.encryption import encrypt_data
-        
+
         message = Message(
             sender_id=1,
             receiver_id=2,
             subject="Test",
             encrypted_content=encrypt_data("Test content", context={"type": "message"}),
             status=MessageStatus.DELIVERED,
-            tenant_id=1
+            tenant_id=1,
         )
         db_session.add(message)
         db_session.commit()
         db_session.refresh(message)
-        
+
         # Initially no read_at
         assert message.read_at is None
-        
+
         # Simulate marking as read
         message.status = MessageStatus.READ
         message.read_at = datetime.utcnow()
         db_session.commit()
-        
+
         assert message.read_at is not None
         assert message.status == MessageStatus.READ
 
@@ -272,28 +237,25 @@ class TestSoftDelete:
         payload = {
             "receiver_id": 2,
             "subject": "À supprimer",
-            "content": "Ce message sera supprimé"
+            "content": "Ce message sera supprimé",
         }
         send_response = client.post(
-            "/api/v1/messages/",
-            json=payload,
-            headers=auth_headers
+            "/api/v1/messages/", json=payload, headers=auth_headers
         )
         message_id = send_response.json()["id"]
-        
+
         # Delete message
         delete_response = client.delete(
-            f"/api/v1/messages/{message_id}",
-            headers=auth_headers
+            f"/api/v1/messages/{message_id}", headers=auth_headers
         )
-        
+
         assert delete_response.status_code == 204
 
     def test_soft_delete_does_not_affect_receiver(self, db_session: Session):
         """Test that soft delete by sender doesn't affect receiver."""
         from app.models.message import Message
         from app.core.encryption import encrypt_data
-        
+
         message = Message(
             sender_id=1,
             receiver_id=2,
@@ -302,11 +264,11 @@ class TestSoftDelete:
             status=MessageStatus.DELIVERED,
             deleted_by_sender=True,
             deleted_by_receiver=False,
-            tenant_id=1
+            tenant_id=1,
         )
         db_session.add(message)
         db_session.commit()
-        
+
         # Receiver should still see it
         assert message.deleted_by_receiver is False
 
@@ -317,11 +279,8 @@ class TestMessageStatistics:
 
     def test_get_message_stats(self, client: TestClient, auth_headers: dict):
         """Test retrieving message statistics."""
-        response = client.get(
-            "/api/v1/messages/stats",
-            headers=auth_headers
-        )
-        
+        response = client.get("/api/v1/messages/stats", headers=auth_headers)
+
         assert response.status_code == 200
         data = response.json()
         assert "total_received" in data
@@ -334,20 +293,18 @@ class TestMessageStatistics:
 class TestMessageSecurity:
     """Test message security and access control."""
 
-    def test_cannot_send_to_different_tenant(self, client: TestClient, auth_headers: dict):
+    def test_cannot_send_to_different_tenant(
+        self, client: TestClient, auth_headers: dict
+    ):
         """Test that users cannot send messages across tenants."""
         payload = {
             "receiver_id": 9999,  # User from different tenant
             "subject": "Cross-tenant test",
-            "content": "This should fail"
+            "content": "This should fail",
         }
-        
-        response = client.post(
-            "/api/v1/messages/",
-            json=payload,
-            headers=auth_headers
-        )
-        
+
+        response = client.post("/api/v1/messages/", json=payload, headers=auth_headers)
+
         # Should fail (404 user not found or 403 forbidden)
         assert response.status_code in [403, 404]
 
@@ -355,21 +312,21 @@ class TestMessageSecurity:
         """Test that message content is encrypted in database."""
         from app.models.message import Message
         from app.core.encryption import encrypt_data
-        
+
         original_content = "Contenu sensible médical"
         encrypted = encrypt_data(original_content, context={"type": "message"})
-        
+
         message = Message(
             sender_id=1,
             receiver_id=2,
             subject="Test encryption",
             encrypted_content=encrypted,
             status=MessageStatus.SENT,
-            tenant_id=1
+            tenant_id=1,
         )
         db_session.add(message)
         db_session.commit()
-        
+
         # Verify stored content is encrypted
         assert message.encrypted_content != original_content
         assert message.encrypted_content == encrypted
@@ -381,33 +338,18 @@ class TestMessageValidation:
 
     def test_empty_content_rejected(self, client: TestClient, auth_headers: dict):
         """Test that empty message content is rejected."""
-        payload = {
-            "receiver_id": 2,
-            "subject": "Test",
-            "content": ""
-        }
-        
-        response = client.post(
-            "/api/v1/messages/",
-            json=payload,
-            headers=auth_headers
-        )
-        
+        payload = {"receiver_id": 2, "subject": "Test", "content": ""}
+
+        response = client.post("/api/v1/messages/", json=payload, headers=auth_headers)
+
         assert response.status_code == 422
 
     def test_missing_receiver_rejected(self, client: TestClient, auth_headers: dict):
         """Test that message without receiver is rejected."""
-        payload = {
-            "subject": "Test",
-            "content": "Test content"
-        }
-        
-        response = client.post(
-            "/api/v1/messages/",
-            json=payload,
-            headers=auth_headers
-        )
-        
+        payload = {"subject": "Test", "content": "Test content"}
+
+        response = client.post("/api/v1/messages/", json=payload, headers=auth_headers)
+
         assert response.status_code == 422
 
     def test_subject_too_long_rejected(self, client: TestClient, auth_headers: dict):
@@ -415,15 +357,11 @@ class TestMessageValidation:
         payload = {
             "receiver_id": 2,
             "subject": "A" * 300,  # Assuming max 255
-            "content": "Test"
+            "content": "Test",
         }
-        
-        response = client.post(
-            "/api/v1/messages/",
-            json=payload,
-            headers=auth_headers
-        )
-        
+
+        response = client.post("/api/v1/messages/", json=payload, headers=auth_headers)
+
         assert response.status_code in [422, 400]
 
 
@@ -438,27 +376,21 @@ class TestMessagePerformance:
             payload = {
                 "receiver_id": 2,
                 "subject": f"Message {i}",
-                "content": f"Content {i}"
+                "content": f"Content {i}",
             }
             client.post("/api/v1/messages/", json=payload, headers=auth_headers)
-        
+
         # Retrieve all
-        response = client.get(
-            "/api/v1/messages/?skip=0&limit=50",
-            headers=auth_headers
-        )
-        
+        response = client.get("/api/v1/messages/?skip=0&limit=50", headers=auth_headers)
+
         assert response.status_code == 200
         data = response.json()
         assert len(data) >= 20
 
     def test_pagination_works(self, client: TestClient, auth_headers: dict):
         """Test message pagination."""
-        response = client.get(
-            "/api/v1/messages/?skip=0&limit=10",
-            headers=auth_headers
-        )
-        
+        response = client.get("/api/v1/messages/?skip=0&limit=10", headers=auth_headers)
+
         assert response.status_code == 200
         data = response.json()
         assert len(data) <= 10
