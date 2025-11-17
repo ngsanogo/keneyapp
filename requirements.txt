@@ -14,7 +14,7 @@ psycopg2-binary==2.9.9
 # Security
 python-jose[cryptography]>=3.5.0
 passlib[bcrypt]==1.7.4
-bcrypt==4.1.2
+bcrypt==4.3.0
 ecdsa>=0.19.1  # Note: Known Minerva timing attack - acceptable for non-critical use
 
 # Environment variables
