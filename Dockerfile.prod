@@ -1,6 +1,6 @@
 # Production Dockerfile - Ultra-optimized with multi-stage build
 # Stage 1: Build dependencies
-FROM python:3.11-slim AS builder
+FROM python:3.14-slim AS builder
 
 WORKDIR /build
 
@@ -20,7 +20,7 @@ RUN python -m venv /opt/venv && \
     find /opt/venv -type f -name '*.pyo' -delete
 
 # Stage 2: Final runtime image
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 WORKDIR /app
 
