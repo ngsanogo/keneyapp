@@ -59,7 +59,7 @@ jobs:
             --failOnCVSS 7
 
       - name: Upload Dependency Check report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dependency-check-report
           path: reports/
@@ -124,7 +124,7 @@ jobs:
           pip-audit --format json > pip-audit-report.json || true
 
       - name: Upload security reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: security-reports
           path: |
