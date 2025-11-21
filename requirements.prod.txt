@@ -50,7 +50,7 @@ urllib3>=2.2.3
 
 # File processing
 python-magic==0.4.27
-Pillow==11.0.0
+Pillow==11.3.0
 
 # Optional: Observability (comment out if not used in production)
 # opentelemetry-api>=1.24.0
