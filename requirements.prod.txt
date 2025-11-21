@@ -18,7 +18,7 @@ cryptography>=46.0.3
 
 # Environment and Configuration
 python-dotenv==1.2.1
-pydantic==2.12.3
+pydantic==2.12.4
 pydantic-settings==2.11.0
 email-validator==2.3.0
 
