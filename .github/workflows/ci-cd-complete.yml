@@ -88,7 +88,7 @@ jobs:
           name: backend-coverage
 
       - name: Upload coverage HTML
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage-html
           path: htmlcov/
@@ -130,7 +130,7 @@ jobs:
         run: npm run build
 
       - name: Upload frontend build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: frontend-build
           path: frontend/build/
