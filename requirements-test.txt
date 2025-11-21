@@ -20,7 +20,7 @@ time-machine==2.19.0
 pytest-html==4.1.1  # Rapports HTML
 
 # Performance testing
-locust==2.32.3  # Load testing
+locust==2.42.3  # Load testing
 memory-profiler==0.61.0
 
 # Security testing
