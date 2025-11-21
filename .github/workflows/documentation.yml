@@ -225,7 +225,7 @@ jobs:
 
       - name: Comment PR with documentation link
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const url = '${{ steps.deployment.outputs.page_url }}';
