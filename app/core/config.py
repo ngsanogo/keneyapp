@@ -320,6 +320,49 @@ elif isinstance(_settings.ALLOWED_ORIGINS, list):
 settings = _settings
 
 
+def _has_local_origin(origins: List[str]) -> bool:
+    """Return True if any origin points to localhost or loopback."""
+
+    local_prefixes = ("http://localhost", "https://localhost", "http://127.0.0.1", "https://127.0.0.1")
+    return any(origin.startswith(local_prefixes) for origin in origins)
+
+
+def validate_production_settings(current_settings: Settings) -> None:
+    """Ensure critical settings are hardened when running in production.
+
+    The application aborts startup if any high-risk misconfigurations are
+    detected. This prevents accidental deployments with debug mode enabled,
+    weak secrets, or localhost-only origins.
+    """
+
+    if str(current_settings.ENVIRONMENT).lower() != "production":
+        return
+
+    issues: List[str] = []
+
+    if not current_settings.SECRET_KEY or current_settings.SECRET_KEY == "your-secret-key-change-in-production":
+        issues.append("SECRET_KEY must be set to a strong, non-default value in production.")
+
+    if current_settings.DEBUG:
+        issues.append("DEBUG must be disabled in production.")
+
+    if not current_settings.ALLOWED_ORIGINS:
+        issues.append("ALLOWED_ORIGINS must include at least one trusted origin.")
+    elif _has_local_origin(current_settings.ALLOWED_ORIGINS):
+        issues.append("ALLOWED_ORIGINS cannot include localhost or loopback origins in production.")
+
+    if "localhost" in str(current_settings.DATABASE_URL):
+        issues.append("DATABASE_URL must point to a production database host (not localhost).")
+
+    if current_settings.ACCESS_TOKEN_EXPIRE_MINUTES <= 0:
+        issues.append("ACCESS_TOKEN_EXPIRE_MINUTES must be a positive integer.")
+
+    if issues:
+        raise RuntimeError(
+            "Production configuration validation failed: " + "; ".join(issues)
+        )
+
+
 def _coerce_bool_env(value: str | None, default: bool) -> bool:
     """Parse a boolean-like environment value with sensible fallbacks.
 

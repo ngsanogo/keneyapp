@@ -14,7 +14,11 @@ from slowapi.errors import RateLimitExceeded
 
 # Ensure all models are imported and registered before metadata operations
 from app import models as app_models  # noqa: F401
-from app.core.config import is_rate_limiting_enabled, settings
+from app.core.config import (
+    is_rate_limiting_enabled,
+    settings,
+    validate_production_settings,
+)
 from app.core.database import Base, engine
 from app.core.errors import generic_exception_handler, validation_exception_handler
 from app.core.logging_middleware import CorrelationIdMiddleware
@@ -68,6 +72,9 @@ async def lifespan(app: FastAPI):
 
 # Wire up OpenTelemetry tracing: call setup_tracing() at startup and instrument_app(app) after FastAPI app creation.
 setup_tracing()
+
+# Abort early if production safeguards are not met
+validate_production_settings(settings)
 
 # Create FastAPI application
 app = FastAPI(
