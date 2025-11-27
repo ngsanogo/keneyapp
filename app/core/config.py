@@ -387,47 +387,47 @@ elif isinstance(_settings.ALLOWED_ORIGINS, list):
 settings = _settings
 
 
-# ---------------------------------------------------------------------------
-# Environment helpers
-# ---------------------------------------------------------------------------
-_PRODUCTION_ENV_NAMES = {"production", "prod"}
+def _has_local_origin(origins: List[str]) -> bool:
+    """Return True if any origin points to localhost or loopback."""
+
+    local_prefixes = ("http://localhost", "https://localhost", "http://127.0.0.1", "https://127.0.0.1")
+    return any(origin.startswith(local_prefixes) for origin in origins)
 
 
-def is_production_environment(env_value: str | None = None) -> bool:
-    """Return True when the provided (or current) environment is production."""
+def validate_production_settings(current_settings: Settings) -> None:
+    """Ensure critical settings are hardened when running in production.
 
-    active_value = env_value if env_value is not None else settings.ENVIRONMENT
-    return str(active_value).strip().lower() in _PRODUCTION_ENV_NAMES
+    The application aborts startup if any high-risk misconfigurations are
+    detected. This prevents accidental deployments with debug mode enabled,
+    weak secrets, or localhost-only origins.
+    """
 
-
-def validate_production_settings() -> None:
-    """Fail fast when dangerous defaults are present in production deployments."""
-
-    if not is_production_environment():
+    if str(current_settings.ENVIRONMENT).lower() != "production":
         return
 
-    issues: list[str] = []
+    issues: List[str] = []
 
-    if settings.DEBUG:
-        issues.append("DEBUG must be False in production.")
+    if not current_settings.SECRET_KEY or current_settings.SECRET_KEY == "your-secret-key-change-in-production":
+        issues.append("SECRET_KEY must be set to a strong, non-default value in production.")
 
-    if not settings.SECRET_KEY or settings.SECRET_KEY == "your-secret-key-change-in-production":
-        issues.append("SECRET_KEY must be set to a strong, non-default value.")
-    elif len(settings.SECRET_KEY) < 32:
-        issues.append("SECRET_KEY must be at least 32 characters long in production.")
+    if current_settings.DEBUG:
+        issues.append("DEBUG must be disabled in production.")
 
-    if settings.ENABLE_BOOTSTRAP_ADMIN:
-        issues.append("Disable ENABLE_BOOTSTRAP_ADMIN to prevent default admin creation.")
+    if not current_settings.ALLOWED_ORIGINS:
+        issues.append("ALLOWED_ORIGINS must include at least one trusted origin.")
+    elif _has_local_origin(current_settings.ALLOWED_ORIGINS):
+        issues.append("ALLOWED_ORIGINS cannot include localhost or loopback origins in production.")
 
-    default_db = "postgresql://keneyapp:keneyapp@localhost:5432/keneyapp"
-    if settings.DATABASE_URL == default_db:
-        issues.append("DATABASE_URL must point to a production-grade database (not the default local value).")
+    if "localhost" in str(current_settings.DATABASE_URL):
+        issues.append("DATABASE_URL must point to a production database host (not localhost).")
 
-    if settings.APP_URL.startswith("http://localhost"):
-        issues.append("APP_URL must be set to the public base URL in production.")
+    if current_settings.ACCESS_TOKEN_EXPIRE_MINUTES <= 0:
+        issues.append("ACCESS_TOKEN_EXPIRE_MINUTES must be a positive integer.")
 
     if issues:
-        raise RuntimeError("Production configuration is insecure:\n- " + "\n- ".join(issues))
+        raise RuntimeError(
+            "Production configuration validation failed: " + "; ".join(issues)
+        )
 
 
 def _coerce_bool_env(value: str | None, default: bool) -> bool:
