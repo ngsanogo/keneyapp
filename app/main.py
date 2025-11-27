@@ -14,7 +14,7 @@ from slowapi.errors import RateLimitExceeded
 
 # Ensure all models are imported and registered before metadata operations
 from app import models as app_models  # noqa: F401
-from app.core.config import settings
+from app.core.config import is_rate_limiting_enabled, settings
 from app.core.database import Base, engine
 from app.core.errors import generic_exception_handler, validation_exception_handler
 from app.core.logging_middleware import CorrelationIdMiddleware
@@ -52,28 +52,16 @@ async def lifespan(app: FastAPI):
     if os.getenv("TESTING", "false").lower() not in {"1", "true", "yes"}:
         Base.metadata.create_all(bind=engine)
 
-    # Configure or disable rate limiting based on current environment
-    enable_rl = os.getenv("ENABLE_RATE_LIMITING", "true").lower() in {
-        "1",
-        "true",
-        "yes",
-    }
-    if enable_rl:
-        app.state.disable_rate_limit = False
+    # Configure or disable rate limiting based on configured settings
+    rate_limiting_enabled = is_rate_limiting_enabled()
+    app.state.disable_rate_limit = not rate_limiting_enabled
+
+    if rate_limiting_enabled:
         app.state.limiter = limiter
         app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
     else:
-        app.state.disable_rate_limit = True
-        # Ensure limiter is disabled in app state and remove any handler
-        if hasattr(app.state, "limiter"):
-            try:
-                delattr(app.state, "limiter")
-            except Exception:
-                pass
-        try:
-            app.exception_handlers.pop(RateLimitExceeded, None)  # type: ignore[arg-type]
-        except Exception:
-            pass
+        app.state.limiter = None
+        app.exception_handlers.pop(RateLimitExceeded, None)  # type: ignore[arg-type]
     yield
     # Shutdown: cleanup if needed
 

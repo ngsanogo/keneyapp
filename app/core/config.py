@@ -14,6 +14,10 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+_TRUTHY = {"1", "true", "yes", "on"}
+_FALSY = {"0", "false", "no", "off"}
+
+
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
@@ -29,6 +33,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     MFA_ISSUER: str = "KeneyApp"
     MAX_FAILED_LOGIN_ATTEMPTS: int = 5
+    ENABLE_RATE_LIMITING: bool = True
 
     # Database
     DATABASE_URL: str = "postgresql://keneyapp:keneyapp@localhost:5432/keneyapp"
@@ -96,6 +101,13 @@ class Settings(BaseSettings):
     def _coerce_max_attempts(cls, v):
         if v in ("", None):
             return 5
+        return v
+
+    @field_validator("ENABLE_RATE_LIMITING", mode="before")
+    @classmethod
+    def _coerce_rate_limiting(cls, v):
+        if v in ("", None):
+            return True
         return v
 
     @field_validator("ENABLE_BOOTSTRAP_ADMIN", mode="before")
@@ -237,12 +249,14 @@ class Settings(BaseSettings):
 
 
 # ----------------------------------------------------------------------------
-# Sanitize environment: drop empty-string overrides for typed fields
+# Sanitize environment: drop empty-string overrides for typed fields and
+# remove invalid boolean values so defaults can apply.
 # ----------------------------------------------------------------------------
 _EMPTY_OVERRIDES = [
     "DEBUG",
     "ACCESS_TOKEN_EXPIRE_MINUTES",
     "MAX_FAILED_LOGIN_ATTEMPTS",
+    "ENABLE_RATE_LIMITING",
     "ENABLE_BOOTSTRAP_ADMIN",
     "REDIS_PORT",
     "REDIS_DB",
@@ -263,6 +277,23 @@ _EMPTY_OVERRIDES = [
     "OTEL_SERVICE_VERSION",
     "ENVIRONMENT",
 ]
+_BOOL_OVERRIDES = {
+    "DEBUG",
+    "ENABLE_RATE_LIMITING",
+    "ENABLE_BOOTSTRAP_ADMIN",
+    "OTEL_ENABLED",
+}
+
+for _key in _BOOL_OVERRIDES:
+    raw_value = os.getenv(_key, None)
+    if raw_value is None:
+        continue
+
+    normalized = str(raw_value).strip().lower()
+    if normalized in _TRUTHY | _FALSY:
+        continue
+
+    os.environ.pop(_key, None)
 
 for _key in _EMPTY_OVERRIDES:
     if os.getenv(_key, None) == "":
@@ -287,3 +318,32 @@ elif isinstance(_settings.ALLOWED_ORIGINS, list):
     ]
 
 settings = _settings
+
+
+def _coerce_bool_env(value: str | None, default: bool) -> bool:
+    """Parse a boolean-like environment value with sensible fallbacks.
+
+    This mirrors common environment parsing while still allowing defaults to
+    apply when a value is missing or invalid.
+    """
+
+    if value is None:
+        return default
+
+    normalized = str(value).strip().lower()
+    if normalized in _TRUTHY:
+        return True
+    if normalized in _FALSY:
+        return False
+    return default
+
+
+def is_rate_limiting_enabled() -> bool:
+    """Return whether rate limiting should be enabled for the current process.
+
+    Priority is given to the raw environment variable to keep runtime overrides
+    (e.g., in tests) working even if the Settings instance was created earlier.
+    Invalid or blank values fall back to the configured default.
+    """
+
+    return _coerce_bool_env(os.getenv("ENABLE_RATE_LIMITING"), settings.ENABLE_RATE_LIMITING)
