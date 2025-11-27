@@ -28,13 +28,24 @@ class DataEncryption:
         Args:
             key: Encryption key (defaults to SECRET_KEY from settings)
         """
-        self.key = key or settings.SECRET_KEY
+        self.key = key or settings.ENCRYPTION_KEY or settings.SECRET_KEY
+
+        if not self.key:
+            raise ValueError("Encryption key is required to initialize DataEncryption.")
+
+        if len(self.key) < 32:
+            raise ValueError("Encryption key must be at least 32 characters long.")
+
+        salt_material = settings.ENCRYPTION_SALT or "keneyapp-salt"
+        salt_hasher = hashes.Hash(hashes.SHA256())
+        salt_hasher.update(salt_material.encode("utf-8"))
+        salt = salt_hasher.finalize()[:16]
 
         # Derive a 32-byte key using PBKDF2-HMAC-SHA256
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
-            salt=b"keneyapp-salt",  # Salt for key derivation
+            salt=salt,
             iterations=100000,
             backend=default_backend(),
         )

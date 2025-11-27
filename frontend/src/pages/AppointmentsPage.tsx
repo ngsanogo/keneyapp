@@ -45,10 +45,18 @@ const AppointmentsPage = () => {
   return (
     <div>
       <Header />
-      <div className="container">
-        <h1>Appointments</h1>
+      <main id="main-content" className="container">
+        <div className="page-heading">
+          <div>
+            <p className="page-subtitle">Visits & scheduling</p>
+            <h1>Appointments</h1>
+          </div>
+          <button className="btn btn-secondary" onClick={() => navigate('/patients')}>
+            Find patient
+          </button>
+        </div>
 
-        <div className="card">
+        <div className="card" aria-live="polite">
           <h2>Appointment List</h2>
 
           {appointments.length === 0 ? (
@@ -57,12 +65,12 @@ const AppointmentsPage = () => {
             <table className="table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Date & Time</th>
-                  <th>Patient ID</th>
-                  <th>Doctor ID</th>
-                  <th>Reason</th>
-                  <th>Status</th>
+                  <th scope="col">ID</th>
+                  <th scope="col">Date & Time</th>
+                  <th scope="col">Patient ID</th>
+                  <th scope="col">Doctor ID</th>
+                  <th scope="col">Reason</th>
+                  <th scope="col">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -74,7 +82,9 @@ const AppointmentsPage = () => {
                     <td>{appointment.doctor_id}</td>
                     <td>{appointment.reason}</td>
                     <td>
-                      <span className={`status-${appointment.status}`}>{appointment.status}</span>
+                      <span className={`pill ${appointment.status === 'completed' ? 'success' : 'warning'}`}>
+                        {appointment.status}
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -82,7 +92,7 @@ const AppointmentsPage = () => {
             </table>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 };

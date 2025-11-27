@@ -123,7 +123,7 @@ If port 3000 is in use, you can:
 
 E2E tests run automatically in GitHub Actions workflows. See:
 
-- `.github/workflows/ci-enhanced.yml`
+- `../../.github/workflows/ci-enhanced.yml`
 - `docker-compose.e2e.yml` for the E2E test environment
 
 ## Writing New E2E Tests
@@ -159,5 +159,5 @@ E2E tests run automatically in GitHub Actions workflows. See:
 
 - [Playwright Documentation](https://playwright.dev)
 - [VS Code Playwright Extension](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright)
-- [KeneyApp E2E Test Scenarios](docs/E2E_TEST_SCENARIOS.md)
-- [E2E Testing Quick Reference](docs/E2E_TESTING_QUICK_REF.md)
+- [KeneyApp E2E Test Scenarios](../E2E_TEST_SCENARIOS.md)
+- [E2E Testing Quick Reference](../E2E_TESTING_QUICK_REF.md)

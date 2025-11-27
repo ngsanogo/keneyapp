@@ -305,8 +305,8 @@ pytest tests/ -v
 
 If you encounter issues not covered here:
 
-1. Check the [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines
-2. Review the [CI/CD configuration](.github/workflows/ci.yml) for the exact build steps used
+1. Check the [CONTRIBUTING.md](../../CONTRIBUTING.md) for development guidelines
+2. Review the [CI/CD configuration](../../.github/workflows/ci.yml) for the exact build steps used
 3. Contact support: <contact@isdataconsulting.com>
 
 ## CI/CD Integration
@@ -319,7 +319,7 @@ The application uses GitHub Actions for continuous integration. The CI pipeline 
 - **Security Scans**: CodeQL and dependency vulnerability scanning
 - **Smoke Tests**: End-to-end API testing with Docker Compose
 
-See [.github/workflows/ci.yml](.github/workflows/ci.yml) for complete CI configuration.
+See [.github/workflows/ci.yml](../../.github/workflows/ci.yml) for complete CI configuration.
 
 ### Local CI Simulation
 
@@ -367,8 +367,8 @@ After building:
 
 - **Local Development**: Run `make dev` to start development servers
 - **Docker Deployment**: Run `./scripts/start_stack.sh` to launch full stack
-- **Production Deployment**: See [DEPLOYMENT.md](docs/DEPLOYMENT.md)
-- **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Production Deployment**: See [DEPLOYMENT.md](../DEPLOYMENT.md)
+- **Contributing**: See [CONTRIBUTING.md](../../CONTRIBUTING.md)
 
 ---
 

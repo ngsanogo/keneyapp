@@ -14,6 +14,9 @@ const App = () => {
       <AuthProvider>
         <Router>
           <div className="app">
+            <a href="#main-content" className="skip-link">
+              Skip to main content
+            </a>
             <Routes>
               <Route path="/" element={<LoginPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />

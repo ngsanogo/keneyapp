@@ -406,107 +406,65 @@ sudo crontab -e
 - Persistent storage provisioner
 - LoadBalancer or Ingress controller
 
-### Step 1: Create Namespace
+### Step 1: Apply the Production Overlay
+
+Use the Kustomize overlay so the production namespace and labels are applied consistently:
 
 ```bash
-kubectl apply -f k8s/namespace.yaml
+kubectl apply -k k8s/overlays/production
 ```
 
-### Step 2: Configure Secrets
+### Step 2: Configure Runtime Secrets and Config
+
+Avoid storing live secrets in Git. After applying the overlay, create/update secrets in-cluster:
 
 ```bash
-# Generate secrets
+# Generate strong secrets
 SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))")
 DB_PASSWORD=$(python3 -c "import secrets; print(secrets.token_urlsafe(24))")
 
-# Create secret
-kubectl create secret generic keneyapp-secret \
-  --from-literal=secret-key="$SECRET_KEY" \
-  --from-literal=database-password="$DB_PASSWORD" \
-  --from-literal=redis-password="" \
-  -n keneyapp
+# Create or update runtime secrets
+kubectl create secret generic keneyapp-secrets \
+  --from-literal=SECRET_KEY="$SECRET_KEY" \
+  --from-literal=DATABASE_URL="${DATABASE_URL}" \
+  --from-literal=CELERY_BROKER_URL="${CELERY_BROKER_URL}" \
+  --from-literal=CELERY_RESULT_BACKEND="${CELERY_RESULT_BACKEND}" \
+  -n keneyapp --dry-run=client -o yaml | kubectl apply -f -
 
-# Or use k8s/secret.yaml template
-nano k8s/secret.yaml  # Update with base64 encoded values
-kubectl apply -f k8s/secret.yaml
+# Patch config values without editing manifests
+kubectl create configmap keneyapp-config \
+  --from-literal=APP_NAME="KeneyApp" \
+  --from-literal=ALLOWED_ORIGINS="${ALLOWED_ORIGINS}" \
+  --from-literal=REDIS_HOST="redis-service" \
+  --from-literal=REDIS_PORT="6379" \
+  --from-literal=REDIS_DB="0" \
+  -n keneyapp --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-### Step 3: Configure ConfigMap
+### Step 3: Verify Stateful Dependencies
 
 ```bash
-# Edit ConfigMap with production values
-nano k8s/configmap.yaml
-
-kubectl apply -f k8s/configmap.yaml
-```
-
-### Step 4: Deploy Database
-
-```bash
-# Deploy PostgreSQL
-kubectl apply -f k8s/postgres-deployment.yaml
-
-# Wait for PostgreSQL to be ready
+# Wait for PostgreSQL and Redis to be ready
 kubectl wait --for=condition=ready pod -l app=postgres -n keneyapp --timeout=300s
-
-# Verify
-kubectl get pods -n keneyapp
-kubectl logs -l app=postgres -n keneyapp
+kubectl wait --for=condition=ready pod -l app=redis -n keneyapp --timeout=180s
 ```
 
-### Step 5: Deploy Redis
+### Step 4: Roll Out Application Images
+
+The GitHub Actions deploy job updates images automatically. To do it manually (e.g., for a hotfix), point deployments at the desired tag and confirm the rollout:
 
 ```bash
-kubectl apply -f k8s/redis-deployment.yaml
-
-# Wait for Redis
-kubectl wait --for=condition=ready pod -l app=redis -n keneyapp --timeout=300s
+kubectl set image deployment/backend backend=<image>:<tag> -n keneyapp
+kubectl set image deployment/frontend frontend=<image>:<tag> -n keneyapp
+kubectl rollout status deployment/backend -n keneyapp --timeout=180s
+kubectl rollout status deployment/frontend -n keneyapp --timeout=180s
 ```
 
-### Step 6: Initialize Database
+### Step 5: Configure Ingress
+
+Update hostnames and TLS secrets in `k8s/base/ingress.yaml` (or patch them in-cluster) before applying the overlay. Validate ingress after deploy:
 
 ```bash
-# Get PostgreSQL pod name
-POSTGRES_POD=$(kubectl get pod -l app=postgres -n keneyapp -o jsonpath='{.items[0].metadata.name}')
-
-# Run migrations
-kubectl exec -it $POSTGRES_POD -n keneyapp -- psql -U keneyapp -c "CREATE DATABASE keneyapp;"
-
-# Apply migrations (from a backend pod after deployment)
-# Or use an init job
-```
-
-### Step 7: Deploy Backend
-
-```bash
-kubectl apply -f k8s/backend-deployment.yaml
-
-# Wait for backend
-kubectl wait --for=condition=ready pod -l app=backend -n keneyapp --timeout=300s
-
-# Check logs
-kubectl logs -l app=backend -n keneyapp --tail=50
-```
-
-### Step 8: Deploy Frontend
-
-```bash
-kubectl apply -f k8s/frontend-deployment.yaml
-
-# Wait for frontend
-kubectl wait --for=condition=ready pod -l app=frontend -n keneyapp --timeout=300s
-```
-
-### Step 9: Configure Ingress
-
-```bash
-# Update ingress with your domain
-nano k8s/ingress.yaml
-
-# Apply ingress
-kubectl apply -f k8s/ingress.yaml
-
-# Get ingress IP
 kubectl get ingress -n keneyapp
 ```
 

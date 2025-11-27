@@ -49,7 +49,15 @@ def get_patients_paginated(db: Session, skip: int = 0, limit: int = 100):
 
 ### 3. Connection Pooling
 
-SQLAlchemy connection pooling is already configured. Monitor pool usage:
+SQLAlchemy connection pooling is already configured with tunable defaults exposed via environment variables to help right-size connections per deployment:
+
+- `DB_POOL_SIZE` (default: 10) — baseline concurrent connections
+- `DB_MAX_OVERFLOW` (default: 10) — burst connections allowed beyond the pool size
+- `DB_POOL_TIMEOUT` (default: 30s) — how long to wait for a connection before failing
+- `DB_POOL_RECYCLE` (default: 1800s) — proactively recycle connections to avoid stale sockets
+- `DB_ECHO` (default: False) — enable SQL logging when troubleshooting
+
+Monitor pool usage directly when tuning:
 
 ```python
 # Check pool status
@@ -82,6 +90,8 @@ LIMIT 10;
 DASHBOARD_CACHE_KEY = "dashboard:stats"
 DASHBOARD_CACHE_TTL = 300  # 5 minutes
 ```
+
+The dashboard endpoint now aggregates counts in a single database round-trip per model and then caches the rendered payload for five minutes, which keeps read pressure low even under frequent refreshes.
 
 #### Patient Lists (2 minutes)
 

@@ -746,17 +746,20 @@ terraform apply tfplan
 ```
 k8s/
 ├── base/                    # Base configurations
-│   ├── namespace.yaml
 │   ├── configmap.yaml
 │   ├── secret.yaml
 │   ├── backend-deployment.yaml
 │   ├── frontend-deployment.yaml
+│   ├── redis-deployment.yaml
+│   ├── postgres-deployment.yaml
 │   └── ingress.yaml
 ├── overlays/               # Environment-specific overlays
 │   ├── staging/
-│   │   └── kustomization.yaml
+│   │   ├── kustomization.yaml
+│   │   └── namespace.yaml
 │   └── production/
-│       └── kustomization.yaml
+│       ├── kustomization.yaml
+│       └── namespace.yaml
 └── README.md
 ```
 

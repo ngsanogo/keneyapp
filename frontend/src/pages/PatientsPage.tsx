@@ -48,16 +48,22 @@ const PatientsPage = () => {
   return (
     <div>
       <Header />
-      <div className="container">
-        <h1>Patients</h1>
-        <button
-          className="btn btn-primary"
-          style={{ marginBottom: '1rem' }}
-          onClick={() => setShowAdd(true)}
-        >
-          Add Patient
-        </button>
-        <div className="card">
+      <main id="main-content" className="container">
+        <div className="page-heading">
+          <div>
+            <p className="page-subtitle">Patient registry</p>
+            <h1>Patients</h1>
+          </div>
+          <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+            Add patient
+          </button>
+        </div>
+
+        <p className="surface-muted" style={{ marginBottom: '1rem' }}>
+          Keep demographic and contact information current to speed up scheduling, billing, and on-call coordination.
+        </p>
+
+        <div className="card" aria-live="polite">
           <h2>Patient List</h2>
           {patients.length === 0 ? (
             <p>No patients found.</p>
@@ -65,11 +71,11 @@ const PatientsPage = () => {
             <table className="table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Gender</th>
+                  <th scope="col">ID</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Phone</th>
+                  <th scope="col">Gender</th>
                 </tr>
               </thead>
               <tbody>
@@ -95,7 +101,7 @@ const PatientsPage = () => {
             onClose={() => setShowAdd(false)}
           />
         )}
-      </div>
+      </main>
     </div>
   );
 };

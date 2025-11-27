@@ -9,6 +9,13 @@
 
 KeneyApp is a modern healthcare data management platform built with **Python**, **React (TypeScript)**, and **PostgreSQL**. It provides an end-to-end system for managing patient records, appointments, prescriptions, and hospital workflows.
 
+## 🤝 Community & Collaboration
+
+- **Join the conversation:** Ask questions or share ideas in [GitHub Discussions](https://github.com/ISData-consulting/keneyapp/discussions).
+- **Contribute with confidence:** Follow the [Contributing Guide](CONTRIBUTING.md) and [Community Playbook](docs/COMMUNITY.md) for branching, reviews, and engagement norms.
+- **Track work transparently:** Use the [issue tracker](https://github.com/ISData-consulting/keneyapp/issues) for bugs and feature requests; labels highlight owners, priorities, and newcomer-friendly items.
+- **Stay informed:** Release announcements, roadmap updates, and office-hour invites are pinned in Discussions and summarized in release notes.
+
 ## 🏥 Features
 
 ### Core Functionality
@@ -59,6 +66,21 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 - ⚡ **Horizontal auto-scaling** with Kubernetes HPA
 - ⚡ **Prometheus metrics** for monitoring
 - ⚡ Database query optimization
+
+## 📁 Project Structure
+
+- `app/` — Python backend services and FastAPI application code
+- `frontend/` — React/TypeScript single-page application
+- `e2e/` — Playwright-based end-to-end tests and fixtures
+- `docs/` — Comprehensive documentation, including:
+  - `guides/` for build, automation, dependency, and E2E setup guides
+  - `reports/` for audits, optimization summaries, and test run results
+- `scripts/` — Developer tooling and automation helpers (lint, format, release)
+- `k8s/` — Kubernetes manifests and Helm deployment resources
+- `terraform/` — Infrastructure-as-code for cloud provisioning
+- `monitoring/` — Observability configuration (Prometheus, Grafana, alerting)
+- `alembic/` — Database migration scripts
+- `uploads/` — Storage for sample or development assets
 
 ### Enterprise Features
 
@@ -602,21 +624,17 @@ settings are hardened:
 
 ### Kubernetes Deployment
 
-KeneyApp is production-ready with comprehensive Kubernetes manifests:
+KeneyApp is production-ready with Kustomize overlays for staging and production:
 
 ```bash
-# Deploy to Kubernetes
-kubectl apply -f k8s/namespace.yaml
-kubectl apply -f k8s/secret.yaml
-kubectl apply -f k8s/configmap.yaml
-kubectl apply -f k8s/postgres-deployment.yaml
-kubectl apply -f k8s/redis-deployment.yaml
-kubectl apply -f k8s/backend-deployment.yaml
-kubectl apply -f k8s/frontend-deployment.yaml
-kubectl apply -f k8s/ingress.yaml
+# Deploy to staging (keneyapp-staging namespace)
+kubectl apply -k k8s/overlays/staging
+
+# Deploy to production (keneyapp namespace)
+kubectl apply -k k8s/overlays/production
 
 # Check deployment status
-kubectl get pods -n keneyapp
+kubectl get pods -n keneyapp-staging
 ```
 
 **Features:**
@@ -687,36 +705,44 @@ See [BUILD.md](BUILD.md) for comprehensive build instructions.
 
 ## 📚 Documentation
 
-Comprehensive documentation available in the `docs/` directory:
+Comprehensive documentation is available in the `docs/` directory and the [Documentation Portal](docs/index.md):
 
-### Getting Started
+### Product & Getting Started
 
-- **[Build Guide](BUILD.md)** - Comprehensive build instructions and troubleshooting
-- **[Development Guide](docs/DEVELOPMENT.md)** - Complete development setup and workflow
-- **[API Reference](docs/API_REFERENCE.md)** - Full API documentation with examples
-- **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment instructions
+- **[Quick Start](docs/QUICK_START.md)** – Fast-track setup for a local environment
+- **[User Guide](docs/USER_GUIDE.md)** – End-user navigation, roles, and day-to-day workflows
+- **[Development Guide](docs/DEVELOPMENT.md)** – Complete development setup and workflow
+- **[API Reference](docs/API_REFERENCE.md)** – REST/GraphQL API documentation with examples
+- **[Deployment Guide](docs/DEPLOYMENT.md)** – Installation and production deployment instructions
 
-### Technology & Planning
+### Codebase & Architecture
 
-- **[Technology Choices](docs/TECHNOLOGY_CHOICES.md)** - Technology stack justification and decisions
-- **[Deployment Strategies](docs/DEPLOYMENT_STRATEGIES.md)** - Blue-Green, Canary, and Rolling deployment procedures
-- **[Testing Strategy](docs/TESTING_STRATEGY.md)** - Comprehensive testing approach and validation
-- **[Maintenance Plan](docs/MAINTENANCE_PLAN.md)** - Ongoing support and continuous improvement
-- **[Indicative Planning](docs/INDICATIVE_PLANNING.md)** - Development roadmap and milestones
+- **[Codebase Overview](docs/CODEBASE_OVERVIEW.md)** – Repository layout and development workflow
+- **[Architecture Overview](docs/ARCHITECTURE.md)** – System design and deployment topology
+- **[Technology Choices](docs/TECHNOLOGY_CHOICES.md)** – Technology stack justification
+- **[Deployment Strategies](docs/DEPLOYMENT_STRATEGIES.md)** – Blue-Green, Canary, and Rolling procedures
+- **[Testing Strategy](docs/TESTING_STRATEGY.md)** – Comprehensive testing approach and validation
+- **[Maintenance Plan](docs/MAINTENANCE_PLAN.md)** – Ongoing support and continuous improvement
+- **[Indicative Planning](docs/INDICATIVE_PLANNING.md)** – Development roadmap and milestones
 
-### Advanced Features
+### Features & Interoperability
 
-- **[OAuth Guide](docs/OAUTH_GUIDE.md)** - OAuth2/OIDC authentication setup
-- **[Encryption Guide](docs/ENCRYPTION_GUIDE.md)** - Data encryption implementation
-- **[FHIR Guide](docs/FHIR_GUIDE.md)** - FHIR interoperability guide
-- **[Medical Terminologies](docs/MEDICAL_TERMINOLOGIES.md)** - Healthcare standards implementation (ICD-11, SNOMED CT, LOINC, ATC, CPT/CCAM)
-- **[New Features](docs/NEW_FEATURES.md)** - Complete v2.0 feature overview
-- **[Integration Plan](docs/INTEGRATION_PLAN.md)** - System integration guide
+- **[OAuth Guide](docs/OAUTH_GUIDE.md)** – OAuth2/OIDC authentication setup
+- **[Encryption Guide](docs/ENCRYPTION_GUIDE.md)** – Data encryption implementation
+- **[FHIR Guide](docs/FHIR_GUIDE.md)** – FHIR interoperability guide
+- **[Medical Terminologies](docs/MEDICAL_TERMINOLOGIES.md)** – ICD-11, SNOMED CT, LOINC, ATC, CPT/CCAM coverage
+- **[New Features](docs/NEW_FEATURES.md)** – v2.0 enterprise capabilities
+- **[New Features v3.0](docs/NEW_FEATURES_V3.md)** – Latest platform enhancements
+- **[Integration Plan](docs/INTEGRATION_PLAN.md)** – System integration guide
 
-### Operations & Maintenance
+### Operations & Quality
 
-- **[Incident Response Playbook](docs/INCIDENT_RESPONSE.md)** - Step-by-step incident handling procedures
-- **[Operations Runbook](docs/OPERATIONS_RUNBOOK.md)** - Standard operating procedures and troubleshooting
+- **[Incident Response Playbook](docs/INCIDENT_RESPONSE.md)** – Step-by-step incident handling procedures
+- **[Operations Runbook](docs/OPERATIONS_RUNBOOK.md)** – Standard operating procedures and troubleshooting
+- **[Monitoring & Alerting](docs/MONITORING_ALERTING.md)** – Observability setup and alerts
+- **[Testing Guide](docs/TESTING_GUIDE.md)** – Comprehensive testing practices
+- **[Coding Standards](docs/CODING_STANDARDS.md)** – Enforced conventions across the stack
+- **[Code Quality](docs/CODE_QUALITY.md)** – Linting, formatting, and quality controls
 
 ## 📊 Repository Analysis
 

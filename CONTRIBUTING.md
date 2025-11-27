@@ -76,6 +76,13 @@ git pull origin develop
 git checkout -b feature/your-feature-name
 ```
 
+### Issue Tracking & Community
+
+- **Use the templates:** Open bugs and feature requests via GitHub issue templates to ensure reproducible details.
+- **Label and link:** Apply `type/*` and `area/*` labels plus priority; link related PRs with `Fixes #<id>`.
+- **Triage cadence:** Maintainers triage twice weekly and surface `good first issue` / `help wanted` tickets for newcomers.
+- **Discuss early:** For significant ideas, start a [Discussion](https://github.com/ISData-consulting/keneyapp/discussions) or a draft PR to gather feedback before building.
+
 ## 📝 Coding Standards
 
 ### Python (Backend)

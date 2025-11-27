@@ -82,6 +82,39 @@ MICROSOFT_CLIENT_SECRET=<your-microsoft-client-secret>
 PROMETHEUS_ENABLED=true
 ```
 
+## Staging → Production Promotion Flow
+
+Our GitHub Actions workflow **Quality Gates & Deploy** builds images after tests pass, then deploys with Kustomize overlays:
+
+1. Push to `develop` → deploys to **staging** using `k8s/overlays/staging` (namespace `keneyapp-staging`).
+2. Push to `main` → deploys to **production** using `k8s/overlays/production` (namespace `keneyapp`).
+3. Each deployment waits for backend and frontend rollouts to finish before completing.
+
+### Prerequisites for CI Deployments
+- Store `STAGING_KUBECONFIG` and `PRODUCTION_KUBECONFIG` as base64-encoded kubeconfig secrets in GitHub.
+- Ensure the cluster can pull from GHCR (`GITHUB_TOKEN` permissions or imagePullSecret).
+- Set ingress hostnames and TLS secrets ahead of time in the target namespace.
+
+### Manual Deploy/Recover Commands
+If you need to redeploy or recover manually outside CI:
+
+```bash
+# Apply the right overlay
+kubectl apply -k k8s/overlays/staging   # or k8s/overlays/production
+
+# Point deployments at a specific image
+kubectl set image deployment/backend backend=<image>:<tag> -n keneyapp-staging
+kubectl set image deployment/frontend frontend=<image>:<tag> -n keneyapp-staging
+
+# Verify rollouts before considering the deploy done
+kubectl rollout status deployment/backend -n keneyapp-staging --timeout=180s
+kubectl rollout status deployment/frontend -n keneyapp-staging --timeout=180s
+
+# Roll back quickly if needed
+kubectl rollout undo deployment/backend -n keneyapp-staging
+kubectl rollout undo deployment/frontend -n keneyapp-staging
+```
+
 ### Generate Secure Keys
 
 ```bash
