@@ -242,7 +242,8 @@ tmp
 
 # Local runtime artifacts
 logs/
-uploads/
+uploads/*
+!uploads/.gitkeep
 
 # Exception: Keep the comprehensive repository analysis report
 !REPOSITORY_ANALYSIS_REPORT.md
