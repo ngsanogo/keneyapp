@@ -244,6 +244,8 @@ tmp
 logs/
 uploads/*
 !uploads/.gitkeep
+!uploads/
+!uploads/README.md
 
 # Exception: Keep the comprehensive repository analysis report
 !REPOSITORY_ANALYSIS_REPORT.md
