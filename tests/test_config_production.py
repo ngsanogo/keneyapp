@@ -1,58 +1,100 @@
-"""Production configuration hardening tests."""
+"""Production configuration safeguards."""
 
 import pytest
 
-from app.core.config import Settings, validate_production_settings
+from app.core.config import (
+    is_production_environment,
+    settings,
+    validate_production_settings,
+)
 
 
-def test_validate_production_settings_accepts_hardened_configuration():
-    """A fully configured production setup should not raise errors."""
+def test_is_production_environment_matches_common_aliases():
+    assert is_production_environment("production") is True
+    assert is_production_environment("prod") is True
+    assert is_production_environment("staging") is False
 
+
+def test_validate_production_settings_noop_in_non_production(monkeypatch):
+    monkeypatch.setattr(settings, "ENVIRONMENT", "development")
+    monkeypatch.setattr(settings, "DEBUG", True)
+    monkeypatch.setattr(settings, "ENABLE_BOOTSTRAP_ADMIN", True)
+
+    # Should not raise because the environment is not production.
+    validate_production_settings()
+
+
+def test_validate_production_settings_flags_insecure_defaults(monkeypatch):
+    monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr(settings, "DEBUG", True)
+    monkeypatch.setattr(settings, "SECRET_KEY", "your-secret-key-change-in-production")
+    monkeypatch.setattr(settings, "ENABLE_BOOTSTRAP_ADMIN", True)
+    monkeypatch.setattr(
+        settings, "DATABASE_URL", "postgresql://keneyapp:keneyapp@localhost:5432/keneyapp"
+    )
+    monkeypatch.setattr(settings, "APP_URL", "http://localhost:8000")
+
+    with pytest.raises(RuntimeError) as exc_info:
+        validate_production_settings()
+
+    error_message = str(exc_info.value)
+    assert "DEBUG must be False" in error_message
+    assert "SECRET_KEY" in error_message
+    assert "ENABLE_BOOTSTRAP_ADMIN" in error_message
+    assert "DATABASE_URL" in error_message
+    assert "APP_URL" in error_message
+
+
+def test_validate_production_settings_allows_hardened_configuration(monkeypatch):
+    monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr(settings, "DEBUG", False)
+    monkeypatch.setattr(settings, "SECRET_KEY", "sufficiently-long-and-random-secret-key-value")
+    monkeypatch.setattr(settings, "ENABLE_BOOTSTRAP_ADMIN", False)
+    monkeypatch.setattr(settings, "DATABASE_URL", "postgresql://prod_user:secret@prod-db:5432/keneyapp")
+    monkeypatch.setattr(settings, "APP_URL", "https://keneyapp.example.com")
+
+    validate_production_settings()
+import pytest
+
+from app.core.config import Settings
+
+
+def test_enforce_production_allows_secure_configuration():
     settings = Settings(
         ENVIRONMENT="production",
-        SECRET_KEY="super-secure-key",
-        ALLOWED_ORIGINS=["https://keneyapp.example.com"],
-        DATABASE_URL="postgresql://user:pass@db:5432/keneyapp",
+        SECRET_KEY="super-secret-key",
         DEBUG=False,
-        ACCESS_TOKEN_EXPIRE_MINUTES=15,
+        ALLOWED_ORIGINS=["https://keneyapp.example"],
     )
 
-    validate_production_settings(settings)
+    settings.enforce_production_safety()
 
 
-def test_validate_production_settings_rejects_insecure_defaults():
-    """Misconfigurations should abort production startup with helpful details."""
+@pytest.mark.parametrize(
+    "kwargs, expected_error",
+    [
+        (
+            {"ENVIRONMENT": "production", "SECRET_KEY": "your-secret-key-change-in-production", "DEBUG": False},
+            "SECRET_KEY must be overridden in production",
+        ),
+        (
+            {"ENVIRONMENT": "production", "DEBUG": True, "ALLOWED_ORIGINS": ["https://keneyapp.example"]},
+            "DEBUG must be False in production",
+        ),
+        (
+            {"ENVIRONMENT": "production", "ALLOWED_ORIGINS": ["*"]},
+            "ALLOWED_ORIGINS cannot include '*' in production",
+        ),
+        (
+            {"ENVIRONMENT": "production", "ALLOWED_ORIGINS": []},
+            "ALLOWED_ORIGINS must include at least one origin in production",
+        ),
+    ],
+)
+def test_enforce_production_raises_on_insecure_defaults(kwargs, expected_error):
+    settings = Settings(**kwargs)
 
-    settings = Settings(
-        ENVIRONMENT="production",
-        SECRET_KEY="your-secret-key-change-in-production",
-        ALLOWED_ORIGINS=["http://localhost:3000"],
-        DATABASE_URL="postgresql://keneyapp:keneyapp@localhost:5432/keneyapp",
-        DEBUG=True,
-        ACCESS_TOKEN_EXPIRE_MINUTES=0,
-    )
+    with pytest.raises(ValueError) as exc_info:
+        settings.enforce_production_safety()
 
-    with pytest.raises(RuntimeError) as excinfo:
-        validate_production_settings(settings)
-
-    message = str(excinfo.value)
-    assert "SECRET_KEY" in message
-    assert "DEBUG" in message
-    assert "ALLOWED_ORIGINS" in message
-    assert "DATABASE_URL" in message
-    assert "ACCESS_TOKEN_EXPIRE_MINUTES" in message
-
-
-def test_validation_skipped_when_not_production():
-    """Non-production environments are not blocked by strict checks."""
-
-    settings = Settings(
-        ENVIRONMENT="staging",
-        SECRET_KEY="your-secret-key-change-in-production",
-        ALLOWED_ORIGINS=["http://localhost:3000"],
-        DATABASE_URL="postgresql://keneyapp:keneyapp@localhost:5432/keneyapp",
-        DEBUG=True,
-        ACCESS_TOKEN_EXPIRE_MINUTES=0,
-    )
-
-    validate_production_settings(settings)
+    assert expected_error in str(exc_info.value)
