@@ -577,6 +577,7 @@ DATABASE_URL=postgresql://keneyapp:keneyapp@localhost:5432/keneyapp
 
 # CORS
 ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000
+ENVIRONMENT=development
 
 # Redis
 REDIS_HOST=localhost

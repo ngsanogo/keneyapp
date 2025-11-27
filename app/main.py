@@ -2,6 +2,7 @@
 Main FastAPI application entry point for KeneyApp.
 """
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
@@ -14,7 +15,11 @@ from slowapi.errors import RateLimitExceeded
 
 # Ensure all models are imported and registered before metadata operations
 from app import models as app_models  # noqa: F401
-from app.core.config import is_rate_limiting_enabled, settings
+from app.core.config import (
+    is_rate_limiting_enabled,
+    settings,
+    validate_production_settings,
+)
 from app.core.database import Base, engine
 from app.core.errors import generic_exception_handler, validation_exception_handler
 from app.core.logging_middleware import CorrelationIdMiddleware
@@ -43,11 +48,20 @@ from app.routers import (
 )
 
 
+logger = logging.getLogger(__name__)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifespan events."""
     # Startup: Initialize database tables (skip in tests to avoid external DB connects)
     import os
+
+    try:
+        settings.enforce_production_safety()
+    except ValueError as exc:
+        logger.critical("Production configuration validation failed: %s", exc)
+        raise
 
     if os.getenv("TESTING", "false").lower() not in {"1", "true", "yes"}:
         Base.metadata.create_all(bind=engine)
@@ -68,6 +82,9 @@ async def lifespan(app: FastAPI):
 
 # Wire up OpenTelemetry tracing: call setup_tracing() at startup and instrument_app(app) after FastAPI app creation.
 setup_tracing()
+
+# Ensure critical production safeguards are enforced before serving requests.
+validate_production_settings()
 
 # Create FastAPI application
 app = FastAPI(
