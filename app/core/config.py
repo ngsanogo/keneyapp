@@ -320,6 +320,49 @@ elif isinstance(_settings.ALLOWED_ORIGINS, list):
 settings = _settings
 
 
+# ---------------------------------------------------------------------------
+# Environment helpers
+# ---------------------------------------------------------------------------
+_PRODUCTION_ENV_NAMES = {"production", "prod"}
+
+
+def is_production_environment(env_value: str | None = None) -> bool:
+    """Return True when the provided (or current) environment is production."""
+
+    active_value = env_value if env_value is not None else settings.ENVIRONMENT
+    return str(active_value).strip().lower() in _PRODUCTION_ENV_NAMES
+
+
+def validate_production_settings() -> None:
+    """Fail fast when dangerous defaults are present in production deployments."""
+
+    if not is_production_environment():
+        return
+
+    issues: list[str] = []
+
+    if settings.DEBUG:
+        issues.append("DEBUG must be False in production.")
+
+    if not settings.SECRET_KEY or settings.SECRET_KEY == "your-secret-key-change-in-production":
+        issues.append("SECRET_KEY must be set to a strong, non-default value.")
+    elif len(settings.SECRET_KEY) < 32:
+        issues.append("SECRET_KEY must be at least 32 characters long in production.")
+
+    if settings.ENABLE_BOOTSTRAP_ADMIN:
+        issues.append("Disable ENABLE_BOOTSTRAP_ADMIN to prevent default admin creation.")
+
+    default_db = "postgresql://keneyapp:keneyapp@localhost:5432/keneyapp"
+    if settings.DATABASE_URL == default_db:
+        issues.append("DATABASE_URL must point to a production-grade database (not the default local value).")
+
+    if settings.APP_URL.startswith("http://localhost"):
+        issues.append("APP_URL must be set to the public base URL in production.")
+
+    if issues:
+        raise RuntimeError("Production configuration is insecure:\n- " + "\n- ".join(issues))
+
+
 def _coerce_bool_env(value: str | None, default: bool) -> bool:
     """Parse a boolean-like environment value with sensible fallbacks.
 
