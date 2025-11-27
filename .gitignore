@@ -242,9 +242,9 @@ tmp
 
 # Local runtime artifacts
 logs/
-uploads/
-!uploads/
 uploads/*
+!uploads/.gitkeep
+!uploads/
 !uploads/README.md
 
 # Exception: Keep the comprehensive repository analysis report
