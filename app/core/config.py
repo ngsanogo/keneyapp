@@ -245,6 +245,39 @@ class Settings(BaseSettings):
             return "development"
         return v
 
+    def enforce_production_safety(self) -> None:
+        """Validate critical production configuration.
+
+        Raises:
+            ValueError: When insecure defaults are used while running in
+                production. This prevents accidental deployments with
+                placeholder secrets or permissive CORS settings.
+        """
+
+        if str(self.ENVIRONMENT).lower() != "production":
+            return
+
+        errors: list[str] = []
+
+        if self.DEBUG:
+            errors.append("DEBUG must be False in production")
+
+        if self.SECRET_KEY == "your-secret-key-change-in-production":
+            errors.append("SECRET_KEY must be overridden in production")
+
+        if isinstance(self.ALLOWED_ORIGINS, str):
+            origins = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
+        else:
+            origins = [origin.strip() for origin in self.ALLOWED_ORIGINS if origin.strip()]
+
+        if not origins:
+            errors.append("ALLOWED_ORIGINS must include at least one origin in production")
+        if any(origin == "*" for origin in origins):
+            errors.append("ALLOWED_ORIGINS cannot include '*' in production")
+
+        if errors:
+            raise ValueError("; ".join(errors))
+
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="allow")
 
 

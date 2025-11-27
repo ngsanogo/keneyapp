@@ -2,6 +2,7 @@
 Main FastAPI application entry point for KeneyApp.
 """
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
@@ -43,11 +44,20 @@ from app.routers import (
 )
 
 
+logger = logging.getLogger(__name__)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifespan events."""
     # Startup: Initialize database tables (skip in tests to avoid external DB connects)
     import os
+
+    try:
+        settings.enforce_production_safety()
+    except ValueError as exc:
+        logger.critical("Production configuration validation failed: %s", exc)
+        raise
 
     if os.getenv("TESTING", "false").lower() not in {"1", "true", "yes"}:
         Base.metadata.create_all(bind=engine)

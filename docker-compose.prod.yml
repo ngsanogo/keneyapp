@@ -43,7 +43,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
       args:
         - BUILD_ENV=production
     container_name: keneyapp_backend_prod
@@ -61,6 +61,9 @@ services:
       REDIS_DB: 0
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
+      ENVIRONMENT: production
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-4}
+      GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-120}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       # OAuth configuration (optional)
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
@@ -161,7 +164,7 @@ services:
   celery_worker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     container_name: keneyapp_celery_worker_prod
     restart: unless-stopped
     environment:
@@ -169,6 +172,7 @@ services:
       DATABASE_URL: postgresql://${DB_USER:-keneyapp}:${DB_PASSWORD:?DB_PASSWORD must be set}@db:5432/${DB_NAME:-keneyapp}
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
+      ENVIRONMENT: production
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     depends_on:
       db:
@@ -200,7 +204,7 @@ services:
   celery_beat:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     container_name: keneyapp_celery_beat_prod
     restart: unless-stopped
     environment:
@@ -208,6 +212,7 @@ services:
       DATABASE_URL: postgresql://${DB_USER:-keneyapp}:${DB_PASSWORD:?DB_PASSWORD must be set}@db:5432/${DB_NAME:-keneyapp}
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
+      ENVIRONMENT: production
     depends_on:
       db:
         condition: service_healthy
@@ -231,13 +236,14 @@ services:
   flower:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     container_name: keneyapp_flower_prod
     restart: unless-stopped
     environment:
       PYTHONPATH: /app
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
+      ENVIRONMENT: production
       FLOWER_BASIC_AUTH: ${FLOWER_USER:-admin}:${FLOWER_PASSWORD:?FLOWER_PASSWORD must be set}
     # Expose only to internal network or protect with nginx
     expose:
