@@ -577,6 +577,7 @@ DATABASE_URL=postgresql://keneyapp:keneyapp@localhost:5432/keneyapp
 
 # CORS
 ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000
+ENVIRONMENT=development
 
 # Redis
 REDIS_HOST=localhost
@@ -587,6 +588,11 @@ REDIS_DB=0
 CELERY_BROKER_URL=redis://localhost:6379/0
 CELERY_RESULT_BACKEND=redis://localhost:6379/0
 ```
+
+- Set `ENVIRONMENT=production` during deployments to enable runtime guards that
+  block insecure defaults (e.g., placeholder secrets or wildcard CORS).
+- Tune Gunicorn by exporting `GUNICORN_WORKERS` or `GUNICORN_TIMEOUT` in
+  production environments as needed.
 
 ## 🚢 Deployment
 
