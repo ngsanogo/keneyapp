@@ -589,10 +589,14 @@ CELERY_BROKER_URL=redis://localhost:6379/0
 CELERY_RESULT_BACKEND=redis://localhost:6379/0
 ```
 
-- Set `ENVIRONMENT=production` during deployments to enable runtime guards that
-  block insecure defaults (e.g., placeholder secrets or wildcard CORS).
-- Tune Gunicorn by exporting `GUNICORN_WORKERS` or `GUNICORN_TIMEOUT` in
-  production environments as needed.
+When `ENVIRONMENT=production`, the application will refuse to start unless critical
+settings are hardened:
+
+- `SECRET_KEY` must be changed from the sample value and be at least 32 characters.
+- `DEBUG` must be disabled.
+- `DATABASE_URL` cannot point to the default localhost database.
+- `ALLOWED_ORIGINS` must include non-localhost origins for your deployed domain(s).
+- The bootstrap admin must be disabled or use non-default credentials.
 
 ## 🚢 Deployment
 

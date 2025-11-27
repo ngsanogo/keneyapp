@@ -8,7 +8,7 @@ present in the shell or .env. This lets defaults apply as intended.
 """
 
 import os
-from typing import List, Union
+from typing import List, Sequence, Union
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -78,6 +78,28 @@ class Settings(BaseSettings):
     OTEL_SERVICE_NAME: str = "keneyapp"
     OTEL_SERVICE_VERSION: str = "1.0.0"
     ENVIRONMENT: str = "development"
+
+    # ------------------------------------------------------------------
+    # Production safety checks
+    # ------------------------------------------------------------------
+    def model_post_init(self, __context: object) -> None:
+        """Harden defaults when running in production.
+
+        The application intentionally keeps sensible defaults for local
+        development and automated tests. When ENVIRONMENT is set to
+        "production", we enforce stricter invariants to avoid accidental
+        deployments with insecure defaults.
+        """
+
+        environment = (self.ENVIRONMENT or "").lower()
+        if environment != "production":
+            return
+
+        self._assert_secure_secret_key()
+        self._assert_debug_disabled()
+        self._assert_bootstrap_admin_disabled()
+        self._assert_database_not_local()
+        self._assert_allowed_origins_not_localhost()
 
     # ------------------------------------------------------------------
     # Validators to coerce empty-string envs to sensible defaults
@@ -245,38 +267,50 @@ class Settings(BaseSettings):
             return "development"
         return v
 
-    def enforce_production_safety(self) -> None:
-        """Validate critical production configuration.
+    # ------------------------------------------------------------------
+    # Production assertions
+    # ------------------------------------------------------------------
+    def _assert_secure_secret_key(self) -> None:
+        if self.SECRET_KEY == "your-secret-key-change-in-production":
+            raise ValueError("SECRET_KEY must be set for production deployments.")
+        if len(self.SECRET_KEY) < 32:
+            raise ValueError("SECRET_KEY must be at least 32 characters long in production.")
 
-        Raises:
-            ValueError: When insecure defaults are used while running in
-                production. This prevents accidental deployments with
-                placeholder secrets or permissive CORS settings.
-        """
+    def _assert_debug_disabled(self) -> None:
+        if self.DEBUG:
+            raise ValueError("DEBUG must be disabled in production.")
 
-        if str(self.ENVIRONMENT).lower() != "production":
+    def _assert_bootstrap_admin_disabled(self) -> None:
+        if not self.ENABLE_BOOTSTRAP_ADMIN:
             return
 
-        errors: list[str] = []
+        if self.BOOTSTRAP_ADMIN_USERNAME == "admin" or self.BOOTSTRAP_ADMIN_PASSWORD == "admin123":
+            raise ValueError(
+                "Disable bootstrap admin or change the default credentials before deploying to production."
+            )
 
-        if self.DEBUG:
-            errors.append("DEBUG must be False in production")
+    def _assert_database_not_local(self) -> None:
+        if self.DATABASE_URL.startswith("postgresql://keneyapp:keneyapp@localhost"):
+            raise ValueError("DATABASE_URL must point to a production database when ENVIRONMENT=production.")
 
-        if self.SECRET_KEY == "your-secret-key-change-in-production":
-            errors.append("SECRET_KEY must be overridden in production")
-
-        if isinstance(self.ALLOWED_ORIGINS, str):
-            origins = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
-        else:
-            origins = [origin.strip() for origin in self.ALLOWED_ORIGINS if origin.strip()]
-
+    def _assert_allowed_origins_not_localhost(self) -> None:
+        origins = self._normalized_origins(self.ALLOWED_ORIGINS)
         if not origins:
-            errors.append("ALLOWED_ORIGINS must include at least one origin in production")
-        if any(origin == "*" for origin in origins):
-            errors.append("ALLOWED_ORIGINS cannot include '*' in production")
+            raise ValueError("ALLOWED_ORIGINS must be configured for production deployments.")
 
-        if errors:
-            raise ValueError("; ".join(errors))
+        if all(origin.startswith(("http://localhost", "http://127.0.0.1")) for origin in origins):
+            raise ValueError("ALLOWED_ORIGINS cannot be limited to localhost values in production.")
+
+        self.ALLOWED_ORIGINS = origins
+
+    @staticmethod
+    def _normalized_origins(origins: Union[str, Sequence[str]]) -> List[str]:
+        if isinstance(origins, str):
+            parsed = [origin.strip() for origin in origins.split(",")]
+        else:
+            parsed = [origin.strip() for origin in origins]
+
+        return [origin for origin in parsed if origin]
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="allow")
 
