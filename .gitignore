@@ -243,6 +243,9 @@ tmp
 # Local runtime artifacts
 logs/
 uploads/
+!uploads/
+uploads/*
+!uploads/README.md
 
 # Exception: Keep the comprehensive repository analysis report
 !REPOSITORY_ANALYSIS_REPORT.md
