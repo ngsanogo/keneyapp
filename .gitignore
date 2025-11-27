@@ -237,5 +237,9 @@ ITERATION_*.md
 BACKLOG.md
 tmp
 
+# Local runtime artifacts
+logs/
+uploads/
+
 # Exception: Keep the comprehensive repository analysis report
 !REPOSITORY_ANALYSIS_REPORT.md
