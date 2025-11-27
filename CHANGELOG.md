@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- Dropped unused `fastapi-cors` dependency from backend requirements to simplify the install surface.
+- Deleted legacy backup copies of `test_messages_comprehensive.py` to reduce repository noise.
+
 ## [3.0.0] - 2025-11-02 - Complete Medical Record System 🏥
 
 ### Added - Major Features
