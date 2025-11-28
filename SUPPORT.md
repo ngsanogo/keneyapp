@@ -59,6 +59,7 @@ Please follow our [Security Policy](SECURITY.md) for reporting security issues p
 
 - **GitHub Repository**: [ISData-consulting/keneyapp](https://github.com/ISData-consulting/keneyapp)
 - **License**: Proprietary - See [LICENSE](LICENSE)
+- **Stay connected**: Join [Discussions](https://github.com/ISData-consulting/keneyapp/discussions) for Q&A, roadmap notes, and office-hour announcements, and follow the [Community Playbook](docs/COMMUNITY.md) for collaboration norms.
 
 ---
 

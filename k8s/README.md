@@ -1,6 +1,6 @@
 # Kubernetes Deployment Guide
 
-This directory contains Kubernetes manifests for deploying KeneyApp in a production environment.
+This directory now uses a Kustomize layout so staging and production can share hardened defaults while keeping their own namespaces and labels. Apply an overlay instead of editing the base files directly.
 
 ## Prerequisites
 
@@ -11,69 +11,26 @@ This directory contains Kubernetes manifests for deploying KeneyApp in a product
 
 ## Deployment Steps
 
-### 1. Create Namespace
+Use the overlay that matches the target environment:
 
 ```bash
-kubectl apply -f namespace.yaml
+# Staging
+kubectl apply -k overlays/staging
+
+# Production
+kubectl apply -k overlays/production
 ```
 
-### 2. Configure Secrets
+Each overlay:
+- Creates its own namespace (`keneyapp-staging` / `keneyapp`)
+- Labels resources with the environment for easier targeting and NetworkPolicy/RBAC rules
+- Applies the shared base manifests from `k8s/base`
 
-**Important:** Update the secrets in `secret.yaml` with production values before deploying!
-
-```bash
-# Edit secret.yaml with your production credentials
-kubectl apply -f secret.yaml
-```
-
-### 3. Create ConfigMap
+After applying, the GitHub Actions deployment jobs update the backend and frontend deployment images to the freshly built tags and wait for rollouts to succeed. You can also update images manually:
 
 ```bash
-kubectl apply -f configmap.yaml
-```
-
-### 4. Deploy Database
-
-```bash
-kubectl apply -f postgres-deployment.yaml
-```
-
-Wait for PostgreSQL to be ready:
-
-```bash
-kubectl wait --for=condition=ready pod -l app=postgres -n keneyapp --timeout=300s
-```
-
-### 5. Deploy Redis
-
-```bash
-kubectl apply -f redis-deployment.yaml
-```
-
-Wait for Redis to be ready:
-
-```bash
-kubectl wait --for=condition=ready pod -l app=redis -n keneyapp --timeout=120s
-```
-
-### 6. Deploy Backend
-
-```bash
-kubectl apply -f backend-deployment.yaml
-```
-
-### 7. Deploy Frontend
-
-```bash
-kubectl apply -f frontend-deployment.yaml
-```
-
-### 8. Configure Ingress
-
-Update the hostnames in `ingress.yaml` with your domain, then:
-
-```bash
-kubectl apply -f ingress.yaml
+kubectl set image deployment/backend backend=<image>:<tag> -n keneyapp-staging
+kubectl rollout status deployment/backend -n keneyapp-staging --timeout=180s
 ```
 
 ## Verification

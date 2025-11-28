@@ -46,10 +46,18 @@ const PrescriptionsPage = () => {
   return (
     <div>
       <Header />
-      <div className="container">
-        <h1>Prescriptions</h1>
+      <main id="main-content" className="container">
+        <div className="page-heading">
+          <div>
+            <p className="page-subtitle">Medication records</p>
+            <h1>Prescriptions</h1>
+          </div>
+          <button className="btn btn-secondary" onClick={() => navigate('/dashboard')}>
+            Back to dashboard
+          </button>
+        </div>
 
-        <div className="card">
+        <div className="card" aria-live="polite">
           <h2>Prescription List</h2>
 
           {prescriptions.length === 0 ? (
@@ -58,12 +66,12 @@ const PrescriptionsPage = () => {
             <table className="table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Medication</th>
-                  <th>Dosage</th>
-                  <th>Frequency</th>
-                  <th>Patient ID</th>
-                  <th>Date</th>
+                  <th scope="col">ID</th>
+                  <th scope="col">Medication</th>
+                  <th scope="col">Dosage</th>
+                  <th scope="col">Frequency</th>
+                  <th scope="col">Patient ID</th>
+                  <th scope="col">Date</th>
                 </tr>
               </thead>
               <tbody>
@@ -81,7 +89,7 @@ const PrescriptionsPage = () => {
             </table>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 };

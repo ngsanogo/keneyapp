@@ -60,35 +60,40 @@ nav:
   - Home: index.md
   - Getting Started:
       - Quick Start: QUICK_START.md
+      - User Guide: USER_GUIDE.md
       - Installation: DEPLOYMENT.md
-      - Configuration: docs/DEVELOPMENT.md
+      - Configuration: DEVELOPMENT.md
   - Architecture:
       - Overview: ARCHITECTURE.md
-      - Technology Choices: docs/TECHNOLOGY_CHOICES.md
-      - DMI Alignment: docs/DMI_ARCHITECTURE_ALIGNMENT.md
+      - Codebase Overview: CODEBASE_OVERVIEW.md
+      - Technology Choices: TECHNOLOGY_CHOICES.md
+      - DMI Alignment: DMI_ARCHITECTURE_ALIGNMENT.md
   - Features:
-      - v3.0 Features: docs/NEW_FEATURES_V3.md
-      - Medical Terminologies: docs/MEDICAL_TERMINOLOGIES.md
-      - FHIR Guide: docs/FHIR_GUIDE.md
-      - OAuth: docs/OAUTH_GUIDE.md
+      - v3.0 Features: NEW_FEATURES_V3.md
+      - Medical Terminologies: MEDICAL_TERMINOLOGIES.md
+      - FHIR Guide: FHIR_GUIDE.md
+      - OAuth: OAUTH_GUIDE.md
   - Development:
-      - Development Guide: docs/DEVELOPMENT.md
+      - Development Guide: DEVELOPMENT.md
+      - Coding Standards: CODING_STANDARDS.md
       - Code Quality: CODE_QUALITY.md
-      - Testing: docs/TESTING_GUIDE.md
-      - E2E Testing: docs/E2E_TESTING.md
+      - Testing Strategy: TESTING_STRATEGY.md
+      - Testing: TESTING_GUIDE.md
+      - E2E Testing: E2E_TESTING.md
   - API Reference:
-      - API Best Practices: docs/API_BEST_PRACTICES.md
-      - API Reference: docs/API_REFERENCE.md
+      - API Best Practices: API_BEST_PRACTICES.md
+      - API Reference: API_REFERENCE.md
   - Security:
-      - Security Best Practices: docs/SECURITY_BEST_PRACTICES.md
-      - Encryption Guide: docs/ENCRYPTION_GUIDE.md
-      - Compliance: docs/SECURITY_COMPLIANCE.md
+      - Security Best Practices: SECURITY_BEST_PRACTICES.md
+      - Encryption Guide: ENCRYPTION_GUIDE.md
+      - Compliance: SECURITY_COMPLIANCE.md
   - Operations:
-      - Deployment: docs/DEPLOYMENT.md
-      - Monitoring: docs/MONITORING_ALERTING.md
-      - Runbook: docs/OPERATIONS_RUNBOOK.md
-      - Disaster Recovery: docs/DISASTER_RECOVERY.md
+      - Deployment: DEPLOYMENT.md
+      - Monitoring: MONITORING_ALERTING.md
+      - Runbook: OPERATIONS_RUNBOOK.md
+      - Disaster Recovery: DISASTER_RECOVERY.md
   - Contributing:
-      - Contributing Guide: CONTRIBUTING.md
-      - Code of Conduct: CODE_OF_CONDUCT.md
-      - Governance: GOVERNANCE.md
+      - Contributing Guide: ../CONTRIBUTING.md
+      - Code of Conduct: ../CODE_OF_CONDUCT.md
+      - Governance: ../GOVERNANCE.md
+      - Community Playbook: COMMUNITY.md

@@ -52,19 +52,19 @@ make ci-dry-run
 act -l
 
 # Exécuter un job spécifique (dry-run)
-act -j backend-lint-and-security -W .github/workflows/ci-enhanced.yml -n
+act -j backend-lint-and-security -W ../../.github/workflows/ci-enhanced.yml -n
 
 # Exécuter réellement un job
-act -j backend-lint-and-security -W .github/workflows/ci-enhanced.yml
+act -j backend-lint-and-security -W ../../.github/workflows/ci-enhanced.yml
 
 # Exécuter tous les jobs d'un workflow
-act -W .github/workflows/ci-enhanced.yml
+act -W ../../.github/workflows/ci-enhanced.yml
 
 # Exécuter sur un événement spécifique
-act push -W .github/workflows/ci-enhanced.yml
+act push -W ../../.github/workflows/ci-enhanced.yml
 
 # Mode verbose pour debug
-act -j backend-lint-and-security -W .github/workflows/ci-enhanced.yml -v
+act -j backend-lint-and-security -W ../../.github/workflows/ci-enhanced.yml -v
 ```
 
 ## 🎯 Jobs Testables Localement
@@ -78,7 +78,7 @@ Ces jobs fonctionnent parfaitement avec act :
    ```bash
    make ci-test-lint
    # ou
-   act -j backend-lint-and-security -W .github/workflows/ci-enhanced.yml
+   act -j backend-lint-and-security -W ../../.github/workflows/ci-enhanced.yml
    ```
 
 2. **Frontend Linting** (`frontend-lint-and-format`)
@@ -96,7 +96,7 @@ Ces jobs fonctionnent parfaitement avec act :
 4. **Backend Type Checking** (`backend-type-check`)
 
    ```bash
-   act -j backend-type-check -W .github/workflows/ci-enhanced.yml
+   act -j backend-type-check -W ../../.github/workflows/ci-enhanced.yml
    ```
 
 ### ⚠️ Jobs avec Limitations
@@ -147,7 +147,7 @@ CODECOV_TOKEN=optional-for-local
 Utilisez-le avec act :
 
 ```bash
-act -j backend-lint-and-security -W .github/workflows/ci-enhanced.yml --secret-file .secrets
+act -j backend-lint-and-security -W ../../.github/workflows/ci-enhanced.yml --secret-file .secrets
 ```
 
 ### 3. Variables d'Environnement
@@ -264,7 +264,7 @@ make ci-test-lint
 make ci-test-build
 
 # En cas d'erreur, voir les logs détaillés
-act -j frontend-build -W .github/workflows/ci-enhanced.yml -v
+act -j frontend-build -W ../../.github/workflows/ci-enhanced.yml -v
 ```
 
 ### Exemple 3 : Tester Plusieurs Jobs en Parallèle

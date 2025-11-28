@@ -41,14 +41,23 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         Encoded JWT token
     """
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-        )
+    now = datetime.now(timezone.utc)
 
-    to_encode.update({"exp": expire})
+    if expires_delta:
+        expire = now + expires_delta
+    else:
+        expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    claims = {
+        "exp": expire,
+        "iat": now,
+        "iss": settings.TOKEN_ISSUER,
+    }
+
+    if settings.TOKEN_AUDIENCE:
+        claims["aud"] = settings.TOKEN_AUDIENCE
+
+    to_encode.update(claims)
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
@@ -64,7 +73,14 @@ def decode_access_token(token: str) -> Optional[dict]:
         Decoded token data or None if invalid
     """
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+            audience=settings.TOKEN_AUDIENCE,
+            issuer=settings.TOKEN_ISSUER,
+            options={"verify_aud": bool(settings.TOKEN_AUDIENCE)},
+        )
         return payload
     except JWTError:
         return None

@@ -29,14 +29,23 @@ class Settings(BaseSettings):
 
     # Security
     SECRET_KEY: str = "your-secret-key-change-in-production"
+    ENCRYPTION_KEY: str | None = None
+    ENCRYPTION_SALT: str = "keneyapp-salt"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    TOKEN_ISSUER: str = "keneyapp"
+    TOKEN_AUDIENCE: str = "keneyapp-clients"
     MFA_ISSUER: str = "KeneyApp"
     MAX_FAILED_LOGIN_ATTEMPTS: int = 5
     ENABLE_RATE_LIMITING: bool = True
 
     # Database
     DATABASE_URL: str = "postgresql://keneyapp:keneyapp@localhost:5432/keneyapp"
+    DB_POOL_SIZE: int = 10
+    DB_MAX_OVERFLOW: int = 10
+    DB_POOL_TIMEOUT: int = 30
+    DB_POOL_RECYCLE: int = 1800
+    DB_ECHO: bool = False
 
     # Bootstrap / default credentials (for tests & local environments)
     ENABLE_BOOTSTRAP_ADMIN: bool = True
@@ -100,6 +109,8 @@ class Settings(BaseSettings):
         self._assert_bootstrap_admin_disabled()
         self._assert_database_not_local()
         self._assert_allowed_origins_not_localhost()
+        self._assert_encryption_key_configured()
+        self._assert_token_claims_configured()
 
     # ------------------------------------------------------------------
     # Validators to coerce empty-string envs to sensible defaults
@@ -158,6 +169,41 @@ class Settings(BaseSettings):
     def _coerce_database_url(cls, v):
         if v in ("", None):
             return "postgresql://keneyapp:keneyapp@localhost:5432/keneyapp"
+        return v
+
+    @field_validator("DB_POOL_SIZE", mode="before")
+    @classmethod
+    def _coerce_db_pool_size(cls, v):
+        if v in ("", None):
+            return 10
+        return v
+
+    @field_validator("DB_MAX_OVERFLOW", mode="before")
+    @classmethod
+    def _coerce_db_max_overflow(cls, v):
+        if v in ("", None):
+            return 10
+        return v
+
+    @field_validator("DB_POOL_TIMEOUT", mode="before")
+    @classmethod
+    def _coerce_db_pool_timeout(cls, v):
+        if v in ("", None):
+            return 30
+        return v
+
+    @field_validator("DB_POOL_RECYCLE", mode="before")
+    @classmethod
+    def _coerce_db_pool_recycle(cls, v):
+        if v in ("", None):
+            return 1800
+        return v
+
+    @field_validator("DB_ECHO", mode="before")
+    @classmethod
+    def _coerce_db_echo(cls, v):
+        if v in ("", None):
+            return False
         return v
 
     @field_validator("APP_NAME", mode="before")
@@ -232,6 +278,34 @@ class Settings(BaseSettings):
             return "System Administrator"
         return v
 
+    @field_validator("ENCRYPTION_KEY", mode="before")
+    @classmethod
+    def _coerce_encryption_key(cls, v):
+        if v in ("", None):
+            return None
+        return v
+
+    @field_validator("ENCRYPTION_SALT", mode="before")
+    @classmethod
+    def _coerce_encryption_salt(cls, v):
+        if v in ("", None):
+            return "keneyapp-salt"
+        return v
+
+    @field_validator("TOKEN_ISSUER", mode="before")
+    @classmethod
+    def _coerce_token_issuer(cls, v):
+        if v in ("", None):
+            return "keneyapp"
+        return v
+
+    @field_validator("TOKEN_AUDIENCE", mode="before")
+    @classmethod
+    def _coerce_token_audience(cls, v):
+        if v in ("", None):
+            return "keneyapp-clients"
+        return v
+
     @field_validator("OTEL_ENABLED", mode="before")
     @classmethod
     def _coerce_otel_enabled(cls, v):
@@ -303,6 +377,20 @@ class Settings(BaseSettings):
 
         self.ALLOWED_ORIGINS = origins
 
+    def _assert_encryption_key_configured(self) -> None:
+        if not self.ENCRYPTION_KEY:
+            raise ValueError("ENCRYPTION_KEY must be configured for production deployments.")
+
+        if len(self.ENCRYPTION_KEY) < 32:
+            raise ValueError("ENCRYPTION_KEY must be at least 32 characters long.")
+
+    def _assert_token_claims_configured(self) -> None:
+        if not self.TOKEN_ISSUER:
+            raise ValueError("TOKEN_ISSUER must be set for production deployments.")
+
+        if not self.TOKEN_AUDIENCE:
+            raise ValueError("TOKEN_AUDIENCE must be set for production deployments.")
+
     @staticmethod
     def _normalized_origins(origins: Union[str, Sequence[str]]) -> List[str]:
         if isinstance(origins, str):
@@ -328,6 +416,10 @@ _EMPTY_OVERRIDES = [
     "REDIS_PORT",
     "REDIS_DB",
     "DATABASE_URL",
+    "DB_POOL_SIZE",
+    "DB_MAX_OVERFLOW",
+    "DB_POOL_TIMEOUT",
+    "DB_POOL_RECYCLE",
     "APP_NAME",
     "APP_VERSION",
     "API_V1_PREFIX",
@@ -338,6 +430,10 @@ _EMPTY_OVERRIDES = [
     "BOOTSTRAP_TENANT_NAME",
     "BOOTSTRAP_ADMIN_EMAIL",
     "BOOTSTRAP_ADMIN_FULL_NAME",
+    "ENCRYPTION_KEY",
+    "ENCRYPTION_SALT",
+    "TOKEN_ISSUER",
+    "TOKEN_AUDIENCE",
     "OTEL_ENABLED",
     "OTEL_EXPORTER_TYPE",
     "OTEL_SERVICE_NAME",
@@ -349,6 +445,7 @@ _BOOL_OVERRIDES = {
     "ENABLE_RATE_LIMITING",
     "ENABLE_BOOTSTRAP_ADMIN",
     "OTEL_ENABLED",
+    "DB_ECHO",
 }
 
 for _key in _BOOL_OVERRIDES:
@@ -423,6 +520,17 @@ def validate_production_settings(current_settings: Settings) -> None:
 
     if current_settings.ACCESS_TOKEN_EXPIRE_MINUTES <= 0:
         issues.append("ACCESS_TOKEN_EXPIRE_MINUTES must be a positive integer.")
+
+    if not current_settings.ENCRYPTION_KEY:
+        issues.append("ENCRYPTION_KEY must be provided for production deployments.")
+    elif len(current_settings.ENCRYPTION_KEY) < 32:
+        issues.append("ENCRYPTION_KEY must be at least 32 characters long in production.")
+
+    if not current_settings.TOKEN_ISSUER:
+        issues.append("TOKEN_ISSUER must be configured for production deployments.")
+
+    if not current_settings.TOKEN_AUDIENCE:
+        issues.append("TOKEN_AUDIENCE must be configured for production deployments.")
 
     if issues:
         raise RuntimeError(

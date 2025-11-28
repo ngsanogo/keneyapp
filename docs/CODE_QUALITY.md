@@ -2,6 +2,8 @@
 
 This document outlines the code quality standards and tools used in the KeneyApp project.
 
+For language-specific style conventions, see [Coding Standards & Style Guides](CODING_STANDARDS.md). This page focuses on the tools and signals that enforce those rules.
+
 ## Overview
 
 KeneyApp maintains high code quality through:

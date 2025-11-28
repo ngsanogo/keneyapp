@@ -23,13 +23,22 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h1>KeneyApp</h1>
-        <h2>Healthcare Management Platform</h2>
+    <main id="main-content" className="login-container" aria-labelledby="login-heading">
+      <div className="login-card" role="presentation">
+        <header className="login-header">
+          <p className="eyebrow">Secure access</p>
+          <h1 id="login-heading">KeneyApp workspace</h1>
+          <p className="subtext">
+            Sign in to manage patient records, appointments, and prescriptions in a single, protected workspace.
+          </p>
+        </header>
 
-        <form onSubmit={handleSubmit} className="login-form">
-          {error && <div className="error-message">{error}</div>}
+        <form onSubmit={handleSubmit} className="login-form" aria-describedby="demo-accounts">
+          {error && (
+            <div className="error-message" role="alert" aria-live="assertive">
+              {error}
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="username">Username</label>
@@ -40,6 +49,7 @@ const LoginPage = () => {
               onChange={e => setUsername(e.target.value)}
               required
               autoFocus
+              autoComplete="username"
             />
           </div>
 
@@ -51,25 +61,38 @@ const LoginPage = () => {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
             />
           </div>
 
           <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
-            {loading ? 'Signing in...' : 'Login'}
+            {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
 
-        <div className="demo-credentials">
-          <p>
-            <strong>Demo Accounts:</strong>
-          </p>
-          <p>Admin: admin / admin123</p>
-          <p>Doctor: doctor / doctor123</p>
-          <p>Nurse: nurse / nurse123</p>
-          <p>Receptionist: receptionist / receptionist123</p>
+        <div className="demo-credentials" id="demo-accounts">
+          <p className="demo-label">Demo access</p>
+          <div className="demo-grid">
+            <div>
+              <p className="demo-role">Admin</p>
+              <p className="demo-creds">admin / admin123</p>
+            </div>
+            <div>
+              <p className="demo-role">Doctor</p>
+              <p className="demo-creds">doctor / doctor123</p>
+            </div>
+            <div>
+              <p className="demo-role">Nurse</p>
+              <p className="demo-creds">nurse / nurse123</p>
+            </div>
+            <div>
+              <p className="demo-role">Receptionist</p>
+              <p className="demo-creds">receptionist / receptionist123</p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

@@ -19,7 +19,7 @@ from app.models.prescription import Prescription
 from app.models.user import User, UserRole
 
 DASHBOARD_STATS_CACHE_KEY = "dashboard:stats"
-DASHBOARD_STATS_TTL_SECONDS = 120
+DASHBOARD_STATS_TTL_SECONDS = 300
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -56,112 +56,83 @@ def get_dashboard_stats(
             request=request,
         )
         return cached_stats
-    # Total counts
-    total_patients = (
-        db.query(func.count(Patient.id))
-        .filter(Patient.tenant_id == current_user.tenant_id)
-        .scalar()
-    )
-    total_appointments = (
-        db.query(func.count(Appointment.id))
-        .filter(Appointment.tenant_id == current_user.tenant_id)
-        .scalar()
-    )
-    total_prescriptions = (
-        db.query(func.count(Prescription.id))
-        .filter(Prescription.tenant_id == current_user.tenant_id)
-        .scalar()
-    )
+    tenant_id = current_user.tenant_id
+    now = datetime.now(timezone.utc)
+    week_ago = now - timedelta(days=7)
 
-    # Today's appointments
-    today = datetime.now(timezone.utc).date()
-    today_start = datetime.combine(today, datetime.min.time(), tzinfo=timezone.utc)
-    today_end = datetime.combine(today, datetime.max.time(), tzinfo=timezone.utc)
+    # Time windows
+    today_start = datetime.combine(now.date(), datetime.min.time(), tzinfo=timezone.utc)
+    today_end = datetime.combine(now.date(), datetime.max.time(), tzinfo=timezone.utc)
 
-    today_appointments = (
-        db.query(func.count(Appointment.id))
-        .filter(
-            Appointment.tenant_id == current_user.tenant_id,
-            Appointment.appointment_date >= today_start,
-            Appointment.appointment_date <= today_end,
+    # Aggregate patient counts in one round-trip
+    patient_counts = (
+        db.query(
+            func.count().filter(Patient.tenant_id == tenant_id).label("total"),
+            func.count()
+            .filter(Patient.tenant_id == tenant_id, Patient.created_at >= week_ago)
+            .label("recent"),
         )
-        .scalar()
+        .select_from(Patient)
+        .one()
     )
 
-    # Appointments by status
-    scheduled_appointments = (
-        db.query(func.count(Appointment.id))
-        .filter(
-            Appointment.tenant_id == current_user.tenant_id,
-            Appointment.status == AppointmentStatus.SCHEDULED,
+    # Aggregate appointment stats in one round-trip
+    appointment_counts = (
+        db.query(
+            func.count().filter(Appointment.tenant_id == tenant_id).label("total"),
+            func.count()
+            .filter(
+                Appointment.tenant_id == tenant_id,
+                Appointment.appointment_date >= today_start,
+                Appointment.appointment_date <= today_end,
+            )
+            .label("today"),
+            func.count()
+            .filter(Appointment.tenant_id == tenant_id, Appointment.status == AppointmentStatus.SCHEDULED)
+            .label("scheduled"),
+            func.count()
+            .filter(Appointment.tenant_id == tenant_id, Appointment.status == AppointmentStatus.COMPLETED)
+            .label("completed"),
+            func.count()
+            .filter(Appointment.tenant_id == tenant_id, Appointment.status == AppointmentStatus.CANCELLED)
+            .label("cancelled"),
+            func.count()
+            .filter(Appointment.tenant_id == tenant_id, Appointment.created_at >= week_ago)
+            .label("recent"),
         )
-        .scalar()
+        .select_from(Appointment)
+        .one()
     )
 
-    completed_appointments = (
-        db.query(func.count(Appointment.id))
-        .filter(
-            Appointment.tenant_id == current_user.tenant_id,
-            Appointment.status == AppointmentStatus.COMPLETED,
+    # Aggregate prescription stats in one round-trip
+    prescription_counts = (
+        db.query(
+            func.count().filter(Prescription.tenant_id == tenant_id).label("total"),
+            func.count()
+            .filter(Prescription.tenant_id == tenant_id, Prescription.created_at >= week_ago)
+            .label("recent"),
         )
-        .scalar()
-    )
-
-    cancelled_appointments = (
-        db.query(func.count(Appointment.id))
-        .filter(
-            Appointment.tenant_id == current_user.tenant_id,
-            Appointment.status == AppointmentStatus.CANCELLED,
-        )
-        .scalar()
-    )
-
-    # Recent activity (last 7 days)
-    week_ago = datetime.now(timezone.utc) - timedelta(days=7)
-
-    # Assuming we'd have a created_at field
-    recent_patients = (
-        db.query(func.count(Patient.id))
-        .filter(
-            Patient.tenant_id == current_user.tenant_id,
-            Patient.created_at >= week_ago,
-        )
-        .scalar()
-    )
-
-    recent_appointments = (
-        db.query(func.count(Appointment.id))
-        .filter(
-            Appointment.tenant_id == current_user.tenant_id,
-            Appointment.created_at >= week_ago,
-        )
-        .scalar()
-    )
-
-    recent_prescriptions = (
-        db.query(func.count(Prescription.id))
-        .filter(
-            Prescription.tenant_id == current_user.tenant_id,
-            Prescription.created_at >= week_ago,
-        )
-        .scalar()
+        .select_from(Prescription)
+        .one()
     )
 
     stats = {
-        "total_patients": total_patients,
-        "total_appointments": total_appointments,
-        "total_prescriptions": total_prescriptions,
-        "today_appointments": today_appointments,
+        "total_patients": patient_counts.total,
+        "total_appointments": appointment_counts.total,
+        "total_prescriptions": prescription_counts.total,
+        "today_appointments": appointment_counts.today,
         "appointments_by_status": {
-            "scheduled": scheduled_appointments,
-            "completed": completed_appointments,
-            "cancelled": cancelled_appointments,
+            "scheduled": appointment_counts.scheduled,
+            "completed": appointment_counts.completed,
+            "cancelled": appointment_counts.cancelled,
         },
         "recent_activity": {
-            "patients": recent_patients,
-            "appointments": recent_appointments,
-            "prescriptions": recent_prescriptions,
+            "patients": patient_counts.recent,
+            "appointments": appointment_counts.recent,
+            "prescriptions": prescription_counts.recent,
         },
+        "activity_window_days": 7,
+        "generated_at": now.isoformat(),
     }
 
     cache_set(cache_key, stats, expire=DASHBOARD_STATS_TTL_SECONDS)

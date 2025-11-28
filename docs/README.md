@@ -4,13 +4,23 @@ Welcome to the KeneyApp documentation! This directory contains comprehensive gui
 
 ## 📚 Documentation Index
 
-### Getting Started
+### Getting Started & Product Guides
 
 | Document | Description |
 |----------|-------------|
 | [Quick Start Guide](QUICK_START.md) | Fast-track guide to get KeneyApp running locally |
+| [User Guide](USER_GUIDE.md) | End-user walkthrough for roles, navigation, and core workflows |
 | [Development Guide](DEVELOPMENT.md) | Complete development environment setup and workflow |
 | [API Reference](API_REFERENCE.md) | Full REST API documentation with examples |
+
+### Codebase & Architecture
+
+| Document | Description |
+|----------|-------------|
+| [Codebase Overview](CODEBASE_OVERVIEW.md) | How the backend, frontend, tests, and infrastructure are organized |
+| [Architecture Overview](ARCHITECTURE.md) | System design and deployment topology |
+| [Technology Choices](TECHNOLOGY_CHOICES.md) | Rationale behind major platform decisions |
+| [DMI Architecture Alignment](DMI_ARCHITECTURE_ALIGNMENT.md) | Alignment of target DMI architecture with current system and migration plan |
 
 ### Deployment & Operations
 
@@ -22,6 +32,8 @@ Welcome to the KeneyApp documentation! This directory contains comprehensive gui
 | [Monitoring & Alerting](MONITORING_ALERTING.md) | Setting up Prometheus, Grafana, and alert rules |
 | [Disaster Recovery](DISASTER_RECOVERY.md) | Backup, restore, and disaster recovery procedures |
 | [Incident Response](INCIDENT_RESPONSE.md) | Step-by-step incident handling playbook |
+| [Automation Guide](guides/AUTOMATION_GUIDE.md) | CI/CD, pre-commit, and quality automation overview |
+| [Local CI Testing](guides/LOCAL_CI_TESTING.md) | How to mirror CI pipelines locally before pushing |
 
 ### Security & Compliance
 
@@ -40,6 +52,30 @@ Welcome to the KeneyApp documentation! This directory contains comprehensive gui
 | [Medical Terminologies](MEDICAL_TERMINOLOGIES.md) | ICD-11, SNOMED CT, LOINC, ATC, CPT/CCAM coding standards |
 | [DMI Architecture Alignment](DMI_ARCHITECTURE_ALIGNMENT.md) | Alignment of target DMI architecture with current system and migration plan |
 
+### Engineering Guides
+
+| Document | Description |
+|----------|-------------|
+| [Build Guide](guides/BUILD.md) | How to build backend, frontend, and container images |
+| [Dependency Updates](guides/DEPENDENCY_UPDATES.md) | Workflow for updating dependencies safely |
+| [E2E Setup Guide](guides/E2E_SETUP_GUIDE.md) | Playwright E2E environment setup and execution |
+| [Git & GitHub Best Practices](guides/GIT_GITHUB_BEST_PRACTICES.md) | Branching, commit messages, and PR workflow |
+| [Local CI Testing](guides/LOCAL_CI_TESTING.md) | How to mirror CI pipelines locally before pushing |
+
+### Reports & Audits
+
+| Document | Description |
+|----------|-------------|
+| [Repository Analysis Report](reports/REPOSITORY_ANALYSIS_REPORT.md) | Assessment of repository hygiene and structure |
+| [Code Quality Audit](reports/CODE_QUALITY_AUDIT.md) | Findings from static analysis and code review |
+| [Security Audit](reports/SECURITY_AUDIT.md) | Security review outcomes and remediation actions |
+| [Docker Optimization Summary](reports/DOCKER_OPTIMIZATION_SUMMARY.md) | Image size reduction highlights |
+| [Docker Optimization Results](reports/DOCKER_OPTIMIZATION_RESULTS.md) | Detailed before/after metrics for each service |
+| [Comprehensive Audit (Nov 2025)](reports/AUDIT_COMPLET_NOVEMBRE_2025.md) | Full audit deliverable for November 2025 |
+| [Corrective Action Plan](reports/PLAN_ACTIONS_CORRECTIVES.md) | Follow-up actions from audits |
+| [Synthesis Audit](reports/SYNTHESE_AUDIT.md) | Consolidated audit summary |
+| [Test Run Results](reports/TEST_RUN_RESULTS.md) | Recorded outcomes from structured test runs |
+
 ### Testing & Quality
 
 | Document | Description |
@@ -50,9 +86,18 @@ Welcome to the KeneyApp documentation! This directory contains comprehensive gui
 | [E2E Testing Quick Reference](E2E_TESTING_QUICK_REF.md) | Quick commands and troubleshooting for E2E tests |
 | [E2E Testing Architecture](E2E_TESTING_ARCHITECTURE.md) | Architecture diagrams and data flow |
 | [E2E Testing Checklist](E2E_TESTING_CHECKLIST.md) | Execution and interpretation checklist |
+| [Testing Strategy](TESTING_STRATEGY.md) | Unified plan for unit, integration, and E2E coverage with CI gates |
 | [Testing Guide](TESTING_GUIDE.md) | Comprehensive testing strategies and best practices |
 | [Performance Testing](PERFORMANCE_TESTING.md) | Load testing, benchmarking, and optimization |
+| [Coding Standards & Style Guides](CODING_STANDARDS.md) | Enforced conventions for backend, frontend, and infrastructure code |
 | [Code Quality](CODE_QUALITY.md) | Code quality standards and tooling |
+
+### Community & Support
+
+| Document | Description |
+|----------|-------------|
+| [Community Playbook](COMMUNITY.md) | Collaboration norms, issue triage cadence, and engagement channels |
+| [Support](../SUPPORT.md) | Support expectations, response times, and escalation paths |
 
 ### Development Resources
 
@@ -73,9 +118,15 @@ Welcome to the KeneyApp documentation! This directory contains comprehensive gui
 ```
 docs/
 ├── README.md                           # This file - documentation index
+├── index.md                            # Documentation portal landing page
 ├── QUICK_START.md                      # Get started quickly
+├── USER_GUIDE.md                       # End-user workflows and navigation
 ├── DEVELOPMENT.md                      # Development setup
 ├── API_REFERENCE.md                    # API documentation
+├── ARCHITECTURE.md                     # System architecture overview
+├── TECHNOLOGY_CHOICES.md               # Technology rationale
+├── DMI_ARCHITECTURE_ALIGNMENT.md       # DMI architecture alignment
+├── CODEBASE_OVERVIEW.md                # Repository layout and development workflow
 │
 ├── Deployment & Operations
 │   ├── DEPLOYMENT.md
@@ -84,6 +135,15 @@ docs/
 │   ├── MONITORING_ALERTING.md
 │   ├── DISASTER_RECOVERY.md
 │   └── INCIDENT_RESPONSE.md
+│
+├── Engineering Guides
+│   ├── guides/README.md
+│   ├── guides/AUTOMATION_GUIDE.md
+│   ├── guides/BUILD.md
+│   ├── guides/GIT_GITHUB_BEST_PRACTICES.md
+│   ├── guides/DEPENDENCY_UPDATES.md
+│   ├── guides/E2E_SETUP_GUIDE.md
+│   └── guides/LOCAL_CI_TESTING.md
 │
 ├── Security & Compliance
 │   ├── SECURITY_BEST_PRACTICES.md
@@ -98,7 +158,23 @@ docs/
 ├── Testing & Quality
 │   ├── TESTING_GUIDE.md
 │   ├── PERFORMANCE_TESTING.md
+│   ├── CODING_STANDARDS.md
 │   └── CODE_QUALITY.md
+│
+├── Community
+│   └── COMMUNITY.md
+│
+├── Reports & Audits
+│   ├── reports/README.md
+│   ├── reports/AUDIT_COMPLET_NOVEMBRE_2025.md
+│   ├── reports/CODE_QUALITY_AUDIT.md
+│   ├── reports/DOCKER_OPTIMIZATION_RESULTS.md
+│   ├── reports/DOCKER_OPTIMIZATION_SUMMARY.md
+│   ├── reports/PLAN_ACTIONS_CORRECTIVES.md
+│   ├── reports/REPOSITORY_ANALYSIS_REPORT.md
+│   ├── reports/SECURITY_AUDIT.md
+│   ├── reports/SYNTHESE_AUDIT.md
+│   └── reports/TEST_RUN_RESULTS.md
 │
 └── Development Resources
     ├── API_BEST_PRACTICES.md
@@ -112,11 +188,12 @@ docs/
 
 ### For Developers
 
-1. Start with [Quick Start](QUICK_START.md)
+1. Start with [Quick Start](QUICK_START.md) and the [Codebase Overview](CODEBASE_OVERVIEW.md)
 2. Read [Development Guide](DEVELOPMENT.md)
 3. Review [API Reference](API_REFERENCE.md)
-4. Follow [Code Quality](CODE_QUALITY.md) standards
-5. Learn about [Testing Guide](TESTING_GUIDE.md)
+4. Follow [Coding Standards & Style Guides](CODING_STANDARDS.md)
+5. Enforce [Code Quality](CODE_QUALITY.md) standards
+6. Align with the [Testing Strategy](TESTING_STRATEGY.md) and dig into the [Testing Guide](TESTING_GUIDE.md)
 
 ### For DevOps Engineers
 
@@ -125,6 +202,13 @@ docs/
 3. Implement [Security Best Practices](SECURITY_BEST_PRACTICES.md)
 4. Understand [Operations Runbook](OPERATIONS_RUNBOOK.md)
 5. Prepare [Disaster Recovery](DISASTER_RECOVERY.md) plan
+
+### For Clinicians & Admin Users
+
+1. Review the [User Guide](USER_GUIDE.md)
+2. Learn feature set in [New Features v3.0](NEW_FEATURES_V3.md)
+3. Manage documents and sharing with [FHIR Guide](FHIR_GUIDE.md) and [Medical Terminologies](MEDICAL_TERMINOLOGIES.md)
+4. Reference [Security Compliance](SECURITY_COMPLIANCE.md) for patient data handling
 
 ### For Healthcare Compliance Officers
 

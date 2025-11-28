@@ -413,13 +413,17 @@ const AddPatientForm = ({ onAdd, onClose, token }: AddPatientFormProps) => {
         </form>
       </div>
       <style>{`
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal { background: #fff; padding: 2rem; border-radius: 8px; min-width: 350px; max-width: 500px; box-shadow: 0 2px 16px rgba(0,0,0,0.2); }
-        .form-row { display: flex; gap: 1rem; margin-bottom: 1rem; }
-        .form-row input, .form-row select { flex: 1; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
-        .form-actions { display: flex; gap: 1rem; justify-content: flex-end; }
-        .error { color: #b00; margin-bottom: 1rem; }
-        .field-error { color: #b00; font-size: 0.85rem; margin-top: -0.5rem; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+        .modal { background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.04)); padding: 1.5rem; border-radius: 16px; min-width: 340px; max-width: 520px; box-shadow: 0 30px 80px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); color: #e2e8f0; }
+        .form-row { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .form-row input, .form-row select { flex: 1; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; background: rgba(255,255,255,0.04); color: #e2e8f0; }
+        .form-row input:focus, .form-row select:focus { outline: 2px solid rgba(56, 189, 248, 0.8); box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15); }
+        .form-actions { display: flex; gap: 1rem; justify-content: flex-end; flex-wrap: wrap; }
+        .form-actions button { padding: 0.75rem 1.2rem; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; }
+        .form-actions button[type='submit'] { background: linear-gradient(135deg, #38bdf8, #06b6d4); color: #0b1020; }
+        .form-actions button[type='button'] { background: rgba(148, 163, 184, 0.2); color: #e2e8f0; border: 1px solid rgba(148, 163, 184, 0.4); }
+        .error { color: #fecdd3; background: rgba(239, 68, 68, 0.15); padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.35); margin-bottom: 1rem; }
+        .field-error { color: #fecdd3; font-size: 0.85rem; margin-top: -0.5rem; }
       `}</style>
     </div>
   );

@@ -172,9 +172,21 @@ Never store sensitive data in code. Use environment variables:
 ```bash
 # .env (never commit this file!)
 SECRET_KEY=your-secret-key-here
+ENCRYPTION_KEY=strong-and-unique-32-char-secret
+ENCRYPTION_SALT=rotation-friendly-unique-salt
+TOKEN_ISSUER=keneyapp
+TOKEN_AUDIENCE=keneyapp-clients
 DATABASE_URL=postgresql://user:password@localhost/db
 REDIS_URL=redis://localhost:6379
 ```
+
+#### JWT hardening
+
+- Tokens now carry `iss`, `aud`, and `iat` claims and are validated on every request. Configure `TOKEN_ISSUER` and `TOKEN_AUDIENCE` to match your deployment, and rotate `SECRET_KEY` when required.
+
+#### Encryption hardening
+
+- Provide an `ENCRYPTION_KEY` that is distinct from `SECRET_KEY` in production and at least 32 characters long. Use `ENCRYPTION_SALT` to scope derived keys per environment or rotation event.
 
 ### Secure Configuration
 

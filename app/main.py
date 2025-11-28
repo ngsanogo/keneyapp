@@ -9,6 +9,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exception_handlers import http_exception_handler as fastapi_http_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -103,6 +104,9 @@ instrument_app(app)
 app.add_middleware(CorrelationIdMiddleware)
 app.add_middleware(MetricsMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
+
+if str(settings.ENVIRONMENT).lower() == "production":
+    app.add_middleware(HTTPSRedirectMiddleware)
 
 # Configure CORS
 app.add_middleware(
