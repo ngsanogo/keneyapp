@@ -134,6 +134,13 @@ class UserNotFoundError(ResourceNotFoundError):
 # ============================================================================
 
 
+class AuthenticationError(KeneyAppException):
+    """Raised when authentication fails."""
+
+    status_code = status.HTTP_401_UNAUTHORIZED
+    detail = "Authentication failed"
+
+
 class InsufficientPermissionsError(KeneyAppException):
     """Raised when user lacks permissions for operation."""
 

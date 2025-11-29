@@ -10,7 +10,7 @@ starlette>=0.49.1  # Security update - GHSA-2c2j-9gv5-cj73, GHSA-7f5h-v6xp-fcq8
 # Database
 sqlalchemy==2.0.44
 alembic==1.17.2
-psycopg2-binary==2.9.9
+psycopg2-binary>=2.9.9  # Python 3.13 requires >=2.9.11 on Windows
 
 # Security
 python-jose[cryptography]>=3.5.0

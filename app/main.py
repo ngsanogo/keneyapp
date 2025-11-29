@@ -39,7 +39,7 @@ from app.routers import (
     dashboard,
     documents,
     fhir,
-    french_healthcare,
+    # french_healthcare,  # Temporarily disabled - UUID migration pending
     lab,
     messages,
     oauth,
@@ -136,7 +136,7 @@ app.include_router(shares.router, prefix=settings.API_V1_PREFIX)
 app.include_router(terminology.router, prefix=settings.API_V1_PREFIX)
 app.include_router(subscriptions.router, prefix=settings.API_V1_PREFIX)
 app.include_router(lab.router, prefix=settings.API_V1_PREFIX)
-app.include_router(french_healthcare.router, prefix=settings.API_V1_PREFIX)
+# app.include_router(french_healthcare.router, prefix=settings.API_V1_PREFIX)  # Temporarily disabled
 
 # Include WebSocket router (no prefix, handles /ws endpoints)
 app.include_router(websocket.router)
