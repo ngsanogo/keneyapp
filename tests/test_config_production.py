@@ -65,18 +65,32 @@ def test_validate_production_settings_allows_hardened_configuration(monkeypatch)
     validate_production_settings()
 
 
+def _create_production_settings_for_test(**overrides):
+    """Helper to create a Settings instance that can be modified for production testing.
+
+    Creates a development settings instance and then applies overrides using
+    object.__setattr__ to bypass production validation during instantiation.
+
+    Args:
+        **overrides: Field values to set on the settings instance.
+
+    Returns:
+        A Settings instance with the specified overrides.
+    """
+    test_settings = Settings(ENVIRONMENT="development")
+    object.__setattr__(test_settings, "ENVIRONMENT", "production")
+    for key, value in overrides.items():
+        object.__setattr__(test_settings, key, value)
+    return test_settings
+
+
 def test_enforce_production_allows_secure_configuration():
     """Test that enforce_production_safety passes with secure configuration."""
-    # Create a non-production settings instance
-    test_settings = Settings(
-        ENVIRONMENT="development",
-        SECRET_KEY="super-secret-key",
+    test_settings = _create_production_settings_for_test(
+        SECRET_KEY="this-is-a-secure-secret-key-for-production-use",
         DEBUG=False,
         ALLOWED_ORIGINS=["https://keneyapp.example"],
     )
-    # Change to production environment after creation
-    object.__setattr__(test_settings, "ENVIRONMENT", "production")
-    object.__setattr__(test_settings, "SECRET_KEY", "this-is-a-secure-secret-key-for-production-use")
 
     # This should not raise since we have valid config
     test_settings.enforce_production_safety()
@@ -84,10 +98,10 @@ def test_enforce_production_allows_secure_configuration():
 
 def test_enforce_production_secret_key_check():
     """Test that enforce_production_safety raises for default SECRET_KEY."""
-    test_settings = Settings(ENVIRONMENT="development")
-    object.__setattr__(test_settings, "ENVIRONMENT", "production")
-    object.__setattr__(test_settings, "SECRET_KEY", "your-secret-key-change-in-production")
-    object.__setattr__(test_settings, "DEBUG", False)
+    test_settings = _create_production_settings_for_test(
+        SECRET_KEY="your-secret-key-change-in-production",
+        DEBUG=False,
+    )
 
     with pytest.raises(ValueError) as exc_info:
         test_settings.enforce_production_safety()
@@ -97,10 +111,10 @@ def test_enforce_production_secret_key_check():
 
 def test_enforce_production_debug_check():
     """Test that enforce_production_safety raises for DEBUG=True."""
-    test_settings = Settings(ENVIRONMENT="development")
-    object.__setattr__(test_settings, "ENVIRONMENT", "production")
-    object.__setattr__(test_settings, "SECRET_KEY", "secure-production-secret-key-12345")
-    object.__setattr__(test_settings, "DEBUG", True)
+    test_settings = _create_production_settings_for_test(
+        SECRET_KEY="secure-production-secret-key-12345",
+        DEBUG=True,
+    )
 
     with pytest.raises(ValueError) as exc_info:
         test_settings.enforce_production_safety()
@@ -110,11 +124,11 @@ def test_enforce_production_debug_check():
 
 def test_enforce_production_allowed_origins_wildcard_check():
     """Test that enforce_production_safety raises for ALLOWED_ORIGINS with wildcard."""
-    test_settings = Settings(ENVIRONMENT="development")
-    object.__setattr__(test_settings, "ENVIRONMENT", "production")
-    object.__setattr__(test_settings, "SECRET_KEY", "secure-production-secret-key-12345")
-    object.__setattr__(test_settings, "DEBUG", False)
-    object.__setattr__(test_settings, "ALLOWED_ORIGINS", ["*"])
+    test_settings = _create_production_settings_for_test(
+        SECRET_KEY="secure-production-secret-key-12345",
+        DEBUG=False,
+        ALLOWED_ORIGINS=["*"],
+    )
 
     with pytest.raises(ValueError) as exc_info:
         test_settings.enforce_production_safety()
@@ -124,11 +138,11 @@ def test_enforce_production_allowed_origins_wildcard_check():
 
 def test_enforce_production_allowed_origins_empty_check():
     """Test that enforce_production_safety raises for empty ALLOWED_ORIGINS."""
-    test_settings = Settings(ENVIRONMENT="development")
-    object.__setattr__(test_settings, "ENVIRONMENT", "production")
-    object.__setattr__(test_settings, "SECRET_KEY", "secure-production-secret-key-12345")
-    object.__setattr__(test_settings, "DEBUG", False)
-    object.__setattr__(test_settings, "ALLOWED_ORIGINS", [])
+    test_settings = _create_production_settings_for_test(
+        SECRET_KEY="secure-production-secret-key-12345",
+        DEBUG=False,
+        ALLOWED_ORIGINS=[],
+    )
 
     with pytest.raises(ValueError) as exc_info:
         test_settings.enforce_production_safety()

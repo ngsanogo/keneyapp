@@ -246,17 +246,16 @@ def test_patient(db: Session, test_tenant) -> Patient:
     patient = Patient(
         first_name="Alice",
         last_name="Doe",
-        birth_date="1990-05-15",
+        date_of_birth="1990-05-15",
         gender="female",
         email="alice.doe@email.com",
         phone="+1234567892",
         address="456 Patient Street",
         tenant_id=test_tenant.id,
-        status="active",
         blood_type="A+",
-        allergies=["Penicillin"],
-        emergency_contact_name="Bob Doe",
-        emergency_contact_phone="+1234567893",
+        allergies="Penicillin",
+        emergency_contact="Bob Doe",
+        emergency_phone="+1234567893",
     )
     db.add(patient)
     db.commit()
@@ -270,12 +269,11 @@ def test_patient_2(db: Session, test_tenant) -> Patient:
     patient = Patient(
         first_name="Charlie",
         last_name="Brown",
-        birth_date="1985-10-20",
+        date_of_birth="1985-10-20",
         gender="male",
         email="charlie.brown@email.com",
         phone="+1234567894",
         tenant_id=test_tenant.id,
-        status="active",
         blood_type="O+",
     )
     db.add(patient)
@@ -293,11 +291,11 @@ def test_patients_bulk(db: Session, test_tenant) -> list[Patient]:
         patient = Patient(
             first_name=f"Patient{i}",
             last_name=f"Test{i}",
-            birth_date=f"198{i % 10}-01-01",
+            date_of_birth=f"198{i % 10}-01-01",
             gender="male" if i % 2 == 0 else "female",
             email=f"patient{i}@test.com",
+            phone=f"+123456789{i}",
             tenant_id=test_tenant.id,
-            status="active",
         )
         db.add(patient)
         patients.append(patient)

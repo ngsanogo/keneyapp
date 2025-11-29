@@ -18,19 +18,19 @@ def sample_patients(db: Session, test_tenant):
             tenant_id=test_tenant.id,
             first_name="John",
             last_name="Doe",
-            birth_date="1980-05-15",
+            date_of_birth="1980-05-15",
             gender="male",
             email="john.doe@test.com",
             phone="1234567890",
             address="123 Main St, Paris, France",
-            allergies=["Peanuts"],
+            allergies="Peanuts",
             medical_history="Hypertension",
         ),
         Patient(
             tenant_id=test_tenant.id,
             first_name="Jane",
             last_name="Smith",
-            birth_date="1995-08-20",
+            date_of_birth="1995-08-20",
             gender="female",
             email="jane.smith@test.com",
             phone="0987654321",
@@ -42,12 +42,12 @@ def sample_patients(db: Session, test_tenant):
             tenant_id=test_tenant.id,
             first_name="Bob",
             last_name="Johnson",
-            birth_date="1970-03-10",
+            date_of_birth="1970-03-10",
             gender="male",
             email="bob.johnson@test.com",
             phone="5555555555",
             address="789 Elm St, Marseille, France",
-            allergies=["Penicillin"],
+            allergies="Penicillin",
             medical_history=None,
         ),
     ]
@@ -109,7 +109,7 @@ def test_advanced_search_age_range(client: TestClient, auth_headers_doctor, samp
     # Calculate ages and verify range
     current_year = datetime.now().year
     for item in data["items"]:
-        dob = datetime.fromisoformat(item["birth_date"]).date()
+        dob = datetime.fromisoformat(item["date_of_birth"]).date()
         age = current_year - dob.year
         assert 40 <= age <= 60
 
@@ -230,7 +230,7 @@ def test_advanced_search_combined_filters(client: TestClient, auth_headers_docto
     current_year = datetime.now().year
     for item in data["items"]:
         assert item["gender"] == "male"
-        dob = datetime.fromisoformat(item["birth_date"]).date()
+        dob = datetime.fromisoformat(item["date_of_birth"]).date()
         age = current_year - dob.year
         assert age >= 30
 
