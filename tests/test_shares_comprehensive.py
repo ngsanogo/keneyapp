@@ -258,8 +258,6 @@ class TestShareExpiration:
         self, client: TestClient, auth_headers: dict, db_session: Session
     ):
         """Test that expired shares cannot be accessed."""
-        from datetime import datetime, timedelta
-
         from app.models.medical_record_share import MedicalRecordShare
 
         # Create an expired share directly in DB

@@ -202,7 +202,7 @@ class TestDuplicateDetection:
 
         # If allowed, should flag as duplicate
         if response2.status_code in [200, 201]:
-            result2 = response2.json()
+            _ = response2.json()
             # Check if duplicate is noted (implementation dependent)
 
 
@@ -323,7 +323,7 @@ class TestDocumentMetadata:
         )
 
         if response.status_code in [200, 201]:
-            result = response.json()
+            _ = response.json()
             # Tags should be stored (if implemented)
 
 

@@ -274,7 +274,7 @@ def test_get_patient_appointments(
             doctor_id=test_doctor.id,
             appointment_date=datetime.now() + timedelta(days=i + 1),
             duration_minutes=30,
-            reason=f"Appointment {i+1}",
+            reason=f"Appointment {i + 1}",
         )
         appointment_service.create_appointment(appt_data, test_tenant.id)
     db.commit()

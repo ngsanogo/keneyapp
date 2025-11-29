@@ -3,6 +3,7 @@
 import pytest
 
 from app.core.config import (
+    Settings,
     is_production_environment,
     settings,
     validate_production_settings,
@@ -60,11 +61,6 @@ def test_validate_production_settings_allows_hardened_configuration(monkeypatch)
     monkeypatch.setattr(settings, "APP_URL", "https://keneyapp.example.com")
 
     validate_production_settings()
-
-
-import pytest
-
-from app.core.config import Settings
 
 
 def test_enforce_production_allows_secure_configuration():

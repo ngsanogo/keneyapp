@@ -411,7 +411,7 @@ class TestNotificationLogging:
 
         notification_service = NotificationService()
 
-        with patch("app.core.audit.log_audit_event") as mock_audit:
+        with patch("app.core.audit.log_audit_event"):
             notification_service.send_notification(
                 user_id=1,
                 notification_type="test",

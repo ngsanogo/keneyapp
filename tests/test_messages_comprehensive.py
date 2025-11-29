@@ -160,8 +160,8 @@ class TestMessageThreads:
         for i in range(3):
             payload = {
                 "receiver_id": 2,
-                "subject": f"Message {i+1}",
-                "content": f"Contenu {i+1}",
+                "subject": f"Message {i + 1}",
+                "content": f"Contenu {i + 1}",
             }
             client.post("/api/v1/messages/", json=payload, headers=auth_headers)
 
@@ -201,9 +201,6 @@ class TestMessageReadStatus:
     ):
         """Test that read_at timestamp is set correctly."""
         # Create message in DB
-        from app.core.encryption import encrypt_data
-        from app.models.message import Message
-
         message = Message(
             sender_id=1,
             receiver_id=2,
@@ -254,9 +251,6 @@ class TestSoftDelete:
 
     def test_soft_delete_does_not_affect_receiver(self, db_session: Session):
         """Test that soft delete by sender doesn't affect receiver."""
-        from app.core.encryption import encrypt_data
-        from app.models.message import Message
-
         message = Message(
             sender_id=1,
             receiver_id=2,
@@ -311,9 +305,6 @@ class TestMessageSecurity:
 
     def test_message_content_encrypted_in_db(self, db_session: Session):
         """Test that message content is encrypted in database."""
-        from app.core.encryption import encrypt_data
-        from app.models.message import Message
-
         original_content = "Contenu sensible médical"
         encrypted = encrypt_data(original_content, context={"type": "message"})
 

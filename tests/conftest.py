@@ -309,7 +309,7 @@ def test_patients_bulk(db: Session, test_tenant) -> list[Patient]:
         patient = Patient(
             first_name=f"Patient{i}",
             last_name=f"Test{i}",
-            birth_date=f"198{i%10}-01-01",
+            birth_date=f"198{i % 10}-01-01",
             gender="male" if i % 2 == 0 else "female",
             email=f"patient{i}@test.com",
             tenant_id=test_tenant.id,

@@ -256,8 +256,8 @@ def test_get_patient_lab_results(
             tenant_id=test_tenant.id,
             patient_id=test_patient.id,
             test_type_id=test_lab_test_type.id,
-            test_name=f"Test {i+1}",
-            result_value=f"Value {i+1}",
+            test_name=f"Test {i + 1}",
+            result_value=f"Value {i + 1}",
             state=LabResultState.VALIDATED,
         )
         db.add(result)
@@ -412,7 +412,7 @@ def test_get_active_lab_test_types(db: Session, test_tenant: Tenant):
         db.query(LabTestType)
         .filter(
             LabTestType.tenant_id == test_tenant.id,
-            LabTestType.active == True,
+            LabTestType.active.is_(True),
         )
         .all()
     )
