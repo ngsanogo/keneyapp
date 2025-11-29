@@ -75,9 +75,7 @@ def generate_secure_filename(
     secure_filename = f"{tenant_id}_{patient_id}_{unique_id}{ext}"
 
     # Organize by tenant and patient
-    storage_path = os.path.join(
-        UPLOAD_DIR, str(tenant_id), str(patient_id), secure_filename
-    )
+    storage_path = os.path.join(UPLOAD_DIR, str(tenant_id), str(patient_id), secure_filename)
 
     return secure_filename, storage_path
 
@@ -263,12 +261,7 @@ def get_patient_documents(
     if document_type:
         query = query.filter(MedicalDocument.document_type == document_type)
 
-    return (
-        query.order_by(MedicalDocument.created_at.desc())
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    return query.order_by(MedicalDocument.created_at.desc()).offset(skip).limit(limit).all()
 
 
 def delete_document(

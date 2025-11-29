@@ -248,15 +248,10 @@ class AppointmentSchedulerService:
         update_dict = appointment_data.model_dump(exclude_unset=True)
 
         # If changing doctor, date, or duration, check conflicts
-        if any(
-            k in update_dict
-            for k in ["doctor_id", "appointment_date", "duration_minutes"]
-        ):
+        if any(k in update_dict for k in ["doctor_id", "appointment_date", "duration_minutes"]):
             new_doctor_id = update_dict.get("doctor_id", appointment.doctor_id)
             new_date = update_dict.get("appointment_date", appointment.appointment_date)
-            new_duration = update_dict.get(
-                "duration_minutes", appointment.duration_minutes
-            )
+            new_duration = update_dict.get("duration_minutes", appointment.duration_minutes)
 
             # Check doctor availability
             if not self.check_doctor_availability(
@@ -266,9 +261,7 @@ class AppointmentSchedulerService:
                 exclude_appointment_id=appointment_id,
                 tenant_id=tenant_id,
             ):
-                raise AppointmentConflictError(
-                    detail=f"Doctor is not available at {new_date}"
-                )
+                raise AppointmentConflictError(detail=f"Doctor is not available at {new_date}")
 
             # Check patient availability
             if not self.check_patient_availability(

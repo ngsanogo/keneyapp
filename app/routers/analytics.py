@@ -3,12 +3,12 @@ Analytics API endpoints for dashboard metrics and charts
 """
 
 from datetime import datetime, timedelta
-from typing import List, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Dict
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
 
-from app.core.dependencies import get_db, get_current_active_user, require_roles
+from app.core.dependencies import get_db, require_roles
 from app.core.rate_limit import limiter
 from app.core.audit import log_audit_event
 from app.models.user import User, UserRole
@@ -40,11 +40,12 @@ async def get_dashboard_metrics(
     # Calculate date ranges
     today = datetime.now().date()
     month_start = today.replace(day=1)
-    last_month_start = (month_start - timedelta(days=1)).replace(day=1)
 
     # Total patients and change
-    total_patients = db.query(func.count(Patient.id)).filter(Patient.tenant_id == tenant_id).scalar() or 0
-    
+    total_patients = (
+        db.query(func.count(Patient.id)).filter(Patient.tenant_id == tenant_id).scalar() or 0
+    )
+
     last_month_patients = (
         db.query(func.count(Patient.id))
         .filter(
@@ -53,9 +54,10 @@ async def get_dashboard_metrics(
                 Patient.created_at < month_start,
             )
         )
-        .scalar() or 0
+        .scalar()
+        or 0
     )
-    
+
     patients_change = (
         ((total_patients - last_month_patients) / last_month_patients * 100)
         if last_month_patients > 0
@@ -71,7 +73,8 @@ async def get_dashboard_metrics(
                 func.date(Appointment.appointment_date) == today,
             )
         )
-        .scalar() or 0
+        .scalar()
+        or 0
     )
 
     # Active doctors
@@ -81,10 +84,11 @@ async def get_dashboard_metrics(
             and_(
                 User.tenant_id == tenant_id,
                 User.role == UserRole.DOCTOR,
-                User.is_active == True,
+                User.is_active.is_(True),
             )
         )
-        .scalar() or 0
+        .scalar()
+        or 0
     )
 
     # Audit log
@@ -147,7 +151,7 @@ async def get_patient_trend(
     # Fill in missing dates with zero counts
     date_range = [start_date.date() + timedelta(days=i) for i in range(days + 1)]
     result_dict = {result.date: result.count for result in results}
-    
+
     labels = [date.strftime("%Y-%m-%d") for date in date_range]
     values = [result_dict.get(date, 0) for date in date_range]
 

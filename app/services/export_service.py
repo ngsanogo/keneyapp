@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import List
 
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4, letter
+from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
@@ -64,9 +64,7 @@ class ExportService:
         return json.dumps(data, indent=2, default=str)
 
     @staticmethod
-    def export_patients_to_pdf(
-        patients: List[dict], title: str = "Patient Report"
-    ) -> bytes:
+    def export_patients_to_pdf(patients: List[dict], title: str = "Patient Report") -> bytes:
         """
         Export patient data to PDF format.
 
@@ -132,7 +130,10 @@ class ExportService:
                 )
 
             # Create table
-            table = Table(table_data, colWidths=[0.5 * inch, 1.5 * inch, 1 * inch, 0.7 * inch, 1.5 * inch, 1 * inch])
+            table = Table(
+                table_data,
+                colWidths=[0.5 * inch, 1.5 * inch, 1 * inch, 0.7 * inch, 1.5 * inch, 1 * inch],
+            )
 
             # Add style to table
             table.setStyle(

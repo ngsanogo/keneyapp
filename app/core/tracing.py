@@ -63,9 +63,7 @@ def setup_tracing() -> None:
             )
             exporter = ConsoleSpanExporter()
         else:
-            logger.info(
-                f"Configuring OTLP exporter to {settings.OTEL_EXPORTER_ENDPOINT}"
-            )
+            logger.info(f"Configuring OTLP exporter to {settings.OTEL_EXPORTER_ENDPOINT}")
             exporter = OTLPSpanExporter(endpoint=settings.OTEL_EXPORTER_ENDPOINT)
 
     elif exporter_type == "jaeger":
@@ -94,9 +92,7 @@ def setup_tracing() -> None:
 
     else:  # console or unknown
         if exporter_type != "console":
-            logger.warning(
-                f"Unknown OTEL_EXPORTER_TYPE '{exporter_type}', using console exporter"
-            )
+            logger.warning(f"Unknown OTEL_EXPORTER_TYPE '{exporter_type}', using console exporter")
         logger.info("Configuring console exporter for traces")
         exporter = ConsoleSpanExporter()
 

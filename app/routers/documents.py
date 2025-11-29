@@ -33,9 +33,7 @@ from app.services import document_service
 router = APIRouter(prefix="/documents", tags=["documents"])
 
 
-@router.post(
-    "/upload", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("/upload", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit("20/minute")
 async def upload_document(
     request: Request,

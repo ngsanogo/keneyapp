@@ -43,17 +43,13 @@ def ensure_bootstrap_admin(db: Session, requested_username: str) -> Optional[Use
 
     # Reuse an existing admin user if it is already present.
     existing_user = (
-        db.query(User)
-        .filter(User.username == settings.BOOTSTRAP_ADMIN_USERNAME)
-        .first()
+        db.query(User).filter(User.username == settings.BOOTSTRAP_ADMIN_USERNAME).first()
     )
     if existing_user:
         return existing_user
 
     # Ensure there is an active tenant to attach the bootstrap user to.
-    tenant = (
-        db.query(Tenant).filter(Tenant.slug == settings.BOOTSTRAP_TENANT_SLUG).first()
-    )
+    tenant = db.query(Tenant).filter(Tenant.slug == settings.BOOTSTRAP_TENANT_SLUG).first()
 
     if not tenant:
         tenant = Tenant(

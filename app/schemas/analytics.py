@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 class DashboardMetrics(BaseModel):
     """Key dashboard metrics"""
+
     total_patients: int = Field(..., description="Total number of patients")
     patients_change: float = Field(..., description="Percentage change from last month")
     appointments_today: int = Field(..., description="Number of appointments today")
@@ -20,12 +21,14 @@ class DashboardMetrics(BaseModel):
 
 class PatientTrendResponse(BaseModel):
     """Patient registration trend data"""
+
     labels: List[str] = Field(..., description="Date labels")
     values: List[int] = Field(..., description="Patient counts per date")
 
 
 class AppointmentStatsResponse(BaseModel):
     """Appointment statistics by status"""
+
     labels: List[str] = Field(..., description="Date labels")
     completed: List[int] = Field(..., description="Completed appointment counts")
     pending: List[int] = Field(..., description="Pending appointment counts")
@@ -34,5 +37,6 @@ class AppointmentStatsResponse(BaseModel):
 
 class GenderDistributionResponse(BaseModel):
     """Patient gender distribution"""
+
     labels: List[str] = Field(..., description="Gender labels")
     values: List[int] = Field(..., description="Patient counts per gender")

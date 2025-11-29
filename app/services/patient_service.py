@@ -68,9 +68,7 @@ class PatientService:
             .first()
         )
 
-    def list_patients(
-        self, tenant_id: int, skip: int = 0, limit: int = 100
-    ) -> List[Patient]:
+    def list_patients(self, tenant_id: int, skip: int = 0, limit: int = 100) -> List[Patient]:
         """
         List patients with pagination.
 
@@ -169,11 +167,7 @@ class PatientService:
         Returns:
             Total patient count
         """
-        return (
-            self.db.query(func.count(Patient.id))
-            .filter(Patient.tenant_id == tenant_id)
-            .scalar()
-        )
+        return self.db.query(func.count(Patient.id)).filter(Patient.tenant_id == tenant_id).scalar()
 
     def create_patient(self, patient_data: PatientCreate, tenant_id: int) -> Patient:
         """
@@ -407,9 +401,7 @@ class PatientService:
                 query = query.filter(Patient.allergies.isnot(None))
                 query = query.filter(Patient.allergies != "")
             else:
-                query = query.filter(
-                    or_(Patient.allergies.is_(None), Patient.allergies == "")
-                )
+                query = query.filter(or_(Patient.allergies.is_(None), Patient.allergies == ""))
 
         if has_medical_history is not None:
             if has_medical_history:
@@ -460,4 +452,3 @@ class PatientService:
         patients = query.offset(skip).limit(min(200, max(1, limit))).all()
 
         return patients, total
-

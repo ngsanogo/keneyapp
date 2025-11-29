@@ -90,9 +90,7 @@ def test_create_appointment_success(
     assert result.reason == "Annual checkup"
 
 
-def test_create_appointment_patient_not_found(
-    appointment_service, test_doctor, test_tenant
-):
+def test_create_appointment_patient_not_found(appointment_service, test_doctor, test_tenant):
     """Test appointment creation with non-existent patient."""
     appointment_date = datetime.now() + timedelta(days=1)
     appt_data = AppointmentCreate(
@@ -204,9 +202,7 @@ def test_update_appointment_success(
     update_data = AppointmentUpdate(
         reason="Updated reason", duration_minutes=45, notes="Added notes"
     )
-    updated = appointment_service.update_appointment(
-        appt.id, update_data, test_tenant.id
-    )
+    updated = appointment_service.update_appointment(appt.id, update_data, test_tenant.id)
     db.commit()
 
     assert updated.reason == "Updated reason"
@@ -214,9 +210,7 @@ def test_update_appointment_success(
     assert updated.notes == "Added notes"
 
 
-def test_cancel_appointment(
-    appointment_service, db, test_patient, test_doctor, test_tenant
-):
+def test_cancel_appointment(appointment_service, db, test_patient, test_doctor, test_tenant):
     """Test appointment cancellation."""
     appointment_date = datetime.now() + timedelta(days=1)
 
@@ -238,9 +232,7 @@ def test_cancel_appointment(
     assert cancelled.status == AppointmentStatus.CANCELLED
 
 
-def test_get_appointment_by_id(
-    appointment_service, db, test_patient, test_doctor, test_tenant
-):
+def test_get_appointment_by_id(appointment_service, db, test_patient, test_doctor, test_tenant):
     """Test retrieving appointment by ID."""
     appointment_date = datetime.now() + timedelta(days=1)
 
@@ -263,9 +255,7 @@ def test_get_appointment_by_id(
     assert retrieved.patient_id == test_patient.id
 
 
-def test_get_patient_appointments(
-    appointment_service, db, test_patient, test_doctor, test_tenant
-):
+def test_get_patient_appointments(appointment_service, db, test_patient, test_doctor, test_tenant):
     """Test retrieving all appointments for a patient."""
     # Create multiple appointments
     for i in range(3):
@@ -280,9 +270,7 @@ def test_get_patient_appointments(
     db.commit()
 
     # Get patient appointments
-    appointments = appointment_service.get_patient_appointments(
-        test_patient.id, test_tenant.id
-    )
+    appointments = appointment_service.get_patient_appointments(test_patient.id, test_tenant.id)
 
     assert len(appointments) == 3
     assert all(appt.patient_id == test_patient.id for appt in appointments)
@@ -324,9 +312,7 @@ def test_check_patient_availability(
     assert is_available is False
 
 
-def test_check_doctor_availability(
-    appointment_service, db, test_patient, test_doctor, test_tenant
-):
+def test_check_doctor_availability(appointment_service, db, test_patient, test_doctor, test_tenant):
     """Test checking doctor availability."""
     appointment_date = datetime.now() + timedelta(days=1)
 

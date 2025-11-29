@@ -43,9 +43,7 @@ def create_share(
     access_pin = MedicalRecordShare.generate_pin() if share_data.require_pin else None
 
     # Calculate expiry
-    expires_at = datetime.now(timezone.utc) + timedelta(
-        hours=share_data.expires_in_hours
-    )
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=share_data.expires_in_hours)
 
     # Convert custom resources to JSON
     custom_resources_json = None
@@ -99,11 +97,7 @@ def get_share_by_token(
     db: Session, token: str, pin: Optional[str] = None
 ) -> Optional[MedicalRecordShare]:
     """Get share by token and validate PIN if required."""
-    share = (
-        db.query(MedicalRecordShare)
-        .filter(MedicalRecordShare.share_token == token)
-        .first()
-    )
+    share = db.query(MedicalRecordShare).filter(MedicalRecordShare.share_token == token).first()
 
     if not share:
         return None
@@ -136,10 +130,7 @@ def validate_and_access_share(
 
     if not share.is_valid():
         # Update status if expired
-        if (
-            share.expires_at < datetime.now(timezone.utc)
-            and share.status == ShareStatus.ACTIVE
-        ):
+        if share.expires_at < datetime.now(timezone.utc) and share.status == ShareStatus.ACTIVE:
             setattr(share, "status", ShareStatus.EXPIRED)
             db.commit()
 
@@ -180,9 +171,7 @@ def validate_and_access_share(
     return share
 
 
-def get_shared_medical_record(
-    db: Session, share: MedicalRecordShare
-) -> SharedMedicalRecord:
+def get_shared_medical_record(db: Session, share: MedicalRecordShare) -> SharedMedicalRecord:
     """
     Get medical record data based on share scope.
     """

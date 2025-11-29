@@ -58,9 +58,7 @@ def test_patient_care_recommendations_follow_up(db, test_tenant):
     )
 
     # Should recommend follow-up
-    follow_up_rec = next(
-        (r for r in recommendations if r["type"] == "follow_up"), None
-    )
+    follow_up_rec = next((r for r in recommendations if r["type"] == "follow_up"), None)
     assert follow_up_rec is not None
     assert follow_up_rec["priority"] == "high"
     assert "200" in follow_up_rec["description"]
@@ -116,9 +114,7 @@ def test_patient_care_recommendations_prescription_refill(db, test_tenant):
     )
 
     # Should recommend prescription refill
-    refill_rec = next(
-        (r for r in recommendations if r["type"] == "prescription_refill"), None
-    )
+    refill_rec = next((r for r in recommendations if r["type"] == "prescription_refill"), None)
     assert refill_rec is not None
     assert refill_rec["priority"] == "medium"
     assert "Lisinopril" in refill_rec["description"]
@@ -149,9 +145,7 @@ def test_patient_care_recommendations_missing_data(db, test_tenant):
     )
 
     # Should recommend updating both fields
-    data_quality_recs = [
-        r for r in recommendations if r["type"] == "data_quality"
-    ]
+    data_quality_recs = [r for r in recommendations if r["type"] == "data_quality"]
     assert len(data_quality_recs) >= 2
 
     # Check for allergy recommendation
@@ -163,11 +157,7 @@ def test_patient_care_recommendations_missing_data(db, test_tenant):
 
     # Check for emergency contact recommendation
     emergency_rec = next(
-        (
-            r
-            for r in data_quality_recs
-            if r["metadata"].get("field") == "emergency_contact"
-        ),
+        (r for r in data_quality_recs if r["metadata"].get("field") == "emergency_contact"),
         None,
     )
     assert emergency_rec is not None
@@ -363,14 +353,10 @@ def test_resource_optimization_recommendations_workload(db, test_tenant):
 
     # Get optimization recommendations
     service = RecommendationService(db)
-    recommendations = service.get_resource_optimization_recommendations(
-        tenant_id=test_tenant.id
-    )
+    recommendations = service.get_resource_optimization_recommendations(tenant_id=test_tenant.id)
 
     # Should recommend workload balancing for busy doctor
-    workload_rec = next(
-        (r for r in recommendations if r["type"] == "workload_balance"), None
-    )
+    workload_rec = next((r for r in recommendations if r["type"] == "workload_balance"), None)
     assert workload_rec is not None
     assert workload_rec["priority"] in ["medium", "high"]
 

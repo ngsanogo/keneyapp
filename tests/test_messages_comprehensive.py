@@ -104,15 +104,11 @@ class TestMessageCRUD:
         data = response.json()
         assert isinstance(data, list)
 
-    def test_get_message_details(
-        self, client: TestClient, auth_headers: dict, db_session: Session
-    ):
+    def test_get_message_details(self, client: TestClient, auth_headers: dict, db_session: Session):
         """Test retrieving message details."""
         # First send a message
         payload = {"receiver_id": 2, "subject": "Test", "content": "Test content"}
-        send_response = client.post(
-            "/api/v1/messages/", json=payload, headers=auth_headers
-        )
+        send_response = client.post("/api/v1/messages/", json=payload, headers=auth_headers)
         message_id = send_response.json()["id"]
 
         # Retrieve message
@@ -143,9 +139,7 @@ class TestMessageThreads:
             "subject": "Question médicale",
             "content": "Bonjour Docteur, j'ai une question.",
         }
-        response1 = client.post(
-            "/api/v1/messages/", json=payload1, headers=auth_headers
-        )
+        response1 = client.post("/api/v1/messages/", json=payload1, headers=auth_headers)
         assert response1.status_code == 201
         message1_id = response1.json()["id"]
         thread_id = response1.json().get("thread_id")
@@ -182,16 +176,12 @@ class TestMessageReadStatus:
         """Test marking message as read."""
         # Send message
         payload = {"receiver_id": 2, "subject": "Test", "content": "Test"}
-        send_response = client.post(
-            "/api/v1/messages/", json=payload, headers=auth_headers
-        )
+        send_response = client.post("/api/v1/messages/", json=payload, headers=auth_headers)
         message_id = send_response.json()["id"]
 
         # Mark as read (would need receiver auth in real scenario)
         # For now, test endpoint exists
-        read_response = client.post(
-            f"/api/v1/messages/{message_id}/read", headers=auth_headers
-        )
+        read_response = client.post(f"/api/v1/messages/{message_id}/read", headers=auth_headers)
 
         # Expect 200 or 403 (if sender tries to mark own message as read)
         assert read_response.status_code in [200, 403]
@@ -237,15 +227,11 @@ class TestSoftDelete:
             "subject": "À supprimer",
             "content": "Ce message sera supprimé",
         }
-        send_response = client.post(
-            "/api/v1/messages/", json=payload, headers=auth_headers
-        )
+        send_response = client.post("/api/v1/messages/", json=payload, headers=auth_headers)
         message_id = send_response.json()["id"]
 
         # Delete message
-        delete_response = client.delete(
-            f"/api/v1/messages/{message_id}", headers=auth_headers
-        )
+        delete_response = client.delete(f"/api/v1/messages/{message_id}", headers=auth_headers)
 
         assert delete_response.status_code == 204
 
@@ -288,9 +274,7 @@ class TestMessageStatistics:
 class TestMessageSecurity:
     """Test message security and access control."""
 
-    def test_cannot_send_to_different_tenant(
-        self, client: TestClient, auth_headers: dict
-    ):
+    def test_cannot_send_to_different_tenant(self, client: TestClient, auth_headers: dict):
         """Test that users cannot send messages across tenants."""
         payload = {
             "receiver_id": 9999,  # User from different tenant

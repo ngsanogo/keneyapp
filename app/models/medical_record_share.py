@@ -51,9 +51,7 @@ class MedicalRecordShare(Base):
 
     # Sharing details
     share_token = Column(String(255), unique=True, nullable=False, index=True)
-    scope = Column(
-        SQLEnum(ShareScope, name="sharescope", native_enum=False), nullable=False
-    )
+    scope = Column(SQLEnum(ShareScope, name="sharescope", native_enum=False), nullable=False)
     custom_resources = Column(Text, nullable=True)  # JSON for custom scope
 
     # Access control
@@ -87,9 +85,7 @@ class MedicalRecordShare(Base):
     tenant_id = Column(String(255), nullable=False, index=True)
 
     # Audit fields
-    created_at = Column(
-        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
-    )
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),

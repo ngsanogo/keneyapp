@@ -84,9 +84,7 @@ def create_appointment(
 
     # Queue reminder notifications (best effort)
     try:
-        patient = (
-            db.query(Patient).filter(Patient.id == db_appointment.patient_id).first()
-        )
+        patient = db.query(Patient).filter(Patient.id == db_appointment.patient_id).first()
         patient_email = patient.email if patient else None
         send_appointment_reminder.delay(
             appointment_id=db_appointment.id,
@@ -130,9 +128,7 @@ def get_appointments(
     status_filter: Optional[AppointmentStatus] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(
-            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
-        )
+        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
     ),
 ):
     """
@@ -150,7 +146,9 @@ def get_appointments(
         List of appointments
     """
     status_key = status_filter.value if status_filter else "all"
-    cache_key = f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:{skip}:{limit}:{status_key}"
+    cache_key = (
+        f"{APPOINTMENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:{skip}:{limit}:{status_key}"
+    )
     cached_appointments = cache_get(cache_key)
     if cached_appointments is not None:
         log_audit_event(
@@ -171,16 +169,13 @@ def get_appointments(
         )
         return cached_appointments
 
-    query = db.query(Appointment).filter(
-        Appointment.tenant_id == current_user.tenant_id
-    )
+    query = db.query(Appointment).filter(Appointment.tenant_id == current_user.tenant_id)
     if status_filter:
         query = query.filter(Appointment.status == status_filter)
 
     appointments = query.offset(skip).limit(limit).all()
     serialized_appointments = [
-        AppointmentResponse.model_validate(appt).model_dump(mode="json")
-        for appt in appointments
+        AppointmentResponse.model_validate(appt).model_dump(mode="json") for appt in appointments
     ]
 
     cache_set(cache_key, serialized_appointments, expire=APPOINTMENT_LIST_TTL_SECONDS)
@@ -212,9 +207,7 @@ def get_appointment(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(
-            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
-        )
+        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
     ),
 ):
     """
@@ -229,9 +222,7 @@ def get_appointment(
     Returns:
         Appointment record
     """
-    cache_key = (
-        f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{appointment_id}"
-    )
+    cache_key = f"{APPOINTMENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{appointment_id}"
     cached_appointment = cache_get(cache_key)
     if cached_appointment is not None:
         log_audit_event(

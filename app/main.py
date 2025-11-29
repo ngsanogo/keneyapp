@@ -106,9 +106,7 @@ instrument_app(app)
 app.add_middleware(CorrelationIdMiddleware)
 app.add_middleware(MetricsMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
-app.add_middleware(
-    RequestValidationMiddleware, max_request_size=10 * 1024 * 1024
-)  # 10 MB
+app.add_middleware(RequestValidationMiddleware, max_request_size=10 * 1024 * 1024)  # 10 MB
 
 if str(settings.ENVIRONMENT).lower() == "production":
     app.add_middleware(HTTPSRedirectMiddleware)

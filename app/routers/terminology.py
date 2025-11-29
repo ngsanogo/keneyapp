@@ -28,9 +28,7 @@ def validate_code_endpoint(
     code: str = Query(..., description="Code value"),
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(
-            UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST
-        )
+        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST)
     ),
 ) -> Dict[str, Any]:
     """Validate a medical code."""
@@ -44,9 +42,7 @@ def translate_code_endpoint(
     payload: Dict[str, str],
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(
-            UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST
-        )
+        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST)
     ),
 ) -> Dict[str, Any]:
     """Translate a code from one system to another.

@@ -198,9 +198,7 @@ class TestPatientEndpointContract:
 
     def test_list_patients_contract(self, auth_token):
         """Verify patients list response structure."""
-        response = client.get(
-            "/api/v1/patients", headers={"Authorization": f"Bearer {auth_token}"}
-        )
+        response = client.get("/api/v1/patients", headers={"Authorization": f"Bearer {auth_token}"})
 
         assert response.status_code == 200
         data = response.json()

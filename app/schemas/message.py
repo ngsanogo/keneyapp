@@ -15,16 +15,10 @@ class MessageBase(BaseModel):
 
     receiver_id: int = Field(..., description="ID of the message receiver")
     subject: Optional[str] = Field(None, max_length=255, description="Message subject")
-    content: str = Field(
-        ..., min_length=1, description="Message content (will be encrypted)"
-    )
+    content: str = Field(..., min_length=1, description="Message content (will be encrypted)")
     is_urgent: bool = Field(False, description="Mark message as urgent")
-    attachment_ids: Optional[List[int]] = Field(
-        None, description="List of attached document IDs"
-    )
-    reply_to_id: Optional[int] = Field(
-        None, description="ID of message being replied to"
-    )
+    attachment_ids: Optional[List[int]] = Field(None, description="List of attached document IDs")
+    reply_to_id: Optional[int] = Field(None, description="ID of message being replied to")
 
 
 class MessageCreate(MessageBase):

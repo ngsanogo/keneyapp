@@ -40,9 +40,7 @@ class SortParams(BaseModel):
 class FilterParams(BaseModel):
     """Base filter parameters"""
 
-    search: Optional[str] = Field(
-        None, min_length=1, max_length=200, description="Search query"
-    )
+    search: Optional[str] = Field(None, min_length=1, max_length=200, description="Search query")
     date_from: Optional[datetime] = Field(None, description="Filter from date")
     date_to: Optional[datetime] = Field(None, description="Filter to date")
 

@@ -26,10 +26,7 @@ def test_operation_outcome_without_details():
 
     assert outcome["resourceType"] == "OperationOutcome"
     assert outcome["issue"][0]["code"] == "invalid"
-    assert (
-        "diagnostics" not in outcome["issue"][0]
-        or outcome["issue"][0]["diagnostics"] is None
-    )
+    assert "diagnostics" not in outcome["issue"][0] or outcome["issue"][0]["diagnostics"] is None
 
 
 def test_make_search_bundle_structure():

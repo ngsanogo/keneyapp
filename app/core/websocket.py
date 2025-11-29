@@ -40,9 +40,7 @@ class ConnectionManager:
         # Stats
         self.stats = {"total_connections": 0, "messages_sent": 0, "broadcasts_sent": 0}
 
-    async def connect(
-        self, websocket: WebSocket, user_id: str, metadata: Optional[Dict] = None
-    ):
+    async def connect(self, websocket: WebSocket, user_id: str, metadata: Optional[Dict] = None):
         """
         Accept and register a new WebSocket connection
 
@@ -70,9 +68,7 @@ class ConnectionManager:
         self.stats["total_connections"] += 1
 
         total_conns = len(self.get_all_connections())
-        logger.info(
-            f"WebSocket connected: user={user_id}, " f"total_connections={total_conns}"
-        )
+        logger.info(f"WebSocket connected: user={user_id}, " f"total_connections={total_conns}")
 
     def disconnect(self, websocket: WebSocket, user_id: str):
         """
@@ -107,8 +103,7 @@ class ConnectionManager:
 
         remaining_conns = len(self.get_all_connections())
         logger.info(
-            f"WebSocket disconnected: user={user_id}, "
-            f"remaining_connections={remaining_conns}"
+            f"WebSocket disconnected: user={user_id}, " f"remaining_connections={remaining_conns}"
         )
 
     async def send_personal_message(
@@ -145,9 +140,7 @@ class ConnectionManager:
             for conn in dead_connections:
                 self.disconnect(conn, user_id)
 
-    async def send_json_message(
-        self, data: Dict, user_id: str, message_type: str = "message"
-    ):
+    async def send_json_message(self, data: Dict, user_id: str, message_type: str = "message"):
         """
         Send JSON message to a specific user
 
@@ -296,9 +289,7 @@ class ConnectionManager:
                         else:
                             dead_connections.append(connection)
                     except Exception as e:
-                        logger.error(
-                            f"Error sending to room {room_id}, user {user_id}: {e}"
-                        )
+                        logger.error(f"Error sending to room {room_id}, user {user_id}: {e}")
                         dead_connections.append(connection)
 
                 for conn in dead_connections:
