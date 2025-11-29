@@ -3,7 +3,7 @@
 # Testing frameworks (inherit core pytest/pytest-asyncio from requirements.txt)
 pytest-mock==3.14.0
 pytest-benchmark==4.0.0
-pytest-xdist==3.6.1  # Tests parallèles
+pytest-xdist==3.8.0  # Tests parallèles
 
 # HTTP testing
 requests-mock==1.12.1
