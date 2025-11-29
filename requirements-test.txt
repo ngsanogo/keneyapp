@@ -10,7 +10,7 @@ requests-mock==1.12.1
 
 # Database testing
 pytest-alembic==0.12.1
-faker==33.1.0  # Génération de données de test
+faker==33.3.1  # Génération de données de test
 
 # Time mocking
 freezegun==1.5.5
