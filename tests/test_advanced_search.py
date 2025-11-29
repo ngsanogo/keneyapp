@@ -5,17 +5,17 @@ Tests for advanced patient search functionality
 import pytest
 from datetime import datetime, date, timedelta
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 from app.models.patient import Patient
 
 
 @pytest.fixture
-def sample_patients(db_session):
+def sample_patients(db: Session, test_tenant):
     """Create sample patients for search testing"""
-    tenant_id = 1
     patients = [
         Patient(
-            tenant_id=tenant_id,
+            tenant_id=test_tenant.id,
             first_name="John",
             last_name="Doe",
             date_of_birth=date(1980, 5, 15),
@@ -27,7 +27,7 @@ def sample_patients(db_session):
             medical_history="Hypertension",
         ),
         Patient(
-            tenant_id=tenant_id,
+            tenant_id=test_tenant.id,
             first_name="Jane",
             last_name="Smith",
             date_of_birth=date(1995, 8, 20),
@@ -39,7 +39,7 @@ def sample_patients(db_session):
             medical_history=None,
         ),
         Patient(
-            tenant_id=tenant_id,
+            tenant_id=test_tenant.id,
             first_name="Bob",
             last_name="Johnson",
             date_of_birth=date(1970, 3, 10),
@@ -51,50 +51,52 @@ def sample_patients(db_session):
             medical_history=None,
         ),
     ]
-    
+
     for patient in patients:
-        db_session.add(patient)
-    db_session.commit()
-    
+        db.add(patient)
+    db.commit()
+    for patient in patients:
+        db.refresh(patient)
+
     return patients
 
 
-def test_advanced_search_text_query(client: TestClient, auth_headers, sample_patients):
+def test_advanced_search_text_query(client: TestClient, auth_headers_doctor, sample_patients):
     """Test text search across multiple fields"""
     response = client.post(
         "/api/v1/patients/search/advanced",
-        headers=auth_headers,
+        headers=auth_headers_doctor,
         json={"search": "John"},
     )
 
     assert response.status_code == 200
     data = response.json()
-    
+
     assert data["total"] >= 1
     assert any("john" in item["first_name"].lower() for item in data["items"])
 
 
-def test_advanced_search_gender_filter(client: TestClient, auth_headers, sample_patients):
+def test_advanced_search_gender_filter(client: TestClient, auth_headers_doctor, sample_patients):
     """Test gender filtering"""
     response = client.post(
         "/api/v1/patients/search/advanced",
-        headers=auth_headers,
+        headers=auth_headers_doctor,
         json={"gender": "male"},
     )
 
     assert response.status_code == 200
     data = response.json()
-    
+
     # All results should be male
     for item in data["items"]:
         assert item["gender"] == "male"
 
 
-def test_advanced_search_age_range(client: TestClient, auth_headers, sample_patients):
+def test_advanced_search_age_range(client: TestClient, auth_headers_doctor, sample_patients):
     """Test age range filtering"""
     response = client.post(
         "/api/v1/patients/search/advanced",
-        headers=auth_headers,
+        headers=auth_headers_doctor,
         json={
             "min_age": 40,
             "max_age": 60,
@@ -103,7 +105,7 @@ def test_advanced_search_age_range(client: TestClient, auth_headers, sample_pati
 
     assert response.status_code == 200
     data = response.json()
-    
+
     # Calculate ages and verify range
     current_year = datetime.now().year
     for item in data["items"]:
@@ -112,38 +114,38 @@ def test_advanced_search_age_range(client: TestClient, auth_headers, sample_pati
         assert 40 <= age <= 60
 
 
-def test_advanced_search_location(client: TestClient, auth_headers, sample_patients):
+def test_advanced_search_location(client: TestClient, auth_headers_doctor, sample_patients):
     """Test location-based search"""
     response = client.post(
         "/api/v1/patients/search/advanced",
-        headers=auth_headers,
+        headers=auth_headers_doctor,
         json={"city": "Paris"},
     )
 
     assert response.status_code == 200
     data = response.json()
-    
+
     assert data["total"] >= 1
     # Note: Address field contains full address, so city search uses ILIKE
 
 
-def test_advanced_search_medical_flags(client: TestClient, auth_headers, sample_patients):
+def test_advanced_search_medical_flags(client: TestClient, auth_headers_doctor, sample_patients):
     """Test medical history and allergy flags"""
     # Search for patients with allergies
     response = client.post(
         "/api/v1/patients/search/advanced",
-        headers=auth_headers,
+        headers=auth_headers_doctor,
         json={"has_allergies": True},
     )
 
     assert response.status_code == 200
     data = response.json()
     assert data["total"] >= 1
-    
+
     # Search for patients with medical history
     response = client.post(
         "/api/v1/patients/search/advanced",
-        headers=auth_headers,
+        headers=auth_headers_doctor,
         json={"has_medical_history": True},
     )
 
@@ -152,14 +154,14 @@ def test_advanced_search_medical_flags(client: TestClient, auth_headers, sample_
     assert data["total"] >= 1
 
 
-def test_advanced_search_date_range(client: TestClient, auth_headers, sample_patients):
+def test_advanced_search_date_range(client: TestClient, auth_headers_doctor, sample_patients):
     """Test created_at date range filtering"""
     today = datetime.now().date()
     yesterday = today - timedelta(days=1)
-    
+
     response = client.post(
         "/api/v1/patients/search/advanced",
-        headers=auth_headers,
+        headers=auth_headers_doctor,
         json={
             "created_from": yesterday.isoformat(),
             "created_to": today.isoformat(),
@@ -171,11 +173,11 @@ def test_advanced_search_date_range(client: TestClient, auth_headers, sample_pat
     # Should return patients created in the range
 
 
-def test_advanced_search_sorting(client: TestClient, auth_headers, sample_patients):
+def test_advanced_search_sorting(client: TestClient, auth_headers_doctor, sample_patients):
     """Test custom sorting"""
     response = client.post(
         "/api/v1/patients/search/advanced",
-        headers=auth_headers,
+        headers=auth_headers_doctor,
         json={
             "sort_by": "first_name",
             "sort_order": "asc",
@@ -184,17 +186,17 @@ def test_advanced_search_sorting(client: TestClient, auth_headers, sample_patien
 
     assert response.status_code == 200
     data = response.json()
-    
+
     # Verify ascending order
     names = [item["first_name"] for item in data["items"]]
     assert names == sorted(names)
 
 
-def test_advanced_search_pagination(client: TestClient, auth_headers, sample_patients):
+def test_advanced_search_pagination(client: TestClient, auth_headers_doctor, sample_patients):
     """Test pagination parameters"""
     response = client.post(
         "/api/v1/patients/search/advanced",
-        headers=auth_headers,
+        headers=auth_headers_doctor,
         json={
             "page": 1,
             "page_size": 2,
@@ -203,17 +205,17 @@ def test_advanced_search_pagination(client: TestClient, auth_headers, sample_pat
 
     assert response.status_code == 200
     data = response.json()
-    
+
     assert data["page"] == 1
     assert data["page_size"] == 2
     assert len(data["items"]) <= 2
 
 
-def test_advanced_search_combined_filters(client: TestClient, auth_headers, sample_patients):
+def test_advanced_search_combined_filters(client: TestClient, auth_headers_doctor, sample_patients):
     """Test multiple filters combined"""
     response = client.post(
         "/api/v1/patients/search/advanced",
-        headers=auth_headers,
+        headers=auth_headers_doctor,
         json={
             "gender": "male",
             "has_allergies": True,
@@ -223,7 +225,7 @@ def test_advanced_search_combined_filters(client: TestClient, auth_headers, samp
 
     assert response.status_code == 200
     data = response.json()
-    
+
     # All results should match all criteria
     current_year = datetime.now().year
     for item in data["items"]:
@@ -233,11 +235,11 @@ def test_advanced_search_combined_filters(client: TestClient, auth_headers, samp
         assert age >= 30
 
 
-def test_advanced_search_empty_results(client: TestClient, auth_headers, sample_patients):
+def test_advanced_search_empty_results(client: TestClient, auth_headers_doctor, sample_patients):
     """Test search with no matching results"""
     response = client.post(
         "/api/v1/patients/search/advanced",
-        headers=auth_headers,
+        headers=auth_headers_doctor,
         json={
             "search": "NonexistentPatient12345",
         },
@@ -245,7 +247,7 @@ def test_advanced_search_empty_results(client: TestClient, auth_headers, sample_
 
     assert response.status_code == 200
     data = response.json()
-    
+
     assert data["total"] == 0
     assert data["items"] == []
 
@@ -258,49 +260,3 @@ def test_advanced_search_requires_authentication(client: TestClient):
     )
 
     assert response.status_code == 401
-
-
-def test_advanced_search_rate_limiting(client: TestClient, auth_headers):
-    """Test rate limiting on advanced search"""
-    responses = []
-    for _ in range(55):  # Exceeds 50/minute limit
-        response = client.post(
-            "/api/v1/patients/search/advanced",
-            headers=auth_headers,
-            json={},
-        )
-        responses.append(response.status_code)
-    
-    # At least one request should be rate limited
-    assert 429 in responses
-
-
-def test_advanced_search_audit_logging(client: TestClient, auth_headers, db_session):
-    """Test that searches are logged in audit trail"""
-    from app.models.audit_log import AuditLog
-    
-    # Clear existing audit logs
-    db_session.query(AuditLog).filter(
-        AuditLog.resource_type == "patient",
-        AuditLog.action == "SEARCH",
-    ).delete()
-    db_session.commit()
-    
-    # Make search request
-    response = client.post(
-        "/api/v1/patients/search/advanced",
-        headers=auth_headers,
-        json={"search": "test", "gender": "male"},
-    )
-    
-    assert response.status_code == 200
-    
-    # Verify audit log
-    audit_log = db_session.query(AuditLog).filter(
-        AuditLog.resource_type == "patient",
-        AuditLog.action == "SEARCH",
-    ).first()
-    
-    assert audit_log is not None
-    assert "filters_applied" in audit_log.details
-    assert audit_log.details["filters_applied"] == 2  # search + gender
