@@ -11,6 +11,7 @@ Fixtures réutilisables pour tous les tests:
 """
 
 import os
+from datetime import date
 from typing import Generator
 
 import pytest
@@ -246,7 +247,7 @@ def test_patient(db: Session, test_tenant) -> Patient:
     patient = Patient(
         first_name="Alice",
         last_name="Doe",
-        date_of_birth="1990-05-15",
+        date_of_birth=date(1990, 5, 15),
         gender="female",
         email="alice.doe@email.com",
         phone="+1234567892",
@@ -269,7 +270,7 @@ def test_patient_2(db: Session, test_tenant) -> Patient:
     patient = Patient(
         first_name="Charlie",
         last_name="Brown",
-        date_of_birth="1985-10-20",
+        date_of_birth=date(1985, 10, 20),
         gender="male",
         email="charlie.brown@email.com",
         phone="+1234567894",
@@ -291,7 +292,7 @@ def test_patients_bulk(db: Session, test_tenant) -> list[Patient]:
         patient = Patient(
             first_name=f"Patient{i}",
             last_name=f"Test{i}",
-            date_of_birth=f"198{i % 10}-01-01",
+            date_of_birth=date(1980 + i % 10, 1, 1),
             gender="male" if i % 2 == 0 else "female",
             email=f"patient{i}@test.com",
             phone=f"+123456789{i}",
