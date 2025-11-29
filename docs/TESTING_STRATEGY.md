@@ -54,7 +54,7 @@ This strategy establishes how KeneyApp validates functionality, reliability, and
 - **Traceability:** Every user story/feature flag should link to: a unit test for core logic, and an integration test for service boundaries and user workflows.
 - **Coverage gates:** Failing if backend/unit+integration coverage <80% (`make test-cov`), frontend coverage <70%.
 - **Performance & security:** Include `pytest -m "performance and slow"` in nightly jobs; run `make security` weekly or on dependency bumps.
-- **Reporting:** CI must publish coverage (HTML/LCOV), pytest JUnit XML, and Playwright HTML reports. Track flaky tests and quarantine with a ticket until resolved.
+- **Reporting:** CI must publish coverage (HTML/LCOV) and pytest JUnit XML. Track flaky tests and quarantine with a ticket until resolved.
 
 ## How to Adopt for New Features
 

@@ -71,7 +71,7 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 
 - `app/` — Python backend services and FastAPI application code
 - `frontend/` — React/TypeScript single-page application
-- `e2e/` — Playwright-based end-to-end tests and fixtures
+- `tests/` — Backend unit and integration tests with pytest
 - `docs/` — Comprehensive documentation, including:
   - `guides/` for build, automation, dependency, and E2E setup guides
   - `reports/` for audits, optimization summaries, and test run results
@@ -175,9 +175,9 @@ make docker-logs
 - **Testing**: pytest (backend), Jest (frontend)
 - **Code Quality**: Black, Flake8, ESLint
 
-## 📁 Project Structure
+## 📂 Repository Structure
 
-```
+```plaintext
 keneyapp/
 ├── app/                    # Backend application
 │   ├── core/              # Core configuration and security
@@ -241,7 +241,7 @@ keneyapp/
    # add --logs to follow container output, or --down to stop everything
    ```
 
-4. **Access the application**
+3. **Access the application**
    - Frontend: <http://localhost:3000>
    - Backend API: <http://localhost:8000>
    - API Documentation: <http://localhost:8000/api/v1/docs>
