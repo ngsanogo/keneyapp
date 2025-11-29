@@ -35,7 +35,9 @@ def get_fhir_patient(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)),
+    current_user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
+    ),
 ):
     """
     Get patient in FHIR format.
@@ -66,7 +68,9 @@ def get_fhir_patient(
 
     # Weak ETag based on last update
     if getattr(patient, "updated_at", None):
-        response.headers["ETag"] = f'W/"Patient/{patient.id}-{patient.updated_at.timestamp()}"'
+        response.headers["ETag"] = (
+            f'W/"Patient/{patient.id}-{patient.updated_at.timestamp()}"'
+        )
 
     return fhir_converter.patient_to_fhir(patient)
 
@@ -111,7 +115,9 @@ def search_fhir_patient(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST)
+        require_roles(
+            UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST
+        )
     ),
     name: Optional[str] = Query(None, description="Search in family or given"),
     family: Optional[str] = Query(None, description="Family name"),
@@ -126,7 +132,9 @@ def search_fhir_patient(
     # Basic parameters mapping
     if name:
         like = f"%{name}%"
-        query = query.filter((Patient.first_name.ilike(like)) | (Patient.last_name.ilike(like)))
+        query = query.filter(
+            (Patient.first_name.ilike(like)) | (Patient.last_name.ilike(like))
+        )
     if family:
         query = query.filter(Patient.last_name.ilike(f"%{family}%"))
     if given:
@@ -139,11 +147,15 @@ def search_fhir_patient(
 
     # Pagination
     offset = (_page - 1) * _count
-    patients: List[Patient] = query.order_by(Patient.id.asc()).offset(offset).limit(_count).all()
+    patients: List[Patient] = (
+        query.order_by(Patient.id.asc()).offset(offset).limit(_count).all()
+    )
 
     # Convert to FHIR and bundle
     fhir_list = [fhir_converter.patient_to_fhir(p) for p in patients]
-    base_url = str(request.base_url).rstrip("/") + request.url.path  # /api/v1/fhir/Patient
+    base_url = (
+        str(request.base_url).rstrip("/") + request.url.path
+    )  # /api/v1/fhir/Patient
     base_url = base_url.rsplit("/", 1)[0]  # /api/v1/fhir
     query_params = {
         "name": name,
@@ -171,7 +183,9 @@ def get_fhir_appointment(
     response: Response,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST)
+        require_roles(
+            UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST
+        )
     ),
 ):
     """
@@ -217,7 +231,9 @@ def get_fhir_medication_request(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)),
+    current_user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
+    ),
 ):
     """
     Get prescription as FHIR MedicationRequest.
@@ -344,7 +360,9 @@ def search_fhir_appointment(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST)
+        require_roles(
+            UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST
+        )
     ),
     patient: Optional[int] = Query(None, description="Patient ID reference"),
     date: Optional[str] = Query(None, description="YYYY-MM-DD (filters by day)"),
@@ -353,14 +371,18 @@ def search_fhir_appointment(
     _page: int = Query(1, ge=1),
 ):
     """FHIR Appointment search (subset)."""
-    query = db.query(Appointment).filter(Appointment.tenant_id == current_user.tenant_id)
+    query = db.query(Appointment).filter(
+        Appointment.tenant_id == current_user.tenant_id
+    )
 
     if patient is not None:
         query = query.filter(Appointment.patient_id == patient)
     if date:
         # Filter by same calendar day (simplified); relies on database casting
         # This is a minimal approach; for production use proper range filtering
-        query = query.filter(cast(Appointment.appointment_date, String).like(f"{date}%"))
+        query = query.filter(
+            cast(Appointment.appointment_date, String).like(f"{date}%")
+        )
     if status:
         query = query.filter(Appointment.status == status)
 
@@ -393,7 +415,9 @@ def get_fhir_observation(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)),
+    current_user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
+    ),
 ):
     """Get Observation in FHIR format."""
     obs = (
@@ -412,7 +436,9 @@ def get_fhir_observation(
         )
 
     if getattr(obs, "updated_at", None):
-        response.headers["ETag"] = f'W/"Observation/{obs.id}-{obs.updated_at.timestamp()}"'
+        response.headers["ETag"] = (
+            f'W/"Observation/{obs.id}-{obs.updated_at.timestamp()}"'
+        )
 
     return fhir_converter.observation_to_fhir(obs)
 
@@ -422,7 +448,9 @@ def get_fhir_observation(
 def search_fhir_observation(
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)),
+    current_user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
+    ),
     patient: Optional[int] = Query(None, description="Patient ID reference"),
     code: Optional[str] = Query(None, description="LOINC code token"),
     date: Optional[str] = Query(None, description="YYYY-MM-DD (filters by day)"),
@@ -431,14 +459,18 @@ def search_fhir_observation(
     _page: int = Query(1, ge=1),
 ):
     """FHIR Observation search (subset)."""
-    query = db.query(ObservationModel).filter(ObservationModel.tenant_id == current_user.tenant_id)
+    query = db.query(ObservationModel).filter(
+        ObservationModel.tenant_id == current_user.tenant_id
+    )
 
     if patient is not None:
         query = query.filter(ObservationModel.patient_id == patient)
     if code:
         query = query.filter(ObservationModel.loinc_code == code)
     if date:
-        query = query.filter(cast(ObservationModel.effective_datetime, String).like(f"{date}%"))
+        query = query.filter(
+            cast(ObservationModel.effective_datetime, String).like(f"{date}%")
+        )
     if status:
         query = query.filter(ObservationModel.status == status)
 
@@ -471,7 +503,9 @@ def get_fhir_condition(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)),
+    current_user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
+    ),
 ):
     """Get Condition in FHIR format."""
     condition = (
@@ -502,7 +536,9 @@ def get_fhir_condition(
 def search_fhir_condition(
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)),
+    current_user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
+    ),
     patient: Optional[int] = Query(None, description="Patient ID reference"),
     code: Optional[str] = Query(None, description="ICD-11 or SNOMED CT code token"),
     clinical_status: Optional[str] = Query(
@@ -514,7 +550,9 @@ def search_fhir_condition(
     _page: int = Query(1, ge=1),
 ):
     """FHIR Condition search (subset)."""
-    query = db.query(ConditionModel).filter(ConditionModel.tenant_id == current_user.tenant_id)
+    query = db.query(ConditionModel).filter(
+        ConditionModel.tenant_id == current_user.tenant_id
+    )
 
     if patient is not None:
         query = query.filter(ConditionModel.patient_id == patient)
@@ -559,7 +597,9 @@ def get_fhir_procedure(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)),
+    current_user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
+    ),
 ):
     """Get Procedure in FHIR format."""
     procedure = (
@@ -590,7 +630,9 @@ def get_fhir_procedure(
 def search_fhir_procedure(
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)),
+    current_user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
+    ),
     patient: Optional[int] = Query(None, description="Patient ID reference"),
     code: Optional[str] = Query(None, description="CPT, CCAM, or SNOMED CT code token"),
     date: Optional[str] = Query(None, description="YYYY-MM-DD (filters by day)"),
@@ -598,7 +640,9 @@ def search_fhir_procedure(
     _page: int = Query(1, ge=1),
 ):
     """FHIR Procedure search (subset)."""
-    query = db.query(ProcedureModel).filter(ProcedureModel.tenant_id == current_user.tenant_id)
+    query = db.query(ProcedureModel).filter(
+        ProcedureModel.tenant_id == current_user.tenant_id
+    )
 
     if patient is not None:
         query = query.filter(ProcedureModel.patient_id == patient)
@@ -610,7 +654,9 @@ def search_fhir_procedure(
             | (ProcedureModel.snomed_code == code)
         )
     if date:
-        query = query.filter(cast(ProcedureModel.performed_datetime, String).like(f"{date}%"))
+        query = query.filter(
+            cast(ProcedureModel.performed_datetime, String).like(f"{date}%")
+        )
 
     total = query.count()
     offset = (_page - 1) * _count
@@ -641,7 +687,9 @@ def fhir_bundle_transaction(  # noqa: C901
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
+        require_roles(
+            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
+        )
     ),
 ):
     """
@@ -679,7 +727,9 @@ def fhir_bundle_transaction(  # noqa: C901
             if not patient:
                 return JSONResponse(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    content=operation_outcome("not-found", f"Patient {patient_id} not found"),
+                    content=operation_outcome(
+                        "not-found", f"Patient {patient_id} not found"
+                    ),
                 )
             resource = fhir_converter.patient_to_fhir(patient)
         elif url.startswith("Appointment/"):
@@ -713,7 +763,9 @@ def fhir_bundle_transaction(  # noqa: C901
             if not obs:
                 return JSONResponse(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    content=operation_outcome("not-found", f"Observation {obs_id} not found"),
+                    content=operation_outcome(
+                        "not-found", f"Observation {obs_id} not found"
+                    ),
                 )
             resource = fhir_converter.observation_to_fhir(obs)
         elif url.startswith("Condition/"):
@@ -729,7 +781,9 @@ def fhir_bundle_transaction(  # noqa: C901
             if not cond:
                 return JSONResponse(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    content=operation_outcome("not-found", f"Condition {cond_id} not found"),
+                    content=operation_outcome(
+                        "not-found", f"Condition {cond_id} not found"
+                    ),
                 )
             resource = fhir_converter.condition_to_fhir(cond)
         elif url.startswith("Procedure/"):
@@ -745,7 +799,9 @@ def fhir_bundle_transaction(  # noqa: C901
             if not proc:
                 return JSONResponse(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    content=operation_outcome("not-found", f"Procedure {proc_id} not found"),
+                    content=operation_outcome(
+                        "not-found", f"Procedure {proc_id} not found"
+                    ),
                 )
             resource = fhir_converter.procedure_to_fhir(proc)
         elif url.startswith("MedicationRequest/"):
@@ -761,7 +817,9 @@ def fhir_bundle_transaction(  # noqa: C901
             if not rx:
                 return JSONResponse(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    content=operation_outcome("not-found", f"MedicationRequest {rx_id} not found"),
+                    content=operation_outcome(
+                        "not-found", f"MedicationRequest {rx_id} not found"
+                    ),
                 )
             resource = fhir_converter.prescription_to_fhir(rx)
         else:

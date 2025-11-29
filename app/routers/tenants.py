@@ -35,7 +35,9 @@ def _get_tenant_or_404(db: Session, tenant_id: int) -> Tenant:
     """Fetch tenant or raise 404."""
     tenant = db.query(Tenant).filter(Tenant.id == tenant_id).first()
     if not tenant:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found"
+        )
     return tenant
 
 
@@ -62,10 +64,14 @@ def create_tenant(
     """Create a new tenant."""
 
     if db.query(Tenant).filter(Tenant.slug == payload.slug).first():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Slug already in use")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Slug already in use"
+        )
 
     if db.query(Tenant).filter(Tenant.name == payload.name).first():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Name already in use")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Name already in use"
+        )
 
     tenant = Tenant(
         name=payload.name,

@@ -31,9 +31,13 @@ class Prescription(Base):
     frequency = Column(String, nullable=False)
     duration = Column(String, nullable=False)
     instructions = Column(Text)
-    prescribed_date = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    prescribed_date = Column(
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    )
     refills = Column(Integer, default=0)
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),

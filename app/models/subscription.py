@@ -34,13 +34,17 @@ class Subscription(Base):
         String(255), nullable=False
     )  # e.g., "Appointment?patient=123" or resource type
     channel_type = Column(
-        SQLEnum(SubscriptionChannelType, name="subscriptionchanneltype", native_enum=False),
+        SQLEnum(
+            SubscriptionChannelType, name="subscriptionchanneltype", native_enum=False
+        ),
         nullable=False,
         default=SubscriptionChannelType.rest_hook,
     )
     endpoint = Column(String(512), nullable=False)  # webhook URL
     payload = Column(String(128), nullable=True, default="application/fhir+json")
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),

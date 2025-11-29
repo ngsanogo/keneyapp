@@ -57,7 +57,9 @@ class Settings(BaseSettings):
     BOOTSTRAP_ADMIN_FULL_NAME: str = "System Administrator"
 
     # CORS
-    ALLOWED_ORIGINS: Union[str, List[str]] = "http://localhost:3000,http://localhost:8000"
+    ALLOWED_ORIGINS: Union[str, List[str]] = (
+        "http://localhost:3000,http://localhost:8000"
+    )
 
     # Redis
     REDIS_HOST: str = "localhost"
@@ -348,7 +350,9 @@ class Settings(BaseSettings):
         if self.SECRET_KEY == "your-secret-key-change-in-production":
             raise ValueError("SECRET_KEY must be set for production deployments.")
         if len(self.SECRET_KEY) < 32:
-            raise ValueError("SECRET_KEY must be at least 32 characters long in production.")
+            raise ValueError(
+                "SECRET_KEY must be at least 32 characters long in production."
+            )
 
     def _assert_debug_disabled(self) -> None:
         if self.DEBUG:
@@ -358,28 +362,42 @@ class Settings(BaseSettings):
         if not self.ENABLE_BOOTSTRAP_ADMIN:
             return
 
-        if self.BOOTSTRAP_ADMIN_USERNAME == "admin" or self.BOOTSTRAP_ADMIN_PASSWORD == "admin123":
+        if (
+            self.BOOTSTRAP_ADMIN_USERNAME == "admin"
+            or self.BOOTSTRAP_ADMIN_PASSWORD == "admin123"
+        ):
             raise ValueError(
                 "Disable bootstrap admin or change the default credentials before deploying to production."
             )
 
     def _assert_database_not_local(self) -> None:
         if self.DATABASE_URL.startswith("postgresql://keneyapp:keneyapp@localhost"):
-            raise ValueError("DATABASE_URL must point to a production database when ENVIRONMENT=production.")
+            raise ValueError(
+                "DATABASE_URL must point to a production database when ENVIRONMENT=production."
+            )
 
     def _assert_allowed_origins_not_localhost(self) -> None:
         origins = self._normalized_origins(self.ALLOWED_ORIGINS)
         if not origins:
-            raise ValueError("ALLOWED_ORIGINS must be configured for production deployments.")
+            raise ValueError(
+                "ALLOWED_ORIGINS must be configured for production deployments."
+            )
 
-        if all(origin.startswith(("http://localhost", "http://127.0.0.1")) for origin in origins):
-            raise ValueError("ALLOWED_ORIGINS cannot be limited to localhost values in production.")
+        if all(
+            origin.startswith(("http://localhost", "http://127.0.0.1"))
+            for origin in origins
+        ):
+            raise ValueError(
+                "ALLOWED_ORIGINS cannot be limited to localhost values in production."
+            )
 
         self.ALLOWED_ORIGINS = origins
 
     def _assert_encryption_key_configured(self) -> None:
         if not self.ENCRYPTION_KEY:
-            raise ValueError("ENCRYPTION_KEY must be configured for production deployments.")
+            raise ValueError(
+                "ENCRYPTION_KEY must be configured for production deployments."
+            )
 
         if len(self.ENCRYPTION_KEY) < 32:
             raise ValueError("ENCRYPTION_KEY must be at least 32 characters long.")
@@ -400,7 +418,9 @@ class Settings(BaseSettings):
 
         return [origin for origin in parsed if origin]
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="allow")
+    model_config = SettingsConfigDict(
+        env_file=".env", case_sensitive=True, extra="allow"
+    )
 
 
 # ----------------------------------------------------------------------------
@@ -487,7 +507,12 @@ settings = _settings
 def _has_local_origin(origins: List[str]) -> bool:
     """Return True if any origin points to localhost or loopback."""
 
-    local_prefixes = ("http://localhost", "https://localhost", "http://127.0.0.1", "https://127.0.0.1")
+    local_prefixes = (
+        "http://localhost",
+        "https://localhost",
+        "http://127.0.0.1",
+        "https://127.0.0.1",
+    )
     return any(origin.startswith(local_prefixes) for origin in origins)
 
 
@@ -504,8 +529,13 @@ def validate_production_settings(current_settings: Settings) -> None:
 
     issues: List[str] = []
 
-    if not current_settings.SECRET_KEY or current_settings.SECRET_KEY == "your-secret-key-change-in-production":
-        issues.append("SECRET_KEY must be set to a strong, non-default value in production.")
+    if (
+        not current_settings.SECRET_KEY
+        or current_settings.SECRET_KEY == "your-secret-key-change-in-production"
+    ):
+        issues.append(
+            "SECRET_KEY must be set to a strong, non-default value in production."
+        )
 
     if current_settings.DEBUG:
         issues.append("DEBUG must be disabled in production.")
@@ -513,10 +543,14 @@ def validate_production_settings(current_settings: Settings) -> None:
     if not current_settings.ALLOWED_ORIGINS:
         issues.append("ALLOWED_ORIGINS must include at least one trusted origin.")
     elif _has_local_origin(current_settings.ALLOWED_ORIGINS):
-        issues.append("ALLOWED_ORIGINS cannot include localhost or loopback origins in production.")
+        issues.append(
+            "ALLOWED_ORIGINS cannot include localhost or loopback origins in production."
+        )
 
     if "localhost" in str(current_settings.DATABASE_URL):
-        issues.append("DATABASE_URL must point to a production database host (not localhost).")
+        issues.append(
+            "DATABASE_URL must point to a production database host (not localhost)."
+        )
 
     if current_settings.ACCESS_TOKEN_EXPIRE_MINUTES <= 0:
         issues.append("ACCESS_TOKEN_EXPIRE_MINUTES must be a positive integer.")
@@ -524,7 +558,9 @@ def validate_production_settings(current_settings: Settings) -> None:
     if not current_settings.ENCRYPTION_KEY:
         issues.append("ENCRYPTION_KEY must be provided for production deployments.")
     elif len(current_settings.ENCRYPTION_KEY) < 32:
-        issues.append("ENCRYPTION_KEY must be at least 32 characters long in production.")
+        issues.append(
+            "ENCRYPTION_KEY must be at least 32 characters long in production."
+        )
 
     if not current_settings.TOKEN_ISSUER:
         issues.append("TOKEN_ISSUER must be configured for production deployments.")
@@ -564,4 +600,6 @@ def is_rate_limiting_enabled() -> bool:
     Invalid or blank values fall back to the configured default.
     """
 
-    return _coerce_bool_env(os.getenv("ENABLE_RATE_LIMITING"), settings.ENABLE_RATE_LIMITING)
+    return _coerce_bool_env(
+        os.getenv("ENABLE_RATE_LIMITING"), settings.ENABLE_RATE_LIMITING
+    )
