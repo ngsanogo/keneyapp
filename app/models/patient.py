@@ -79,3 +79,5 @@ class Patient(Base):
     prescriptions = relationship("Prescription", back_populates="patient")
     tenant = relationship(Tenant, back_populates="patients")
     documents = relationship("MedicalDocument", back_populates="patient")
+    ins_record = relationship("PatientINS", back_populates="patient", uselist=False)
+    dmp_record = relationship("DMPIntegration", back_populates="patient", uselist=False)

@@ -45,6 +45,18 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 - 💳 **Payment Integration**: Stripe/PayPal for telemedicine consultations (coming Q2 2026)
 - 📹 **Telemedicine Module**: WebRTC video consultations with recording (coming Q2 2026)
 
+### 🇫🇷 French Healthcare Integration (NEW)
+
+- ✅ **INS (Identifiant National de Santé)**: Patient identity verification with ANS Teleservice
+- ✅ **Pro Santé Connect**: Healthcare professional SSO authentication via CPS/e-CPS
+- 🚧 **DMP (Dossier Médical Partagé)**: National medical record integration (coming Q2 2026)
+- 🚧 **MSSanté**: Certified secure health messaging (coming Q2 2026)
+- ✅ **RPPS/ADELI**: Healthcare professional identification
+- ✅ **ANS Compliance**: Following Agence du Numérique en Santé standards
+- 📋 **Ségur Ready**: Prepared for Ségur wave 2 certification
+
+**[📖 French Healthcare Integration Guide](docs/FRENCH_HEALTHCARE_INTEGRATION.md)**
+
 ### Security & Compliance
 
 - ✅ **GDPR/HIPAA/HDS compliant architecture**

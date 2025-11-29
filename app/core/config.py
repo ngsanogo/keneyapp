@@ -90,6 +90,34 @@ class Settings(BaseSettings):
     OTEL_SERVICE_VERSION: str = "1.0.0"
     ENVIRONMENT: str = "development"
 
+    # French Healthcare Integration (ANS)
+    # INS (Identifiant National de Santé)
+    INS_API_URL: str = ""  # ANS Teleservice INS endpoint
+    INS_API_KEY: str = ""  # API key for INS verification
+    INS_VALIDATION_ENABLED: bool = False  # Enable INS validation
+    
+    # Pro Santé Connect (PSC) - French healthcare SSO
+    PSC_CLIENT_ID: str = ""
+    PSC_CLIENT_SECRET: str = ""
+    PSC_AUTHORIZATION_ENDPOINT: str = "https://wallet.esw.esante.gouv.fr/auth"
+    PSC_TOKEN_ENDPOINT: str = "https://auth.esw.esante.gouv.fr/auth/realms/esante-wallet/protocol/openid-connect/token"
+    PSC_USERINFO_ENDPOINT: str = "https://auth.esw.esante.gouv.fr/auth/realms/esante-wallet/protocol/openid-connect/userinfo"
+    PSC_JWKS_URI: str = "https://auth.esw.esante.gouv.fr/auth/realms/esante-wallet/protocol/openid-connect/certs"
+    PSC_SCOPE: str = "openid profile email rpps"  # RPPS = healthcare professional ID
+    
+    # DMP (Dossier Médical Partagé) Integration
+    DMP_API_URL: str = ""  # DMP API endpoint
+    DMP_API_KEY: str = ""  # API key for DMP access
+    DMP_INTEGRATION_ENABLED: bool = False
+    
+    # MSSanté (Messagerie Sécurisée de Santé)
+    MSSANTE_ENABLED: bool = False
+    MSSANTE_SMTP_HOST: str = ""  # MSSanté SMTP gateway
+    MSSANTE_SMTP_PORT: int = 587
+    MSSANTE_USERNAME: str = ""  # MSSanté account (prenom.nom@structure.mssante.fr)
+    MSSANTE_PASSWORD: str = ""
+    MSSANTE_FROM_ADDRESS: str = ""
+
     # ------------------------------------------------------------------
     # Production safety checks
     # ------------------------------------------------------------------

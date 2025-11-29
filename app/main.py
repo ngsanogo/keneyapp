@@ -38,6 +38,7 @@ from app.routers import (
     dashboard,
     documents,
     fhir,
+    french_healthcare,
     lab,
     messages,
     oauth,
@@ -131,6 +132,7 @@ app.include_router(shares.router, prefix=settings.API_V1_PREFIX)
 app.include_router(terminology.router, prefix=settings.API_V1_PREFIX)
 app.include_router(subscriptions.router, prefix=settings.API_V1_PREFIX)
 app.include_router(lab.router, prefix=settings.API_V1_PREFIX)
+app.include_router(french_healthcare.router, prefix=settings.API_V1_PREFIX)
 
 # Include GraphQL router
 graphql_router = create_graphql_router()
