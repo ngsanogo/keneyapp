@@ -145,19 +145,27 @@ class DataEncryption:
         return self.decrypt(data)
 
 
-# Global encryption instance
-encryption = DataEncryption()
+# Global encryption instance (lazy-loaded)
+_encryption: Optional[DataEncryption] = None
+
+
+def get_encryption() -> DataEncryption:
+    """Get or create the global encryption instance."""
+    global _encryption
+    if _encryption is None:
+        _encryption = DataEncryption()
+    return _encryption
 
 
 # Helper functions for direct use
 def encrypt_sensitive_data(plaintext: str) -> str:
     """Encrypt sensitive data."""
-    return encryption.encrypt(plaintext)
+    return get_encryption().encrypt(plaintext)
 
 
 def decrypt_sensitive_data(encrypted_data: str) -> str:
     """Decrypt sensitive data."""
-    return encryption.decrypt(encrypted_data)
+    return get_encryption().decrypt(encrypted_data)
 
 
 # Backward-compatible wrappers used by services; optional context is ignored for now

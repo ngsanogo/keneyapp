@@ -27,6 +27,7 @@ services:
       PYTHONPATH: /app
       DATABASE_URL: postgresql://keneyapp:keneyapp@db:5432/keneyapp
       SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-dev-encryption-key-32-chars!!}
       ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8000
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -88,6 +89,7 @@ services:
     environment:
       PYTHONPATH: /app
       DATABASE_URL: postgresql://keneyapp:keneyapp@db:5432/keneyapp
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-dev-encryption-key-32-chars!!}
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
     depends_on:
@@ -108,6 +110,7 @@ services:
     environment:
       PYTHONPATH: /app
       DATABASE_URL: postgresql://keneyapp:keneyapp@db:5432/keneyapp
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-dev-encryption-key-32-chars!!}
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
     depends_on:
