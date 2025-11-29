@@ -2,12 +2,10 @@
 WebSocket manager for real-time features
 Handles WebSocket connections, rooms, and broadcasting
 """
-import json
 from datetime import datetime
 from typing import Dict, List, Optional, Set
-from uuid import UUID
 
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 from app.core.logging_middleware import logger

@@ -14,7 +14,6 @@ from app.core.config import settings
 from app.core.audit import log_audit_event
 from app.exceptions import ValidationError
 from app.models.french_healthcare import INSStatus, PatientINS
-from app.models.patient import Patient
 
 
 class INSService:

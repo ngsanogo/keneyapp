@@ -6,7 +6,6 @@ HTTP/platform concerns (audit, cache, metrics, FHIR events) in router.
 """
 
 import logging
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session

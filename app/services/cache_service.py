@@ -6,7 +6,7 @@ import hashlib
 import json
 import pickle
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 import redis
 from redis import Redis

@@ -2,7 +2,7 @@
 Pro Santé Connect (PSC) OAuth2/OIDC Integration
 French healthcare professional authentication system
 """
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, Optional
 from uuid import UUID
 

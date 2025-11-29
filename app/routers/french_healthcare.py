@@ -15,7 +15,6 @@ from app.core.cache import cache_clear_pattern, cache_get, cache_set
 from app.core.dependencies import get_current_active_user, get_db, require_roles
 from app.core.metrics import patient_operations_total
 from app.core.rate_limit import limiter
-from app.models.french_healthcare import INSStatus
 from app.models.user import User, UserRole
 from app.services.ins_service import INSService
 from app.services.pro_sante_connect import ProSanteConnectService

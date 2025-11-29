@@ -179,6 +179,10 @@ def decrypt_data(encrypted_data: str, context: Optional[dict] = None) -> str:
     return decrypt_sensitive_data(encrypted_data)
 
 
+# Alias for backward compatibility
+encryption = get_encryption
+
+
 def encrypt_patient_data(data: dict) -> dict:
     """
     Encrypt sensitive fields in patient data.
@@ -190,6 +194,7 @@ def encrypt_patient_data(data: dict) -> dict:
         Dictionary with encrypted sensitive fields
     """
     encrypted = data.copy()
+    enc = get_encryption()
 
     # Fields that should be encrypted
     sensitive_fields = [
@@ -202,7 +207,7 @@ def encrypt_patient_data(data: dict) -> dict:
 
     for field in sensitive_fields:
         if field in encrypted and encrypted[field]:
-            encrypted[field] = encryption.encrypt_field(encrypted[field])
+            encrypted[field] = enc.encrypt_field(encrypted[field])
 
     return encrypted
 
@@ -218,6 +223,7 @@ def decrypt_patient_data(data: dict) -> dict:
         Dictionary with decrypted sensitive fields
     """
     decrypted = data.copy()
+    enc = get_encryption()
 
     # Fields that should be decrypted
     sensitive_fields = [
@@ -231,7 +237,7 @@ def decrypt_patient_data(data: dict) -> dict:
     for field in sensitive_fields:
         if field in decrypted and decrypted[field]:
             try:
-                decrypted[field] = encryption.decrypt_field(decrypted[field])
+                decrypted[field] = enc.decrypt_field(decrypted[field])
             except ValueError:
                 # Field might not be encrypted, leave as is
                 pass
