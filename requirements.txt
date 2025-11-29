@@ -30,6 +30,7 @@ email-validator==2.3.0
 pytest==8.4.2
 pytest-asyncio==1.3.0
 httpx==0.28.1
+faker==36.0.0  # E2E test data generation
 
 # Code quality
 black==25.9.0

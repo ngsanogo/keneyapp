@@ -4,11 +4,12 @@ These are concise, actionable rules for AI coding agents working in this reposit
 
 ## Architecture & Boundaries
 
-- **Backend**: FastAPI app in `app/` with routers in `app/routers`, business logic in `app/services`, ORM models in `app/models`, Pydantic schemas in `app/schemas`, and platform concerns in `app/core` (config, security, db, cache, rate limiting, metrics, audit).
-- **Frontend**: React + TypeScript in `frontend/` consuming REST (`/api/v1/...`) and GraphQL (`/graphql`).
-- **Infrastructure**: PostgreSQL, Redis, Celery (workers + beat), Prometheus/Grafana. Local stack is orchestrated via `docker-compose.yml` and `./scripts/start_stack.sh`.
-- **Multi-tenancy**: Most domain models are tenant-scoped. Seed and tests rely on a default tenant; keep `tenant_id` set in writes.
+- **Backend**: FastAPI (Python 3.11+) app in `app/` with routers in `app/routers`, business logic in `app/services`, ORM models in `app/models`, Pydantic schemas in `app/schemas`, and platform concerns in `app/core` (config, security, db, cache, rate limiting, metrics, audit).
+- **Frontend**: React 18 + TypeScript in `frontend/` consuming REST (`/api/v1/...`) and GraphQL (`/graphql`).
+- **Infrastructure**: PostgreSQL 15, Redis 7, Celery (workers + beat), Prometheus/Grafana. Local stack is orchestrated via `docker-compose.yml` and `./scripts/start_stack.sh`.
+- **Multi-tenancy**: Most domain models are tenant-scoped. Seed scripts (`scripts/init_db.py`) create default tenant ("Default Tenant", slug: "default"); keep `tenant_id` set in all writes.
 - **Healthcare Standards**: FHIR R4 interoperability in `app/fhir/`, medical terminologies (ICD-11, SNOMED CT, LOINC, ATC) in `app/services/terminology.py`, v3.0 features (messaging, documents, shares) in dedicated services.
+- **Advanced Features**: E2E encrypted messaging (`app/services/messaging_service.py`), multi-level caching (`app/services/cache_service.py`), WebSocket notifications, DICOM support.
 
 ## Core Conventions (Backend)
 
@@ -36,10 +37,12 @@ These are concise, actionable rules for AI coding agents working in this reposit
 
 ### Caching Strategy
 
-- Use Redis helpers in `app/core/cache.py`: `cache_get`, `cache_set`, `cache_clear_pattern`.
+- **Simple caching**: Use `app/core/cache.py` helpers: `cache_get`, `cache_set`, `cache_clear_pattern`.
+- **Advanced caching**: Use `CacheService` from `app/services/cache_service.py` for multi-level (memory + Redis) caching with statistics.
 - **Naming**: `{resource}:list:{tenant}:{params}`, `{resource}:detail:{tenant}:{id}`.
-- **TTL**: Lists 120s, details 300s (PATIENT_LIST_TTL_SECONDS, PATIENT_DETAIL_TTL_SECONDS).
+- **TTL**: Lists 120s, details 300s (define constants like PATIENT_LIST_TTL_SECONDS, PATIENT_DETAIL_TTL_SECONDS).
 - **Invalidation**: On mutation, clear related list/detail keys AND `dashboard:*` keys.
+- **Key generation**: Use `cache_service.generate_key(prefix, *args, **kwargs)` for consistent hashing.
 - See `docs/patterns/cache_keys.md` for complete patterns.
 
 ### PHI Encryption & Security
@@ -48,7 +51,8 @@ These are concise, actionable rules for AI coding agents working in this reposit
 - **Write flow**: `encrypt_patient_payload(data)` → store encrypted fields.
 - **Read flow**: `serialize_patient_dict(patient)` → returns decrypted response.
 - **Sensitive fields**: medical_history, allergies, emergency_contact, emergency_phone, address.
-- See `docs/patterns/phi_logging_checklist.md` for PHI handling rules.
+- **Never log PHI**: Sanitize all audit logs and error messages to exclude sensitive patient data.
+- See `docs/ENCRYPTION_GUIDE.md` for complete encryption patterns.
 
 ### Metrics & Observability
 
@@ -61,7 +65,9 @@ These are concise, actionable rules for AI coding agents working in this reposit
 
 - Business logic lives in `app/services/` (e.g., `patient_service.py`, `messaging_service.py`, `document_service.py`).
 - Routers handle HTTP concerns (request/response, cache, audit, metrics); services handle domain logic and data access.
-- Custom exceptions defined in `app/exceptions.py` (e.g., `PatientNotFoundError`, `DuplicateResourceError`).
+- Services accept `db: Session` in `__init__` and expose methods like `get_by_id(id, tenant_id)`, `create(data, tenant_id)`.
+- Custom exceptions defined in `app/exceptions.py`: `PatientNotFoundError`, `DuplicateResourceError`, `raise_if_not_found`, `raise_if_tenant_mismatch`.
+- Specialized services: `MessagingService` (E2E encryption), `CacheService` (multi-level caching), `DocumentService` (DICOM support), `ExportService` (bulk operations).
 
 ### Database Access
 
@@ -76,21 +82,27 @@ These are concise, actionable rules for AI coding agents working in this reposit
 
 - **Quick start**: `make dev` (uvicorn + React dev server).
 - **Full stack**: `./scripts/start_stack.sh` (Docker Compose with DB, Redis, Celery, Prometheus).
+  - On Windows: Run in Git Bash or WSL, or use `docker compose up -d` directly.
 - **Backend only**: `uvicorn app.main:app --reload` (requires local PostgreSQL + Redis).
 - **Frontend only**: `cd frontend && npm start`.
+- **Windows users**: See `docs/WINDOWS_SETUP.md` for PowerShell-specific setup and ExecutionPolicy configuration.
 
 ### Testing
 
 - **Backend**: `pytest tests/ -v` (skip slow tests: `-m "not slow and not smoke"`).
+  - Markers: `smoke` (requires running server), `slow`, `integration`, `unit`, `api`, `security`, `performance`.
+  - Target coverage: 70%+ (current: ~75%), tracked in `pytest.ini`.
 - **Frontend**: `cd frontend && npm test -- --watchAll=false`.
 - **Coverage**: `pytest --cov=app tests/` or `make test-cov`.
-- **E2E integration**: `./scripts/run_e2e_tests.sh` (Docker-based, full scenarios).
+- **E2E integration**: `./scripts/run_e2e_tests.sh` (Docker-based, full scenarios in `tests/e2e/`).
 - **CI parity**: `make ci` runs same checks as GitHub Actions.
 
 ### Code Quality
 
 - **Format**: `make format` (Black + Prettier) or `black app tests`.
+  - Windows: `.\scripts\format_all.ps1` or `.\scripts\format_all.ps1 -Check`.
 - **Lint**: `make lint` (flake8 + mypy + ESLint).
+  - Windows: `.\scripts\lint_all.ps1` or `.\scripts\lint_all.ps1 -Fix`.
 - **Type checking**: `mypy app` (gradual typing, non-blocking).
 - **Security**: `make security` (pip-audit + npm audit).
 
@@ -99,6 +111,8 @@ These are concise, actionable rules for AI coding agents working in this reposit
 - **Create migration**: `alembic revision --autogenerate -m "description"`.
 - **Apply migration**: `alembic upgrade head`.
 - **Seed database**: `python scripts/init_db.py` (idempotent, creates default tenant + demo users).
+  - Default tenant: name="Default Tenant", slug="default".
+  - Demo users: admin/admin123, doctor/doctor123, nurse/nurse123, receptionist/receptionist123.
 - **Reset database**: `make db-reset` (downgrade → upgrade → seed).
 
 ## Adding Features (Examples)
@@ -108,14 +122,15 @@ These are concise, actionable rules for AI coding agents working in this reposit
 1. Define Pydantic schemas in `app/schemas/<resource>.py` (Create/Update/Response).
 2. Create SQLAlchemy model in `app/models/<resource>.py` with `tenant_id` and timestamps.
 3. Add Alembic migration: `alembic revision --autogenerate -m "add <resource>"`.
-4. Create router in `app/routers/<resource>.py`:
+4. Create service in `app/services/<resource>_service.py` for business logic.
+5. Create router in `app/routers/<resource>.py`:
    - Apply `require_roles([...])` for RBAC.
    - Add `@limiter.limit("X/minute")` for rate limiting.
    - Use `log_audit_event(...)` for CREATE/UPDATE/DELETE.
    - Implement caching with `cache_get`/`cache_set` and invalidation.
    - Increment metrics counters.
-5. Include router in `app/main.py`: `app.include_router(resource.router, prefix=settings.API_V1_PREFIX)`.
-6. See `docs/patterns/new_resource_scaffold.md` for complete template.
+6. Include router in `app/main.py`: `app.include_router(resource.router, prefix=settings.API_V1_PREFIX)`.
+7. See `docs/patterns/new_resource_scaffold.md` for complete template.
 
 ### Mutating Patient Data
 
@@ -134,7 +149,10 @@ These are concise, actionable rules for AI coding agents working in this reposit
 ### GraphQL Extensions
 
 - Schema/routers created via `app.graphql.schema.create_graphql_router()` and mounted at `/graphql`.
-- Resolvers must enforce tenancy, RBAC, and use `get_session(info)` for DB access.
+- Resolvers must enforce tenancy with `info.context.user.tenant_id` and RBAC with `ensure_roles(info, [UserRole.ADMIN, ...])` helper.
+- Use `with get_session(info) as db:` context manager for scoped DB access.
+- GraphQL context includes `GraphQLUserContext` with `id`, `username`, `tenant_id`, `role` from JWT.
+- Mutations must log audit events with `log_audit_event(...)` and invalidate caches.
 - Follow patterns in `app/graphql/schema.py` and see `docs/patterns/graphql_extension.md`.
 
 ### FHIR Interoperability
@@ -196,7 +214,7 @@ These are concise, actionable rules for AI coding agents working in this reposit
 
 ### Documentation
 
-- **Comprehensive guides**: `README.md`, `docs/DEVELOPMENT.md`, `BUILD.md`, `ARCHITECTURE.md`.
+- **Comprehensive guides**: `README.md`, `docs/DEVELOPMENT.md`, `docs/guides/BUILD.md`, `ARCHITECTURE.md`.
 - **Testing**: `docs/TESTING_GUIDE.md`, `docs/E2E_TESTING.md`, `docs/E2E_TESTING_QUICK_REF.md`.
 - **Security & compliance**: `docs/ENCRYPTION_GUIDE.md`, `docs/SECURITY_BEST_PRACTICES.md`.
 - **Healthcare standards**: `docs/MEDICAL_TERMINOLOGIES.md`, `docs/FHIR_GUIDE.md`.
@@ -244,7 +262,6 @@ make build-full                   # With Docker images
 
 - **New resource scaffold (REST)**: `docs/patterns/new_resource_scaffold.md` (complete template with RBAC, caching, audit).
 - **GraphQL extension guide**: `docs/patterns/graphql_extension.md` (resolver patterns, tenancy, mutations).
-- **PHI logging checklist**: `docs/patterns/phi_logging_checklist.md` (sanitization rules).
 - **Cache keys and invalidation**: `docs/patterns/cache_keys.md` (naming conventions, TTLs, invalidation patterns).
 
 ### AI PR Checklist

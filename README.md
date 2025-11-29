@@ -509,23 +509,50 @@ LIMIT 100;
 
 ### End-to-End (E2E) Integration Tests ⭐ NEW
 
+KeneyApp includes comprehensive E2E testing suite with fake data generation and full-stack validation:
+
 ```bash
-# Run complete E2E test suite in Docker
+# Quick start - Run complete E2E test suite
+make e2e-full
+
+# Or use Docker Compose directly
 ./scripts/run_e2e_tests.sh
+
+# Individual components
+make e2e-seed          # Seed database with fake data (100 records)
+make e2e-validate      # Validate frontend-backend alignment
+make e2e-test-api      # Test all API endpoints
+make e2e-quick         # Quick validation (skip seeding)
 ```
 
-**Comprehensive testing** covering:
+**What's Tested:**
 
-- ✅ Authentication (all user roles)
-- ✅ Patient CRUD workflows with PHI encryption
-- ✅ RBAC enforcement
-- ✅ Cache validation
-- ✅ GraphQL API
-- ✅ Prometheus metrics
+- ✅ **Test Data Generation**: Realistic fake data with Faker (patients, appointments, prescriptions, documents, messages)
+- ✅ **French Healthcare Features**: INS, NIR, DMP, MSSanté, CPS credentials
+- ✅ **45+ API Endpoints**: Authentication, CRUD operations, FHIR, GraphQL, metrics
+- ✅ **Frontend-Backend Alignment**: CORS, API contracts, auth flow, static assets
+- ✅ **Authentication**: All user roles (admin, doctor, nurse, receptionist)
+- ✅ **RBAC**: Role-based access control enforcement
+- ✅ **PHI Encryption**: Patient data encryption/decryption workflows
+- ✅ **Cache validation**: Redis caching and invalidation
+- ✅ **Performance metrics**: Response times and throughput
 
-**Automated analysis** with performance metrics, failure investigation, and recommendations.
+**E2E Test Suite Components:**
 
-📖 **Documentation:** [E2E Testing Guide](docs/E2E_TESTING.md) | [Quick Reference](docs/E2E_TESTING_QUICK_REF.md)
+| Script | Purpose | Duration |
+|--------|---------|----------|
+| `scripts/seed_test_data.py` | Generate realistic test data with Faker | ~45s (100 records) |
+| `scripts/test_all_apis.py` | Comprehensive API endpoint testing | ~10s (45 endpoints) |
+| `scripts/validate_frontend_backend.py` | Frontend-backend integration validation | ~5s (16 checks) |
+| `scripts/run_full_e2e_tests.py` | Master orchestrator with JSON reporting | ~90s (full suite) |
+
+**Generated Test Report** (`e2e_test_report.json`):
+- Overall status (✅ PASSED / ❌ FAILED)
+- Stage-by-stage results (seed → validate → test → verify)
+- Error aggregation and statistics
+- Performance metrics and timing
+
+📖 **Full Documentation:** [E2E Testing Quick Reference](docs/E2E_TESTING_QUICK_REF.md) | [Implementation Guide](scripts/E2E_TESTING_README.md)
 
 ### Backend Tests
 

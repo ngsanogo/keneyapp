@@ -1,7 +1,7 @@
 """Add French healthcare integration: INS, CPS, DMP, MSSante
 
-Revision ID: 013_french_healthcare
-Revises: 012_add_medical_record_shares
+Revision ID: 017_french_healthcare
+Revises: 016_enhance_lab_models
 Create Date: 2025-11-29 14:30:00.000000
 
 """
@@ -12,29 +12,41 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '013_french_healthcare'
-down_revision: Union[str, None] = '012_add_medical_record_shares'
+revision: str = '017_french_healthcare'
+down_revision: Union[str, None] = '016_enhance_lab_models'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create enums
-    op.execute("CREATE TYPE insstatus AS ENUM ('pending', 'verified', 'failed', 'expired')")
-    op.execute("CREATE TYPE cpstype AS ENUM ('cps', 'e_cps', 'cpf')")
+    # Create enums (check existence first)
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE insstatus AS ENUM ('pending', 'verified', 'failed', 'expired');
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+        END $$;
+    """)
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE cpstype AS ENUM ('cps', 'e_cps', 'cpf');
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+        END $$;
+    """)
     
     # ### PatientINS table ###
     op.create_table(
         'patient_ins',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('patient_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.Integer(), nullable=False, autoincrement=True),
+        sa.Column('patient_id', sa.Integer(), nullable=False),
         sa.Column('ins_number', sa.String(length=15), nullable=False),
         sa.Column('nir_key', sa.String(length=2), nullable=True),
         sa.Column('oid', sa.String(length=50), nullable=True),
-        sa.Column('status', sa.Enum('pending', 'verified', 'failed', 'expired', name='insstatus'), nullable=False),
+        sa.Column('status', postgresql.ENUM('pending', 'verified', 'failed', 'expired', name='insstatus', create_type=False), nullable=False),
         sa.Column('verified_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('verification_method', sa.String(length=50), nullable=True),
-        sa.Column('verification_operator_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('verification_operator_id', sa.Integer(), nullable=True),
         sa.Column('birth_name', sa.String(length=100), nullable=True),
         sa.Column('first_names', sa.String(length=200), nullable=True),
         sa.Column('birth_date', sa.DateTime(timezone=True), nullable=True),
@@ -43,7 +55,7 @@ def upgrade() -> None:
         sa.Column('gender_code', sa.String(length=1), nullable=True),
         sa.Column('expires_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('last_check_at', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('tenant_id', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], ondelete='CASCADE'),
@@ -60,9 +72,9 @@ def upgrade() -> None:
     # ### HealthcareProfessionalCPS table ###
     op.create_table(
         'healthcare_professional_cps',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('user_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('cps_type', sa.Enum('cps', 'e_cps', 'cpf', name='cpstype'), nullable=False),
+        sa.Column('id', sa.Integer(), nullable=False, autoincrement=True),
+        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('cps_type', postgresql.ENUM('cps', 'e_cps', 'cpf', name='cpstype', create_type=False), nullable=False),
         sa.Column('cps_number', sa.String(length=20), nullable=False),
         sa.Column('rpps_number', sa.String(length=11), nullable=True),
         sa.Column('adeli_number', sa.String(length=9), nullable=True),
@@ -78,7 +90,7 @@ def upgrade() -> None:
         sa.Column('issue_date', sa.DateTime(timezone=True), nullable=True),
         sa.Column('expiry_date', sa.DateTime(timezone=True), nullable=True),
         sa.Column('is_active', sa.Boolean(), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('tenant_id', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ),
@@ -97,8 +109,8 @@ def upgrade() -> None:
     # ### DMPIntegration table ###
     op.create_table(
         'dmp_integration',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('patient_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.Integer(), nullable=False, autoincrement=True),
+        sa.Column('patient_id', sa.Integer(), nullable=False),
         sa.Column('dmp_id', sa.String(length=50), nullable=True),
         sa.Column('dmp_consent', sa.Boolean(), nullable=False),
         sa.Column('dmp_consent_date', sa.DateTime(timezone=True), nullable=True),
@@ -107,7 +119,7 @@ def upgrade() -> None:
         sa.Column('documents_sent_count', sa.Integer(), nullable=False),
         sa.Column('documents_received_count', sa.Integer(), nullable=False),
         sa.Column('last_error', sa.Text(), nullable=True),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('tenant_id', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], ondelete='CASCADE'),
@@ -122,8 +134,8 @@ def upgrade() -> None:
     # ### MSSanteMessage table ###
     op.create_table(
         'mssante_messages',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('internal_message_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column('id', sa.Integer(), nullable=False, autoincrement=True),
+        sa.Column('internal_message_id', sa.Integer(), nullable=True),
         sa.Column('mssante_message_id', sa.String(length=100), nullable=True),
         sa.Column('sender_mssante_address', sa.String(length=200), nullable=False),
         sa.Column('receiver_mssante_address', sa.String(length=200), nullable=False),
@@ -135,7 +147,7 @@ def upgrade() -> None:
         sa.Column('error_message', sa.Text(), nullable=True),
         sa.Column('has_attachments', sa.Boolean(), nullable=False),
         sa.Column('attachment_count', sa.Integer(), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('tenant_id', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.ForeignKeyConstraint(['internal_message_id'], ['messages.id'], ),

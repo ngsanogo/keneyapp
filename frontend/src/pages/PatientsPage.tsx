@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AddPatientForm from '../components/AddPatientForm';
+import RecommendationPanel from '../components/RecommendationPanel';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
@@ -18,6 +19,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 const PatientsPage = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
   const { isAuthenticated, token } = useAuth();
   const navigate = useNavigate();
 
@@ -80,7 +82,12 @@ const PatientsPage = () => {
               </thead>
               <tbody>
                 {patients.map(patient => (
-                  <tr key={patient.id}>
+                  <tr 
+                    key={patient.id}
+                    onClick={() => setSelectedPatientId(patient.id)}
+                    style={{ cursor: 'pointer' }}
+                    className={selectedPatientId === patient.id ? 'selected-row' : ''}
+                  >
                     <td>{patient.id}</td>
                     <td>
                       {patient.first_name} {patient.last_name}
@@ -94,6 +101,11 @@ const PatientsPage = () => {
             </table>
           )}
         </div>
+        
+        {selectedPatientId && token && (
+          <RecommendationPanel patientId={selectedPatientId} token={token} />
+        )}
+        
         {showAdd && (
           <AddPatientForm
             token={token!}

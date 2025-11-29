@@ -166,6 +166,7 @@ const AnalyticsDashboard: React.FC = () => {
           labels: data.labels,
           datasets: [
             {
+              label: 'Gender Distribution',
               data: data.values,
               backgroundColor: ['#007bff', '#e83e8c', '#6f42c1'],
               borderWidth: 0,

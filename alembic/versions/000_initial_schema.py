@@ -28,7 +28,7 @@ def upgrade() -> None:
         sa.Column('username', sa.String(), nullable=False),
         sa.Column('hashed_password', sa.String(), nullable=False),
         sa.Column('full_name', sa.String(), nullable=False),
-        sa.Column('role', sa.Enum('admin', 'doctor', 'nurse', 'receptionist', name='userrole'), nullable=False, server_default='receptionist'),
+        sa.Column('role', sa.Enum('admin', 'doctor', 'nurse', 'receptionist', name='userrole', create_type=False), nullable=False, server_default='receptionist'),
         sa.Column('is_active', sa.Boolean(), nullable=True, server_default='true'),
         sa.PrimaryKeyConstraint('id')
     )
@@ -45,7 +45,7 @@ def upgrade() -> None:
         sa.Column('first_name', sa.String(), nullable=False),
         sa.Column('last_name', sa.String(), nullable=False),
         sa.Column('date_of_birth', sa.Date(), nullable=False),
-        sa.Column('gender', sa.Enum('male', 'female', 'other', name='gender'), nullable=False),
+        sa.Column('gender', sa.Enum('male', 'female', 'other', name='gender', create_type=False), nullable=False),
         sa.Column('email', sa.String(), nullable=True),
         sa.Column('phone', sa.String(), nullable=False),
         sa.Column('address', sa.Text(), nullable=True),
@@ -68,7 +68,7 @@ def upgrade() -> None:
         sa.Column('doctor_id', sa.Integer(), nullable=False),
         sa.Column('appointment_date', sa.DateTime(), nullable=False),
         sa.Column('duration_minutes', sa.Integer(), nullable=True, server_default='30'),
-        sa.Column('status', sa.Enum('scheduled', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show', name='appointmentstatus'), nullable=True, server_default='scheduled'),
+        sa.Column('status', sa.Enum('scheduled', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show', name='appointmentstatus', create_type=False), nullable=True, server_default='scheduled'),
         sa.Column('reason', sa.String(), nullable=False),
         sa.Column('notes', sa.Text(), nullable=True),
         sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], ),

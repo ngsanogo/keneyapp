@@ -454,3 +454,48 @@ ci-dry-run:
 	@echo ""
 	@echo "To run a specific job in dry-run mode:"
 	@echo "  act -j JOB_NAME -W .github/workflows/WORKFLOW.yml -n"
+
+# ==============================================================================
+# E2E Testing Commands
+# ==============================================================================
+
+# E2E Testing
+e2e-install:
+	@echo "📦 Installing E2E testing dependencies..."
+	@pip install -r requirements-e2e-tests.txt
+	@echo "✅ E2E dependencies installed!"
+
+e2e-seed:
+	@echo "🌱 Seeding test data..."
+	@python scripts/seed_test_data.py --count 100
+	@echo "✅ Test data seeded!"
+
+e2e-seed-clean:
+	@echo "🧹 Cleaning and reseeding test data..."
+	@python scripts/seed_test_data.py --clean --count 100
+	@echo "✅ Test data cleaned and reseeded!"
+
+e2e-test-api:
+	@echo "🧪 Testing all API endpoints..."
+	@python scripts/test_all_apis.py --verbose
+	@echo "✅ API tests complete!"
+
+e2e-validate:
+	@echo "🔍 Validating frontend-backend alignment..."
+	@python scripts/validate_frontend_backend.py
+	@echo "✅ Validation complete!"
+
+e2e-full:
+	@echo "🚀 Running full E2E test suite..."
+	@python scripts/run_full_e2e_tests.py
+	@echo "✅ Full E2E suite complete!"
+
+e2e-full-clean:
+	@echo "🚀 Running full E2E test suite (clean first)..."
+	@python scripts/run_full_e2e_tests.py --clean-first
+	@echo "✅ Full E2E suite complete!"
+
+e2e-quick:
+	@echo "⚡ Running quick E2E validation..."
+	@python scripts/run_full_e2e_tests.py --skip-seed
+	@echo "✅ Quick validation complete!"

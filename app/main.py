@@ -46,6 +46,7 @@ from app.routers import (
     oauth,
     patients,
     prescriptions,
+    recommendations,
     shares,
     subscriptions,
     tenants,
@@ -138,6 +139,7 @@ app.include_router(terminology.router, prefix=settings.API_V1_PREFIX)
 app.include_router(subscriptions.router, prefix=settings.API_V1_PREFIX)
 app.include_router(lab.router, prefix=settings.API_V1_PREFIX)
 app.include_router(analytics.router, prefix=settings.API_V1_PREFIX, tags=["analytics"])
+app.include_router(recommendations.router, prefix=settings.API_V1_PREFIX)
 # app.include_router(french_healthcare.router, prefix=settings.API_V1_PREFIX)  # Temporarily disabled
 
 # Include WebSocket router (no prefix, handles /ws endpoints)

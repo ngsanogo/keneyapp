@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.create_table(
         'medical_codes',
         sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('code_system', sa.Enum('icd11', 'snomed_ct', 'loinc', 'atc', 'cpt', 'ccam', 'dicom', name='codesystem'), nullable=False),
+        sa.Column('code_system', sa.Enum('icd11', 'snomed_ct', 'loinc', 'atc', 'cpt', 'ccam', 'dicom', name='codesystem', create_type=False), nullable=False),
         sa.Column('code', sa.String(length=50), nullable=False),
         sa.Column('display', sa.String(length=500), nullable=False),
         sa.Column('definition', sa.Text(), nullable=True),
