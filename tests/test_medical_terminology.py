@@ -2,8 +2,9 @@
 Tests for medical terminology services and coding.
 """
 
-import pytest
 from datetime import datetime
+
+import pytest
 
 from app.models.medical_code import CodeSystem, MedicalCode
 from app.services.terminology import TerminologyService, terminology_service

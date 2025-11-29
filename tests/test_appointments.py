@@ -5,20 +5,21 @@ Comprehensive tests for appointment creation, scheduling, conflict detection,
 and RBAC enforcement.
 """
 
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
 from sqlalchemy.orm import Session
 
-from app.services.appointment_scheduler import AppointmentSchedulerService
-from app.models.appointment import Appointment, AppointmentStatus
-from app.models.patient import Patient
-from app.models.user import User, UserRole
-from app.models.tenant import Tenant
-from app.schemas.appointment import AppointmentCreate, AppointmentUpdate
 from app.exceptions import (
     AppointmentConflictError,
     ResourceNotFoundError,
 )
+from app.models.appointment import Appointment, AppointmentStatus
+from app.models.patient import Patient
+from app.models.tenant import Tenant
+from app.models.user import User, UserRole
+from app.schemas.appointment import AppointmentCreate, AppointmentUpdate
+from app.services.appointment_scheduler import AppointmentSchedulerService
 
 
 @pytest.fixture

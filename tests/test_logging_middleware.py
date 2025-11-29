@@ -2,8 +2,9 @@
 Tests for the structured logging middleware with correlation IDs.
 """
 
-import pytest
 import uuid as uuid_module
+
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app

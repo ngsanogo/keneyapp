@@ -69,5 +69,8 @@ def test_production_allows_hardened_configuration(monkeypatch):
     settings = Settings()
 
     assert settings.SECRET_KEY == "x" * 64
-    assert settings.ALLOWED_ORIGINS == ["https://example.com", "https://api.example.com"]
+    assert settings.ALLOWED_ORIGINS == [
+        "https://example.com",
+        "https://api.example.com",
+    ]
     assert settings.ENABLE_BOOTSTRAP_ADMIN is False

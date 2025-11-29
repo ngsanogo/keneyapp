@@ -7,9 +7,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.main import app
+from app.core.audit import get_audit_logs, log_audit_event
 from app.core.database import Base, get_db
-from app.core.audit import log_audit_event, get_audit_logs
+from app.main import app
 from app.models.audit_log import AuditLog
 
 # Create an in-memory SQLite database for testing

@@ -4,13 +4,14 @@ Tests for business metrics collector service.
 
 from datetime import datetime
 
-from app.services.metrics_collector import (
-    collect_all_business_metrics,
-)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+
 from app.core.database import Base
+from app.services.metrics_collector import (
+    collect_all_business_metrics,
+)
 
 # Create an in-memory SQLite database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"

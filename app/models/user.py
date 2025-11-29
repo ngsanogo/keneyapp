@@ -60,4 +60,6 @@ class User(Base):
     appointments = relationship("Appointment", back_populates="doctor")
     prescriptions = relationship("Prescription", back_populates="doctor")
     # Relationships to messages are provided via backref on Message to avoid early class resolution issues
-    cps_credential = relationship("HealthcareProfessionalCPS", back_populates="user", uselist=False)
+    cps_credential = relationship(
+        "HealthcareProfessionalCPS", back_populates="user", uselist=False
+    )

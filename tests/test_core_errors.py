@@ -4,12 +4,13 @@ import os
 os.environ["TESTING"] = "true"
 
 import json
+
 import pytest
 from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ValidationError
 
-from app.core.errors import validation_exception_handler, generic_exception_handler
+from app.core.errors import generic_exception_handler, validation_exception_handler
 
 
 class _FakeRequest:

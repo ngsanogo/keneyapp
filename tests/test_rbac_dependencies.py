@@ -5,13 +5,13 @@ import os
 
 os.environ["TESTING"] = "true"
 
-from fastapi.testclient import TestClient
 from unittest.mock import Mock
 
-from app.main import app
-from app.core.dependencies import require_roles
-from app.models.user import UserRole
+from fastapi.testclient import TestClient
 
+from app.core.dependencies import require_roles
+from app.main import app
+from app.models.user import UserRole
 
 client = TestClient(app)
 

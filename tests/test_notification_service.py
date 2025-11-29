@@ -10,14 +10,15 @@ Tests cover:
 - Multi-channel notifications
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock, call
 from datetime import datetime, timedelta
+from unittest.mock import MagicMock, Mock, call, patch
+
+import pytest
 
 from app.services.notification_service import (
     EmailNotification,
-    SMSNotification,
     NotificationService,
+    SMSNotification,
 )
 
 

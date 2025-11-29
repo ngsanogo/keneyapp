@@ -6,18 +6,18 @@ Covers both router handlers and document_service happy paths using the in-memory
 from __future__ import annotations
 
 import json
+from datetime import date
 from typing import Generator
 
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app
 from app.core.dependencies import get_current_active_user
-from app.models.user import User, UserRole
-from app.models.tenant import Tenant
-from app.models.patient import Patient, Gender
-from datetime import date
+from app.main import app
 from app.models.medical_document import DocumentType
+from app.models.patient import Gender, Patient
+from app.models.tenant import Tenant
+from app.models.user import User, UserRole
 
 
 @pytest.mark.unit

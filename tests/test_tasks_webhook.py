@@ -61,10 +61,9 @@ def test_deliver_subscription_webhook_success(monkeypatch):
 
 
 def test_deliver_subscription_webhook_not_found(monkeypatch):
-    from app import tasks
-
     # No subscription found
     import app.core.database as dbmod
+    from app import tasks
 
     class _DummySessionLocal:
         def __call__(self):

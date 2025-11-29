@@ -2,18 +2,19 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
 import uuid
+from datetime import date, datetime, timezone
 from typing import Dict
+
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.graphql import schema as graphql_schema
-from app.main import app
 from app.core.database import Base
 from app.core.security import create_access_token, get_password_hash
+from app.graphql import schema as graphql_schema
+from app.main import app
 from app.models.appointment import Appointment, AppointmentStatus
 from app.models.patient import Gender, Patient
 from app.models.prescription import Prescription

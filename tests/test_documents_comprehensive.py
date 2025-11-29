@@ -12,13 +12,14 @@ Tests cover:
 - Security and access control
 """
 
-import pytest
-import io
 import hashlib
+import io
 from datetime import datetime
+from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from unittest.mock import patch, MagicMock
 
 
 @pytest.mark.unit

@@ -1,9 +1,11 @@
 """
 Tests for cache service
 """
-import pytest
+
 import time
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from app.services.cache_service import CacheService, cache_service
 
@@ -28,7 +30,7 @@ def cache():
 def test_set_and_get(cache):
     """Test basic set and get operations"""
     cache.set("test:key", "test_value", ttl=60)
-    
+
     value = cache.get("test:key")
     assert value == "test_value"
     assert cache.stats["sets"] == 1
@@ -52,7 +54,7 @@ def test_delete(cache):
     """Test delete operation"""
     cache.set("test:key", "value")
     assert cache.exists("test:key")
-    
+
     cache.delete("test:key")
     assert not cache.exists("test:key")
     assert cache.stats["deletes"] == 1
@@ -61,7 +63,7 @@ def test_delete(cache):
 def test_exists(cache):
     """Test exists check"""
     assert not cache.exists("test:key")
-    
+
     cache.set("test:key", "value")
     assert cache.exists("test:key")
 
@@ -71,11 +73,11 @@ def test_increment(cache):
     # First increment creates the key
     value = cache.increment("counter:key")
     assert value == 1
-    
+
     # Subsequent increments
     value = cache.increment("counter:key")
     assert value == 2
-    
+
     value = cache.increment("counter:key", amount=5)
     assert value == 7
 
@@ -87,15 +89,15 @@ def test_delete_pattern(cache):
     cache.set("users:2:profile", "user2")
     cache.set("users:1:settings", "settings1")
     cache.set("posts:1:data", "post1")
-    
+
     # Delete with pattern
     cache.delete_pattern("users:*")
-    
+
     # Users keys should be deleted
     assert not cache.exists("users:1:profile")
     assert not cache.exists("users:2:profile")
     assert not cache.exists("users:1:settings")
-    
+
     # Posts key should still exist
     assert cache.exists("posts:1:data")
 
@@ -106,11 +108,11 @@ def test_generate_key(cache):
     key = cache.generate_key("users", 123)
     assert "users" in key
     assert "123" in key
-    
+
     # With keyword args
     key = cache.generate_key("search", page=2, limit=50)
     assert "search" in key
-    
+
     # Same args should produce same key
     key1 = cache.generate_key("test", 1, 2, foo="bar")
     key2 = cache.generate_key("test", 1, 2, foo="bar")
@@ -120,23 +122,23 @@ def test_generate_key(cache):
 def test_cached_decorator(cache):
     """Test caching decorator"""
     call_count = 0
-    
+
     @cache.cached(prefix="expensive", ttl=60)
     def expensive_function(x, y):
         nonlocal call_count
         call_count += 1
         return x + y
-    
+
     # First call executes function
     result = expensive_function(2, 3)
     assert result == 5
     assert call_count == 1
-    
+
     # Second call with same args uses cache
     result = expensive_function(2, 3)
     assert result == 5
     assert call_count == 1  # Not called again
-    
+
     # Different args execute function
     result = expensive_function(5, 7)
     assert result == 12
@@ -150,9 +152,9 @@ def test_warm_cache(cache):
         "key2": "value2",
         "key3": "value3",
     }
-    
+
     cache.warm_cache(data, ttl=120)
-    
+
     # All keys should be cached
     assert cache.get("key1") == "value1"
     assert cache.get("key2") == "value2"
@@ -166,9 +168,9 @@ def test_get_stats(cache):
     cache.get("key1")  # Hit
     cache.get("key2")  # Miss
     cache.delete("key1")
-    
+
     stats = cache.get_stats()
-    
+
     assert stats["hits"] == 1
     assert stats["misses"] == 1
     assert stats["sets"] == 1
@@ -181,9 +183,9 @@ def test_clear_all(cache):
     cache.set("key1", "value1")
     cache.set("key2", "value2")
     cache.set("key3", "value3")
-    
+
     cache.clear_all()
-    
+
     assert not cache.exists("key1")
     assert not cache.exists("key2")
     assert not cache.exists("key3")
@@ -192,14 +194,14 @@ def test_clear_all(cache):
 def test_lru_eviction(cache):
     """Test LRU eviction in memory cache"""
     cache.max_memory_items = 5
-    
+
     # Add 10 items
     for i in range(10):
         cache.set(f"key{i}", f"value{i}")
-    
+
     # Memory cache should only have 5 items (most recent)
     assert len(cache._memory_cache) <= 5
-    
+
     # Older items should not be in memory
     assert "key0" not in cache._memory_cache
     assert "key1" not in cache._memory_cache
@@ -212,10 +214,10 @@ def test_complex_objects(cache):
         "dict": {"nested": "value"},
         "tuple": (4, 5, 6),
     }
-    
+
     cache.set("complex:key", complex_obj)
     retrieved = cache.get("complex:key")
-    
+
     assert retrieved == complex_obj
     assert isinstance(retrieved["list"], list)
     assert isinstance(retrieved["dict"], dict)
@@ -226,13 +228,13 @@ def test_ttl_expiration(cache):
     # Note: This test only works for memory cache
     # Redis TTL is handled by Redis server
     cache.set("temp:key", "temp_value", ttl=1)
-    
+
     # Should exist immediately
     assert cache.get("temp:key") == "temp_value"
-    
+
     # Wait for expiration
     time.sleep(1.1)
-    
+
     # Should be expired (in memory cache)
     # Note: Memory cache doesn't automatically expire, but this demonstrates the concept
     # In production, Redis handles TTL automatically
@@ -242,5 +244,5 @@ def test_cache_service_singleton():
     """Test that cache_service is a singleton instance"""
     from app.services.cache_service import cache_service as cs1
     from app.services.cache_service import cache_service as cs2
-    
+
     assert cs1 is cs2

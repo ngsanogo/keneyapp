@@ -4,17 +4,18 @@ Tests for patient service layer.
 Tests business logic and validation independent of HTTP routing.
 """
 
-import pytest
 from datetime import date
 
-from app.services.patient_service import PatientService
-from app.models.patient import Patient
-from app.schemas.patient import PatientCreate, PatientUpdate
+import pytest
+
 from app.exceptions import (
-    PatientNotFoundError,
     DuplicateResourceError,
+    PatientNotFoundError,
     TenantMismatchError,
 )
+from app.models.patient import Patient
+from app.schemas.patient import PatientCreate, PatientUpdate
+from app.services.patient_service import PatientService
 
 
 def test_create_patient_success(db, test_tenant):

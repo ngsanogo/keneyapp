@@ -30,7 +30,9 @@ def test_validate_production_settings_flags_insecure_defaults(monkeypatch):
     monkeypatch.setattr(settings, "SECRET_KEY", "your-secret-key-change-in-production")
     monkeypatch.setattr(settings, "ENABLE_BOOTSTRAP_ADMIN", True)
     monkeypatch.setattr(
-        settings, "DATABASE_URL", "postgresql://keneyapp:keneyapp@localhost:5432/keneyapp"
+        settings,
+        "DATABASE_URL",
+        "postgresql://keneyapp:keneyapp@localhost:5432/keneyapp",
     )
     monkeypatch.setattr(settings, "APP_URL", "http://localhost:8000")
 
@@ -48,12 +50,18 @@ def test_validate_production_settings_flags_insecure_defaults(monkeypatch):
 def test_validate_production_settings_allows_hardened_configuration(monkeypatch):
     monkeypatch.setattr(settings, "ENVIRONMENT", "production")
     monkeypatch.setattr(settings, "DEBUG", False)
-    monkeypatch.setattr(settings, "SECRET_KEY", "sufficiently-long-and-random-secret-key-value")
+    monkeypatch.setattr(
+        settings, "SECRET_KEY", "sufficiently-long-and-random-secret-key-value"
+    )
     monkeypatch.setattr(settings, "ENABLE_BOOTSTRAP_ADMIN", False)
-    monkeypatch.setattr(settings, "DATABASE_URL", "postgresql://prod_user:secret@prod-db:5432/keneyapp")
+    monkeypatch.setattr(
+        settings, "DATABASE_URL", "postgresql://prod_user:secret@prod-db:5432/keneyapp"
+    )
     monkeypatch.setattr(settings, "APP_URL", "https://keneyapp.example.com")
 
     validate_production_settings()
+
+
 import pytest
 
 from app.core.config import Settings
@@ -74,11 +82,19 @@ def test_enforce_production_allows_secure_configuration():
     "kwargs, expected_error",
     [
         (
-            {"ENVIRONMENT": "production", "SECRET_KEY": "your-secret-key-change-in-production", "DEBUG": False},
+            {
+                "ENVIRONMENT": "production",
+                "SECRET_KEY": "your-secret-key-change-in-production",
+                "DEBUG": False,
+            },
             "SECRET_KEY must be overridden in production",
         ),
         (
-            {"ENVIRONMENT": "production", "DEBUG": True, "ALLOWED_ORIGINS": ["https://keneyapp.example"]},
+            {
+                "ENVIRONMENT": "production",
+                "DEBUG": True,
+                "ALLOWED_ORIGINS": ["https://keneyapp.example"],
+            },
             "DEBUG must be False in production",
         ),
         (

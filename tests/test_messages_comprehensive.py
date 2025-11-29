@@ -12,14 +12,15 @@ Tests cover:
 - Security and access control
 """
 
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models.user import User, UserRole
+from app.core.encryption import decrypt_data, encrypt_data
 from app.models.message import Message, MessageStatus
-from app.core.encryption import encrypt_data, decrypt_data
+from app.models.user import User, UserRole
 
 
 @pytest.mark.unit
@@ -200,8 +201,8 @@ class TestMessageReadStatus:
     ):
         """Test that read_at timestamp is set correctly."""
         # Create message in DB
-        from app.models.message import Message
         from app.core.encryption import encrypt_data
+        from app.models.message import Message
 
         message = Message(
             sender_id=1,
@@ -253,8 +254,8 @@ class TestSoftDelete:
 
     def test_soft_delete_does_not_affect_receiver(self, db_session: Session):
         """Test that soft delete by sender doesn't affect receiver."""
-        from app.models.message import Message
         from app.core.encryption import encrypt_data
+        from app.models.message import Message
 
         message = Message(
             sender_id=1,
@@ -310,8 +311,8 @@ class TestMessageSecurity:
 
     def test_message_content_encrypted_in_db(self, db_session: Session):
         """Test that message content is encrypted in database."""
-        from app.models.message import Message
         from app.core.encryption import encrypt_data
+        from app.models.message import Message
 
         original_content = "Contenu sensible médical"
         encrypted = encrypt_data(original_content, context={"type": "message"})

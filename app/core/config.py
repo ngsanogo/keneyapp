@@ -13,7 +13,6 @@ from typing import List, Sequence, Union
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 _TRUTHY = {"1", "true", "yes", "on"}
 _FALSY = {"0", "false", "no", "off"}
 
@@ -95,21 +94,27 @@ class Settings(BaseSettings):
     INS_API_URL: str = ""  # ANS Teleservice INS endpoint
     INS_API_KEY: str = ""  # API key for INS verification
     INS_VALIDATION_ENABLED: bool = False  # Enable INS validation
-    
+
     # Pro Santé Connect (PSC) - French healthcare SSO
     PSC_CLIENT_ID: str = ""
     PSC_CLIENT_SECRET: str = ""
     PSC_AUTHORIZATION_ENDPOINT: str = "https://wallet.esw.esante.gouv.fr/auth"
-    PSC_TOKEN_ENDPOINT: str = "https://auth.esw.esante.gouv.fr/auth/realms/esante-wallet/protocol/openid-connect/token"
-    PSC_USERINFO_ENDPOINT: str = "https://auth.esw.esante.gouv.fr/auth/realms/esante-wallet/protocol/openid-connect/userinfo"
-    PSC_JWKS_URI: str = "https://auth.esw.esante.gouv.fr/auth/realms/esante-wallet/protocol/openid-connect/certs"
+    PSC_TOKEN_ENDPOINT: str = (
+        "https://auth.esw.esante.gouv.fr/auth/realms/esante-wallet/protocol/openid-connect/token"
+    )
+    PSC_USERINFO_ENDPOINT: str = (
+        "https://auth.esw.esante.gouv.fr/auth/realms/esante-wallet/protocol/openid-connect/userinfo"
+    )
+    PSC_JWKS_URI: str = (
+        "https://auth.esw.esante.gouv.fr/auth/realms/esante-wallet/protocol/openid-connect/certs"
+    )
     PSC_SCOPE: str = "openid profile email rpps"  # RPPS = healthcare professional ID
-    
+
     # DMP (Dossier Médical Partagé) Integration
     DMP_API_URL: str = ""  # DMP API endpoint
     DMP_API_KEY: str = ""  # API key for DMP access
     DMP_INTEGRATION_ENABLED: bool = False
-    
+
     # MSSanté (Messagerie Sécurisée de Santé)
     MSSANTE_ENABLED: bool = False
     MSSANTE_SMTP_HOST: str = ""  # MSSanté SMTP gateway

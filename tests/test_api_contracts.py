@@ -10,8 +10,9 @@ backward compatibility. They validate:
 - Data types and formats
 """
 
-import pytest
 import time
+
+import pytest
 from fastapi.testclient import TestClient
 from jsonschema import validate
 

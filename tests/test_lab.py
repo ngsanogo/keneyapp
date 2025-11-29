@@ -5,14 +5,15 @@ Comprehensive tests for lab test catalog, result management, validation,
 state transitions, and RBAC enforcement.
 """
 
-import pytest
 from datetime import datetime
+
+import pytest
 from sqlalchemy.orm import Session
 
-from app.models.lab import LabTestType, LabResult, LabResultState
+from app.models.lab import LabResult, LabResultState, LabTestType
 from app.models.patient import Patient
-from app.models.user import User, UserRole
 from app.models.tenant import Tenant
+from app.models.user import User, UserRole
 from app.schemas.lab import LabTestTypeCreate, LabTestTypeUpdate
 
 

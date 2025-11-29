@@ -2,9 +2,10 @@
 Tests for FHIR converters with medical terminology coding.
 """
 
-import pytest
 from datetime import datetime, timezone
 from unittest.mock import Mock
+
+import pytest
 
 from app.fhir.converters import FHIRConverter
 from app.models.prescription import Prescription

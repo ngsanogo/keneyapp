@@ -107,7 +107,7 @@ def create_patient(
         "patients:detail", current_user.tenant_id, db_patient.id
     )
     cache_service.set(cache_key, serialized_patient, ttl=PATIENT_DETAIL_TTL_SECONDS)
-    
+
     # Invalidate list caches
     cache_service.delete_pattern(f"patients:list:{current_user.tenant_id}:*")
     cache_service.delete_pattern("dashboard:*")
@@ -164,7 +164,7 @@ def get_patients(
         filters.date_from,
         filters.date_to,
     )
-    
+
     # Try cache first
     cached_result = cache_service.get(cache_key)
     if cached_result:
@@ -186,7 +186,7 @@ def get_patients(
         return cached_result
 
     service = PatientService(db)
-    
+
     # Get filtered and sorted patients
     patients, total = service.list_patients_paginated(
         tenant_id=current_user.tenant_id,
@@ -198,10 +198,10 @@ def get_patients(
         date_from=filters.date_from,
         date_to=filters.date_to,
     )
-    
+
     # Serialize patients (decrypt PHI)
     serialized_patients = serialize_patient_collection(patients)
-    
+
     # Create paginated response
     result = PaginatedResponse.create(
         items=serialized_patients,
@@ -209,7 +209,7 @@ def get_patients(
         page=pagination.page,
         page_size=pagination.page_size,
     )
-    
+
     # Cache result
     cache_service.set(cache_key, result, ttl=PATIENT_LIST_TTL_SECONDS)
 
@@ -231,7 +231,7 @@ def get_patients(
     )
 
     patient_operations_total.labels(operation="list").inc()
-    
+
     return result
 
 
@@ -307,9 +307,7 @@ def get_patient(
         request=request,
     )
     serialized_patient = serialize_patient_dict(patient)
-    cache_service.set(
-        cache_key, serialized_patient, ttl=PATIENT_DETAIL_TTL_SECONDS
-    )
+    cache_service.set(cache_key, serialized_patient, ttl=PATIENT_DETAIL_TTL_SECONDS)
     return serialized_patient
 
 

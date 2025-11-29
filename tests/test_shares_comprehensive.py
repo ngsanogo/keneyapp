@@ -12,11 +12,12 @@ Tests cover:
 - Access limits
 """
 
-import pytest
+import secrets
 from datetime import datetime, timedelta
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-import secrets
 
 
 @pytest.mark.unit
@@ -257,8 +258,9 @@ class TestShareExpiration:
         self, client: TestClient, auth_headers: dict, db_session: Session
     ):
         """Test that expired shares cannot be accessed."""
-        from app.models.medical_record_share import MedicalRecordShare
         from datetime import datetime, timedelta
+
+        from app.models.medical_record_share import MedicalRecordShare
 
         # Create an expired share directly in DB
         expired_share = MedicalRecordShare(

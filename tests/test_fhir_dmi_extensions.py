@@ -1,6 +1,7 @@
 """Integration tests for DMI FHIR extensions: Observation, Condition, Procedure endpoints."""
 
-from datetime import datetime, date, timezone
+from datetime import date, datetime, timezone
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -8,13 +9,12 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.database import Base, get_db
+from app.core.security import create_access_token, get_password_hash
 from app.main import app
+from app.models.medical_code import Condition, Observation, Procedure
 from app.models.patient import Patient
 from app.models.tenant import Tenant
 from app.models.user import User, UserRole
-from app.models.medical_code import Observation, Condition, Procedure
-from app.core.security import get_password_hash, create_access_token
-
 
 # Test database
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"

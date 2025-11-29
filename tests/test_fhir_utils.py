@@ -5,7 +5,7 @@ import os
 
 os.environ["TESTING"] = "true"
 
-from app.fhir.utils import operation_outcome, make_search_bundle
+from app.fhir.utils import make_search_bundle, operation_outcome
 
 
 def test_operation_outcome_structure():

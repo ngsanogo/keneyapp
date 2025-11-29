@@ -2,16 +2,18 @@
 Tests for medical code schemas.
 """
 
-import pytest
 from datetime import datetime, timezone
+
+import pytest
+
 from app.schemas.medical_code import (
-    MedicalCodeBase,
-    MedicalCodeCreate,
-    MedicalCodeResponse,
     CodingSchema,
     ConditionBase,
     ConditionCreate,
     ConditionResponse,
+    MedicalCodeBase,
+    MedicalCodeCreate,
+    MedicalCodeResponse,
     ObservationBase,
     ObservationCreate,
     ObservationResponse,

@@ -89,7 +89,7 @@ class PatientService:
             .limit(min(100, max(1, limit)))
             .all()
         )
-    
+
     def list_patients_paginated(
         self,
         tenant_id: int,
@@ -118,7 +118,7 @@ class PatientService:
             Tuple of (list of Patient instances, total count)
         """
         query = self.db.query(Patient).filter(Patient.tenant_id == tenant_id)
-        
+
         # Apply search filter
         if search:
             search_pattern = f"%{search}%"
@@ -130,7 +130,7 @@ class PatientService:
                     Patient.phone.ilike(search_pattern),
                 )
             )
-        
+
         # Apply date filters
         if date_from:
             query = query.filter(Patient.created_at >= date_from)
@@ -138,10 +138,10 @@ class PatientService:
             # Include entire day
             end_of_day = datetime.combine(date_to, datetime.max.time())
             query = query.filter(Patient.created_at <= end_of_day)
-        
+
         # Get total count before pagination
         total = query.count()
-        
+
         # Apply sorting
         if sort_by:
             sort_column = getattr(Patient, sort_by, None)
@@ -153,10 +153,10 @@ class PatientService:
         else:
             # Default sort by created_at descending
             query = query.order_by(Patient.created_at.desc())
-        
+
         # Apply pagination
         patients = query.offset(skip).limit(min(100, max(1, limit))).all()
-        
+
         return patients, total
 
     def count_patients(self, tenant_id: int) -> int:

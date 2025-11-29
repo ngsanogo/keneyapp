@@ -1,12 +1,13 @@
 """Tests for data encryption module."""
 
 import pytest
+
 from app.core.encryption import (
-    encryption,
-    encrypt_sensitive_data,
+    decrypt_patient_data,
     decrypt_sensitive_data,
     encrypt_patient_data,
-    decrypt_patient_data,
+    encrypt_sensitive_data,
+    encryption,
 )
 
 

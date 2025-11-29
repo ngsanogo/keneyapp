@@ -8,8 +8,8 @@ os.environ["TESTING"] = "true"
 import types
 from typing import Any, List
 
-from app.services.subscription_events import _find_matching_subscriptions
 from app.models.subscription import Subscription, SubscriptionStatus
+from app.services.subscription_events import _find_matching_subscriptions
 
 
 class _FakeQuery:

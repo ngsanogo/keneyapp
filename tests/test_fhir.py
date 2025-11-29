@@ -1,18 +1,18 @@
 """Tests for FHIR interoperability."""
 
-from datetime import datetime, date
+from datetime import date, datetime
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.database import Base
-from app.models.patient import Patient
+from app.fhir.converters import fhir_converter
 from app.models.appointment import Appointment, AppointmentStatus
+from app.models.patient import Patient
 from app.models.prescription import Prescription
 from app.models.tenant import Tenant
-from app.fhir.converters import fhir_converter
-
 
 # Create test database
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
