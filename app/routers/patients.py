@@ -6,13 +6,12 @@ HTTP/platform concerns (audit, cache, metrics, FHIR events) in router.
 """
 
 import logging
-from typing import List, Optional
+from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.audit import log_audit_event
-from app.core.cache import cache_clear_pattern, cache_get, cache_set
 from app.core.database import get_db
 from app.core.dependencies import require_roles
 from app.core.metrics import patient_operations_total
@@ -37,11 +36,8 @@ from app.services.subscription_events import publish_event
 
 logger = logging.getLogger(__name__)
 
-PATIENT_LIST_CACHE_PREFIX = "patients:list"
-PATIENT_DETAIL_CACHE_PREFIX = "patients:detail"
 PATIENT_LIST_TTL_SECONDS = 120
 PATIENT_DETAIL_TTL_SECONDS = 300
-DASHBOARD_CACHE_PATTERN = "dashboard:*"
 
 router = APIRouter(prefix="/patients", tags=["patients"])
 
@@ -108,13 +104,14 @@ def create_patient(
     # Cache management
     serialized_patient = serialize_patient_dict(db_patient)
 
-    cache_set(
-        f"{PATIENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{db_patient.id}",
-        serialized_patient,
-        expire=PATIENT_DETAIL_TTL_SECONDS,
+    cache_key = cache_service.generate_key(
+        "patients:detail", current_user.tenant_id, db_patient.id
     )
-    cache_clear_pattern(f"{PATIENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
-    cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
+    cache_service.set(cache_key, serialized_patient, ttl=PATIENT_DETAIL_TTL_SECONDS)
+    
+    # Invalidate list caches
+    cache_service.delete_pattern(f"patients:list:{current_user.tenant_id}:*")
+    cache_service.delete_pattern("dashboard:*")
 
     patient_operations_total.labels(operation="create").inc()
 
@@ -237,50 +234,6 @@ def get_patients(
     patient_operations_total.labels(operation="list").inc()
     
     return result
-        db: Database session
-        current_user: Authenticated user performing the read
-
-    Returns:
-        List of patient records
-    """
-    cache_key = f"{PATIENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:{skip}:{limit}"
-    cached_patients = cache_get(cache_key)
-    if cached_patients is not None:
-        log_audit_event(
-            db=db,
-            action="READ",
-            resource_type="patient",
-            status="success",
-            user_id=current_user.id,
-            username=current_user.username,
-            details={"operation": "list", "skip": skip, "limit": limit, "cached": True},
-            request=request,
-        )
-        return cached_patients
-
-    service = PatientService(db)
-    patients = service.list_patients(current_user.tenant_id, skip=skip, limit=limit)
-    serialized_patients = serialize_patient_collection(patients)
-
-    cache_set(cache_key, serialized_patients, expire=PATIENT_LIST_TTL_SECONDS)
-
-    log_audit_event(
-        db=db,
-        action="READ",
-        resource_type="patient",
-        status="success",
-        user_id=current_user.id,
-        username=current_user.username,
-        details={
-            "operation": "list",
-            "skip": skip,
-            "limit": limit,
-            "cached": False,
-        },
-        request=request,
-    )
-
-    return serialized_patients
 
 
 @router.get("/{patient_id}", response_model=PatientResponse)
@@ -307,8 +260,10 @@ def get_patient(
     Returns:
         Patient record
     """
-    cache_key = f"{PATIENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{patient_id}"
-    cached_patient = cache_get(cache_key)
+    cache_key = cache_service.generate_key(
+        "patients:detail", current_user.tenant_id, patient_id
+    )
+    cached_patient = cache_service.get(cache_key)
     if cached_patient is not None:
         log_audit_event(
             db=db,
@@ -353,7 +308,9 @@ def get_patient(
         request=request,
     )
     serialized_patient = serialize_patient_dict(patient)
-    cache_set(cache_key, serialized_patient, expire=PATIENT_DETAIL_TTL_SECONDS)
+    cache_service.set(
+        cache_key, serialized_patient, ttl=PATIENT_DETAIL_TTL_SECONDS
+    )
     return serialized_patient
 
 
@@ -432,13 +389,12 @@ def update_patient(
     )
 
     serialized_patient = serialize_patient_dict(patient)
-    cache_set(
-        f"{PATIENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{patient.id}",
-        serialized_patient,
-        expire=PATIENT_DETAIL_TTL_SECONDS,
+    cache_key = cache_service.generate_key(
+        "patients:detail", current_user.tenant_id, patient.id
     )
-    cache_clear_pattern(f"{PATIENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
-    cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
+    cache_service.set(cache_key, serialized_patient, ttl=PATIENT_DETAIL_TTL_SECONDS)
+    cache_service.delete_pattern(f"patients:list:{current_user.tenant_id}:*")
+    cache_service.delete_pattern("dashboard:*")
 
     patient_operations_total.labels(operation="update").inc()
 
@@ -500,10 +456,12 @@ def delete_patient(
         request=request,
     )
 
-    cache_clear_pattern(f"{PATIENT_LIST_CACHE_PREFIX}:{current_user.tenant_id}:*")
-    cache_clear_pattern(DASHBOARD_CACHE_PATTERN)
-    cache_clear_pattern(
-        f"{PATIENT_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{patient_id}"
+    cache_service.delete_pattern(f"patients:list:{current_user.tenant_id}:*")
+    cache_service.delete_pattern("dashboard:*")
+    cache_service.delete(
+        cache_service.generate_key(
+            "patients:detail", current_user.tenant_id, patient_id
+        )
     )
 
     patient_operations_total.labels(operation="delete").inc()

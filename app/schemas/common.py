@@ -4,7 +4,6 @@ Provides consistent response formats across all endpoints
 """
 from datetime import datetime
 from typing import Any, Dict, Generic, List, Optional, TypeVar
-from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -15,7 +14,9 @@ T = TypeVar("T")
 class PaginationParams(BaseModel):
     """Standard pagination parameters"""
     page: int = Field(1, ge=1, description="Page number (1-indexed)")
-    page_size: int = Field(20, ge=1, le=100, description="Items per page")
+    page_size: int = Field(
+        50, ge=1, le=100, description="Items per page"
+    )
     
     @property
     def skip(self) -> int:
@@ -30,14 +31,22 @@ class PaginationParams(BaseModel):
 
 class SortParams(BaseModel):
     """Standard sorting parameters"""
-    sort_by: Optional[str] = Field(None, description="Field to sort by")
-    sort_order: str = Field("asc", pattern="^(asc|desc)$", description="Sort order")
+    sort_by: Optional[str] = Field(
+        None, pattern="^[a-zA-Z_][a-zA-Z0-9_]*$", description="Field to sort by"
+    )
+    sort_order: str = Field(
+        "asc", pattern="^(asc|desc)$", description="Sort order"
+    )
 
 
 class FilterParams(BaseModel):
     """Base filter parameters"""
-    search: Optional[str] = Field(None, min_length=1, max_length=200, description="Search query")
-    date_from: Optional[datetime] = Field(None, description="Filter from date")
+    search: Optional[str] = Field(
+        None, min_length=1, max_length=200, description="Search query"
+    )
+    date_from: Optional[datetime] = Field(
+        None, description="Filter from date"
+    )
     date_to: Optional[datetime] = Field(None, description="Filter to date")
     
     @field_validator("date_to")
@@ -115,7 +124,7 @@ class HealthCheckResponse(BaseModel):
 
 class BulkOperationRequest(BaseModel):
     """Request for bulk operations"""
-    ids: List[UUID] = Field(..., min_length=1, max_length=100)
+    ids: List[int] = Field(..., min_length=1, max_length=100)
     action: str = Field(..., min_length=1, max_length=50)
     params: Optional[Dict[str, Any]] = None
 
@@ -125,15 +134,20 @@ class BulkOperationResponse(BaseModel):
     success_count: int = Field(..., ge=0)
     failure_count: int = Field(..., ge=0)
     total: int = Field(..., ge=0)
-    errors: List[ErrorDetail] = Field(default_factory=list)
+    errors: List[Dict[str, Any]] = Field(default_factory=list)
     
     @classmethod
-    def create(cls, successes: int, failures: int, errors: List[ErrorDetail] = None):
+    def create(
+        cls,
+        success_count: int,
+        errors: Optional[List[Dict[str, Any]]] = None
+    ) -> "BulkOperationResponse":
         """Factory method"""
+        failure_count = len(errors) if errors else 0
         return cls(
-            success_count=successes,
-            failure_count=failures,
-            total=successes + failures,
+            success_count=success_count,
+            failure_count=failure_count,
+            total=success_count + failure_count,
             errors=errors or []
         )
 
@@ -163,16 +177,15 @@ class ImportResponse(BaseModel):
 class AuditInfo(BaseModel):
     """Audit information for entities"""
     created_at: datetime
-    created_by: Optional[UUID] = None
+    created_by: Optional[int] = None
     updated_at: Optional[datetime] = None
-    updated_by: Optional[UUID] = None
+    updated_by: Optional[int] = None
     version: int = 1
 
 
 class BaseEntityResponse(BaseModel):
     """Base response schema for entities with audit info"""
-    id: UUID
+    id: int
     audit: AuditInfo
     
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}

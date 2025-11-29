@@ -77,7 +77,11 @@ class ConnectionManager:
         
         self.stats["total_connections"] += 1
         
-        logger.info(f"WebSocket connected: user={user_id}, total_connections={len(self.get_all_connections())}")
+        total_conns = len(self.get_all_connections())
+        logger.info(
+            f"WebSocket connected: user={user_id}, "
+            f"total_connections={total_conns}"
+        )
     
     def disconnect(self, websocket: WebSocket, user_id: str):
         """
@@ -110,7 +114,11 @@ class ConnectionManager:
         if conn_id in self.connection_metadata:
             del self.connection_metadata[conn_id]
         
-        logger.info(f"WebSocket disconnected: user={user_id}, remaining_connections={len(self.get_all_connections())}")
+        remaining_conns = len(self.get_all_connections())
+        logger.info(
+            f"WebSocket disconnected: user={user_id}, "
+            f"remaining_connections={remaining_conns}"
+        )
     
     async def send_personal_message(
         self,
@@ -303,7 +311,9 @@ class ConnectionManager:
                         else:
                             dead_connections.append(connection)
                     except Exception as e:
-                        logger.error(f"Error sending to room {room_id}, user {user_id}: {e}")
+                        logger.error(
+                            f"Error sending to room {room_id}, user {user_id}: {e}"
+                        )
                         dead_connections.append(connection)
                 
                 for conn in dead_connections:
@@ -327,10 +337,13 @@ class ConnectionManager:
     
     def get_stats(self) -> Dict:
         """Get connection statistics"""
+        total_websockets = sum(
+            len(conns) for conns in self.active_connections.values()
+        )
         return {
             **self.stats,
             "active_users": len(self.active_connections),
-            "total_websockets": sum(len(conns) for conns in self.active_connections.values()),
+            "total_websockets": total_websockets,
             "active_rooms": len(self.rooms)
         }
 
