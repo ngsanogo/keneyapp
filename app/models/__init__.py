@@ -4,7 +4,13 @@ Database models for KeneyApp.
 
 from app.models.appointment import Appointment
 from app.models.lab import LabResult, LabTestCriterion, LabTestType
-from app.models.medical_code import CodeSystem, Condition, MedicalCode, Observation, Procedure
+from app.models.medical_code import (
+    CodeSystem,
+    Condition,
+    MedicalCode,
+    Observation,
+    Procedure,
+)
 from app.models.medical_document import MedicalDocument
 from app.models.medical_record_share import MedicalRecordShare
 from app.models.message import Message

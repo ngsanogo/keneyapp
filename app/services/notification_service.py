@@ -167,9 +167,7 @@ class NotificationService:
         L'équipe KeneyApp
         """
 
-        sms_body = (
-            f"Vos résultats pour {test_name} sont disponibles. Consultez votre compte KeneyApp."
-        )
+        sms_body = f"Vos résultats pour {test_name} sont disponibles. Consultez votre compte KeneyApp."
 
         results = {
             "email": EmailNotification.send_email(patient_email, subject, email_body),

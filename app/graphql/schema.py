@@ -30,7 +30,10 @@ from app.models.appointment import Appointment, AppointmentStatus
 from app.models.patient import Gender, Patient
 from app.models.prescription import Prescription
 from app.models.user import User, UserRole
-from app.services.patient_security import encrypt_patient_payload, serialize_patient_model
+from app.services.patient_security import (
+    encrypt_patient_payload,
+    serialize_patient_model,
+)
 
 # GraphQL enums that mirror core application enums
 GenderEnum = strawberry.enum(Gender, name="Gender")
@@ -349,7 +352,9 @@ class Query:
         limit = max(1, min(limit, 100))
 
         with get_session(info) as session:
-            query = session.query(Patient).filter(Patient.tenant_id == info.context.user.tenant_id)
+            query = session.query(Patient).filter(
+                Patient.tenant_id == info.context.user.tenant_id
+            )
 
             if search:
                 term = f"%{search.strip()}%"
@@ -507,7 +512,9 @@ class Query:
                 .all()
             )
 
-            return [to_prescription_type(prescription) for prescription in prescriptions]
+            return [
+                to_prescription_type(prescription) for prescription in prescriptions
+            ]
 
     @strawberry.field
     def prescription(
@@ -566,8 +573,12 @@ class Query:
             ) or 0
 
             today = datetime.now(timezone.utc).date()
-            today_start = datetime.combine(today, datetime.min.time(), tzinfo=timezone.utc)
-            today_end = datetime.combine(today, datetime.max.time(), tzinfo=timezone.utc)
+            today_start = datetime.combine(
+                today, datetime.min.time(), tzinfo=timezone.utc
+            )
+            today_end = datetime.combine(
+                today, datetime.max.time(), tzinfo=timezone.utc
+            )
 
             today_appointments = (
                 session.query(func.count(Appointment.id))

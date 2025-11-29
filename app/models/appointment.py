@@ -44,7 +44,9 @@ class Appointment(Base):
     )
     reason = Column(String, nullable=False)
     notes = Column(Text)
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
