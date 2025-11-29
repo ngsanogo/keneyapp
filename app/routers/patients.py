@@ -6,9 +6,9 @@ HTTP/platform concerns (audit, cache, metrics, FHIR events) in router.
 """
 
 import logging
-from typing import List
+from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.audit import log_audit_event
@@ -20,7 +20,14 @@ from app.core.rate_limit import limiter
 from app.exceptions import DuplicateResourceError, PatientNotFoundError
 from app.fhir.converters import fhir_converter
 from app.models.user import User, UserRole
+from app.schemas.common import (
+    FilterParams,
+    PaginatedResponse,
+    PaginationParams,
+    SortParams,
+)
 from app.schemas.patient import PatientCreate, PatientResponse, PatientUpdate
+from app.services.cache_service import cache_service
 from app.services.patient_security import (
     serialize_patient_collection,
     serialize_patient_dict,
@@ -121,12 +128,13 @@ def create_patient(
     return serialized_patient
 
 
-@router.get("/", response_model=List[PatientResponse])
-@limiter.limit("60/minute")
+@router.get("/", response_model=PaginatedResponse[PatientResponse])
+@limiter.limit("100/minute")
 def get_patients(
     request: Request,
-    skip: int = 0,
-    limit: int = 100,
+    pagination: PaginationParams = Depends(),
+    sort: SortParams = Depends(),
+    filters: FilterParams = Depends(),
     db: Session = Depends(get_db),
     current_user: User = Depends(
         require_roles(
@@ -135,12 +143,100 @@ def get_patients(
     ),
 ):
     """
-    Retrieve a list of patients with pagination.
+    Retrieve a list of patients with pagination, sorting, and filtering.
 
     Args:
         request: Incoming request for auditing
-        skip: Number of records to skip
-        limit: Maximum number of records to return
+        pagination: Pagination parameters (page, page_size)
+        sort: Sorting parameters (sort_by, sort_order)
+        filters: Filter parameters (search, date_from, date_to)
+        db: Database session
+        current_user: Authenticated user performing the read
+
+    Returns:
+        Paginated list of patient records
+    """
+    # Generate cache key including all parameters
+    cache_key = cache_service.generate_key(
+        "patients:list",
+        current_user.tenant_id,
+        pagination.page,
+        pagination.page_size,
+        sort.sort_by,
+        sort.sort_order,
+        filters.search,
+        filters.date_from,
+        filters.date_to,
+    )
+    
+    # Try cache first
+    cached_result = cache_service.get(cache_key)
+    if cached_result:
+        log_audit_event(
+            db=db,
+            action="READ",
+            resource_type="patient",
+            status="success",
+            user_id=current_user.id,
+            username=current_user.username,
+            details={
+                "operation": "list",
+                "page": pagination.page,
+                "page_size": pagination.page_size,
+                "cached": True,
+            },
+            request=request,
+        )
+        return cached_result
+
+    service = PatientService(db)
+    
+    # Get filtered and sorted patients
+    patients, total = service.list_patients_paginated(
+        tenant_id=current_user.tenant_id,
+        skip=pagination.skip,
+        limit=pagination.limit,
+        search=filters.search,
+        sort_by=sort.sort_by,
+        sort_order=sort.sort_order,
+        date_from=filters.date_from,
+        date_to=filters.date_to,
+    )
+    
+    # Serialize patients (decrypt PHI)
+    serialized_patients = serialize_patient_collection(patients)
+    
+    # Create paginated response
+    result = PaginatedResponse.create(
+        items=serialized_patients,
+        total=total,
+        page=pagination.page,
+        page_size=pagination.page_size,
+    )
+    
+    # Cache result
+    cache_service.set(cache_key, result, ttl=PATIENT_LIST_TTL_SECONDS)
+
+    log_audit_event(
+        db=db,
+        action="READ",
+        resource_type="patient",
+        status="success",
+        user_id=current_user.id,
+        username=current_user.username,
+        details={
+            "operation": "list",
+            "page": pagination.page,
+            "page_size": pagination.page_size,
+            "total": total,
+            "cached": False,
+        },
+        request=request,
+    )
+
+    patient_operations_total.labels(operation="list").inc()
+    
+    return result
         db: Database session
         current_user: Authenticated user performing the read
 

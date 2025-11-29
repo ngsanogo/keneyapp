@@ -5,9 +5,10 @@ Separates business rules from HTTP routing layer for better testability
 and maintainability. Follows patterns from GNU Health and ERPNext.
 """
 
-from typing import List, Optional
+from datetime import date, datetime
+from typing import List, Optional, Tuple
 
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.exceptions import (
@@ -88,6 +89,75 @@ class PatientService:
             .limit(min(100, max(1, limit)))
             .all()
         )
+    
+    def list_patients_paginated(
+        self,
+        tenant_id: int,
+        skip: int = 0,
+        limit: int = 100,
+        search: Optional[str] = None,
+        sort_by: Optional[str] = None,
+        sort_order: str = "asc",
+        date_from: Optional[date] = None,
+        date_to: Optional[date] = None,
+    ) -> Tuple[List[Patient], int]:
+        """
+        List patients with pagination, filtering, and sorting.
+
+        Args:
+            tenant_id: Tenant ID for isolation
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            search: Search term (searches first_name, last_name, email, phone)
+            sort_by: Field to sort by
+            sort_order: Sort order ('asc' or 'desc')
+            date_from: Filter patients created after this date
+            date_to: Filter patients created before this date
+
+        Returns:
+            Tuple of (list of Patient instances, total count)
+        """
+        query = self.db.query(Patient).filter(Patient.tenant_id == tenant_id)
+        
+        # Apply search filter
+        if search:
+            search_pattern = f"%{search}%"
+            query = query.filter(
+                or_(
+                    Patient.first_name.ilike(search_pattern),
+                    Patient.last_name.ilike(search_pattern),
+                    Patient.email.ilike(search_pattern),
+                    Patient.phone.ilike(search_pattern),
+                )
+            )
+        
+        # Apply date filters
+        if date_from:
+            query = query.filter(Patient.created_at >= date_from)
+        if date_to:
+            # Include entire day
+            end_of_day = datetime.combine(date_to, datetime.max.time())
+            query = query.filter(Patient.created_at <= end_of_day)
+        
+        # Get total count before pagination
+        total = query.count()
+        
+        # Apply sorting
+        if sort_by:
+            sort_column = getattr(Patient, sort_by, None)
+            if sort_column is not None:
+                if sort_order == "desc":
+                    query = query.order_by(sort_column.desc())
+                else:
+                    query = query.order_by(sort_column.asc())
+        else:
+            # Default sort by created_at descending
+            query = query.order_by(Patient.created_at.desc())
+        
+        # Apply pagination
+        patients = query.offset(skip).limit(min(100, max(1, limit))).all()
+        
+        return patients, total
 
     def count_patients(self, tenant_id: int) -> int:
         """

@@ -30,6 +30,7 @@ from app.core.metrics import metrics_endpoint
 from app.core.middleware import MetricsMiddleware, SecurityHeadersMiddleware
 from app.core.rate_limit import limiter
 from app.core.tracing import instrument_app, setup_tracing
+from app.core.validation import RequestValidationMiddleware
 from app.fhir.utils import operation_outcome
 from app.graphql.schema import create_graphql_router
 from app.routers import (
@@ -49,6 +50,7 @@ from app.routers import (
     tenants,
     terminology,
     users,
+    websocket,
 )
 
 
@@ -103,6 +105,7 @@ instrument_app(app)
 app.add_middleware(CorrelationIdMiddleware)
 app.add_middleware(MetricsMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RequestValidationMiddleware, max_request_size=10 * 1024 * 1024)  # 10 MB
 
 if str(settings.ENVIRONMENT).lower() == "production":
     app.add_middleware(HTTPSRedirectMiddleware)
@@ -133,6 +136,9 @@ app.include_router(terminology.router, prefix=settings.API_V1_PREFIX)
 app.include_router(subscriptions.router, prefix=settings.API_V1_PREFIX)
 app.include_router(lab.router, prefix=settings.API_V1_PREFIX)
 app.include_router(french_healthcare.router, prefix=settings.API_V1_PREFIX)
+
+# Include WebSocket router (no prefix, handles /ws endpoints)
+app.include_router(websocket.router)
 
 # Include GraphQL router
 graphql_router = create_graphql_router()
