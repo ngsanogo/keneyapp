@@ -1,421 +1,607 @@
-# New Enterprise Features - KeneyApp v2.0
+# Nouvelles Fonctionnalités KeneyApp v3.0
 
-## Overview
+## Vue d'ensemble
 
-This document outlines the major enterprise features added to KeneyApp to transform it into a world-class, secure, and scalable healthcare management platform.
-
-## 🔐 OAuth2/OIDC Authentication
-
-### Features
-
-- **Multiple Providers**: Google, Microsoft (Azure AD), and Okta support
-- **Single Sign-On**: Seamless SSO integration for enterprise environments
-- **Auto-Registration**: Automatic user creation on first OAuth login
-- **CSRF Protection**: State parameter for security
-- **Audit Logging**: All OAuth events tracked
-
-### Benefits
-
-- Reduced password management overhead
-- Enterprise identity integration
-- Improved security with provider-managed credentials
-- Better user experience with SSO
-
-### Documentation
-
-See [OAuth Guide](./OAUTH_GUIDE.md) for detailed implementation
+Ce document détaille les nouvelles fonctionnalités implémentées pour transformer KeneyApp en une plateforme complète de dossier médical électronique (DME) conforme aux standards internationaux.
 
 ---
 
-## 🔒 Data Encryption at Rest
+## 1. 💬 Messagerie Sécurisée Patient-Médecin
 
-### Features
+### Description
 
-- **AES-256-GCM Encryption**: Industry-standard encryption algorithm
-- **Automatic Field Encryption**: Sensitive patient data automatically encrypted
-- **Authenticated Encryption**: Prevents tampering and ensures integrity
-- **Key Derivation**: PBKDF2 with 100,000 iterations
-- **Selective Encryption**: Only sensitive fields encrypted
+Système de messagerie chiffrée E2E permettant une communication sécurisée entre patients et professionnels de santé.
 
-### Encrypted Fields
+### Fonctionnalités
 
-- Medical history
-- Allergies
-- Emergency contact information
-- Patient addresses
-- Custom sensitive fields
+- **Chiffrement AES-256-GCM** : Tous les messages sont chiffrés au repos
+- **Conversations threadées** : Regroupement automatique des messages par conversation
+- **Statuts de lecture** : Suivi des messages lus/non lus
+- **Messages urgents** : Marquage prioritaire pour les cas urgents
+- **Pièces jointes** : Support pour joindre des documents médicaux
+- **Soft delete** : Suppression côté utilisateur sans perte de données
 
-### Benefits
+### API Endpoints
 
-- HIPAA compliance for data at rest
-- GDPR compliance for data protection
-- Protection against database breaches
-- Secure data deletion (crypto-shredding)
+```
+POST   /api/v1/messages/                    # Envoyer un message
+GET    /api/v1/messages/                    # Liste des messages (inbox + envoyés)
+GET    /api/v1/messages/stats               # Statistiques messagerie
+GET    /api/v1/messages/conversation/{id}   # Conversation avec un utilisateur
+GET    /api/v1/messages/{id}                # Détails d'un message
+POST   /api/v1/messages/{id}/read           # Marquer comme lu
+DELETE /api/v1/messages/{id}                # Supprimer un message
+```
 
-### Documentation
+### Modèle de données
 
-See [Encryption Guide](./ENCRYPTION_GUIDE.md) for detailed implementation
+```sql
+TABLE messages (
+  id, sender_id, receiver_id, encrypted_content,
+  subject, status (sent/delivered/read/failed),
+  is_urgent, attachment_ids, thread_id, reply_to_id,
+  tenant_id, created_at, read_at, deleted_by_sender, deleted_by_receiver
+)
+```
+
+### Sécurité
+
+- ✅ Chiffrement des messages avec contexte tenant
+- ✅ Validation RBAC (tous les rôles peuvent envoyer/recevoir)
+- ✅ Rate limiting : 30 envois/min, 60 lectures/min
+- ✅ Audit logging de tous les envois et lectures
+- ✅ Pas de PHI dans les logs
+
+### Migration
+
+```bash
+alembic upgrade head  # Applique 010_add_messages
+```
 
 ---
 
-## 🌐 GraphQL API
+## 2. 📄 Upload et Gestion de Documents Médicaux
 
-### Features
+### Description
 
-- **Modern Query Language**: Flexible data fetching
-- **Strawberry Framework**: Type-safe GraphQL implementation
-- **Interactive Playground**: Built-in GraphQL IDE
-- **Introspection**: Self-documenting API
-- **Parallel REST**: GraphQL alongside existing REST API
+Système complet de gestion documentaire pour stocker analyses, imagerie, ordonnances, vaccins, etc.
 
-### Available Types
+### Formats supportés
 
-- UserType
-- PatientType
-- AppointmentType
-- PrescriptionType
+- **PDF** : Comptes-rendus, ordonnances
+- **Images** : JPEG, PNG (radios, photos)
+- **DICOM** : Imagerie médicale standard
+- **Office** : DOCX, TXT
 
-### Benefits
+### Types de documents
 
-- Efficient data fetching (no over/under-fetching)
-- Single endpoint for complex queries
-- Strong typing and validation
-- Better developer experience
-- Reduced network overhead
+- `lab_result` : Résultats d'analyses
+- `imaging` : Imagerie médicale (X-ray, CT, MRI)
+- `prescription` : Ordonnances
+- `consultation_note` : Comptes-rendus
+- `vaccination_record` : Carnets de vaccination
+- `insurance` : Documents d'assurance
+- `id_document` : Pièces d'identité
+- `other` : Autres
 
-### Example Query
+### Fonctionnalités
 
-```graphql
-query {
-  hello
-  apiVersion
+- **Upload sécurisé** : Limite 50 MB, validation MIME
+- **Détection de doublons** : Checksum SHA-256
+- **Stockage local ou S3** : Configurable via env vars
+- **Métadonnées enrichies** : Description, tags, associations
+- **OCR ready** : Champ pour texte extrait (futur)
+- **Soft delete** : Archivage sans suppression physique
+
+### API Endpoints
+
+```
+POST   /api/v1/documents/upload             # Upload document
+GET    /api/v1/documents/patient/{id}       # Documents d'un patient
+GET    /api/v1/documents/stats               # Statistiques stockage
+GET    /api/v1/documents/{id}                # Détails document
+GET    /api/v1/documents/{id}/download       # Télécharger fichier
+PATCH  /api/v1/documents/{id}                # Mettre à jour métadonnées
+DELETE /api/v1/documents/{id}                # Supprimer document
+```
+
+### Modèle de données
+
+```sql
+TABLE medical_documents (
+  id, filename, original_filename,
+  document_type, document_format, mime_type, file_size,
+  storage_path, storage_type, checksum,
+  status (uploading/processing/ready/failed/archived),
+  processing_error, ocr_text, extracted_metadata,
+  patient_id, uploaded_by_id, appointment_id, prescription_id,
+  description, tags, is_sensitive, encryption_key_id,
+  tenant_id, created_at, updated_at, deleted_at
+)
+```
+
+### Configuration
+
+```env
+DOCUMENTS_UPLOAD_DIR=./uploads/medical_documents  # Local storage path
+MAX_DOCUMENT_SIZE=52428800                        # 50 MB in bytes
+```
+
+### Sécurité
+
+- ✅ Validation MIME type stricte
+- ✅ Limite de taille fichier
+- ✅ Checksum pour intégrité
+- ✅ Détection doublons
+- ✅ PHI marqué par défaut
+- ✅ Audit logging téléchargements
+- ✅ Rate limiting : 20 uploads/min, 30 downloads/min
+
+### Migration
+
+```bash
+alembic upgrade head  # Applique 011_add_medical_documents
+```
+
+---
+
+## 3. 🔔 Système d'Alertes et Rappels Automatiques
+
+### Description
+
+Notifications automatiques multi-canal (email, SMS) pour rappels et alertes importantes.
+
+### Types de notifications
+
+#### 📅 Rappels de rendez-vous
+
+- Envoyés 24h avant le rendez-vous
+- Email + SMS (si numéro fourni)
+- Tâche Celery : `send_upcoming_appointment_reminders` (daily)
+
+#### 🧪 Résultats d'analyses disponibles
+
+- Notification immédiate après upload
+- Tâche Celery : `send_lab_results_notifications`
+- Déclenchée manuellement après upload document
+
+#### 💊 Renouvellement d'ordonnances
+
+- Rappel 7 jours avant expiration
+- Email + SMS
+- Tâche Celery : `send_prescription_renewal_reminders` (daily)
+
+#### 💉 Rappels de vaccination
+
+- Configurable par vaccin
+- Tâche Celery : `send_vaccination_reminder`
+
+#### 💬 Nouveaux messages
+
+- Notification immédiate
+- Tâche Celery : `send_new_message_notification`
+- Déclenchée après création message
+
+### Service de notifications
+
+**Module**: `app/services/notification_service.py`
+
+Classes:
+
+- `EmailNotification` : SMTP (Gmail, SendGrid, SES)
+- `SMSNotification` : Twilio, AWS SNS
+- `NotificationService` : Orchestrateur unifié
+
+### Configuration
+
+```env
+# Email
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_FROM=noreply@keneyapp.com
+
+# SMS via Twilio
+SMS_PROVIDER=twilio
+TWILIO_ACCOUNT_SID=ACxxxxx
+TWILIO_AUTH_TOKEN=your-token
+TWILIO_FROM_NUMBER=+1234567890
+```
+
+### Tâches Celery
+
+```python
+# Dans app/tasks.py
+send_upcoming_appointment_reminders()      # Daily at 8 AM
+send_lab_results_notifications(doc_id, patient_id)  # On-demand
+send_prescription_renewal_reminders()      # Daily at 9 AM
+send_new_message_notification(msg_id, receiver_id)  # On-demand
+```
+
+### Planification Celery Beat
+
+Ajouter dans configuration Celery Beat :
+
+```python
+from celery.schedules import crontab
+
+beat_schedule = {
+    'appointment-reminders-daily': {
+        'task': 'send_upcoming_appointment_reminders',
+        'schedule': crontab(hour=8, minute=0),  # 8 AM daily
+    },
+    'prescription-reminders-daily': {
+        'task': 'send_prescription_renewal_reminders',
+        'schedule': crontab(hour=9, minute=0),  # 9 AM daily
+    },
 }
 ```
 
-### Access
+### Sécurité
 
-- **Endpoint**: `/graphql`
-- **Playground**: `/graphql` (browser)
+- ✅ Pas de PHI dans les logs
+- ✅ Emails avec opt-out (futur)
+- ✅ RGPD compliant
+- ✅ Rate limiting providers
 
----
-
-## 🏥 FHIR Interoperability
-
-### Features
-
-- **FHIR R4 Compliance**: Full HL7 FHIR version 4.0.1 support
-- **Bidirectional Conversion**: KeneyApp ↔ FHIR resource conversion
-- **Standard Resources**: Patient, Appointment, MedicationRequest
-- **Capability Statement**: Server metadata endpoint
-- **RESTful FHIR API**: Standard FHIR REST interactions
-
-### Supported Operations
-
-- **Patient**: Read, Create
-- **Appointment**: Read
-- **MedicationRequest**: Read
-
-### Benefits
-
-- Healthcare system interoperability
-- Standards-based data exchange
-- Integration with EHR systems
-- Regulatory compliance
-- Data portability
-
-### Example Usage
-
-```http
-GET /api/v1/fhir/Patient/123
-GET /api/v1/fhir/metadata
-```
-
-### Documentation
-
-See [FHIR Guide](./FHIR_GUIDE.md) for detailed implementation
-
----
-
-## ☁️ Cloud Deployment with Terraform
-
-### Features
-
-- **Multi-Cloud Support**: AWS, Azure, GCP configurations
-- **Infrastructure as Code**: Reproducible deployments
-- **Production-Ready**: High availability and auto-scaling
-- **Managed Services**: RDS, ElastiCache, managed Kubernetes
-
-### AWS Resources
-
-- **EKS** (Kubernetes cluster)
-- **RDS PostgreSQL** (managed database)
-- **ElastiCache Redis** (managed cache)
-- **Application Load Balancer**
-- **ECR** (container registry)
-- **VPC** with public/private subnets
-- **CloudWatch** (logging and monitoring)
-
-### Auto-Scaling
-
-- **Horizontal Pod Autoscaler**: 3-10 replicas
-- **CPU-based scaling**: 70% threshold
-- **Memory-based scaling**: 80% threshold
-
-### Benefits
-
-- One-command infrastructure provisioning
-- Consistent environments (dev/staging/prod)
-- Cost optimization
-- Disaster recovery
-- Compliance-ready architecture
-
-### Quick Start
+### Dépendances
 
 ```bash
-cd terraform/aws
-terraform init
-terraform plan
-terraform apply
+pip install twilio==9.3.7
 ```
-
-### Documentation
-
-See [Terraform README](../terraform/README.md)
 
 ---
 
-## 📊 Enhanced Testing
+## 4. 🔗 Partage Contrôlé du Dossier Médical
 
-### New Test Suites
+### Description
 
-#### Encryption Tests (9 tests)
+Système de partage temporaire et sécurisé des dossiers médicaux via tokens et liens.
 
-- Basic encryption/decryption
-- Unicode support
-- Patient data encryption
-- Field-level encryption
-- Error handling
+### Fonctionnalités
 
-#### FHIR Tests (5 tests)
+- **Tokens temporaires** : Validité 1h à 30 jours
+- **Protection PIN optionnelle** : Code à 6 chiffres
+- **Limitation d'accès** : Nombre maximum d'accès configurable
+- **Restriction email** : Limite l'accès à un email spécifique
+- **Scopes personnalisables** :
+  - `full_record` : Dossier complet
+  - `appointments_only` : Rendez-vous uniquement
+  - `prescriptions_only` : Ordonnances uniquement
+  - `documents_only` : Documents uniquement
+  - `custom` : Sélection personnalisée
 
-- Patient conversion
-- Appointment conversion
-- Prescription conversion
-- Bidirectional mapping
-- Status mapping
+### Cas d'usage
 
-#### GraphQL Tests (4 tests)
+1. **Consultation externe** : Patient partage son dossier avec un nouveau médecin
+2. **Urgences** : Accès rapide aux données critiques (allergies, traitements)
+3. **Assurance** : Partage de documents spécifiques pour remboursement
+4. **Famille** : Partage avec proche pour suivi médical
 
-- Endpoint accessibility
-- Query execution
-- Error handling
-- Introspection
+### API Endpoints
 
-### Test Coverage
+```
+POST   /api/v1/shares/                      # Créer un partage
+GET    /api/v1/shares/                      # Liste des partages créés
+POST   /api/v1/shares/access                # Accéder via token (public)
+GET    /api/v1/shares/{id}                  # Détails d'un partage
+DELETE /api/v1/shares/{id}                  # Révoquer un partage
+```
 
-- **Total Tests**: 30
-- **Passing**: 25
-- **Coverage**: Core features 100%
+### Modèle de données
 
-### Running Tests
+```sql
+TABLE medical_record_shares (
+  id, patient_id, shared_by_user_id,
+  share_token (secure random), scope,
+  custom_resources, recipient_email, recipient_name,
+  access_pin, status (active/expired/revoked/used),
+  expires_at, access_count, max_access_count,
+  last_accessed_at, last_accessed_ip,
+  purpose, notes, consent_given, consent_date,
+  tenant_id, created_at, updated_at, revoked_at, revoked_by_user_id
+)
+```
+
+### Exemple d'utilisation
+
+**1. Créer un partage**
+
+```json
+POST /api/v1/shares/
+{
+  "patient_id": 123,
+  "scope": "full_record",
+  "recipient_email": "dr.external@hospital.com",
+  "recipient_name": "Dr. Martin",
+  "expires_in_hours": 48,
+  "max_access_count": 3,
+  "require_pin": true,
+  "purpose": "Consultation spécialisée"
+}
+
+Response:
+{
+  "id": 1,
+  "share_token": "xYz123AbC...",
+  "access_pin": "845621",
+  "expires_at": "2025-11-04T10:00:00Z",
+  ...
+}
+```
+
+**2. Accéder au dossier partagé** (sans authentification)
+
+```json
+POST /api/v1/shares/access
+{
+  "token": "xYz123AbC...",
+  "pin": "845621"
+}
+
+Response:
+{
+  "patient": {
+    "first_name": "Jean",
+    "last_name": "Dupont",
+    "date_of_birth": "1980-05-15",
+    "blood_type": "A+",
+    "allergies": "Pénicilline"
+  },
+  "appointments": [...],
+  "prescriptions": [...],
+  "documents": [...],
+  "medical_history": "...",
+  "scope": "full_record",
+  "accessed_at": "2025-11-02T15:30:00Z"
+}
+```
+
+### Sécurité
+
+- ✅ Tokens sécurisés (secrets.token_urlsafe)
+- ✅ PINs aléatoires 6 chiffres
+- ✅ Expiration automatique
+- ✅ Révocation manuelle
+- ✅ Audit logging de tous les accès
+- ✅ Tracking IP
+- ✅ Rate limiting : 10 créations/h, 20 accès/h
+- ✅ Consentement patient requis
+
+### Migration
 
 ```bash
-# All tests
-pytest tests/
-
-# Specific test suite
-pytest tests/test_encryption.py
-pytest tests/test_fhir.py
-pytest tests/test_graphql.py
-
-# With coverage
-pytest --cov=app tests/
+alembic upgrade head  # Applique 012_add_medical_record_shares
 ```
 
 ---
 
-## 📚 Comprehensive Documentation
+## 5. 📊 Statistiques et Tableaux de Bord Professionnels (À venir)
 
-### New Documentation Files
+### Description
 
-1. **OAuth Guide** - OAuth2/OIDC integration guide
-2. **Encryption Guide** - Data encryption implementation
-3. **FHIR Guide** - FHIR interoperability guide
-4. **Terraform README** - Infrastructure deployment
-5. **New Features** - This document
+Analytics avancés pour le suivi des patients chroniques et KPIs médicaux.
 
-### Updated Documentation
+### Fonctionnalités prévues
 
-- Main README with new features
-- Architecture documentation
-- API documentation (auto-generated)
+- Suivi patients chroniques
+- Alertes pathologies
+- Graphiques tendances
+- Exports rapports PDF/Excel
+- Tableaux de bord personnalisables
 
 ---
 
-## 🔧 Updated Dependencies
+## 6. 💳 Intégration Paiement en Ligne (À venir)
 
-### New Python Packages
+### Description
 
+Module de paiement pour téléconsultations.
+
+### Fonctionnalités prévues
+
+- Intégration Stripe/PayPal
+- Gestion transactions
+- Facturation automatique
+- Remboursements
+
+---
+
+## 7. 📹 Module Téléconsultation (À venir)
+
+### Description
+
+Visioconférence intégrée pour consultations à distance.
+
+### Fonctionnalités prévues
+
+- WebRTC ou Twilio Video
+- Salles d'attente virtuelles
+- Enregistrement consultations (avec consentement)
+- Chat vidéo sécurisé
+
+---
+
+## Installation et Configuration
+
+### 1. Installer les dépendances
+
+```bash
+pip install -r requirements.txt
 ```
-authlib==1.3.0                    # OAuth2/OIDC
-itsdangerous==2.1.2              # Session security
-strawberry-graphql[fastapi]==0.235.2  # GraphQL
-fhir.resources==7.1.0            # FHIR resources
-pycryptodome==3.20.0             # Encryption
+
+### 2. Appliquer les migrations
+
+```bash
+alembic upgrade head
 ```
 
-### Why These Libraries?
+### 3. Configurer les variables d'environnement
 
-- **authlib**: Industry-standard OAuth implementation
-- **strawberry-graphql**: Modern, type-safe GraphQL for Python
-- **fhir.resources**: Official FHIR resource models
-- **pycryptodome**: Robust cryptographic library
+```bash
+# Créer .env avec les configs SMTP, Twilio, etc.
+cp .env.example .env
+nano .env
+```
 
----
+### 4. Redémarrer les services
 
-## 🚀 Performance & Scalability
+```bash
+# Backend
+uvicorn app.main:app --reload
 
-### Improvements
+# Celery worker
+celery -A app.core.celery_app worker --loglevel=info
 
-- **Caching**: Redis for frequently accessed data
-- **Background Tasks**: Celery for async operations
-- **Auto-Scaling**: Kubernetes HPA for traffic spikes
-- **Load Balancing**: ALB/nginx for traffic distribution
-
-### Metrics
-
-- **API Response**: < 200ms (95th percentile)
-- **Throughput**: 10,000+ concurrent users
-- **Uptime**: 99.9% SLA
-- **Scalability**: Horizontal scaling 3-10 replicas
+# Celery beat (scheduler)
+celery -A app.core.celery_app beat --loglevel=info
+```
 
 ---
 
-## 🔐 Security Enhancements
+## Tests
 
-### Additional Security
+### Tests unitaires
 
-- **Encryption at Rest**: AES-256-GCM for sensitive data
-- **OAuth Security**: Industry-standard authentication
-- **Rate Limiting**: Protection against abuse
-- **Audit Logging**: Comprehensive activity tracking
-- **Security Headers**: XSS, CSRF, CSP protection
-- **TLS/SSL**: Encrypted data in transit
+```bash
+# Tester messagerie
+pytest tests/test_messages.py -v
 
-### Compliance
+# Tester documents
+pytest tests/test_documents.py -v
 
-- ✅ **HIPAA**: Encryption, access controls, audit logs
-- ✅ **GDPR**: Data protection, right to erasure, pseudonymization
-- ✅ **SOC 2**: Security controls and monitoring
+# Tester partages
+pytest tests/test_shares.py -v
 
----
+# Tester notifications
+pytest tests/test_notifications.py -v
+```
 
-## 📈 Enterprise Features
+### Tests d'intégration
 
-### Production-Ready
-
-- ✅ Multi-cloud deployment
-- ✅ High availability
-- ✅ Auto-scaling
-- ✅ Disaster recovery
-- ✅ Monitoring and alerting
-- ✅ Backup and restore
-- ✅ Security hardening
-
-### Integration Capabilities
-
-- ✅ OAuth2/OIDC SSO
-- ✅ FHIR interoperability
-- ✅ GraphQL API
-- ✅ REST API
-- ✅ Webhook support (existing)
-- ✅ Prometheus metrics
+```bash
+# Full suite
+pytest tests/ -v --cov=app
+```
 
 ---
 
-## 🎯 Use Cases
+## Conformité et Sécurité
 
-### 1. Enterprise Healthcare Organization
+### RGPD
 
-- **Problem**: Need SSO integration with Azure AD
-- **Solution**: OAuth2/OIDC with Microsoft provider
-- **Benefit**: Centralized identity management
+- ✅ Droit d'accès (partages avec tokens)
+- ✅ Droit à l'effacement (soft deletes)
+- ✅ Portabilité (exports futurs)
+- ✅ Consentement explicite (partages)
+- ✅ Audit complet
 
-### 2. Multi-Facility Hospital System
+### HIPAA
 
-- **Problem**: Data sharing between facilities
-- **Solution**: FHIR interoperability for standard data exchange
-- **Benefit**: Seamless patient data portability
+- ✅ Chiffrement au repos (AES-256)
+- ✅ Chiffrement en transit (TLS)
+- ✅ Contrôle d'accès (RBAC)
+- ✅ Audit trail complet
+- ✅ Authentification forte
 
-### 3. Privacy-Conscious Clinic
+### HDS (France)
 
-- **Problem**: HIPAA-compliant data storage
-- **Solution**: Encryption at rest for all sensitive data
-- **Benefit**: Protected patient information
-
-### 4. Growing Healthcare Startup
-
-- **Problem**: Unpredictable traffic patterns
-- **Solution**: Kubernetes auto-scaling
-- **Benefit**: Handle traffic spikes automatically
-
-### 5. Developer Integration
-
-- **Problem**: Complex data fetching requirements
-- **Solution**: GraphQL API for flexible queries
-- **Benefit**: Reduced API calls, better performance
+- ✅ Hébergement sécurisé
+- ✅ Traçabilité accès
+- ✅ Chiffrement données santé
+- ✅ Gestion consentements
 
 ---
 
-## 🔮 Future Roadmap
+## Métriques et Monitoring
 
-### Phase 2 (Planned)
+### Nouvelles métriques Prometheus
 
-- ✅ OAuth2/OIDC (Completed)
-- ✅ Data encryption (Completed)
-- ✅ GraphQL API (Completed)
-- ✅ FHIR interoperability (Completed)
-- 🔄 Redux Toolkit frontend state management
-- 🔄 React Hook Form + Zod validation
-- 🔄 Storybook component documentation
+```python
+# Messages
+messages_sent_total
+messages_read_total
+messages_urgent_total
 
-### Phase 3 (Future)
+# Documents
+documents_uploaded_total
+documents_downloaded_total
+documents_total_size_bytes
 
-- TimescaleDB for time-series data
-- Terraform for Azure and GCP
-- Cypress E2E tests
-- Mobile app support
-- Advanced analytics
-- AI-powered diagnostics
+# Partages
+shares_created_total
+shares_accessed_total
+shares_revoked_total
 
----
+# Notifications
+notifications_sent_total{type="email"}
+notifications_sent_total{type="sms"}
+notifications_failed_total
+```
 
-## 📞 Support
+### Logs structurés
 
-### Getting Help
+Tous les événements sont loggés en JSON pour analyse:
 
-- **Documentation**: Check the docs/ folder
-- **Issues**: GitHub Issues for bug reports
-- **Email**: <support@isdataconsulting.com>
-- **Enterprise Support**: Available for production deployments
-
-### Contributing
-
-We welcome contributions! See CONTRIBUTING.md for guidelines.
-
----
-
-## 📄 License
-
-Proprietary software owned by ISDATA Consulting.
-See LICENSE file for details.
+```json
+{
+  "event": "document_uploaded",
+  "user_id": 123,
+  "patient_id": 456,
+  "document_type": "lab_result",
+  "file_size": 2048576,
+  "timestamp": "2025-11-02T10:30:00Z"
+}
+```
 
 ---
 
-## 🎉 Conclusion
+## Support et Documentation
 
-KeneyApp v2.0 represents a significant leap forward in healthcare management technology. With enterprise-grade features including OAuth2/OIDC authentication, data encryption at rest, GraphQL API, FHIR interoperability, and cloud-native deployment capabilities, KeneyApp is now ready for deployment in large-scale healthcare environments.
+### Documentation API
 
-**Version**: 2.0.0
-**Release Date**: January 2025
-**Status**: Production-Ready
+- Swagger UI : `http://localhost:8000/api/v1/docs`
+- ReDoc : `http://localhost:8000/api/v1/redoc`
+
+### Guides
+
+- [Guide développeur](DEVELOPMENT.md)
+- [Guide déploiement](DEPLOYMENT.md)
+- [Guide sécurité](SECURITY.md)
+
+### Contact
+
+📧 <contact@isdataconsulting.com>
+
+---
+
+## Roadmap
+
+### Q1 2026
+
+- ✅ Messagerie sécurisée
+- ✅ Upload documents
+- ✅ Notifications automatiques
+- ✅ Partage dossiers
+
+### Q2 2026
+
+- 📊 Statistiques avancées
+- 💳 Paiements en ligne
+- 📹 Téléconsultation
+- 📱 Application mobile React Native
+
+### Q3 2026
+
+- 🤖 IA pour analyse prédictive
+- 🌍 Multi-langue
+- 📊 Business Intelligence
+- 🔐 Blockchain pour traçabilité
+
+---
+
+**Version**: 3.0.0
+**Date**: 2 novembre 2025
+**Auteur**: ISDATA Consulting
+**License**: Proprietary

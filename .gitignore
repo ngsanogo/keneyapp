@@ -238,14 +238,50 @@ yarn-error.log*
 *_COMPLETE.md
 ITERATION_*.md
 BACKLOG.md
-tmp
+tmp/
+temp/
+.tmp/
 
 # Local runtime artifacts
 logs/
 uploads/*
 !uploads/.gitkeep
-!uploads/
 !uploads/README.md
 
-# Exception: Keep the comprehensive repository analysis report
-!REPOSITORY_ANALYSIS_REPORT.md
+# Test artifacts
+.pytest_cache/
+test-results/
+playwright-report/
+test-output/
+
+# IDE and Editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker volumes data
+postgres_data/
+redis_data/
+
+# Secrets and credentials
+*.pem
+*.key
+!terraform/**/*.key
+*.crt
+*.cer
+credentials.json
+service-account.json
