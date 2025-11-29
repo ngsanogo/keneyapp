@@ -330,7 +330,7 @@ Les INS générés sont volontairement invalides.
 
 Pour questions sur cette documentation :
 
-- **Email** : <issasanogo2000@gmail.com>
+- **Email** : <ngsanogo@prooton.me>
 - **GitHub Issues** : [Créer une issue](https://github.com/ngsanogo/keneyapp/issues)
 
 ---

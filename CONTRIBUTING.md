@@ -432,7 +432,7 @@ Describe the tests you added or ran
 - **Validate all user inputs**
 - Follow **OWASP** security best practices
 - Run `npm audit` and `pip-audit` regularly
-- Report security vulnerabilities privately to <issasanogo2000@gmail.com>
+- Report security vulnerabilities privately to <ngsanogo@prooton.me>
 
 ## 📚 Additional Resources
 
@@ -449,7 +449,7 @@ If you have questions or need help:
 1. Check existing [documentation](docs/)
 2. Search [existing issues](https://github.com/ngsanogo/keneyapp/issues)
 3. Create a new issue with the `question` label
-4. Contact: <issasanogo2000@gmail.com>
+4. Contact: <ngsanogo@prooton.me>
 
 ## 🎉 Thank You
 

@@ -572,7 +572,7 @@ Tous les événements sont loggés en JSON pour analyse:
 
 ### Contact
 
-📧 <issasanogo2000@gmail.com>
+📧 <ngsanogo@prooton.me>
 
 ---
 

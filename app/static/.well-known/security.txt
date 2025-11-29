@@ -1,5 +1,5 @@
-Contact: mailto:issasanogo2000@gmail.com
-Contact: mailto:issasanogo2000@gmail.com
+Contact: mailto:ngsanogo@prooton.me
+Contact: mailto:ngsanogo@prooton.me
 Expires: 2025-12-31T23:59:59.000Z
 Preferred-Languages: en, fr
 Canonical: https://keneyapp.com/.well-known/security.txt
@@ -12,7 +12,7 @@ seriously and appreciate your efforts to disclose vulnerabilities responsibly.
 ## Reporting a Vulnerability
 
 If you believe you have found a security vulnerability in KeneyApp, please
-send an email to issasanogo2000@gmail.com with:
+send an email to ngsanogo@prooton.me with:
 
 1. Description of the vulnerability
 2. Steps to reproduce the issue

@@ -308,3 +308,156 @@ class PatientService:
             .limit(min(100, max(1, limit)))
             .all()
         )
+
+    def list_patients_advanced(
+        self,
+        tenant_id: int,
+        search: Optional[str] = None,
+        gender: Optional[str] = None,
+        min_age: Optional[int] = None,
+        max_age: Optional[int] = None,
+        date_of_birth_from: Optional[date] = None,
+        date_of_birth_to: Optional[date] = None,
+        city: Optional[str] = None,
+        country: Optional[str] = None,
+        has_allergies: Optional[bool] = None,
+        has_medical_history: Optional[bool] = None,
+        created_from: Optional[datetime] = None,
+        created_to: Optional[datetime] = None,
+        updated_from: Optional[datetime] = None,
+        updated_to: Optional[datetime] = None,
+        sort_by: str = "created_at",
+        sort_order: str = "desc",
+        skip: int = 0,
+        limit: int = 50,
+    ) -> Tuple[List[Patient], int]:
+        """
+        Advanced patient search with multiple filter criteria.
+
+        Args:
+            tenant_id: Tenant ID for isolation
+            search: Text search across name, email, phone, address
+            gender: Filter by gender
+            min_age: Minimum age filter
+            max_age: Maximum age filter
+            date_of_birth_from: DOB range start
+            date_of_birth_to: DOB range end
+            city: Filter by city
+            country: Filter by country
+            has_allergies: Filter patients with/without allergies
+            has_medical_history: Filter patients with/without medical history
+            created_from: Record creation date start
+            created_to: Record creation date end
+            updated_from: Record update date start
+            updated_to: Record update date end
+            sort_by: Field to sort by
+            sort_order: Sort order (asc/desc)
+            skip: Pagination offset
+            limit: Max results
+
+        Returns:
+            Tuple of (list of Patient instances, total count)
+        """
+        query = self.db.query(Patient).filter(Patient.tenant_id == tenant_id)
+
+        # Text search across multiple fields
+        if search:
+            search_pattern = f"%{search}%"
+            query = query.filter(
+                or_(
+                    Patient.first_name.ilike(search_pattern),
+                    Patient.last_name.ilike(search_pattern),
+                    Patient.email.ilike(search_pattern),
+                    Patient.phone.ilike(search_pattern),
+                    Patient.address.ilike(search_pattern),
+                )
+            )
+
+        # Gender filter
+        if gender and gender != "all":
+            query = query.filter(Patient.gender == gender)
+
+        # Age filters (calculated from date of birth)
+        if min_age is not None or max_age is not None:
+            today = date.today()
+            if max_age is not None:
+                min_dob = date(today.year - max_age - 1, today.month, today.day)
+                query = query.filter(Patient.date_of_birth >= min_dob)
+            if min_age is not None:
+                max_dob = date(today.year - min_age, today.month, today.day)
+                query = query.filter(Patient.date_of_birth <= max_dob)
+
+        # Date of birth range
+        if date_of_birth_from:
+            query = query.filter(Patient.date_of_birth >= date_of_birth_from)
+        if date_of_birth_to:
+            query = query.filter(Patient.date_of_birth <= date_of_birth_to)
+
+        # Location filters (note: address field stores full address, may need parsing)
+        if city:
+            city_pattern = f"%{city}%"
+            query = query.filter(Patient.address.ilike(city_pattern))
+        if country:
+            country_pattern = f"%{country}%"
+            query = query.filter(Patient.address.ilike(country_pattern))
+
+        # Medical history flags
+        if has_allergies is not None:
+            if has_allergies:
+                query = query.filter(Patient.allergies.isnot(None))
+                query = query.filter(Patient.allergies != "")
+            else:
+                query = query.filter(
+                    or_(Patient.allergies.is_(None), Patient.allergies == "")
+                )
+
+        if has_medical_history is not None:
+            if has_medical_history:
+                query = query.filter(Patient.medical_history.isnot(None))
+                query = query.filter(Patient.medical_history != "")
+            else:
+                query = query.filter(
+                    or_(
+                        Patient.medical_history.is_(None),
+                        Patient.medical_history == "",
+                    )
+                )
+
+        # Date range filters for created_at
+        if created_from:
+            query = query.filter(Patient.created_at >= created_from)
+        if created_to:
+            end_of_day = datetime.combine(
+                created_to.date() if isinstance(created_to, datetime) else created_to,
+                datetime.max.time(),
+            )
+            query = query.filter(Patient.created_at <= end_of_day)
+
+        # Date range filters for updated_at
+        if updated_from:
+            query = query.filter(Patient.updated_at >= updated_from)
+        if updated_to:
+            end_of_day = datetime.combine(
+                updated_to.date() if isinstance(updated_to, datetime) else updated_to,
+                datetime.max.time(),
+            )
+            query = query.filter(Patient.updated_at <= end_of_day)
+
+        # Get total count before pagination
+        total = query.count()
+
+        # Apply sorting
+        sort_column = getattr(Patient, sort_by, None)
+        if sort_column is not None:
+            if sort_order == "desc":
+                query = query.order_by(sort_column.desc())
+            else:
+                query = query.order_by(sort_column.asc())
+        else:
+            query = query.order_by(Patient.created_at.desc())
+
+        # Apply pagination
+        patients = query.offset(skip).limit(min(200, max(1, limit))).all()
+
+        return patients, total
+

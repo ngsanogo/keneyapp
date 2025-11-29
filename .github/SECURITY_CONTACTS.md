@@ -4,20 +4,20 @@ For security-related issues, please contact:
 
 ## Primary Contact
 
-- **Email**: <issasanogo2000@gmail.com>
+- **Email**: <ngsanogo@prooton.me>
 - **Response Time**: Within 48 hours
 
 ## Security Team
 
 - Issa Sanogo Security Team
-- Contact via: <issasanogo2000@gmail.com>
+- Contact via: <ngsanogo@prooton.me>
 
 ## PGP Key
 
 For encrypted communications (recommended for sensitive security reports):
 
 ```
-Contact us at issasanogo2000@gmail.com to obtain our PGP public key.
+Contact us at ngsanogo@prooton.me to obtain our PGP public key.
 ```
 
 ## Security Reporting Guidelines

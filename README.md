@@ -801,12 +801,12 @@ A comprehensive analysis of this repository is available in [REPOSITORY_ANALYSIS
 KeneyApp is proprietary software owned by **Issa Sanogo**.
 Unauthorized copying, modification, or distribution of this software is prohibited.
 
-For licensing or partnership inquiries, please contact: **<issasanogo2000@gmail.com>**
+For licensing or partnership inquiries, please contact: **<ngsanogo@prooton.me>**
 
 ## 📞 Support
 
 For technical support or questions, please contact:
-📧 **<issasanogo2000@gmail.com>**
+📧 **<ngsanogo@prooton.me>**
 
 ---
 

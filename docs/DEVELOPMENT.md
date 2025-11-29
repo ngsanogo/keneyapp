@@ -603,4 +603,4 @@ make db-reset     # Reset database
 - Check the [README](../README.md) for basic information
 - Read [CONTRIBUTING.md](../CONTRIBUTING.md) for contribution guidelines
 - Create an issue on GitHub
-- Contact: <issasanogo2000@gmail.com>
+- Contact: <ngsanogo@prooton.me>

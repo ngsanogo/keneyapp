@@ -502,7 +502,7 @@ Tests end-to-end avec Cypress ou Playwright.
 
 Pour toute question sur ce plan d'actions :
 
-- 📧 Email : <issasanogo2000@gmail.com>
+- 📧 Email : <ngsanogo@prooton.me>
 - 📖 Documentation : `docs/`
 - 🐛 Issues : GitHub Issues
 

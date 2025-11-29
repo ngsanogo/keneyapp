@@ -390,7 +390,7 @@ tests/models/test_french_healthcare.py
 ## 📞 Support
 
 ### Development Team
-- **Email**: issasanogo2000@gmail.com
+- **Email**: ngsanogo@prooton.me
 - **Documentation**: `docs/FRENCH_HEALTHCARE_INTEGRATION.md`
 - **GitHub Issues**: Tag with `french-healthcare` label
 

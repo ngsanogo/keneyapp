@@ -1000,7 +1000,7 @@ L'équipe KeneyApp a construit une base exceptionnelle pour un système de sant�
 
 **Date de l'audit** : 10 novembre 2025
 **Prochaine revue recommandée** : 10 février 2026 (post-implémentation actions prioritaires)
-**Contact** : <issasanogo2000@gmail.com>
+**Contact** : <ngsanogo@prooton.me>
 
 ---
 

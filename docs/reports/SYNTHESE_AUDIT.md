@@ -331,7 +331,7 @@ L'ancien rapport CODE_QUALITY_AUDIT.md mentionnait PyCrypto comme vulnérabilit�
 
 Pour questions sur cet audit :
 
-- 📧 **Email** : <issasanogo2000@gmail.com>
+- 📧 **Email** : <ngsanogo@prooton.me>
 - 📖 **Documentation** : `docs/` directory
 - 🐛 **Issues** : GitHub Issues
 

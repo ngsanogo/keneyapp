@@ -365,4 +365,4 @@ Planned improvements:
 
 ## Support
 
-For encryption-related questions: <issasanogo2000@gmail.com>
+For encryption-related questions: <ngsanogo@prooton.me>

@@ -890,4 +890,4 @@ def test_fhir_patient_endpoint():
 
 ## Support
 
-For FHIR integration support: <issasanogo2000@gmail.com>
+For FHIR integration support: <ngsanogo@prooton.me>

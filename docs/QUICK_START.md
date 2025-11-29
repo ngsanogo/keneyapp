@@ -440,7 +440,7 @@ SMSNotification.send_sms('+33612345678', 'Test message')
 
 ### Support
 
-📧 <issasanogo2000@gmail.com>
+📧 <ngsanogo@prooton.me>
 
 ---
 

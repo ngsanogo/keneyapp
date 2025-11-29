@@ -311,4 +311,4 @@ Proprietary - Issa Sanogo
 
 ## Support
 
-For questions or issues, contact: <issasanogo2000@gmail.com>
+For questions or issues, contact: <ngsanogo@prooton.me>

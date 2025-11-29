@@ -8,7 +8,7 @@ This document outlines the governance structure and decision-making processes fo
 
 - **Owner**: Issa Sanogo
 - **License**: Proprietary (See [LICENSE](LICENSE))
-- **Contact**: <issasanogo2000@gmail.com>
+- **Contact**: <ngsanogo@prooton.me>
 
 ## Project Structure
 
@@ -165,7 +165,7 @@ We use GitHub labels to categorize issues:
 - **GitHub Issues**: Bug reports, feature requests
 - **GitHub Discussions**: Questions, general discussions
 - **Pull Requests**: Code review, technical discussions
-- **Email**: <issasanogo2000@gmail.com> (business inquiries)
+- **Email**: <ngsanogo@prooton.me> (business inquiries)
 
 ### Response Times
 

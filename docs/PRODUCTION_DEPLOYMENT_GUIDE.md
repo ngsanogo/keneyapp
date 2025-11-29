@@ -483,7 +483,7 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: issasanogo2000@gmail.com
+    email: ngsanogo@prooton.me
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
@@ -686,7 +686,7 @@ kubectl rollout status deployment/backend -n keneyapp
 
 For deployment assistance:
 
-- Email: <issasanogo2000@gmail.com>
+- Email: <ngsanogo@prooton.me>
 - Documentation: <https://github.com/ngsanogo/keneyapp/tree/main/docs>
 
 ---

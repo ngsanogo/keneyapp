@@ -307,7 +307,7 @@ If you encounter issues not covered here:
 
 1. Check the [CONTRIBUTING.md](../../CONTRIBUTING.md) for development guidelines
 2. Review the [CI/CD configuration](../../.github/workflows/ci.yml) for the exact build steps used
-3. Contact support: <issasanogo2000@gmail.com>
+3. Contact support: <ngsanogo@prooton.me>
 
 ## CI/CD Integration
 
@@ -372,4 +372,4 @@ After building:
 
 ---
 
-**Questions or Issues?** Contact: <issasanogo2000@gmail.com>
+**Questions or Issues?** Contact: <ngsanogo@prooton.me>

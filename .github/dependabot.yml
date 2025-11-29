@@ -11,8 +11,6 @@ updates:
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 5
-    reviewers:
-      - "ngsanogo"
     labels:
       - "dependencies"
       - "python"
@@ -34,8 +32,6 @@ updates:
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 5
-    reviewers:
-      - "ngsanogo"
     labels:
       - "dependencies"
       - "javascript"
@@ -58,8 +54,6 @@ updates:
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 3
-    reviewers:
-      - "ngsanogo"
     labels:
       - "dependencies"
       - "github-actions"
@@ -75,8 +69,6 @@ updates:
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 3
-    reviewers:
-      - "ngsanogo"
     labels:
       - "dependencies"
       - "docker"

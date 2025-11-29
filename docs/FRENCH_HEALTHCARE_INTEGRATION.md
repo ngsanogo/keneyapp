@@ -597,7 +597,7 @@ Fournisseurs HDS certifiés:
 
 ### Support KeneyApp
 
-- **Email**: issasanogo2000@gmail.com
+- **Email**: ngsanogo@prooton.me
 - **Documentation**: https://github.com/ngsanogo/keneyapp/docs
 - **Issues**: https://github.com/ngsanogo/keneyapp/issues
 

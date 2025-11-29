@@ -527,22 +527,22 @@ docker save ngsanogo/keneyapp-backend:current | \
 **Primary On-Call**
 
 - Phone: [Primary On-Call Number]
-- Email: <issasanogo2000@gmail.com>
+- Email: <ngsanogo@prooton.me>
 - Slack: #incident-response
 
 **Technical Lead**
 
-- Email: <issasanogo2000@gmail.com>
+- Email: <ngsanogo@prooton.me>
 - Phone: [Technical Lead Number]
 
 **Database Administrator**
 
-- Email: <issasanogo2000@gmail.com>
+- Email: <ngsanogo@prooton.me>
 - Phone: [DBA Number]
 
 **DevOps Lead**
 
-- Email: <issasanogo2000@gmail.com>
+- Email: <ngsanogo@prooton.me>
 - Phone: [DevOps Number]
 
 ### External Vendors

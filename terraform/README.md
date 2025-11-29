@@ -148,4 +148,4 @@ terraform destroy
 
 ## Support
 
-For issues or questions, contact: <issasanogo2000@gmail.com>
+For issues or questions, contact: <ngsanogo@prooton.me>

@@ -334,8 +334,8 @@ http://grafana.yourdomain.com
 global:
   resolve_timeout: 5m
   smtp_smarthost: 'smtp.gmail.com:587'
-  smtp_from: 'issasanogo2000@gmail.com'
-  smtp_auth_username: 'issasanogo2000@gmail.com'
+  smtp_from: 'ngsanogo@prooton.me'
+  smtp_auth_username: 'ngsanogo@prooton.me'
   smtp_auth_password: '<password>'
 
 route:
@@ -390,7 +390,7 @@ receivers:
 
   - name: 'email-ops'
     email_configs:
-      - to: 'issasanogo2000@gmail.com'
+      - to: 'ngsanogo@prooton.me'
         headers:
           subject: 'KeneyApp Alert: {{ .CommonAnnotations.summary }}'
         html: |
@@ -635,7 +635,7 @@ rate(redis_keyspace_hits_total[5m]) /
 For monitoring questions:
 
 - Slack: #monitoring
-- Email: <issasanogo2000@gmail.com>
+- Email: <ngsanogo@prooton.me>
 
 ---
 

@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "Proprietary"}
 authors = [
-    {name = "Issa Sanogo", email = "issasanogo2000@gmail.com"}
+    {name = "Issa Sanogo", email = "ngsanogo@prooton.me"}
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
