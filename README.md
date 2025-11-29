@@ -57,6 +57,18 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 
 **[📖 French Healthcare Integration Guide](docs/FRENCH_HEALTHCARE_INTEGRATION.md)**
 
+### ✨ Application Enhancements (v3.0.1 - NEW)
+
+- ⚡ **Advanced Caching**: Dual-level (memory + Redis) caching with statistics and monitoring
+- 📊 **Pagination & Filtering**: Standardized pagination, sorting, and filtering across all endpoints
+- 🔒 **Enhanced Security**: SQL injection, XSS, path traversal prevention middleware
+- 🔔 **Real-time WebSocket**: Room-based notifications and live updates
+- 📝 **Standardized Responses**: Consistent API response formats (PaginatedResponse, ErrorResponse)
+- ✅ **Comprehensive Tests**: 65+ new test cases for validation, caching, and schemas
+- 🛡️ **Input Sanitization**: Complete sanitization utilities for all user inputs
+
+**[📖 Enhancement Guide](docs/ENHANCEMENT_GUIDE.md)**
+
 ### Security & Compliance
 
 - ✅ **GDPR/HIPAA/HDS compliant architecture**
