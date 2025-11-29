@@ -248,6 +248,7 @@ keneyapp/
 ## 🚀 Quick Start
 
 > **📖 For complete build instructions**, see [BUILD.md](BUILD.md)
+> **🔧 For pre-commit setup**, see [Pre-commit Guide](docs/PRE_COMMIT_GUIDE.md)
 
 ### Option 1: Docker Compose (Recommended)
 
@@ -258,14 +259,25 @@ keneyapp/
    cd keneyapp
    ```
 
-2. **Start all services**
+2. **Set up pre-commit hooks** (auto-format & lint on every commit)
+
+   ```bash
+   # Windows
+   .\scripts\setup_pre_commit.ps1
+   
+   # Linux/macOS
+   chmod +x scripts/setup_pre_commit.sh
+   ./scripts/setup_pre_commit.sh
+   ```
+
+3. **Start all services**
 
    ```bash
    ./scripts/start_stack.sh
    # add --logs to follow container output, or --down to stop everything
    ```
 
-3. **Access the application**
+4. **Access the application**
    - Frontend: <http://localhost:3000>
    - Backend API: <http://localhost:8000>
    - API Documentation: <http://localhost:8000/api/v1/docs>

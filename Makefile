@@ -1,7 +1,7 @@
 # Makefile for KeneyApp Development
 # This file provides convenient shortcuts for common development tasks
 
-.PHONY: help install install-dev install-hooks format lint test test-cov clean setup dev build docker-up docker-down
+.PHONY: help install install-dev install-hooks setup-pre-commit format format-check lint lint-fix test test-cov clean setup dev build docker-up docker-down
 
 # Default target
 help:
@@ -12,12 +12,15 @@ help:
 	@echo "  make install          Install all dependencies (backend + frontend)"
 	@echo "  make install-dev      Install development dependencies"
 	@echo "  make install-hooks    Install pre-commit hooks"
+	@echo "  make setup-pre-commit Full pre-commit setup with verification"
 	@echo "  make setup           Full setup: install deps + hooks + db"
 	@echo ""
 	@echo "Development Commands:"
 	@echo "  make dev             Start development servers (backend + frontend)"
-	@echo "  make format          Format all code (Black + Prettier)"
+	@echo "  make format          Auto-format all code (Black + Prettier)"
+	@echo "  make format-check    Check formatting without changes"
 	@echo "  make lint            Run all linters"
+	@echo "  make lint-fix        Run linters with auto-fix"
 	@echo "  make test            Run all tests"
 	@echo "  make test-cov        Run tests with coverage"
 	@echo ""
@@ -63,10 +66,16 @@ install-dev:
 install-hooks:
 	@echo "Installing pre-commit hooks..."
 	pre-commit install
+	pre-commit install --hook-type commit-msg
 	@echo "✅ Pre-commit hooks installed!"
 
+setup-pre-commit:
+	@echo "🔧 Setting up pre-commit hooks..."
+	@powershell -ExecutionPolicy Bypass -File ./scripts/setup_pre_commit.ps1 || bash ./scripts/setup_pre_commit.sh
+	@echo "✅ Pre-commit setup complete!"
+
 # Setup target
-setup: install install-dev install-hooks
+setup: install install-dev setup-pre-commit
 	@echo "Running initial setup..."
 	cp .env.example .env || true
 	@echo "⚠️  Please configure your .env file with appropriate values"
@@ -74,22 +83,25 @@ setup: install install-dev install-hooks
 
 # Code formatting
 format:
-	@echo "Formatting backend code with Black..."
-	black app tests
-	@echo "Formatting frontend code with Prettier..."
-	cd frontend && npm run format
+	@echo "🎨 Auto-formatting all code..."
+	@powershell -ExecutionPolicy Bypass -File ./scripts/format_all.ps1 || bash ./scripts/format_all.sh
 	@echo "✅ Code formatting complete!"
+
+format-check:
+	@echo "🔍 Checking code formatting..."
+	@powershell -ExecutionPolicy Bypass -File ./scripts/format_all.ps1 -Check || bash ./scripts/format_all.sh --check
+	@echo "✅ Format check complete!"
 
 # Linting
 lint:
-	@echo "Running backend linters..."
-	flake8 app tests
-	black --check app tests
-	mypy app || true
-	@echo "Running frontend linters..."
-	cd frontend && npm run lint
-	cd frontend && npm run format:check
+	@echo "🔍 Running all linters..."
+	@powershell -ExecutionPolicy Bypass -File ./scripts/lint_all.ps1 || bash ./scripts/lint_all.sh
 	@echo "✅ Linting complete!"
+
+lint-fix:
+	@echo "🔧 Running linters with auto-fix..."
+	@powershell -ExecutionPolicy Bypass -File ./scripts/lint_all.ps1 -Fix || bash ./scripts/lint_all.sh --fix
+	@echo "✅ Linting with auto-fix complete!"
 
 # Testing
 test:
