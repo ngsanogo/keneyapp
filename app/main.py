@@ -58,11 +58,7 @@ async def lifespan(app: FastAPI):
     # Startup: Initialize database tables (skip in tests to avoid external DB connects)
     import os
 
-    try:
-        settings.enforce_production_safety()
-    except ValueError as exc:
-        logger.critical("Production configuration validation failed: %s", exc)
-        raise
+    # Production validation is done in validate_production_settings() call below and in Settings.model_post_init()
 
     if os.getenv("TESTING", "false").lower() not in {"1", "true", "yes"}:
         Base.metadata.create_all(bind=engine)
@@ -85,7 +81,7 @@ async def lifespan(app: FastAPI):
 setup_tracing()
 
 # Ensure critical production safeguards are enforced before serving requests.
-validate_production_settings()
+validate_production_settings(settings)
 
 # Create FastAPI application
 app = FastAPI(
