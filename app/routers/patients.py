@@ -6,6 +6,7 @@ HTTP/platform concerns (audit, cache, metrics, FHIR events) in router.
 """
 
 import logging
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
@@ -26,6 +27,7 @@ from app.schemas.common import (
     SortParams,
 )
 from app.schemas.patient import PatientCreate, PatientResponse, PatientUpdate
+from app.schemas.patient_filters import PatientAdvancedFilters
 from app.services.cache_service import cache_service
 from app.services.export_service import ExportService
 from app.services.patient_security import (
@@ -480,7 +482,7 @@ def delete_patient(
 @router.post("/search/advanced", response_model=PaginatedResponse[PatientResponse])
 @limiter.limit("50/minute")
 def advanced_patient_search(
-    filters: "PatientAdvancedFilters",
+    filters: PatientAdvancedFilters,
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(
@@ -508,8 +510,6 @@ def advanced_patient_search(
     Returns:
         Paginated list of matching patients
     """
-    from app.schemas.patient_filters import PatientAdvancedFilters
-
     service = PatientService(db)
 
     # Execute advanced search
@@ -784,6 +784,3 @@ def export_patients(
         media_type=media_type,
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
-
-
-
