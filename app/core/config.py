@@ -147,6 +147,36 @@ class Settings(BaseSettings):
         self._assert_encryption_key_configured()
         self._assert_token_claims_configured()
 
+    def enforce_production_safety(self) -> None:
+        """Validate production-critical settings and raise if insecure.
+
+        This method can be called explicitly to validate settings
+        independent of when they were created (e.g., for testing).
+
+        Raises:
+            ValueError: If any production safety check fails.
+        """
+        environment = (self.ENVIRONMENT or "").lower()
+        if environment != "production":
+            return
+
+        # Check SECRET_KEY
+        if self.SECRET_KEY == "your-secret-key-change-in-production":
+            raise ValueError("SECRET_KEY must be overridden in production")
+
+        # Check DEBUG
+        if self.DEBUG:
+            raise ValueError("DEBUG must be False in production")
+
+        # Check ALLOWED_ORIGINS
+        origins = self._normalized_origins(self.ALLOWED_ORIGINS)
+        if not origins:
+            raise ValueError(
+                "ALLOWED_ORIGINS must include at least one origin in production"
+            )
+        if "*" in origins:
+            raise ValueError("ALLOWED_ORIGINS cannot include '*' in production")
+
     # ------------------------------------------------------------------
     # Validators to coerce empty-string envs to sensible defaults
     # ------------------------------------------------------------------
@@ -549,15 +579,33 @@ def _has_local_origin(origins: List[str]) -> bool:
     return any(origin.startswith(local_prefixes) for origin in origins)
 
 
-def validate_production_settings(current_settings: Settings) -> None:
+def is_production_environment(env_name: str) -> bool:
+    """Check if the given environment name indicates a production environment.
+
+    Args:
+        env_name: The environment name to check.
+
+    Returns:
+        True if the environment is production or prod, False otherwise.
+    """
+    return env_name.lower() in ("production", "prod")
+
+
+def validate_production_settings(current_settings: "Settings | None" = None) -> None:
     """Ensure critical settings are hardened when running in production.
 
     The application aborts startup if any high-risk misconfigurations are
     detected. This prevents accidental deployments with debug mode enabled,
     weak secrets, or localhost-only origins.
-    """
 
-    if str(current_settings.ENVIRONMENT).lower() != "production":
+    Args:
+        current_settings: The settings instance to validate. If None, uses
+            the global settings instance.
+    """
+    if current_settings is None:
+        current_settings = settings
+
+    if not is_production_environment(str(current_settings.ENVIRONMENT)):
         return
 
     issues: List[str] = []
@@ -571,7 +619,10 @@ def validate_production_settings(current_settings: Settings) -> None:
         )
 
     if current_settings.DEBUG:
-        issues.append("DEBUG must be disabled in production.")
+        issues.append("DEBUG must be False in production.")
+
+    if current_settings.ENABLE_BOOTSTRAP_ADMIN:
+        issues.append("ENABLE_BOOTSTRAP_ADMIN must be False in production.")
 
     if not current_settings.ALLOWED_ORIGINS:
         issues.append("ALLOWED_ORIGINS must include at least one trusted origin.")
@@ -584,6 +635,9 @@ def validate_production_settings(current_settings: Settings) -> None:
         issues.append(
             "DATABASE_URL must point to a production database host (not localhost)."
         )
+
+    if "localhost" in str(current_settings.APP_URL):
+        issues.append("APP_URL must not be localhost in production.")
 
     if current_settings.ACCESS_TOKEN_EXPIRE_MINUTES <= 0:
         issues.append("ACCESS_TOKEN_EXPIRE_MINUTES must be a positive integer.")
