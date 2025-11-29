@@ -597,13 +597,13 @@ Fournisseurs HDS certifiés:
 
 ### Support KeneyApp
 
-- **Email**: contact@isdataconsulting.com
-- **Documentation**: https://github.com/ISData-consulting/keneyapp/docs
-- **Issues**: https://github.com/ISData-consulting/keneyapp/issues
+- **Email**: issasanogo2000@gmail.com
+- **Documentation**: https://github.com/ngsanogo/keneyapp/docs
+- **Issues**: https://github.com/ngsanogo/keneyapp/issues
 
 ---
 
 **Version**: 1.0
 **Date**: 29 novembre 2025
-**Auteur**: ISDATA Consulting
+**Auteur**: Issa Sanogo
 **License**: Proprietary

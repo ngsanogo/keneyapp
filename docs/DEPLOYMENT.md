@@ -656,4 +656,4 @@ For deployment issues:
 
 - Check logs first
 - Review this documentation
-- Contact: <contact@isdataconsulting.com>
+- Contact: <issasanogo2000@gmail.com>

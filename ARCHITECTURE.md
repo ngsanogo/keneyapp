@@ -1,6 +1,6 @@
 # KeneyApp Architecture Documentation
 
-[![CI](https://github.com/ISData-consulting/keneyapp/actions/workflows/ci.yml/badge.svg)](https://github.com/ISData-consulting/keneyapp/actions/workflows/ci.yml)
+[![CI](https://github.com/ngsanogo/keneyapp/actions/workflows/ci.yml/badge.svg)](https://github.com/ngsanogo/keneyapp/actions/workflows/ci.yml)
 
 ## System Overview
 

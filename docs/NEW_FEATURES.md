@@ -572,7 +572,7 @@ Tous les événements sont loggés en JSON pour analyse:
 
 ### Contact
 
-📧 <contact@isdataconsulting.com>
+📧 <issasanogo2000@gmail.com>
 
 ---
 
@@ -603,5 +603,5 @@ Tous les événements sont loggés en JSON pour analyse:
 
 **Version**: 3.0.0
 **Date**: 2 novembre 2025
-**Auteur**: ISDATA Consulting
+**Auteur**: Issa Sanogo
 **License**: Proprietary

@@ -113,5 +113,5 @@ When making changes to these files:
 If you have questions about any of these community health files or suggestions for improvement, please:
 
 - Open an issue using the appropriate template
-- Start a discussion in [GitHub Discussions](https://github.com/ISData-consulting/keneyapp/discussions)
-- Contact the maintainers at <contact@isdataconsulting.com>
+- Start a discussion in [GitHub Discussions](https://github.com/ngsanogo/keneyapp/discussions)
+- Contact the maintainers at <issasanogo2000@gmail.com>

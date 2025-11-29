@@ -81,7 +81,7 @@ git checkout -b feature/your-feature-name
 - **Use the templates:** Open bugs and feature requests via GitHub issue templates to ensure reproducible details.
 - **Label and link:** Apply `type/*` and `area/*` labels plus priority; link related PRs with `Fixes #<id>`.
 - **Triage cadence:** Maintainers triage twice weekly and surface `good first issue` / `help wanted` tickets for newcomers.
-- **Discuss early:** For significant ideas, start a [Discussion](https://github.com/ISData-consulting/keneyapp/discussions) or a draft PR to gather feedback before building.
+- **Discuss early:** For significant ideas, start a [Discussion](https://github.com/ngsanogo/keneyapp/discussions) or a draft PR to gather feedback before building.
 
 ## 📝 Coding Standards
 
@@ -432,7 +432,7 @@ Describe the tests you added or ran
 - **Validate all user inputs**
 - Follow **OWASP** security best practices
 - Run `npm audit` and `pip-audit` regularly
-- Report security vulnerabilities privately to <contact@isdataconsulting.com>
+- Report security vulnerabilities privately to <issasanogo2000@gmail.com>
 
 ## 📚 Additional Resources
 
@@ -447,9 +447,9 @@ Describe the tests you added or ran
 If you have questions or need help:
 
 1. Check existing [documentation](docs/)
-2. Search [existing issues](https://github.com/ISData-consulting/keneyapp/issues)
+2. Search [existing issues](https://github.com/ngsanogo/keneyapp/issues)
 3. Create a new issue with the `question` label
-4. Contact: <contact@isdataconsulting.com>
+4. Contact: <issasanogo2000@gmail.com>
 
 ## 🎉 Thank You
 

@@ -1,10 +1,10 @@
 site_name: KeneyApp Documentation
 site_description: Comprehensive healthcare management platform documentation
-site_author: ISData Consulting
-site_url: https://isdata-consulting.github.io/keneyapp
+site_author: Issa Sanogo
+site_url: https://ngsanogo.github.io/keneyapp
 
-repo_name: ISData-consulting/keneyapp
-repo_url: https://github.com/ISData-consulting/keneyapp
+repo_name: ngsanogo/keneyapp
+repo_url: https://github.com/ngsanogo/keneyapp
 
 theme:
   name: material

@@ -152,7 +152,7 @@ kubectl rollout undo deployment/backend -n keneyapp
 kubectl rollout status deployment/backend -n keneyapp
 
 # Docker (restore from previous image)
-docker pull isdataconsulting/keneyapp-backend:previous-tag
+docker pull ngsanogo/keneyapp-backend:previous-tag
 docker-compose up -d --force-recreate backend
 ```
 
@@ -424,7 +424,7 @@ aws s3 sync $BACKUP_DIR s3://keneyapp-backups/configs/
 kubectl get all -n keneyapp -o yaml > backup-before-update.yaml
 
 # Before application updates
-docker save isdataconsulting/keneyapp-backend:current | \
+docker save ngsanogo/keneyapp-backend:current | \
   gzip > keneyapp-backend-image-backup.tar.gz
 ```
 
@@ -527,22 +527,22 @@ docker save isdataconsulting/keneyapp-backend:current | \
 **Primary On-Call**
 
 - Phone: [Primary On-Call Number]
-- Email: <oncall@isdataconsulting.com>
+- Email: <issasanogo2000@gmail.com>
 - Slack: #incident-response
 
 **Technical Lead**
 
-- Email: <contact@isdataconsulting.com>
+- Email: <issasanogo2000@gmail.com>
 - Phone: [Technical Lead Number]
 
 **Database Administrator**
 
-- Email: <dba@isdataconsulting.com>
+- Email: <issasanogo2000@gmail.com>
 - Phone: [DBA Number]
 
 **DevOps Lead**
 
-- Email: <devops@isdataconsulting.com>
+- Email: <issasanogo2000@gmail.com>
 - Phone: [DevOps Number]
 
 ### External Vendors
@@ -595,7 +595,7 @@ docker save isdataconsulting/keneyapp-backend:current | \
 
 | Version | Date       | Author | Changes |
 |---------|------------|--------|---------|
-| 1.0     | 2024-10-31 | ISDATA Consulting | Initial disaster recovery plan |
+| 1.0     | 2024-10-31 | Issa Sanogo | Initial disaster recovery plan |
 
 ## Approval
 
@@ -610,4 +610,4 @@ This disaster recovery plan has been reviewed and approved by:
 **Document Classification**: Internal - Confidential
 **Review Frequency**: Quarterly
 **Next Review Date**: 2025-01-31
-**Document Owner**: ISDATA Consulting DevOps Team
+**Document Owner**: Issa Sanogo - DevOps Team

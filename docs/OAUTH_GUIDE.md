@@ -256,4 +256,4 @@ OAuth integration maintains HIPAA/GDPR compliance:
 
 ## Support
 
-For OAuth integration issues, contact: <support@isdataconsulting.com>
+For OAuth integration issues, contact: <issasanogo2000@gmail.com>

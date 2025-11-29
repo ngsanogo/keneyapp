@@ -357,5 +357,5 @@ def test_<function_name>_<scenario>_<expected_result>():
 For questions or suggestions about code quality standards, please:
 
 - Open an issue on GitHub
-- Contact the development team at <contact@isdataconsulting.com>
+- Contact the development team at <issasanogo2000@gmail.com>
 - Discuss in team meetings

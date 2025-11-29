@@ -4,20 +4,20 @@ For security-related issues, please contact:
 
 ## Primary Contact
 
-- **Email**: <contact@isdataconsulting.com>
+- **Email**: <issasanogo2000@gmail.com>
 - **Response Time**: Within 48 hours
 
 ## Security Team
 
-- ISDATA Consulting Security Team
-- Contact via: <contact@isdataconsulting.com>
+- Issa Sanogo Security Team
+- Contact via: <issasanogo2000@gmail.com>
 
 ## PGP Key
 
 For encrypted communications (recommended for sensitive security reports):
 
 ```
-Contact us at contact@isdataconsulting.com to obtain our PGP public key.
+Contact us at issasanogo2000@gmail.com to obtain our PGP public key.
 ```
 
 ## Security Reporting Guidelines

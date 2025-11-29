@@ -561,7 +561,7 @@ KeneyApp's standardized coding makes it compatible with OMOP CDM for research pu
 
 For questions about medical terminologies implementation:
 
-- **Technical Support**: <fhir-support@isdataconsulting.com>
+- **Technical Support**: <issasanogo2000@gmail.com>
 - **Documentation**: <https://docs.keneyapp.com>
 - **Community**: <https://community.keneyapp.com>
 

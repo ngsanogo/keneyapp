@@ -1,14 +1,14 @@
 blank_issues_enabled: false
 contact_links:
   - name: 📚 Documentation
-    url: https://github.com/ISData-consulting/keneyapp/blob/main/README.md
+    url: https://github.com/ngsanogo/keneyapp/blob/main/README.md
     about: Check our comprehensive documentation for answers
   - name: 💬 GitHub Discussions
-    url: https://github.com/ISData-consulting/keneyapp/discussions
+    url: https://github.com/ngsanogo/keneyapp/discussions
     about: Ask questions and discuss ideas with the community
   - name: 🔒 Security Vulnerability
-    url: https://github.com/ISData-consulting/keneyapp/blob/main/SECURITY.md
+    url: https://github.com/ngsanogo/keneyapp/blob/main/SECURITY.md
     about: Please report security vulnerabilities privately
   - name: 📧 Commercial Support
-    url: mailto:contact@isdataconsulting.com
-    about: Contact ISDATA Consulting for commercial support and licensing
+    url: mailto:issasanogo2000@gmail.com
+    about: Contact Issa Sanogo for commercial support and licensing

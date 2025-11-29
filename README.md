@@ -1,7 +1,7 @@
 # KeneyApp
 
-[![CI](https://github.com/ISData-consulting/keneyapp/actions/workflows/ci.yml/badge.svg)](https://github.com/ISData-consulting/keneyapp/actions/workflows/ci.yml)
-[![Security Scan](https://github.com/ISData-consulting/keneyapp/actions/workflows/security-scan.yml/badge.svg)](https://github.com/ISData-consulting/keneyapp/actions/workflows/security-scan.yml)
+[![CI](https://github.com/ngsanogo/keneyapp/actions/workflows/ci.yml/badge.svg)](https://github.com/ngsanogo/keneyapp/actions/workflows/ci.yml)
+[![Security Scan](https://github.com/ngsanogo/keneyapp/actions/workflows/security-scan.yml/badge.svg)](https://github.com/ngsanogo/keneyapp/actions/workflows/security-scan.yml)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![React](https://img.shields.io/badge/react-18.0+-blue.svg)](https://react.dev/)
@@ -11,9 +11,9 @@ KeneyApp is a modern healthcare data management platform built with **Python**, 
 
 ## 🤝 Community & Collaboration
 
-- **Join the conversation:** Ask questions or share ideas in [GitHub Discussions](https://github.com/ISData-consulting/keneyapp/discussions).
+- **Join the conversation:** Ask questions or share ideas in [GitHub Discussions](https://github.com/ngsanogo/keneyapp/discussions).
 - **Contribute with confidence:** Follow the [Contributing Guide](CONTRIBUTING.md) and [Community Playbook](docs/COMMUNITY.md) for branching, reviews, and engagement norms.
-- **Track work transparently:** Use the [issue tracker](https://github.com/ISData-consulting/keneyapp/issues) for bugs and feature requests; labels highlight owners, priorities, and newcomer-friendly items.
+- **Track work transparently:** Use the [issue tracker](https://github.com/ngsanogo/keneyapp/issues) for bugs and feature requests; labels highlight owners, priorities, and newcomer-friendly items.
 - **Stay informed:** Release announcements, roadmap updates, and office-hour invites are pinned in Discussions and summarized in release notes.
 
 ## 🏥 Features
@@ -255,7 +255,7 @@ keneyapp/
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/ISData-consulting/keneyapp.git
+   git clone https://github.com/ngsanogo/keneyapp.git
    cd keneyapp
    ```
 
@@ -798,16 +798,16 @@ A comprehensive analysis of this repository is available in [REPOSITORY_ANALYSIS
 
 ## 📄 License
 
-KeneyApp is proprietary software owned by **ISDATA Consulting**.
+KeneyApp is proprietary software owned by **Issa Sanogo**.
 Unauthorized copying, modification, or distribution of this software is prohibited.
 
-For licensing or partnership inquiries, please contact: **<contact@isdataconsulting.com>**
+For licensing or partnership inquiries, please contact: **<issasanogo2000@gmail.com>**
 
 ## 📞 Support
 
 For technical support or questions, please contact:
-📧 **<contact@isdataconsulting.com>**
+📧 **<issasanogo2000@gmail.com>**
 
 ---
 
-Made with ❤️ by ISDATA Consulting
+Made with ❤️ by Issa Sanogo

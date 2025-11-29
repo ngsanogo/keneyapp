@@ -262,4 +262,4 @@ When contributing to documentation:
 ---
 
 **Last Updated**: November 2025
-Made with ❤️ by ISDATA Consulting
+Made with ❤️ by Issa Sanogo

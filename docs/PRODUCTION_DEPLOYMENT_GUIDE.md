@@ -51,7 +51,7 @@ sudo mkdir -p /opt/keneyapp
 cd /opt/keneyapp
 
 # Clone repository
-git clone https://github.com/ISData-consulting/keneyapp.git .
+git clone https://github.com/ngsanogo/keneyapp.git .
 
 # Checkout production release
 git checkout v2.0.0  # or latest stable tag
@@ -483,7 +483,7 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: contact@isdataconsulting.com
+    email: issasanogo2000@gmail.com
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
@@ -686,8 +686,8 @@ kubectl rollout status deployment/backend -n keneyapp
 
 For deployment assistance:
 
-- Email: <contact@isdataconsulting.com>
-- Documentation: <https://github.com/ISData-consulting/keneyapp/tree/main/docs>
+- Email: <issasanogo2000@gmail.com>
+- Documentation: <https://github.com/ngsanogo/keneyapp/tree/main/docs>
 
 ---
 

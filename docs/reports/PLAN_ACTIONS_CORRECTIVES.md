@@ -502,7 +502,7 @@ Tests end-to-end avec Cypress ou Playwright.
 
 Pour toute question sur ce plan d'actions :
 
-- 📧 Email : <contact@isdataconsulting.com>
+- 📧 Email : <issasanogo2000@gmail.com>
 - 📖 Documentation : `docs/`
 - 🐛 Issues : GitHub Issues
 

@@ -4,17 +4,17 @@ This document outlines the governance structure and decision-making processes fo
 
 ## Project Ownership
 
-**KeneyApp** is proprietary software owned and maintained by **ISDATA Consulting**.
+**KeneyApp** is proprietary software owned and maintained by **Issa Sanogo**.
 
-- **Owner**: ISDATA Consulting
+- **Owner**: Issa Sanogo
 - **License**: Proprietary (See [LICENSE](LICENSE))
-- **Contact**: <contact@isdataconsulting.com>
+- **Contact**: <issasanogo2000@gmail.com>
 
 ## Project Structure
 
 ### Maintainers
 
-Project maintainers are ISDATA Consulting team members responsible for:
+Project maintainers are team members responsible for:
 
 - Reviewing and merging pull requests
 - Managing releases and versioning
@@ -165,7 +165,7 @@ We use GitHub labels to categorize issues:
 - **GitHub Issues**: Bug reports, feature requests
 - **GitHub Discussions**: Questions, general discussions
 - **Pull Requests**: Code review, technical discussions
-- **Email**: <contact@isdataconsulting.com> (business inquiries)
+- **Email**: <issasanogo2000@gmail.com> (business inquiries)
 
 ### Response Times
 
@@ -180,7 +180,7 @@ If disagreements arise:
 
 1. Discuss respectfully in the relevant GitHub issue or PR
 2. Seek input from additional maintainers
-3. If consensus cannot be reached, ISDATA Consulting makes the final decision
+3. If consensus cannot be reached, Issa Sanogo makes the final decision
 4. All participants must follow the [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ## Code of Conduct
@@ -193,10 +193,10 @@ All community members must adhere to our [Code of Conduct](CODE_OF_CONDUCT.md). 
 
 ## Amendments
 
-This governance document may be updated by ISDATA Consulting as the project evolves. Major changes will be announced through GitHub discussions.
+This governance document may be updated by Issa Sanogo as the project evolves. Major changes will be announced through GitHub discussions.
 
 **Last Updated**: November 2025
 
 ---
 
-Made with ❤️ by ISDATA Consulting
+Made with ❤️ by Issa Sanogo

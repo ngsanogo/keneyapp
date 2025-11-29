@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "Proprietary"}
 authors = [
-    {name = "ISDATA Consulting", email = "contact@isdataconsulting.com"}
+    {name = "Issa Sanogo", email = "issasanogo2000@gmail.com"}
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -70,10 +70,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ISData-consulting/keneyapp"
-Documentation = "https://github.com/ISData-consulting/keneyapp/tree/main/docs"
-Repository = "https://github.com/ISData-consulting/keneyapp"
-Issues = "https://github.com/ISData-consulting/keneyapp/issues"
+Homepage = "https://github.com/ngsanogo/keneyapp"
+Documentation = "https://github.com/ngsanogo/keneyapp/tree/main/docs"
+Repository = "https://github.com/ngsanogo/keneyapp"
+Issues = "https://github.com/ngsanogo/keneyapp/issues"
 
 [tool.black]
 line-length = 88

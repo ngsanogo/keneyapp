@@ -1,5 +1,5 @@
-Contact: mailto:security@isdataconsulting.com
-Contact: mailto:contact@isdataconsulting.com
+Contact: mailto:issasanogo2000@gmail.com
+Contact: mailto:issasanogo2000@gmail.com
 Expires: 2025-12-31T23:59:59.000Z
 Preferred-Languages: en, fr
 Canonical: https://keneyapp.com/.well-known/security.txt
@@ -12,7 +12,7 @@ seriously and appreciate your efforts to disclose vulnerabilities responsibly.
 ## Reporting a Vulnerability
 
 If you believe you have found a security vulnerability in KeneyApp, please
-send an email to security@isdataconsulting.com with:
+send an email to issasanogo2000@gmail.com with:
 
 1. Description of the vulnerability
 2. Steps to reproduce the issue
@@ -56,10 +56,10 @@ We are committed to working with security researchers and will acknowledge your
 contribution in our security hall of fame (with your permission).
 
 For more information about our security practices, see:
-https://github.com/ISData-consulting/keneyapp/blob/main/SECURITY.md
+https://github.com/ngsanogo/keneyapp/blob/main/SECURITY.md
 
 Thank you for helping us keep KeneyApp secure!
 
 ---
-ISDATA Consulting
-https://isdataconsulting.com
+Issa Sanogo
+https://github.com/ngsanogo/keneyapp

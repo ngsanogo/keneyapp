@@ -330,14 +330,14 @@ Les INS générés sont volontairement invalides.
 
 Pour questions sur cette documentation :
 
-- **Email** : <contact@isdataconsulting.com>
-- **GitHub Issues** : [Créer une issue](https://github.com/ISData-consulting/keneyapp/issues)
+- **Email** : <issasanogo2000@gmail.com>
+- **GitHub Issues** : [Créer une issue](https://github.com/ngsanogo/keneyapp/issues)
 
 ---
 
-**Auteurs** : ISDATA Consulting - Équipe KeneyApp
+**Auteurs** : Issa Sanogo - Équipe KeneyApp
 **Date création** : 2025-01-10
 **Version** : 1.0
-**Licence** : Proprietary (ISDATA Consulting)
+**Licence** : Proprietary (Issa Sanogo)
 
 **Note** : Cette documentation constitue un livrable complet pour le développement d'un DMI de production. Elle est le fruit d'une analyse approfondie des besoins métier, des standards internationaux, et des meilleures pratiques de l'industrie.

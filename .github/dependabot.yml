@@ -12,7 +12,7 @@ updates:
       time: "09:00"
     open-pull-requests-limit: 5
     reviewers:
-      - "ISData-consulting"
+      - "ngsanogo"
     labels:
       - "dependencies"
       - "python"
@@ -35,7 +35,7 @@ updates:
       time: "09:00"
     open-pull-requests-limit: 5
     reviewers:
-      - "ISData-consulting"
+      - "ngsanogo"
     labels:
       - "dependencies"
       - "javascript"
@@ -59,7 +59,7 @@ updates:
       time: "09:00"
     open-pull-requests-limit: 3
     reviewers:
-      - "ISData-consulting"
+      - "ngsanogo"
     labels:
       - "dependencies"
       - "github-actions"
@@ -76,7 +76,7 @@ updates:
       time: "09:00"
     open-pull-requests-limit: 3
     reviewers:
-      - "ISData-consulting"
+      - "ngsanogo"
     labels:
       - "dependencies"
       - "docker"

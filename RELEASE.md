@@ -227,7 +227,7 @@ git push origin v2.1.0
 
 ### 10. Create GitHub Release
 
-1. Go to [Releases](https://github.com/ISData-consulting/keneyapp/releases)
+1. Go to [Releases](https://github.com/ngsanogo/keneyapp/releases)
 2. Click "Draft a new release"
 3. Select the tag (v2.1.0)
 4. Fill in the release details:
@@ -528,4 +528,4 @@ For critical security issues:
 ---
 
 **Last Updated**: November 2025
-Made with ❤️ by ISDATA Consulting
+Made with ❤️ by Issa Sanogo

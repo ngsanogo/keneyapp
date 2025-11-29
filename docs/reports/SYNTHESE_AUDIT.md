@@ -331,7 +331,7 @@ L'ancien rapport CODE_QUALITY_AUDIT.md mentionnait PyCrypto comme vulnérabilit�
 
 Pour questions sur cet audit :
 
-- 📧 **Email** : <contact@isdataconsulting.com>
+- 📧 **Email** : <issasanogo2000@gmail.com>
 - 📖 **Documentation** : `docs/` directory
 - 🐛 **Issues** : GitHub Issues
 
@@ -346,4 +346,4 @@ Pour questions sur cet audit :
 
 ---
 
-Made with ❤️ by ISDATA Consulting
+Made with ❤️ by Issa Sanogo

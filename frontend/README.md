@@ -307,8 +307,8 @@ npm install
 
 ## License
 
-Proprietary - ISDATA Consulting
+Proprietary - Issa Sanogo
 
 ## Support
 
-For questions or issues, contact: <contact@isdataconsulting.com>
+For questions or issues, contact: <issasanogo2000@gmail.com>

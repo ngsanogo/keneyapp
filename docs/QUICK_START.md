@@ -13,7 +13,7 @@
 
 ```bash
 # Cloner le repository
-git clone https://github.com/ISData-consulting/keneyapp.git
+git clone https://github.com/ngsanogo/keneyapp.git
 cd keneyapp
 
 # Créer environnement virtuel
@@ -440,7 +440,7 @@ SMSNotification.send_sms('+33612345678', 'Test message')
 
 ### Support
 
-📧 <contact@isdataconsulting.com>
+📧 <issasanogo2000@gmail.com>
 
 ---
 

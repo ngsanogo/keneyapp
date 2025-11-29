@@ -4,35 +4,35 @@
 
 # Default owners for everything in the repo
 # Unless a later match takes precedence, these owners will be requested for review
-*       @ISData-consulting
+*       @ngsanogo
 
 # Backend code
-/app/                   @ISData-consulting
-/tests/                 @ISData-consulting
-requirements.txt        @ISData-consulting
-alembic.ini            @ISData-consulting
-/alembic/              @ISData-consulting
+/app/                   @ngsanogo
+/tests/                 @ngsanogo
+requirements.txt        @ngsanogo
+alembic.ini            @ngsanogo
+/alembic/              @ngsanogo
 
 # Frontend code
-/frontend/             @ISData-consulting
+/frontend/             @ngsanogo
 
-# Infrastructure and DevOps
-/k8s/                  @ISData-consulting
-/terraform/            @ISData-consulting
-/monitoring/           @ISData-consulting
-docker-compose*.yml    @ISData-consulting
-Dockerfile*            @ISData-consulting
-.github/workflows/     @ISData-consulting
+# Infrastructure owners
+/k8s/                  @ngsanogo
+/terraform/            @ngsanogo
+/monitoring/           @ngsanogo
+docker-compose*.yml    @ngsanogo
+Dockerfile*            @ngsanogo
+.github/workflows/     @ngsanogo
 
 # Documentation
-*.md                   @ISData-consulting
-/docs/                 @ISData-consulting
+*.md                   @ngsanogo
+/docs/                 @ngsanogo
 
-# Configuration files
-.github/               @ISData-consulting
-Makefile               @ISData-consulting
-sonar-project.properties @ISData-consulting
+# Configuration owners
+.github/               @ngsanogo
+Makefile               @ngsanogo
+sonar-project.properties @ngsanogo
 
 # Security-sensitive files
-SECURITY.md            @ISData-consulting
-.github/workflows/security-scan.yml @ISData-consulting
+SECURITY.md            @ngsanogo
+.github/workflows/security-scan.yml @ngsanogo

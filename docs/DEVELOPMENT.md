@@ -21,7 +21,7 @@ This guide provides detailed information for developers working on KeneyApp.
 
 ```bash
 # Clone the repository
-git clone https://github.com/ISData-consulting/keneyapp.git
+git clone https://github.com/ngsanogo/keneyapp.git
 cd keneyapp
 
 # Full setup (install dependencies + hooks + config)
@@ -603,4 +603,4 @@ make db-reset     # Reset database
 - Check the [README](../README.md) for basic information
 - Read [CONTRIBUTING.md](../CONTRIBUTING.md) for contribution guidelines
 - Create an issue on GitHub
-- Contact: <contact@isdataconsulting.com>
+- Contact: <issasanogo2000@gmail.com>

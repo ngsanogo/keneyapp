@@ -328,7 +328,7 @@ git-cliff --output CHANGELOG.md
 4. **Documentation Site** (Docusaurus)
    - Site statique généré
    - Déployé sur GitHub Pages
-   - URL: <https://isdata-consulting.github.io/keneyapp>
+   - URL: <https://ngsanogo.github.io/keneyapp>
 
 **Génération locale**:
 
@@ -420,7 +420,7 @@ make perf-ui
 - Technical Debt
 - Duplication
 
-**Dashboard**: <https://sonarcloud.io/dashboard?id=ISData-consulting_keneyapp>
+**Dashboard**: <https://sonarcloud.io/dashboard?id=ngsanogo_keneyapp>
 
 **Quality Profile**:
 
@@ -781,7 +781,7 @@ npm install -D @playwright/test
 
 ### Workflows Status
 
-Voir: <https://github.com/ISData-consulting/keneyapp/actions>
+Voir: <https://github.com/ngsanogo/keneyapp/actions>
 
 ---
 
@@ -897,8 +897,8 @@ npx playwright test --debug
 
 - **Documentation projet**: `docs/`
 - **API Docs**: <http://localhost:8000/docs>
-- **SonarCloud**: <https://sonarcloud.io/dashboard?id=ISData-consulting_keneyapp>
-- **GitHub Actions**: <https://github.com/ISData-consulting/keneyapp/actions>
+- **SonarCloud**: <https://sonarcloud.io/dashboard?id=ngsanogo_keneyapp>
+- **GitHub Actions**: <https://github.com/ngsanogo/keneyapp/actions>
 - **Coverage Reports**: Artifacts dans GitHub Actions
 
 ---
@@ -906,4 +906,4 @@ npx playwright test --debug
 **Date de création**: 2025-01-10
 **Dernière mise à jour**: 2025-01-10
 **Version**: 3.0.0
-**Mainteneur**: ISData Consulting
+**Mainteneur**: Issa Sanogo

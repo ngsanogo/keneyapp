@@ -213,7 +213,7 @@ http://grafana.yourdomain.com
   annotations:
     summary: "API is down"
     description: "KeneyApp API has been down for more than 1 minute"
-    runbook: "https://github.com/ISData-consulting/keneyapp/blob/main/docs/INCIDENT_RESPONSE.md#api-down"
+    runbook: "https://github.com/ngsanogo/keneyapp/blob/main/docs/INCIDENT_RESPONSE.md#api-down"
 ```
 
 #### High Error Rate
@@ -334,8 +334,8 @@ http://grafana.yourdomain.com
 global:
   resolve_timeout: 5m
   smtp_smarthost: 'smtp.gmail.com:587'
-  smtp_from: 'alerts@isdataconsulting.com'
-  smtp_auth_username: 'alerts@isdataconsulting.com'
+  smtp_from: 'issasanogo2000@gmail.com'
+  smtp_auth_username: 'issasanogo2000@gmail.com'
   smtp_auth_password: '<password>'
 
 route:
@@ -390,7 +390,7 @@ receivers:
 
   - name: 'email-ops'
     email_configs:
-      - to: 'ops@isdataconsulting.com'
+      - to: 'issasanogo2000@gmail.com'
         headers:
           subject: 'KeneyApp Alert: {{ .CommonAnnotations.summary }}'
         html: |
@@ -635,7 +635,7 @@ rate(redis_keyspace_hits_total[5m]) /
 For monitoring questions:
 
 - Slack: #monitoring
-- Email: <devops@isdataconsulting.com>
+- Email: <issasanogo2000@gmail.com>
 
 ---
 

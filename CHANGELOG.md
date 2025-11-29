@@ -741,4 +741,4 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## Support
 
-For questions or issues, please contact: <contact@isdataconsulting.com>
+For questions or issues, please contact: <issasanogo2000@gmail.com>
