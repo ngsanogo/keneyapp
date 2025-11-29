@@ -1,7 +1,7 @@
 # Dépendances de test pour KeneyApp v3.0
 
 # Testing frameworks (inherit core pytest/pytest-asyncio from requirements.txt)
-pytest-mock==3.14.0
+pytest-mock==3.15.1
 pytest-benchmark==4.0.0
 pytest-xdist==3.6.1  # Tests parallèles
 
