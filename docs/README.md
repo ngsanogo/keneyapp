@@ -58,7 +58,6 @@ Welcome to the KeneyApp documentation! This directory contains comprehensive gui
 |----------|-------------|
 | [Build Guide](guides/BUILD.md) | How to build backend, frontend, and container images |
 | [Dependency Updates](guides/DEPENDENCY_UPDATES.md) | Workflow for updating dependencies safely |
-| [E2E Setup Guide](guides/E2E_SETUP_GUIDE.md) | Playwright E2E environment setup and execution |
 | [Git & GitHub Best Practices](guides/GIT_GITHUB_BEST_PRACTICES.md) | Branching, commit messages, and PR workflow |
 | [Local CI Testing](guides/LOCAL_CI_TESTING.md) | How to mirror CI pipelines locally before pushing |
 
@@ -80,12 +79,6 @@ Welcome to the KeneyApp documentation! This directory contains comprehensive gui
 
 | Document | Description |
 |----------|-------------|
-| [E2E Testing Guide](E2E_TESTING.md) | ⭐ Comprehensive end-to-end integration testing in Docker |
-| [E2E Test Scenarios](E2E_TEST_SCENARIOS.md) | ⭐ **Detailed test scenarios with complete user journeys** |
-| [E2E Test Methodology](E2E_TEST_METHODOLOGY.md) | ⭐ **Complete testing methodology (11 phases)** |
-| [E2E Testing Quick Reference](E2E_TESTING_QUICK_REF.md) | Quick commands and troubleshooting for E2E tests |
-| [E2E Testing Architecture](E2E_TESTING_ARCHITECTURE.md) | Architecture diagrams and data flow |
-| [E2E Testing Checklist](E2E_TESTING_CHECKLIST.md) | Execution and interpretation checklist |
 | [Testing Strategy](TESTING_STRATEGY.md) | Unified plan for unit, integration, and E2E coverage with CI gates |
 | [Testing Guide](TESTING_GUIDE.md) | Comprehensive testing strategies and best practices |
 | [Performance Testing](PERFORMANCE_TESTING.md) | Load testing, benchmarking, and optimization |

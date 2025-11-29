@@ -26,7 +26,6 @@ This guide orients new contributors to the KeneyApp codebase, highlights key ser
   - `src/contexts/` — auth/session providers, feature flags, theme settings
   - `src/services/` — API clients, analytics, and feature-specific data hooks
   - `src/styles/` — global styles and design tokens
-- `e2e/` — Playwright end-to-end tests, fixtures, and scenarios
 - `tests/` — Backend unit/integration tests
 - `k8s/` — Kubernetes manifests and Helm chart values
 - `terraform/` — Infrastructure-as-code modules for cloud environments
@@ -48,7 +47,7 @@ This guide orients new contributors to the KeneyApp codebase, highlights key ser
 
 - **Run locally:** `make up` (or see [Quick Start](QUICK_START.md)) to boot backend, frontend, and dependencies.
 - **Lint & format:** `make lint` (Python + TypeScript), `make format` to apply standards from the [Coding Standards](CODING_STANDARDS.md).
-- **Test:** `make test` for backend unit tests; `make test-e2e` for Playwright; `make test-performance` for load tests where supported.
+- **Test:** `make test` for backend unit/integration tests; `make test-performance` for load tests where supported.
 - **Database migrations:** Manage with Alembic; see `alembic/` and `alembic.ini` plus patterns in `app/migrations/`.
 - **API evolution:** Follow [API Best Practices](API_BEST_PRACTICES.md) and keep schemas updated in `schemas/`.
 - **Pull requests:** Apply [Git & GitHub Best Practices](guides/GIT_GITHUB_BEST_PRACTICES.md) and ensure checks pass before merge.
@@ -64,5 +63,5 @@ This guide orients new contributors to the KeneyApp codebase, highlights key ser
 
 - [Architecture Overview](ARCHITECTURE.md) for system design and deployment topology.
 - [Technology Choices](TECHNOLOGY_CHOICES.md) for rationale behind the stack.
-- [Testing Guide](TESTING_GUIDE.md) and [E2E Testing](E2E_TESTING.md) for quality gates.
+- [Testing Guide](TESTING_GUIDE.md) for quality gates.
 - [Security Compliance](SECURITY_COMPLIANCE.md) and [Encryption Guide](ENCRYPTION_GUIDE.md) for regulatory alignment.

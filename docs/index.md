@@ -27,7 +27,7 @@ Welcome to the KeneyApp knowledge base. Use this page to jump to the most import
 ## 🧭 Where to Go Next
 
 - **Building or changing code?** Read the [Codebase Overview](CODEBASE_OVERVIEW.md) and follow the [Coding Standards](CODING_STANDARDS.md).
-- **Validating functionality?** Start with the [Testing Strategy](TESTING_STRATEGY.md) for what to run when, then use the [Testing Guide](TESTING_GUIDE.md) and drill down into [E2E Testing](E2E_TESTING.md) or [Performance Testing](PERFORMANCE_TESTING.md).
+- **Validating functionality?** Start with the [Testing Strategy](TESTING_STRATEGY.md) for what to run when, then use the [Testing Guide](TESTING_GUIDE.md) or [Performance Testing](PERFORMANCE_TESTING.md).
 - **Running in production?** Start with the [Production Deployment Guide](PRODUCTION_DEPLOYMENT_GUIDE.md) and the [Operations Runbook](OPERATIONS_RUNBOOK.md).
 
 ## 🧭 Roles and Responsibilities
