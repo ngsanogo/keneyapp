@@ -127,7 +127,6 @@ const RecommendationPanel = ({ patientId, token, onActionClick }: Recommendation
           <article
             key={index}
             className={`recommendation-card ${getPriorityClass(rec.priority)}`}
-            role="article"
             aria-label={`${rec.priority} priority recommendation: ${rec.title}`}
           >
             <div className="card-header">

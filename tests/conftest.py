@@ -11,6 +11,7 @@ Fixtures réutilisables pour tous les tests:
 """
 
 import os
+from datetime import date
 from typing import Generator
 
 import pytest
@@ -24,7 +25,7 @@ from app.core.security import get_password_hash
 from app.main import app
 from app.models.patient import Patient
 from app.models.tenant import Tenant
-from app.models.user import User
+from app.models.user import User, UserRole
 
 # ============================================================================
 # DATABASE FIXTURES
@@ -133,14 +134,11 @@ def test_super_admin(db: Session, test_tenant) -> User:
     user = User(
         email="superadmin@test.com",
         username="superadmin",
-        first_name="Super",
-        last_name="Admin",
-        role="Super Admin",
+        full_name="Super Admin",
+        role=UserRole.SUPER_ADMIN,
         tenant_id=test_tenant.id,
         hashed_password=get_password_hash("superadmin123"),
-        status="active",
         is_active=True,
-        is_superuser=True,
     )
     db.add(user)
     db.commit()
@@ -154,12 +152,10 @@ def test_admin(db: Session, test_tenant) -> User:
     user = User(
         email="admin@test.com",
         username="admin",
-        first_name="Admin",
-        last_name="User",
-        role="Admin",
+        full_name="Admin User",
+        role=UserRole.ADMIN,
         tenant_id=test_tenant.id,
         hashed_password=get_password_hash("admin123"),
-        status="active",
         is_active=True,
     )
     db.add(user)
@@ -174,15 +170,11 @@ def test_doctor(db: Session, test_tenant) -> User:
     user = User(
         email="doctor@test.com",
         username="doctor_smith",
-        first_name="John",
-        last_name="Smith",
-        role="Doctor",
+        full_name="John Smith",
+        role=UserRole.DOCTOR,
         tenant_id=test_tenant.id,
         hashed_password=get_password_hash("doctor123"),
-        status="active",
         is_active=True,
-        phone="+1234567891",
-        specialization="General Practitioner",
     )
     db.add(user)
     db.commit()
@@ -196,14 +188,11 @@ def test_doctor_2(db: Session, test_tenant) -> User:
     user = User(
         email="doctor2@test.com",
         username="doctor_jones",
-        first_name="Jane",
-        last_name="Jones",
-        role="Doctor",
+        full_name="Jane Jones",
+        role=UserRole.DOCTOR,
         tenant_id=test_tenant.id,
         hashed_password=get_password_hash("doctor123"),
-        status="active",
         is_active=True,
-        specialization="Cardiologist",
     )
     db.add(user)
     db.commit()
@@ -217,12 +206,10 @@ def test_nurse(db: Session, test_tenant) -> User:
     user = User(
         email="nurse@test.com",
         username="nurse_williams",
-        first_name="Mary",
-        last_name="Williams",
-        role="Nurse",
+        full_name="Mary Williams",
+        role=UserRole.NURSE,
         tenant_id=test_tenant.id,
         hashed_password=get_password_hash("nurse123"),
-        status="active",
         is_active=True,
     )
     db.add(user)
@@ -237,12 +224,10 @@ def test_receptionist(db: Session, test_tenant) -> User:
     user = User(
         email="receptionist@test.com",
         username="receptionist",
-        first_name="Bob",
-        last_name="Johnson",
-        role="Receptionist",
+        full_name="Bob Johnson",
+        role=UserRole.RECEPTIONIST,
         tenant_id=test_tenant.id,
         hashed_password=get_password_hash("receptionist123"),
-        status="active",
         is_active=True,
     )
     db.add(user)
@@ -262,17 +247,16 @@ def test_patient(db: Session, test_tenant) -> Patient:
     patient = Patient(
         first_name="Alice",
         last_name="Doe",
-        birth_date="1990-05-15",
+        date_of_birth=date(1990, 5, 15),
         gender="female",
         email="alice.doe@email.com",
         phone="+1234567892",
         address="456 Patient Street",
         tenant_id=test_tenant.id,
-        status="active",
         blood_type="A+",
-        allergies=["Penicillin"],
-        emergency_contact_name="Bob Doe",
-        emergency_contact_phone="+1234567893",
+        allergies="Penicillin",
+        emergency_contact="Bob Doe",
+        emergency_phone="+1234567893",
     )
     db.add(patient)
     db.commit()
@@ -286,12 +270,11 @@ def test_patient_2(db: Session, test_tenant) -> Patient:
     patient = Patient(
         first_name="Charlie",
         last_name="Brown",
-        birth_date="1985-10-20",
+        date_of_birth=date(1985, 10, 20),
         gender="male",
         email="charlie.brown@email.com",
         phone="+1234567894",
         tenant_id=test_tenant.id,
-        status="active",
         blood_type="O+",
     )
     db.add(patient)
@@ -309,11 +292,11 @@ def test_patients_bulk(db: Session, test_tenant) -> list[Patient]:
         patient = Patient(
             first_name=f"Patient{i}",
             last_name=f"Test{i}",
-            birth_date=f"198{i % 10}-01-01",
+            date_of_birth=date(1980 + i % 10, 1, 1),
             gender="male" if i % 2 == 0 else "female",
             email=f"patient{i}@test.com",
+            phone=f"+123456789{i}",
             tenant_id=test_tenant.id,
-            status="active",
         )
         db.add(patient)
         patients.append(patient)

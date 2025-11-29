@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LabTestTypeCreate(BaseModel):
@@ -32,6 +32,8 @@ class LabTestTypeUpdate(BaseModel):
 
 
 class LabTestTypeResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     tenant_id: int
     code: str
@@ -46,6 +48,3 @@ class LabTestTypeResponse(BaseModel):
     active: bool
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
