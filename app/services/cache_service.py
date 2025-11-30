@@ -117,7 +117,7 @@ class CacheService:
         # Try memory cache first
         if key in self._memory_cache:
             value, expiry = self._memory_cache[key]
-                if expiry is None or datetime.now(datetime.UTC) < expiry:
+            if expiry is None or datetime.now(datetime.UTC) < expiry:
                 self._stats["hits"] += 1
                 self._stats["memory_hits"] += 1
                 return value

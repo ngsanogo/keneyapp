@@ -35,6 +35,7 @@ from app.fhir.utils import operation_outcome
 from app.graphql.schema import create_graphql_router
 from app.routers import (
     auth,
+    batch,
     dashboard,
     documents,
     fhir,
@@ -122,6 +123,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(patients.router, prefix=settings.API_V1_PREFIX)
+app.include_router(batch.router, prefix=settings.API_V1_PREFIX)
 app.include_router(prescriptions.router, prefix=settings.API_V1_PREFIX)
 app.include_router(dashboard.router, prefix=settings.API_V1_PREFIX)
 app.include_router(users.router, prefix=settings.API_V1_PREFIX)
