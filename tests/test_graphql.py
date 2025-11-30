@@ -115,7 +115,7 @@ def test_graphql_basic_queries_with_auth():
         "/graphql", json={"query": "{ apiVersion }"}, headers=headers
     )
     assert version_response.status_code == 200
-    assert version_response.json()["data"]["apiVersion"] == "1.0.0"
+    assert version_response.json()["data"]["apiVersion"] == "3.0.0"  # Current version
 
 
 def test_graphql_me_and_patients_query():
