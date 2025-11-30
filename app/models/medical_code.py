@@ -59,7 +59,9 @@ class MedicalCode(Base):
     parent_code = Column(String(50))  # For hierarchical code systems
     is_active = Column(Integer, default=1)  # Active status
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -106,7 +108,9 @@ class Condition(Base):
     recorded_by_id = Column(Integer, ForeignKey("users.id"))
     recorded_date = Column(DateTime(timezone=True), server_default=func.now())
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -135,7 +139,9 @@ class Observation(Base):
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False, index=True)
 
     # Observation status
-    status = Column(String(20), default="final")  # registered, preliminary, final, amended
+    status = Column(
+        String(20), default="final"
+    )  # registered, preliminary, final, amended
 
     # LOINC coding for observation type
     loinc_code = Column(String(50), nullable=False, index=True)
@@ -158,7 +164,9 @@ class Observation(Base):
     performer_id = Column(Integer, ForeignKey("users.id"))
     notes = Column(Text)
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -187,7 +195,9 @@ class Procedure(Base):
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False, index=True)
 
     # Procedure status
-    status = Column(String(20), default="completed")  # preparation, in-progress, completed
+    status = Column(
+        String(20), default="completed"
+    )  # preparation, in-progress, completed
 
     # CPT coding (US)
     cpt_code = Column(String(50), index=True)
@@ -210,7 +220,9 @@ class Procedure(Base):
     performed_datetime = Column(DateTime, nullable=False)
     performed_by_id = Column(Integer, ForeignKey("users.id"))
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),

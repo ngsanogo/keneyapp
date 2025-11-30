@@ -192,7 +192,10 @@ def test_prescription_to_fhir(db, sample_patient):
     assert fhir_med_request["medicationCodeableConcept"]["text"] == "Metformin"
     assert len(fhir_med_request["dosageInstruction"]) > 0
     assert "500mg" in fhir_med_request["dosageInstruction"][0]["text"]
-    assert "Take with meals" in fhir_med_request["dosageInstruction"][0]["patientInstruction"]
+    assert (
+        "Take with meals"
+        in fhir_med_request["dosageInstruction"][0]["patientInstruction"]
+    )
 
 
 def test_appointment_status_mapping(db, sample_patient):

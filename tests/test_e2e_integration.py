@@ -155,7 +155,9 @@ def authenticated_sessions(api_base_url, test_logger):
     )
 
     # Admin
-    sessions["admin"] = _authenticate(api_base_url, "admin", "admin123", "Admin", test_logger)
+    sessions["admin"] = _authenticate(
+        api_base_url, "admin", "admin123", "Admin", test_logger
+    )
 
     # Doctor
     sessions["doctor"] = _authenticate(
@@ -199,7 +201,9 @@ def _authenticate(
                     "token_received": bool(data.get("access_token")),
                 },
             )
-            test_logger.log_performance(f"auth_{role.lower().replace(' ', '_')}", duration * 1000)
+            test_logger.log_performance(
+                f"auth_{role.lower().replace(' ', '_')}", duration * 1000
+            )
 
             return {
                 "token": data["access_token"],
@@ -236,7 +240,9 @@ class TestE2EHealthChecks:
             assert response.status_code == 200, "Root endpoint should be accessible"
             data = response.json()
 
-            test_logger.log_test("Root Endpoint", "passed", duration, {"response": data})
+            test_logger.log_test(
+                "Root Endpoint", "passed", duration, {"response": data}
+            )
             test_logger.log_performance("root_endpoint_response_time", duration * 1000)
 
         except Exception as e:
@@ -254,7 +260,9 @@ class TestE2EHealthChecks:
             data = response.json()
             assert data.get("status") == "healthy", "Application should be healthy"
 
-            test_logger.log_test("Health Check", "passed", duration, {"health_status": data})
+            test_logger.log_test(
+                "Health Check", "passed", duration, {"health_status": data}
+            )
             test_logger.log_performance("health_check_response_time", duration * 1000)
 
         except Exception as e:
@@ -270,7 +278,9 @@ class TestE2EHealthChecks:
 
             assert response.status_code == 200, "API docs should be accessible"
 
-            test_logger.log_test("API Documentation", "passed", duration, {"accessible": True})
+            test_logger.log_test(
+                "API Documentation", "passed", duration, {"accessible": True}
+            )
 
         except Exception as e:
             test_logger.log_error("API Documentation", str(e))
@@ -280,7 +290,9 @@ class TestE2EHealthChecks:
 class TestE2EPatientWorkflows:
     """Test complete patient management workflows"""
 
-    def test_patient_crud_workflow(self, api_base_url, authenticated_sessions, test_logger):
+    def test_patient_crud_workflow(
+        self, api_base_url, authenticated_sessions, test_logger
+    ):
         """Test complete patient CRUD workflow"""
         admin_session = authenticated_sessions["admin"]
         if not admin_session:
@@ -314,7 +326,9 @@ class TestE2EPatientWorkflows:
             )
             create_duration = time.time() - start_time
 
-            assert response.status_code == 201, f"Patient creation failed: {response.text}"
+            assert (
+                response.status_code == 201
+            ), f"Patient creation failed: {response.text}"
             patient_data = response.json()
             patient_id = patient_data["id"]
 
@@ -407,7 +421,9 @@ class TestE2EPatientWorkflows:
             assert response.status_code == 200, "Patient list failed"
             patients = response.json()
             assert isinstance(patients, list)
-            assert any(p["id"] == patient_id for p in patients), "Created patient should be in list"
+            assert any(
+                p["id"] == patient_id for p in patients
+            ), "Created patient should be in list"
 
             test_logger.log_test(
                 "Patient List",
@@ -449,7 +465,9 @@ class TestE2EPatientWorkflows:
                     delete_duration,
                     {"patient_id": patient_id, "verified_deleted": True},
                 )
-                test_logger.log_performance("patient_delete_time", delete_duration * 1000)
+                test_logger.log_performance(
+                    "patient_delete_time", delete_duration * 1000
+                )
 
             except Exception as e:
                 test_logger.log_error("Patient Delete", str(e))
@@ -459,7 +477,9 @@ class TestE2EPatientWorkflows:
 class TestE2ERBACEnforcement:
     """Test role-based access control enforcement"""
 
-    def test_rbac_patient_access(self, api_base_url, authenticated_sessions, test_logger):
+    def test_rbac_patient_access(
+        self, api_base_url, authenticated_sessions, test_logger
+    ):
         """Test RBAC for patient endpoints"""
         # Receptionist should be able to list patients
         receptionist = authenticated_sessions["receptionist"]
@@ -506,7 +526,9 @@ class TestE2ERBACEnforcement:
                 )
                 duration = time.time() - start_time
 
-                assert response.status_code == 403, "Receptionist should not create patients"
+                assert (
+                    response.status_code == 403
+                ), "Receptionist should not create patients"
 
                 test_logger.log_test(
                     "RBAC: Receptionist blocked from creating patients",
@@ -527,7 +549,9 @@ class TestE2ERBACEnforcement:
 class TestE2ECacheValidation:
     """Test caching behavior"""
 
-    def test_cache_hit_performance(self, api_base_url, authenticated_sessions, test_logger):
+    def test_cache_hit_performance(
+        self, api_base_url, authenticated_sessions, test_logger
+    ):
         """Test cache hit improves performance"""
         admin_session = authenticated_sessions["admin"]
         if not admin_session:
@@ -573,7 +597,9 @@ class TestE2ECacheValidation:
 class TestE2EGraphQL:
     """Test GraphQL endpoints"""
 
-    def test_graphql_patient_query(self, api_base_url, authenticated_sessions, test_logger):
+    def test_graphql_patient_query(
+        self, api_base_url, authenticated_sessions, test_logger
+    ):
         """Test GraphQL patient query"""
         admin_session = authenticated_sessions["admin"]
         if not admin_session:
@@ -631,7 +657,9 @@ class TestE2EMetricsAndMonitoring:
             metrics_text = response.text
 
             # Verify key metrics exist
-            assert "patient_operations_total" in metrics_text, "Patient operations metric missing"
+            assert (
+                "patient_operations_total" in metrics_text
+            ), "Patient operations metric missing"
             assert (
                 "http_requests_total" in metrics_text or "python_info" in metrics_text
             ), "HTTP metrics missing"
@@ -790,7 +818,9 @@ class TestE2ECompleteUserJourneys:
                 appointment_id = apt_response.json().get("id")
                 test_logger.log_info(f"  ✅ Appointment created: ID={appointment_id}")
             else:
-                test_logger.log_info(f"  ⚠️  Appointment creation: {apt_response.status_code}")
+                test_logger.log_info(
+                    f"  ⚠️  Appointment creation: {apt_response.status_code}"
+                )
 
             # Étape 6: ✏️ Modification patient (Enregistrement informations)
             test_logger.log_info("Step 6: ✏️ Updating patient information")
@@ -854,7 +884,9 @@ class TestE2ECompleteUserJourneys:
                     "total_duration_seconds": scenario_duration,
                 },
             )
-            test_logger.log_performance("admin_workflow_duration", scenario_duration * 1000)
+            test_logger.log_performance(
+                "admin_workflow_duration", scenario_duration * 1000
+            )
 
         except Exception as e:
             test_logger.log_error("Admin Complete Workflow", str(e))
@@ -941,7 +973,9 @@ class TestE2ECompleteUserJourneys:
                 scenario_duration,
                 {"steps_completed": 9},
             )
-            test_logger.log_performance("doctor_workflow_duration", scenario_duration * 1000)
+            test_logger.log_performance(
+                "doctor_workflow_duration", scenario_duration * 1000
+            )
 
         except Exception as e:
             test_logger.log_error("Doctor Consultation Workflow", str(e))
@@ -1020,7 +1054,9 @@ class TestE2ECompleteUserJourneys:
 class TestE2EPerformanceAndReliability:
     """Tests de performance et fiabilité pour optimiser l'expérience client"""
 
-    def test_application_response_times(self, api_base_url, authenticated_sessions, test_logger):
+    def test_application_response_times(
+        self, api_base_url, authenticated_sessions, test_logger
+    ):
         """
         Test des temps de réponse pour assurer une expérience utilisateur optimale
 
@@ -1050,7 +1086,9 @@ class TestE2EPerformanceAndReliability:
             duration_ms = (time.time() - start_time) * 1000
 
             status = "✅ PASS" if duration_ms < target_ms else "⚠️ SLOW"
-            test_logger.log_info(f"  {name}: {duration_ms:.2f}ms {status} (target: {target_ms}ms)")
+            test_logger.log_info(
+                f"  {name}: {duration_ms:.2f}ms {status} (target: {target_ms}ms)"
+            )
 
             results.append(
                 {
@@ -1079,7 +1117,9 @@ class TestE2EPerformanceAndReliability:
             {"endpoints_tested": len(results), "within_target": critical_passed},
         )
 
-    def test_concurrent_user_sessions(self, api_base_url, authenticated_sessions, test_logger):
+    def test_concurrent_user_sessions(
+        self, api_base_url, authenticated_sessions, test_logger
+    ):
         """
         Test de sessions utilisateurs concurrentes
 
@@ -1103,11 +1143,15 @@ class TestE2EPerformanceAndReliability:
             except RequestException:
                 return False
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=len(sessions)) as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(sessions)
+        ) as executor:
             results = list(executor.map(make_request, sessions))
 
         success_rate = (sum(results) / len(results)) * 100
-        test_logger.log_info(f"  ✅ Concurrent requests success rate: {success_rate:.1f}%")
+        test_logger.log_info(
+            f"  ✅ Concurrent requests success rate: {success_rate:.1f}%"
+        )
 
         assert success_rate >= 80, "Concurrent session handling below threshold"
 
@@ -1122,7 +1166,9 @@ class TestE2EPerformanceAndReliability:
 class TestE2EBugDetectionAndQuality:
     """Tests pour la détection des bogues et assurance qualité"""
 
-    def test_error_handling_and_validation(self, api_base_url, authenticated_sessions, test_logger):
+    def test_error_handling_and_validation(
+        self, api_base_url, authenticated_sessions, test_logger
+    ):
         """
         Test de gestion d'erreurs pour détecter les bogues
 
@@ -1157,7 +1203,9 @@ class TestE2EBugDetectionAndQuality:
             headers=admin_session["headers"],
             timeout=10,
         )
-        assert response.status_code == 404, "Should return 404 for non-existent resource"
+        assert (
+            response.status_code == 404
+        ), "Should return 404 for non-existent resource"
         test_logger.log_info("    ✅ 404 error properly returned")
 
         # Test 3: Requête sans authentification

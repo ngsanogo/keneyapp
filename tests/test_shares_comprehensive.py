@@ -100,7 +100,9 @@ class TestShareCreation:
         data = response.json()
         assert data["access_pin"] is None
 
-    def test_create_share_with_max_access_count(self, client: TestClient, auth_headers: dict):
+    def test_create_share_with_max_access_count(
+        self, client: TestClient, auth_headers: dict
+    ):
         """Test creating a share with access limit."""
         payload = {
             "patient_id": 1,
@@ -129,7 +131,9 @@ class TestShareCreation:
 class TestShareAccess:
     """Test accessing shared records."""
 
-    def test_access_share_with_valid_token(self, client: TestClient, auth_headers: dict):
+    def test_access_share_with_valid_token(
+        self, client: TestClient, auth_headers: dict
+    ):
         """Test accessing a share with valid token."""
         # Create share first
         create_payload = {
@@ -139,7 +143,9 @@ class TestShareAccess:
             "require_pin": False,
         }
 
-        create_response = client.post("/api/v1/shares/", json=create_payload, headers=auth_headers)
+        create_response = client.post(
+            "/api/v1/shares/", json=create_payload, headers=auth_headers
+        )
 
         if create_response.status_code == 201:
             share_data = create_response.json()
@@ -164,7 +170,9 @@ class TestShareAccess:
             "require_pin": True,
         }
 
-        create_response = client.post("/api/v1/shares/", json=create_payload, headers=auth_headers)
+        create_response = client.post(
+            "/api/v1/shares/", json=create_payload, headers=auth_headers
+        )
 
         if create_response.status_code == 201:
             share_data = create_response.json()
@@ -188,7 +196,9 @@ class TestShareAccess:
             "require_pin": True,
         }
 
-        create_response = client.post("/api/v1/shares/", json=create_payload, headers=auth_headers)
+        create_response = client.post(
+            "/api/v1/shares/", json=create_payload, headers=auth_headers
+        )
 
         if create_response.status_code == 201:
             share_data = create_response.json()
@@ -201,7 +211,9 @@ class TestShareAccess:
 
             assert access_response.status_code in [401, 403]
 
-    def test_access_share_without_required_pin(self, client: TestClient, auth_headers: dict):
+    def test_access_share_without_required_pin(
+        self, client: TestClient, auth_headers: dict
+    ):
         """Test that PIN is required when configured."""
         # Create share with PIN
         create_payload = {
@@ -211,7 +223,9 @@ class TestShareAccess:
             "require_pin": True,
         }
 
-        create_response = client.post("/api/v1/shares/", json=create_payload, headers=auth_headers)
+        create_response = client.post(
+            "/api/v1/shares/", json=create_payload, headers=auth_headers
+        )
 
         if create_response.status_code == 201:
             share_data = create_response.json()
@@ -300,7 +314,9 @@ class TestAccessTracking:
             "require_pin": False,
         }
 
-        create_response = client.post("/api/v1/shares/", json=create_payload, headers=auth_headers)
+        create_response = client.post(
+            "/api/v1/shares/", json=create_payload, headers=auth_headers
+        )
 
         if create_response.status_code == 201:
             share_data = create_response.json()
@@ -330,7 +346,9 @@ class TestAccessTracking:
             "require_pin": False,
         }
 
-        create_response = client.post("/api/v1/shares/", json=create_payload, headers=auth_headers)
+        create_response = client.post(
+            "/api/v1/shares/", json=create_payload, headers=auth_headers
+        )
 
         if create_response.status_code == 201:
             share_data = create_response.json()
@@ -361,7 +379,9 @@ class TestAccessTracking:
             "require_pin": False,
         }
 
-        create_response = client.post("/api/v1/shares/", json=create_payload, headers=auth_headers)
+        create_response = client.post(
+            "/api/v1/shares/", json=create_payload, headers=auth_headers
+        )
 
         if create_response.status_code == 201:
             share_data = create_response.json()
@@ -394,7 +414,9 @@ class TestShareRevocation:
             "expires_in_hours": 48,
         }
 
-        create_response = client.post("/api/v1/shares/", json=create_payload, headers=auth_headers)
+        create_response = client.post(
+            "/api/v1/shares/", json=create_payload, headers=auth_headers
+        )
 
         if create_response.status_code == 201:
             share_data = create_response.json()
@@ -402,7 +424,9 @@ class TestShareRevocation:
             token = share_data["share_token"]
 
             # Revoke share
-            revoke_response = client.delete(f"/api/v1/shares/{share_id}", headers=auth_headers)
+            revoke_response = client.delete(
+                f"/api/v1/shares/{share_id}", headers=auth_headers
+            )
 
             assert revoke_response.status_code in [200, 204]
 
@@ -485,7 +509,9 @@ class TestShareSecurity:
 
         assert response.status_code in [404, 401]
 
-    def test_ip_tracking(self, client: TestClient, auth_headers: dict, db_session: Session):
+    def test_ip_tracking(
+        self, client: TestClient, auth_headers: dict, db_session: Session
+    ):
         """Test that IP address is tracked on access."""
         # Create and access share
         create_payload = {
@@ -495,7 +521,9 @@ class TestShareSecurity:
             "require_pin": False,
         }
 
-        create_response = client.post("/api/v1/shares/", json=create_payload, headers=auth_headers)
+        create_response = client.post(
+            "/api/v1/shares/", json=create_payload, headers=auth_headers
+        )
 
         if create_response.status_code == 201:
             share_data = create_response.json()
@@ -513,7 +541,10 @@ class TestShareSecurity:
 
             if share:
                 # last_accessed_ip should be set (testclient uses 127.0.0.1)
-                assert share.last_accessed_ip is not None or share.last_accessed_ip == "testclient"
+                assert (
+                    share.last_accessed_ip is not None
+                    or share.last_accessed_ip == "testclient"
+                )
 
     def test_consent_required(self, client: TestClient, auth_headers: dict):
         """Test that consent is tracked."""

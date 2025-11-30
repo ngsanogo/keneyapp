@@ -3,7 +3,9 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 
-pytestmark = pytest.mark.skip(reason="Auth fixtures required; enable when test auth is configured")
+pytestmark = pytest.mark.skip(
+    reason="Auth fixtures required; enable when test auth is configured"
+)
 
 client = TestClient(app)
 

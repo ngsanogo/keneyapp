@@ -58,7 +58,9 @@ class TestEmailNotification:
     def test_send_email_failure(self, mock_smtp):
         """Test email sending failure handling."""
         # Setup mock to raise exception
-        mock_smtp.return_value.__enter__.side_effect = Exception("SMTP connection failed")
+        mock_smtp.return_value.__enter__.side_effect = Exception(
+            "SMTP connection failed"
+        )
 
         email_service = EmailNotification(
             smtp_host="smtp.test.com",
@@ -68,7 +70,9 @@ class TestEmailNotification:
             smtp_from="noreply@keneyapp.com",
         )
 
-        result = email_service.send(to_email="patient@test.com", subject="Test", body="Test")
+        result = email_service.send(
+            to_email="patient@test.com", subject="Test", body="Test"
+        )
 
         assert result is False
 

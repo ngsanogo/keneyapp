@@ -55,7 +55,9 @@ def db_engine():
 @pytest.fixture(scope="function")
 def db(db_engine) -> Generator[Session, None, None]:
     """Crée une session de base de données pour un test"""
-    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
+    TestingSessionLocal = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_engine
+    )
 
     session = TestingSessionLocal()
 
@@ -526,7 +528,9 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "api: marque les tests d'API")
     config.addinivalue_line("markers", "security: marque les tests de sécurité")
     config.addinivalue_line("markers", "performance: marque les tests de performance")
-    config.addinivalue_line("markers", "smoke: smoke tests that require a running server")
+    config.addinivalue_line(
+        "markers", "smoke: smoke tests that require a running server"
+    )
 
 
 # ============================================================================
@@ -539,7 +543,8 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         # Ajouter marker 'unit' par défaut si aucun autre marker
         if not any(
-            marker in item.keywords for marker in ["integration", "api", "slow", "performance"]
+            marker in item.keywords
+            for marker in ["integration", "api", "slow", "performance"]
         ):
             item.add_marker(pytest.mark.unit)
 

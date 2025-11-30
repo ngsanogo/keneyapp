@@ -106,7 +106,9 @@ def get_dashboard_stats(
             )
             .label("cancelled"),
             func.count()
-            .filter(Appointment.tenant_id == tenant_id, Appointment.created_at >= week_ago)
+            .filter(
+                Appointment.tenant_id == tenant_id, Appointment.created_at >= week_ago
+            )
             .label("recent"),
         )
         .select_from(Appointment)
@@ -118,7 +120,9 @@ def get_dashboard_stats(
         db.query(
             func.count().filter(Prescription.tenant_id == tenant_id).label("total"),
             func.count()
-            .filter(Prescription.tenant_id == tenant_id, Prescription.created_at >= week_ago)
+            .filter(
+                Prescription.tenant_id == tenant_id, Prescription.created_at >= week_ago
+            )
             .label("recent"),
         )
         .select_from(Prescription)

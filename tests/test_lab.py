@@ -123,7 +123,9 @@ def test_lab_test_type_uniqueness_per_tenant(
     db.rollback()
 
 
-def test_lab_test_type_update(db: Session, test_tenant: Tenant, test_lab_test_type: LabTestType):
+def test_lab_test_type_update(
+    db: Session, test_tenant: Tenant, test_lab_test_type: LabTestType
+):
     """Test updating lab test type fields."""
     update_data = LabTestTypeUpdate(
         name="Updated CBC Name",

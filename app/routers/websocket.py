@@ -129,7 +129,9 @@ async def websocket_endpoint(
 
                 # Handle ping
                 if message_type == "ping":
-                    await manager.send_json_message({"pong": True}, user_id, message_type="pong")
+                    await manager.send_json_message(
+                        {"pong": True}, user_id, message_type="pong"
+                    )
 
                 # Handle join room
                 elif message_type == "join_room":

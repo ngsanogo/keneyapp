@@ -2,7 +2,7 @@
 Prescription model for managing patient prescriptions and medications.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
@@ -31,9 +31,13 @@ class Prescription(Base):
     frequency = Column(String, nullable=False)
     duration = Column(String, nullable=False)
     instructions = Column(Text)
-    prescribed_date = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    prescribed_date = Column(
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    )
     refills = Column(Integer, default=0)
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -45,3 +49,21 @@ class Prescription(Base):
     patient = relationship("Patient", back_populates="prescriptions")
     doctor = relationship("User", back_populates="prescriptions")
     tenant = relationship(Tenant, back_populates="prescriptions")
+    refill_requests = relationship(
+        "PrescriptionRefillRequest",
+        foreign_keys="[PrescriptionRefillRequest.prescription_id]",
+        back_populates="prescription",
+        cascade="all, delete-orphan",
+    )
+
+    @property
+    def is_active(self) -> bool:
+        """Check if prescription is still active based on prescribed date and duration."""
+        if not self.prescribed_date or not self.duration:
+            return True
+        try:
+            duration_days = int("".join(filter(str.isdigit, self.duration)))
+            expiry_date = self.prescribed_date + timedelta(days=duration_days)
+            return datetime.now(timezone.utc) < expiry_date
+        except (ValueError, AttributeError):
+            return True

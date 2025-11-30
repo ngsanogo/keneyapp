@@ -73,7 +73,9 @@ def verify_oidc_token(token: str, provider: str = "google") -> Optional[Dict[str
         )
 
 
-async def get_oauth_authorization_url(provider: str, redirect_uri: str) -> Dict[str, str]:
+async def get_oauth_authorization_url(
+    provider: str, redirect_uri: str
+) -> Dict[str, str]:
     """
     Generate authorization URL for OAuth flow.
 
@@ -93,9 +95,13 @@ async def get_oauth_authorization_url(provider: str, redirect_uri: str) -> Dict[
                 detail=f"OAuth provider '{provider}' not configured",
             )
 
-        redirect_uri = redirect_uri or f"{settings.APP_URL}/auth/oauth/callback/{provider}"
+        redirect_uri = (
+            redirect_uri or f"{settings.APP_URL}/auth/oauth/callback/{provider}"
+        )
 
-        authorization_url, state = await client.create_authorization_url(redirect_uri=redirect_uri)
+        authorization_url, state = await client.create_authorization_url(
+            redirect_uri=redirect_uri
+        )
 
         return {"authorization_url": authorization_url, "state": state}
 

@@ -208,7 +208,9 @@ def test_analytics_audit_logging(client: TestClient, analytics_headers, db_sessi
     from app.models.audit_log import AuditLog
 
     # Clear existing audit logs for this test
-    db_session.query(AuditLog).filter(AuditLog.resource_type == "analytics_metrics").delete()
+    db_session.query(AuditLog).filter(
+        AuditLog.resource_type == "analytics_metrics"
+    ).delete()
     db_session.commit()
 
     # Make request
@@ -221,7 +223,9 @@ def test_analytics_audit_logging(client: TestClient, analytics_headers, db_sessi
 
     # Verify audit log was created
     audit_log = (
-        db_session.query(AuditLog).filter(AuditLog.resource_type == "analytics_metrics").first()
+        db_session.query(AuditLog)
+        .filter(AuditLog.resource_type == "analytics_metrics")
+        .first()
     )
 
     assert audit_log is not None

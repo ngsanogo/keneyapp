@@ -73,7 +73,9 @@ class AuthenticatedTaskSet(TaskSet):
                 self.access_token = data.get("access_token")
                 return True
             else:
-                print(f"Authentication failed: {response.status_code} - {response.text}")
+                print(
+                    f"Authentication failed: {response.status_code} - {response.text}"
+                )
                 return False
         except Exception as e:
             print(f"Authentication error: {e}")
@@ -152,7 +154,9 @@ class PatientTasks(AuthenticatedTaskSet):
             "address": "123 Test Street",
             "medical_history": "Test medical history",
             "allergies": "None",
-            "blood_group": random.choice(["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]),
+            "blood_group": random.choice(
+                ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]
+            ),
         }
         self.client.post(
             "/api/v1/patients/",

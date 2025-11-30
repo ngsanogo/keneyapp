@@ -59,7 +59,9 @@ def test_validate_production_settings_allows_hardened_configuration(monkeypatch)
         settings, "DATABASE_URL", "postgresql://prod_user:secret@prod-db:5432/keneyapp"
     )
     monkeypatch.setattr(settings, "APP_URL", "https://keneyapp.example.com")
-    monkeypatch.setattr(settings, "ENCRYPTION_KEY", "a-very-long-encryption-key-for-production-32chars")
+    monkeypatch.setattr(
+        settings, "ENCRYPTION_KEY", "a-very-long-encryption-key-for-production-32chars"
+    )
     monkeypatch.setattr(settings, "ALLOWED_ORIGINS", ["https://keneyapp.example.com"])
 
     validate_production_settings()
@@ -147,4 +149,6 @@ def test_enforce_production_allowed_origins_empty_check():
     with pytest.raises(ValueError) as exc_info:
         test_settings.enforce_production_safety()
 
-    assert "ALLOWED_ORIGINS must include at least one origin in production" in str(exc_info.value)
+    assert "ALLOWED_ORIGINS must include at least one origin in production" in str(
+        exc_info.value
+    )

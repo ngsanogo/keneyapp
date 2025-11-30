@@ -44,7 +44,9 @@ class Appointment(Base):
     )
     reason = Column(String, nullable=False)
     notes = Column(Text)
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -56,3 +58,8 @@ class Appointment(Base):
     patient = relationship("Patient", back_populates="appointments")
     doctor = relationship("User", back_populates="appointments")
     tenant = relationship(Tenant, back_populates="appointments")
+    reminders = relationship(
+        "AppointmentReminder",
+        back_populates="appointment",
+        cascade="all, delete-orphan",
+    )

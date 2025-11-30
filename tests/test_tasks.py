@@ -8,7 +8,9 @@ def test_generate_patient_report_runs():
         mock_db = MagicMock()
         mock_session_local.return_value = mock_db
         mock_patient_instance = MagicMock()
-        mock_db.query.return_value.filter.return_value.first.return_value = mock_patient_instance
+        mock_db.query.return_value.filter.return_value.first.return_value = (
+            mock_patient_instance
+        )
         result = generate_patient_report(42)
         assert result["status"] == "generated"
         assert result["patient_id"] == 42

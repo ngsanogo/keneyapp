@@ -20,7 +20,9 @@ class RecommendationService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_patient_care_recommendations(self, patient_id: int, tenant_id: int) -> List[Dict]:
+    def get_patient_care_recommendations(
+        self, patient_id: int, tenant_id: int
+    ) -> List[Dict]:
         """
         Generate personalized care recommendations for a patient.
 
@@ -54,7 +56,9 @@ class RecommendationService:
         )
 
         if last_appointment:
-            days_since = (datetime.now().date() - last_appointment.appointment_date).days
+            days_since = (
+                datetime.now().date() - last_appointment.appointment_date
+            ).days
             if days_since > 180:
                 recommendations.append(
                     {
@@ -164,7 +168,9 @@ class RecommendationService:
         recommendations = []
         for hour in range(working_start, working_end):
             if hour not in occupied_slots:
-                slot_time = datetime.combine(date.date(), datetime.min.time()).replace(hour=hour)
+                slot_time = datetime.combine(date.date(), datetime.min.time()).replace(
+                    hour=hour
+                )
                 recommendations.append(
                     {
                         "time": slot_time.strftime("%H:%M"),
@@ -332,7 +338,9 @@ class RecommendationService:
                     "description": f"Cancellation rate is {int((no_show_rate / total_recent) * 100)}%. Consider implementing reminder system.",
                     "action": "enable_reminders",
                     "metadata": {
-                        "cancellation_rate": round((no_show_rate / total_recent) * 100, 1),
+                        "cancellation_rate": round(
+                            (no_show_rate / total_recent) * 100, 1
+                        ),
                         "total_appointments": total_recent,
                     },
                 }

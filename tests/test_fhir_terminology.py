@@ -27,7 +27,9 @@ class TestFHIRPrescriptionWithATC:
         prescription.frequency = "twice daily"
         prescription.duration = "30 days"
         prescription.instructions = "Take with meals"
-        prescription.prescribed_date = datetime(2024, 1, 15, 14, 30, tzinfo=timezone.utc)
+        prescription.prescribed_date = datetime(
+            2024, 1, 15, 14, 30, tzinfo=timezone.utc
+        )
 
         fhir_result = FHIRConverter.prescription_to_fhir(prescription)
 
@@ -56,7 +58,9 @@ class TestFHIRPrescriptionWithATC:
         prescription.frequency = "once daily"
         prescription.duration = "90 days"
         prescription.instructions = None
-        prescription.prescribed_date = datetime(2024, 1, 15, 14, 30, tzinfo=timezone.utc)
+        prescription.prescribed_date = datetime(
+            2024, 1, 15, 14, 30, tzinfo=timezone.utc
+        )
 
         fhir_result = FHIRConverter.prescription_to_fhir(prescription)
 
@@ -164,7 +168,9 @@ class TestFHIRObservationConverter:
         observation.reference_range_low = "90"
         observation.reference_range_high = "130"
         observation.interpretation = "normal"
-        observation.effective_datetime = datetime(2024, 1, 15, 10, 30, tzinfo=timezone.utc)
+        observation.effective_datetime = datetime(
+            2024, 1, 15, 10, 30, tzinfo=timezone.utc
+        )
         observation.issued_datetime = datetime(2024, 1, 15, 10, 35, tzinfo=timezone.utc)
         observation.notes = "Measured while seated"
 

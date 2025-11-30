@@ -68,9 +68,13 @@ class RequestValidationMiddleware(BaseHTTPMiddleware):
 
     def _compile_patterns(self):
         """Compile regex patterns for performance"""
-        self.sql_regex = [re.compile(p, re.IGNORECASE) for p in self.SQL_INJECTION_PATTERNS]
+        self.sql_regex = [
+            re.compile(p, re.IGNORECASE) for p in self.SQL_INJECTION_PATTERNS
+        ]
         self.xss_regex = [re.compile(p, re.IGNORECASE) for p in self.XSS_PATTERNS]
-        self.path_regex = [re.compile(p, re.IGNORECASE) for p in self.PATH_TRAVERSAL_PATTERNS]
+        self.path_regex = [
+            re.compile(p, re.IGNORECASE) for p in self.PATH_TRAVERSAL_PATTERNS
+        ]
         self.cmd_regex = [re.compile(p) for p in self.COMMAND_INJECTION_PATTERNS]
 
     async def dispatch(self, request: Request, call_next: Callable):
@@ -83,7 +87,8 @@ class RequestValidationMiddleware(BaseHTTPMiddleware):
                     raise HTTPException(
                         status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                         detail=(
-                            f"Request too large. " f"Maximum size: {self.max_request_size} bytes"
+                            f"Request too large. "
+                            f"Maximum size: {self.max_request_size} bytes"
                         ),
                     )
 
@@ -107,7 +112,9 @@ class RequestValidationMiddleware(BaseHTTPMiddleware):
             raise
         except Exception as e:
             logger.error(f"Request validation error: {e}")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid request")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid request"
+            )
 
     def _validate_params(self, params: Dict[str, Any], param_type: str):
         """Validate parameters for malicious patterns"""
@@ -121,7 +128,8 @@ class RequestValidationMiddleware(BaseHTTPMiddleware):
             for pattern in self.sql_regex:
                 if pattern.search(value_str):
                     logger.warning(
-                        f"SQL injection attempt in {param_type} " f"parameter '{key}': {value_str}"
+                        f"SQL injection attempt in {param_type} "
+                        f"parameter '{key}': {value_str}"
                     )
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
@@ -132,7 +140,8 @@ class RequestValidationMiddleware(BaseHTTPMiddleware):
             for pattern in self.xss_regex:
                 if pattern.search(value_str):
                     logger.warning(
-                        f"XSS attempt in {param_type} " f"parameter '{key}': {value_str}"
+                        f"XSS attempt in {param_type} "
+                        f"parameter '{key}': {value_str}"
                     )
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
@@ -143,7 +152,8 @@ class RequestValidationMiddleware(BaseHTTPMiddleware):
             for pattern in self.path_regex:
                 if pattern.search(value_str):
                     logger.warning(
-                        f"Path traversal attempt in {param_type} " f"parameter '{key}': {value_str}"
+                        f"Path traversal attempt in {param_type} "
+                        f"parameter '{key}': {value_str}"
                     )
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,

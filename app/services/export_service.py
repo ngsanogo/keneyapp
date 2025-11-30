@@ -44,7 +44,9 @@ class ExportService:
         for row in data:
             # Filter out None values and convert to string
             filtered_row = {
-                k: str(v) if v is not None else "" for k, v in row.items() if k in columns
+                k: str(v) if v is not None else ""
+                for k, v in row.items()
+                if k in columns
             }
             writer.writerow(filtered_row)
 
@@ -64,7 +66,9 @@ class ExportService:
         return json.dumps(data, indent=2, default=str)
 
     @staticmethod
-    def export_patients_to_pdf(patients: List[dict], title: str = "Patient Report") -> bytes:
+    def export_patients_to_pdf(
+        patients: List[dict], title: str = "Patient Report"
+    ) -> bytes:
         """
         Export patient data to PDF format.
 
@@ -132,7 +136,14 @@ class ExportService:
             # Create table
             table = Table(
                 table_data,
-                colWidths=[0.5 * inch, 1.5 * inch, 1 * inch, 0.7 * inch, 1.5 * inch, 1 * inch],
+                colWidths=[
+                    0.5 * inch,
+                    1.5 * inch,
+                    1 * inch,
+                    0.7 * inch,
+                    1.5 * inch,
+                    1 * inch,
+                ],
             )
 
             # Add style to table
@@ -149,7 +160,12 @@ class ExportService:
                         ("GRID", (0, 0), (-1, -1), 1, colors.black),
                         ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
                         ("FONTSIZE", (0, 1), (-1, -1), 8),
-                        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+                        (
+                            "ROWBACKGROUNDS",
+                            (0, 1),
+                            (-1, -1),
+                            [colors.white, colors.lightgrey],
+                        ),
                     ]
                 )
             )

@@ -46,7 +46,9 @@ class LabValidationService:
             age -= 1
         return float(age)
 
-    def validate_test_for_patient(self, test_type: LabTestType, patient: Patient) -> None:
+    def validate_test_for_patient(
+        self, test_type: LabTestType, patient: Patient
+    ) -> None:
         """
         Validate that a test type is appropriate for a patient.
 

@@ -245,7 +245,9 @@ class FHIRConverter:
             "dosageInstruction": [
                 {
                     "text": f"{prescription.dosage} {prescription.frequency} for {prescription.duration}",
-                    "timing": {"repeat": {"frequency": 1, "period": 1, "periodUnit": "d"}},
+                    "timing": {
+                        "repeat": {"frequency": 1, "period": 1, "periodUnit": "d"}
+                    },
                 }
             ],
         }
@@ -390,7 +392,9 @@ class FHIRConverter:
         if observation.value_quantity and observation.value_unit:
             fhir_observation["valueQuantity"] = {
                 "value": (
-                    float(observation.value_quantity) if observation.value_quantity else None
+                    float(observation.value_quantity)
+                    if observation.value_quantity
+                    else None
                 ),
                 "unit": observation.value_unit,
             }

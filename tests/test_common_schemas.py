@@ -77,7 +77,9 @@ def test_sort_params_validation():
 
 def test_filter_params():
     """Test filter parameters"""
-    params = FilterParams(search="test", date_from=date(2024, 1, 1), date_to=date(2024, 12, 31))
+    params = FilterParams(
+        search="test", date_from=date(2024, 1, 1), date_to=date(2024, 12, 31)
+    )
     assert params.search == "test"
     assert params.date_from == date(2024, 1, 1)
     assert params.date_to == date(2024, 12, 31)
@@ -127,7 +129,9 @@ def test_success_response():
 
 def test_error_response():
     """Test error response"""
-    details = [ErrorDetail(field="email", message="Invalid email format", code="invalid_email")]
+    details = [
+        ErrorDetail(field="email", message="Invalid email format", code="invalid_email")
+    ]
 
     response = ErrorResponse(error="Validation failed", details=details)
 
@@ -140,7 +144,9 @@ def test_error_response():
 
 def test_bulk_operation_request():
     """Test bulk operation request"""
-    request = BulkOperationRequest(ids=[1, 2, 3], action="delete", params={"reason": "cleanup"})
+    request = BulkOperationRequest(
+        ids=[1, 2, 3], action="delete", params={"reason": "cleanup"}
+    )
     assert request.ids == [1, 2, 3]
     assert request.action == "delete"
     assert request.params == {"reason": "cleanup"}

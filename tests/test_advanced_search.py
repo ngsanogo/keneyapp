@@ -61,7 +61,9 @@ def sample_patients(db: Session, test_tenant):
     return patients
 
 
-def test_advanced_search_text_query(client: TestClient, auth_headers_doctor, sample_patients):
+def test_advanced_search_text_query(
+    client: TestClient, auth_headers_doctor, sample_patients
+):
     """Test text search across multiple fields"""
     response = client.post(
         "/api/v1/patients/search/advanced",
@@ -76,7 +78,9 @@ def test_advanced_search_text_query(client: TestClient, auth_headers_doctor, sam
     assert any("john" in item["first_name"].lower() for item in data["items"])
 
 
-def test_advanced_search_gender_filter(client: TestClient, auth_headers_doctor, sample_patients):
+def test_advanced_search_gender_filter(
+    client: TestClient, auth_headers_doctor, sample_patients
+):
     """Test gender filtering"""
     response = client.post(
         "/api/v1/patients/search/advanced",
@@ -92,7 +96,9 @@ def test_advanced_search_gender_filter(client: TestClient, auth_headers_doctor, 
         assert item["gender"] == "male"
 
 
-def test_advanced_search_age_range(client: TestClient, auth_headers_doctor, sample_patients):
+def test_advanced_search_age_range(
+    client: TestClient, auth_headers_doctor, sample_patients
+):
     """Test age range filtering"""
     response = client.post(
         "/api/v1/patients/search/advanced",
@@ -114,7 +120,9 @@ def test_advanced_search_age_range(client: TestClient, auth_headers_doctor, samp
         assert 40 <= age <= 60
 
 
-def test_advanced_search_location(client: TestClient, auth_headers_doctor, sample_patients):
+def test_advanced_search_location(
+    client: TestClient, auth_headers_doctor, sample_patients
+):
     """Test location-based search"""
     response = client.post(
         "/api/v1/patients/search/advanced",
@@ -129,7 +137,9 @@ def test_advanced_search_location(client: TestClient, auth_headers_doctor, sampl
     # Note: Address field contains full address, so city search uses ILIKE
 
 
-def test_advanced_search_medical_flags(client: TestClient, auth_headers_doctor, sample_patients):
+def test_advanced_search_medical_flags(
+    client: TestClient, auth_headers_doctor, sample_patients
+):
     """Test medical history and allergy flags"""
     # Search for patients with allergies
     response = client.post(
@@ -154,7 +164,9 @@ def test_advanced_search_medical_flags(client: TestClient, auth_headers_doctor, 
     assert data["total"] >= 1
 
 
-def test_advanced_search_date_range(client: TestClient, auth_headers_doctor, sample_patients):
+def test_advanced_search_date_range(
+    client: TestClient, auth_headers_doctor, sample_patients
+):
     """Test created_at date range filtering"""
     today = datetime.now().date()
     yesterday = today - timedelta(days=1)
@@ -173,7 +185,9 @@ def test_advanced_search_date_range(client: TestClient, auth_headers_doctor, sam
     # Should return patients created in the range
 
 
-def test_advanced_search_sorting(client: TestClient, auth_headers_doctor, sample_patients):
+def test_advanced_search_sorting(
+    client: TestClient, auth_headers_doctor, sample_patients
+):
     """Test custom sorting"""
     response = client.post(
         "/api/v1/patients/search/advanced",
@@ -192,7 +206,9 @@ def test_advanced_search_sorting(client: TestClient, auth_headers_doctor, sample
     assert names == sorted(names)
 
 
-def test_advanced_search_pagination(client: TestClient, auth_headers_doctor, sample_patients):
+def test_advanced_search_pagination(
+    client: TestClient, auth_headers_doctor, sample_patients
+):
     """Test pagination parameters"""
     response = client.post(
         "/api/v1/patients/search/advanced",
@@ -211,7 +227,9 @@ def test_advanced_search_pagination(client: TestClient, auth_headers_doctor, sam
     assert len(data["items"]) <= 2
 
 
-def test_advanced_search_combined_filters(client: TestClient, auth_headers_doctor, sample_patients):
+def test_advanced_search_combined_filters(
+    client: TestClient, auth_headers_doctor, sample_patients
+):
     """Test multiple filters combined"""
     response = client.post(
         "/api/v1/patients/search/advanced",
@@ -235,7 +253,9 @@ def test_advanced_search_combined_filters(client: TestClient, auth_headers_docto
         assert age >= 30
 
 
-def test_advanced_search_empty_results(client: TestClient, auth_headers_doctor, sample_patients):
+def test_advanced_search_empty_results(
+    client: TestClient, auth_headers_doctor, sample_patients
+):
     """Test search with no matching results"""
     response = client.post(
         "/api/v1/patients/search/advanced",

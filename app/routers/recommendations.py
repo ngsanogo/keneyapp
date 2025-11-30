@@ -24,13 +24,17 @@ from app.services.recommendation_service import RecommendationService
 router = APIRouter(prefix="/recommendations", tags=["recommendations"])
 
 
-@router.get("/patient/{patient_id}/care", response_model=List[PatientCareRecommendation])
+@router.get(
+    "/patient/{patient_id}/care", response_model=List[PatientCareRecommendation]
+)
 @limiter.limit("50/minute")
 async def get_patient_care_recommendations(
     patient_id: int,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])),
+    current_user: User = Depends(
+        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])
+    ),
 ):
     """
     Get AI-powered care recommendations for a specific patient.
@@ -133,7 +137,9 @@ async def check_medication_interactions(
     new_medication: str,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])),
+    current_user: User = Depends(
+        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])
+    ),
 ):
     """
     Check for potential interactions between a new medication and patient's current prescriptions.

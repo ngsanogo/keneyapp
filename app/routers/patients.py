@@ -55,7 +55,9 @@ def create_patient(
     patient_data: PatientCreate,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])),
+    current_user: User = Depends(
+        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])
+    ),
 ):
     """
     Create a new patient record.
@@ -105,7 +107,9 @@ def create_patient(
     # Cache management
     serialized_patient = serialize_patient_dict(db_patient)
 
-    cache_key = cache_service.generate_key("patients:detail", current_user.tenant_id, db_patient.id)
+    cache_key = cache_service.generate_key(
+        "patients:detail", current_user.tenant_id, db_patient.id
+    )
     cache_service.set(cache_key, serialized_patient, ttl=PATIENT_DETAIL_TTL_SECONDS)
 
     # Invalidate list caches
@@ -133,7 +137,9 @@ def get_patients(
     filters: FilterParams = Depends(),
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
+        require_roles(
+            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
+        )
     ),
 ):
     """
@@ -240,7 +246,9 @@ def get_patient(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
+        require_roles(
+            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
+        )
     ),
 ):
     """
@@ -255,7 +263,9 @@ def get_patient(
     Returns:
         Patient record
     """
-    cache_key = cache_service.generate_key("patients:detail", current_user.tenant_id, patient_id)
+    cache_key = cache_service.generate_key(
+        "patients:detail", current_user.tenant_id, patient_id
+    )
     cached_patient = cache_service.get(cache_key)
     if cached_patient is not None:
         log_audit_event(
@@ -286,7 +296,9 @@ def get_patient(
             details={"reason": "not_found"},
             request=request,
         )
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
+        )
 
     log_audit_event(
         db=db,
@@ -327,7 +339,9 @@ def update_patient(
     """
     service = PatientService(db)
     try:
-        patient = service.update_patient(patient_id, patient_data, current_user.tenant_id)
+        patient = service.update_patient(
+            patient_id, patient_data, current_user.tenant_id
+        )
         db.commit()
     except PatientNotFoundError:
         log_audit_event(
@@ -341,7 +355,9 @@ def update_patient(
             details={"reason": "not_found"},
             request=request,
         )
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
+        )
     except DuplicateResourceError as exc:
         log_audit_event(
             db=db,
@@ -367,12 +383,16 @@ def update_patient(
         status="success",
         user_id=current_user.id,
         username=current_user.username,
-        details={"updated_fields": list(patient_data.model_dump(exclude_unset=True).keys())},
+        details={
+            "updated_fields": list(patient_data.model_dump(exclude_unset=True).keys())
+        },
         request=request,
     )
 
     serialized_patient = serialize_patient_dict(patient)
-    cache_key = cache_service.generate_key("patients:detail", current_user.tenant_id, patient.id)
+    cache_key = cache_service.generate_key(
+        "patients:detail", current_user.tenant_id, patient.id
+    )
     cache_service.set(cache_key, serialized_patient, ttl=PATIENT_DETAIL_TTL_SECONDS)
     cache_service.delete_pattern(f"patients:list:{current_user.tenant_id}:*")
     cache_service.delete_pattern("dashboard:*")
@@ -422,7 +442,9 @@ def delete_patient(
             details={"reason": "not_found"},
             request=request,
         )
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
+        )
 
     log_audit_event(
         db=db,
@@ -438,7 +460,9 @@ def delete_patient(
     cache_service.delete_pattern(f"patients:list:{current_user.tenant_id}:*")
     cache_service.delete_pattern("dashboard:*")
     cache_service.delete(
-        cache_service.generate_key("patients:detail", current_user.tenant_id, patient_id)
+        cache_service.generate_key(
+            "patients:detail", current_user.tenant_id, patient_id
+        )
     )
 
     patient_operations_total.labels(operation="delete").inc()
@@ -462,7 +486,9 @@ def advanced_patient_search(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
+        require_roles(
+            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
+        )
     ),
 ):
     """
@@ -526,7 +552,8 @@ def advanced_patient_search(
                 [
                     k
                     for k, v in filters.model_dump(exclude_unset=True).items()
-                    if v is not None and k not in ["page", "page_size", "sort_by", "sort_order"]
+                    if v is not None
+                    and k not in ["page", "page_size", "sort_by", "sort_order"]
                 ]
             ),
             "results_count": len(patients),
@@ -589,11 +616,18 @@ def bulk_delete_patients(
 
             # Clear cache for deleted patient
             cache_service.delete(
-                cache_service.generate_key("patients:detail", current_user.tenant_id, patient_id)
+                cache_service.generate_key(
+                    "patients:detail", current_user.tenant_id, patient_id
+                )
             )
         except PatientNotFoundError:
             failed += 1
-            errors.append({"patient_id": patient_id, "error": "Patient not found or access denied"})
+            errors.append(
+                {
+                    "patient_id": patient_id,
+                    "error": "Patient not found or access denied",
+                }
+            )
         except Exception as exc:
             failed += 1
             errors.append({"patient_id": patient_id, "error": str(exc)})
@@ -645,7 +679,9 @@ def export_patients(
     search: str = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
+        require_roles(
+            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
+        )
     ),
 ):
     """
@@ -754,3 +790,209 @@ def export_patients(
         media_type=media_type,
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
+
+
+@router.get(
+    "/{patient_id}/history",
+    response_model=list,
+)
+@limiter.limit("50/minute")
+def get_patient_medical_history(
+    patient_id: int,
+    request: Request,
+    start_date: str = None,
+    end_date: str = None,
+    event_types: list[str] = None,
+    sort: str = "desc",
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])
+    ),
+):
+    """
+    Get comprehensive medical history timeline for a patient.
+
+    Aggregates appointments, prescriptions, lab results, documents,
+    and notes into a unified timeline view.
+
+    Args:
+        patient_id: Patient ID
+        request: Incoming request
+        start_date: Optional start date filter (YYYY-MM-DD)
+        end_date: Optional end date filter (YYYY-MM-DD)
+        event_types: Optional list of event types to include
+        sort: Sort order ('asc' or 'desc')
+        db: Database session
+        current_user: Authenticated user
+
+    Returns:
+        List of timeline events
+    """
+    from app.models.patient import Patient
+    from app.models.appointment import Appointment
+    from app.models.prescription import Prescription
+    from app.models.lab_result import LabResult
+    from app.models.medical_document import MedicalDocument
+    from sqlalchemy import desc as sql_desc, asc as sql_asc
+
+    # Verify patient exists and belongs to tenant
+    patient = (
+        db.query(Patient)
+        .filter(Patient.id == patient_id, Patient.tenant_id == current_user.tenant_id)
+        .first()
+    )
+
+    if not patient:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Patient not found",
+        )
+
+    timeline_events = []
+
+    # Parse date filters if provided
+    start_dt = datetime.fromisoformat(start_date) if start_date else None
+    end_dt = datetime.fromisoformat(end_date) if end_date else None
+
+    # Fetch appointments
+    if not event_types or "appointment" in event_types:
+        appt_query = db.query(Appointment).filter(
+            Appointment.patient_id == patient_id,
+            Appointment.tenant_id == current_user.tenant_id,
+        )
+        if start_dt:
+            appt_query = appt_query.filter(Appointment.appointment_date >= start_dt)
+        if end_dt:
+            appt_query = appt_query.filter(Appointment.appointment_date <= end_dt)
+
+        for appt in appt_query.all():
+            doctor = db.query(User).filter(User.id == appt.doctor_id).first()
+            timeline_events.append(
+                {
+                    "id": f"appt_{appt.id}",
+                    "date": appt.appointment_date.isoformat(),
+                    "type": "appointment",
+                    "title": f"Appointment - {appt.reason}",
+                    "description": appt.notes or f"Appointment for {appt.reason}",
+                    "doctor": doctor.full_name if doctor else "Unknown",
+                    "status": appt.status.value,
+                    "metadata": {
+                        "duration_minutes": appt.duration_minutes,
+                        "appointment_id": appt.id,
+                    },
+                }
+            )
+
+    # Fetch prescriptions
+    if not event_types or "prescription" in event_types:
+        presc_query = db.query(Prescription).filter(
+            Prescription.patient_id == patient_id,
+            Prescription.tenant_id == current_user.tenant_id,
+        )
+        if start_dt:
+            presc_query = presc_query.filter(Prescription.created_at >= start_dt)
+        if end_dt:
+            presc_query = presc_query.filter(Prescription.created_at <= end_dt)
+
+        for presc in presc_query.all():
+            doctor = db.query(User).filter(User.id == presc.doctor_id).first()
+            timeline_events.append(
+                {
+                    "id": f"presc_{presc.id}",
+                    "date": presc.created_at.isoformat(),
+                    "type": "prescription",
+                    "title": f"Prescription - {presc.medication_name}",
+                    "description": f"{presc.dosage}, {presc.frequency}. Duration: {presc.duration} days",
+                    "doctor": doctor.full_name if doctor else "Unknown",
+                    "status": "active" if presc.is_active else "inactive",
+                    "metadata": {
+                        "medication": presc.medication_name,
+                        "dosage": presc.dosage,
+                        "prescription_id": presc.id,
+                    },
+                }
+            )
+
+    # Fetch lab results (if model exists)
+    if not event_types or "lab_result" in event_types:
+        try:
+            lab_query = db.query(LabResult).filter(
+                LabResult.patient_id == patient_id,
+                LabResult.tenant_id == current_user.tenant_id,
+            )
+            if start_dt:
+                lab_query = lab_query.filter(LabResult.test_date >= start_dt)
+            if end_dt:
+                lab_query = lab_query.filter(LabResult.test_date <= end_dt)
+
+            for lab in lab_query.all():
+                timeline_events.append(
+                    {
+                        "id": f"lab_{lab.id}",
+                        "date": lab.test_date.isoformat(),
+                        "type": "lab_result",
+                        "title": f"Lab Test - {lab.test_name}",
+                        "description": f"Result: {lab.result_value} {lab.unit or ''}",
+                        "doctor": lab.ordered_by,
+                        "status": (
+                            lab.status.value if hasattr(lab, "status") else "completed"
+                        ),
+                        "metadata": {
+                            "test_name": lab.test_name,
+                            "result": lab.result_value,
+                            "lab_id": lab.id,
+                        },
+                    }
+                )
+        except Exception:
+            pass  # Lab result model might not exist yet
+
+    # Fetch medical documents
+    if not event_types or "document" in event_types:
+        try:
+            doc_query = db.query(MedicalDocument).filter(
+                MedicalDocument.patient_id == patient_id,
+                MedicalDocument.tenant_id == current_user.tenant_id,
+            )
+            if start_dt:
+                doc_query = doc_query.filter(MedicalDocument.created_at >= start_dt)
+            if end_dt:
+                doc_query = doc_query.filter(MedicalDocument.created_at <= end_dt)
+
+            for doc in doc_query.all():
+                timeline_events.append(
+                    {
+                        "id": f"doc_{doc.id}",
+                        "date": doc.created_at.isoformat(),
+                        "type": "document",
+                        "title": f"Document - {doc.document_type}",
+                        "description": doc.description
+                        or f"{doc.document_type} document uploaded",
+                        "status": "available",
+                        "metadata": {
+                            "document_type": doc.document_type,
+                            "file_path": doc.file_path,
+                            "document_id": doc.id,
+                        },
+                    }
+                )
+        except Exception:
+            pass  # Document model might have different structure
+
+    # Sort events
+    timeline_events.sort(key=lambda x: x["date"], reverse=(sort == "desc"))
+
+    # Audit log
+    log_audit_event(
+        db=db,
+        action="READ",
+        resource_type="patient_history",
+        resource_id=patient_id,
+        status="success",
+        user_id=current_user.id,
+        username=current_user.username,
+        details={"event_count": len(timeline_events)},
+        request=request,
+    )
+
+    return timeline_events

@@ -266,7 +266,9 @@ class TestDocumentRetrieval:
             doc_id = upload_response.json()["id"]
 
             # Download document
-            response = client.get(f"/api/v1/documents/{doc_id}/download", headers=auth_headers)
+            response = client.get(
+                f"/api/v1/documents/{doc_id}/download", headers=auth_headers
+            )
 
             assert response.status_code == 200
             assert len(response.content) > 0
@@ -329,7 +331,9 @@ class TestDocumentMetadata:
 class TestDocumentSecurity:
     """Test document security and access control."""
 
-    def test_cannot_access_other_tenant_document(self, client: TestClient, auth_headers: dict):
+    def test_cannot_access_other_tenant_document(
+        self, client: TestClient, auth_headers: dict
+    ):
         """Test that documents are tenant-isolated."""
         # Try to access non-existent document from another tenant
         response = client.get("/api/v1/documents/99999", headers=auth_headers)
@@ -395,12 +399,16 @@ class TestDocumentDeletion:
             doc_id = upload_response.json()["id"]
 
             # Delete document
-            response = client.delete(f"/api/v1/documents/{doc_id}", headers=auth_headers)
+            response = client.delete(
+                f"/api/v1/documents/{doc_id}", headers=auth_headers
+            )
 
             assert response.status_code in [200, 204]
 
             # Verify soft delete (document should not be retrievable)
-            get_response = client.get(f"/api/v1/documents/{doc_id}", headers=auth_headers)
+            get_response = client.get(
+                f"/api/v1/documents/{doc_id}", headers=auth_headers
+            )
             assert get_response.status_code in [404, 410]
 
 

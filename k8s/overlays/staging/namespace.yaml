@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: keneyapp-staging
-  labels:
-    name: keneyapp-staging
-    environment: staging

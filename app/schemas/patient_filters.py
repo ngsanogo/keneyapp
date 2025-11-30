@@ -40,26 +40,42 @@ class PatientAdvancedFilters(BaseModel):
     gender: Optional[GenderFilter] = Field(None, description="Filter by gender")
     min_age: Optional[int] = Field(None, ge=0, le=150, description="Minimum age")
     max_age: Optional[int] = Field(None, ge=0, le=150, description="Maximum age")
-    date_of_birth_from: Optional[date] = Field(None, description="Date of birth from (inclusive)")
-    date_of_birth_to: Optional[date] = Field(None, description="Date of birth to (inclusive)")
+    date_of_birth_from: Optional[date] = Field(
+        None, description="Date of birth from (inclusive)"
+    )
+    date_of_birth_to: Optional[date] = Field(
+        None, description="Date of birth to (inclusive)"
+    )
 
     # Location
-    city: Optional[str] = Field(None, min_length=1, max_length=100, description="Filter by city")
+    city: Optional[str] = Field(
+        None, min_length=1, max_length=100, description="Filter by city"
+    )
     country: Optional[str] = Field(
         None, min_length=1, max_length=100, description="Filter by country"
     )
 
     # Medical history flags
-    has_allergies: Optional[bool] = Field(None, description="Filter patients with allergies")
+    has_allergies: Optional[bool] = Field(
+        None, description="Filter patients with allergies"
+    )
     has_medical_history: Optional[bool] = Field(
         None, description="Filter patients with medical history"
     )
 
     # Date range filters
-    created_from: Optional[datetime] = Field(None, description="Filter records created from date")
-    created_to: Optional[datetime] = Field(None, description="Filter records created to date")
-    updated_from: Optional[datetime] = Field(None, description="Filter records updated from date")
-    updated_to: Optional[datetime] = Field(None, description="Filter records updated to date")
+    created_from: Optional[datetime] = Field(
+        None, description="Filter records created from date"
+    )
+    created_to: Optional[datetime] = Field(
+        None, description="Filter records created to date"
+    )
+    updated_from: Optional[datetime] = Field(
+        None, description="Filter records updated from date"
+    )
+    updated_to: Optional[datetime] = Field(
+        None, description="Filter records updated to date"
+    )
 
     # Sorting
     sort_by: str = Field(
@@ -105,5 +121,6 @@ class PatientExportRequest(BaseModel):
         description="Specific fields to include (if None, all fields included)",
     )
     include_sensitive: bool = Field(
-        False, description="Include sensitive medical data (requires special permission)"
+        False,
+        description="Include sensitive medical data (requires special permission)",
     )
