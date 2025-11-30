@@ -1,13 +1,24 @@
-# KeneyApp
+# KeneyApp (Minimal Backend)
 
 [![CI](https://github.com/ngsanogo/keneyapp/actions/workflows/ci.yml/badge.svg)](https://github.com/ngsanogo/keneyapp/actions/workflows/ci.yml)
 [![Security Scan](https://github.com/ngsanogo/keneyapp/actions/workflows/security-scan.yml/badge.svg)](https://github.com/ngsanogo/keneyapp/actions/workflows/security-scan.yml)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![React](https://img.shields.io/badge/react-18.0+-blue.svg)](https://react.dev/)
+[!-- Frontend removed in minimal profile --]
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-KeneyApp is a modern healthcare data management platform built with **Python**, **React (TypeScript)**, and **PostgreSQL**. It provides an end-to-end system for managing patient records, appointments, prescriptions, and hospital workflows.
+KeneyApp is a healthcare data platform focused on a clean, simple, and explicit FastAPI backend. This minimal profile removes the frontend and heavy ops (Kubernetes, Terraform, Grafana/Prometheus) to prioritize readability, simplicity, and quick local development.
+
+## Quick Start (Local)
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+Open docs at `http://localhost:8000/api/v1/docs`.
 
 ## 🤝 Community & Collaboration
 
