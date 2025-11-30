@@ -35,20 +35,16 @@ from app.fhir.utils import operation_outcome
 from app.graphql.schema import create_graphql_router
 from app.routers import (
     analytics,
-    appointments,
     auth,
     dashboard,
     documents,
     fhir,
-    # french_healthcare,  # Temporarily disabled - UUID migration pending
     lab,
     messages,
-    notifications,
     oauth,
     patients,
     prescriptions,
     recommendations,
-    reminders,
     shares,
     subscriptions,
     tenants,
@@ -56,7 +52,6 @@ from app.routers import (
     users,
     websocket,
 )
-from app.routers import status as status_router
 
 logger = logging.getLogger(__name__)
 
@@ -128,15 +123,12 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(patients.router, prefix=settings.API_V1_PREFIX)
-app.include_router(status_router.router, prefix=settings.API_V1_PREFIX)
-app.include_router(appointments.router, prefix=settings.API_V1_PREFIX)
 app.include_router(prescriptions.router, prefix=settings.API_V1_PREFIX)
 app.include_router(dashboard.router, prefix=settings.API_V1_PREFIX)
 app.include_router(users.router, prefix=settings.API_V1_PREFIX)
 app.include_router(fhir.router, prefix=settings.API_V1_PREFIX)
 app.include_router(oauth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(tenants.router, prefix=settings.API_V1_PREFIX)
-app.include_router(appointments.router, prefix=settings.API_V1_PREFIX)
 app.include_router(messages.router, prefix=settings.API_V1_PREFIX)
 app.include_router(documents.router, prefix=settings.API_V1_PREFIX)
 app.include_router(shares.router, prefix=settings.API_V1_PREFIX)
@@ -145,8 +137,6 @@ app.include_router(subscriptions.router, prefix=settings.API_V1_PREFIX)
 app.include_router(lab.router, prefix=settings.API_V1_PREFIX)
 app.include_router(analytics.router, prefix=settings.API_V1_PREFIX, tags=["analytics"])
 app.include_router(recommendations.router, prefix=settings.API_V1_PREFIX)
-app.include_router(notifications.router, prefix=settings.API_V1_PREFIX)
-app.include_router(reminders.router, prefix=settings.API_V1_PREFIX)
 # app.include_router(french_healthcare.router, prefix=settings.API_V1_PREFIX)  # Temporarily disabled
 
 # Include WebSocket router (no prefix, handles /ws endpoints)
