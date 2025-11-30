@@ -26,6 +26,7 @@ from app.main import app
 from app.models.patient import Patient
 from app.models.tenant import Tenant
 from app.models.user import User, UserRole
+from app.core.dependencies import get_current_active_user  # NEW: for auth override
 
 # ============================================================================
 # DATABASE FIXTURES
@@ -69,8 +70,11 @@ def db(db_engine) -> Generator[Session, None, None]:
 
 
 @pytest.fixture(scope="function")
-def client(db: Session) -> Generator[TestClient, None, None]:
-    """Crée un client de test FastAPI avec override de la DB"""
+def client(db: Session, test_doctor: User) -> Generator[TestClient, None, None]:
+    """Crée un client de test FastAPI avec override de la DB et auth simplifiée.
+
+    Auth simplifiée: toute requête protégée retourne `test_doctor` sans validation JWT.
+    """
 
     def override_get_db():
         try:
@@ -78,7 +82,11 @@ def client(db: Session) -> Generator[TestClient, None, None]:
         finally:
             pass
 
+    def override_active_user():
+        return test_doctor
+
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_active_user] = override_active_user
 
     with TestClient(app) as test_client:
         yield test_client
