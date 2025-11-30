@@ -10,18 +10,9 @@ from app.main import app
 from app.models.user import UserRole
 
 
-@pytest.fixture
-def analytics_headers(auth_headers):
-    """Use standard auth headers for analytics tests"""
-    return auth_headers
-
-
-def test_get_dashboard_metrics(client: TestClient, analytics_headers):
+def test_get_dashboard_metrics(client: TestClient):
     """Test dashboard metrics endpoint"""
-    response = client.get(
-        "/api/v1/analytics/metrics",
-        headers=analytics_headers,
-    )
+    response = client.get("/api/v1/analytics/metrics")
 
     assert response.status_code == 200
     data = response.json()
@@ -37,11 +28,11 @@ def test_get_dashboard_metrics(client: TestClient, analytics_headers):
     assert isinstance(data["appointments_today"], int)
 
 
-def test_get_patient_trend_default_period(client: TestClient, analytics_headers):
+def test_get_patient_trend_default_period(client: TestClient):
     """Test patient trend with default 30-day period"""
     response = client.get(
         "/api/v1/analytics/patient-trend",
-        headers=analytics_headers,
+        
     )
 
     assert response.status_code == 200
@@ -57,11 +48,11 @@ def test_get_patient_trend_default_period(client: TestClient, analytics_headers)
     assert len(data["labels"]) == 31
 
 
-def test_get_patient_trend_custom_period(client: TestClient, analytics_headers):
+def test_get_patient_trend_custom_period(client: TestClient):
     """Test patient trend with custom 7-day period"""
     response = client.get(
         "/api/v1/analytics/patient-trend?period=7d",
-        headers=analytics_headers,
+        
     )
 
     assert response.status_code == 200
@@ -75,11 +66,11 @@ def test_get_patient_trend_custom_period(client: TestClient, analytics_headers):
         datetime.strptime(label, "%Y-%m-%d")
 
 
-def test_get_appointment_stats(client: TestClient, analytics_headers):
+def test_get_appointment_stats(client: TestClient):
     """Test appointment statistics endpoint"""
     response = client.get(
         "/api/v1/analytics/appointments?period=7d",
-        headers=analytics_headers,
+        
     )
 
     assert response.status_code == 200
@@ -100,11 +91,11 @@ def test_get_appointment_stats(client: TestClient, analytics_headers):
     assert len(data["labels"]) == len(data["cancelled"])
 
 
-def test_get_gender_distribution(client: TestClient, analytics_headers):
+def test_get_gender_distribution(client: TestClient):
     """Test gender distribution endpoint"""
     response = client.get(
         "/api/v1/analytics/gender-distribution",
-        headers=analytics_headers,
+        
     )
 
     assert response.status_code == 200
@@ -136,14 +127,14 @@ def test_analytics_endpoints_require_authentication(client: TestClient):
         assert response.status_code == 401
 
 
-def test_analytics_rate_limiting(client: TestClient, analytics_headers):
+def test_analytics_rate_limiting(client: TestClient):
     """Test that rate limiting is applied to analytics endpoints"""
     # Make multiple rapid requests to trigger rate limit
     responses = []
     for _ in range(105):  # Exceeds 100/minute limit
         response = client.get(
             "/api/v1/analytics/metrics",
-            headers=analytics_headers,
+            
         )
         responses.append(response.status_code)
 
@@ -187,12 +178,12 @@ def test_analytics_rbac_permissions(client: TestClient, db_session):
         assert response.status_code in [403, 401]
 
 
-def test_patient_trend_empty_data(client: TestClient, analytics_headers, db_session):
+def test_patient_trend_empty_data(client: TestClient, db_session):
     """Test patient trend when no data exists"""
     # This test assumes a clean database or mocked scenario
     response = client.get(
         "/api/v1/analytics/patient-trend?period=7d",
-        headers=analytics_headers,
+        
     )
 
     assert response.status_code == 200
@@ -203,7 +194,7 @@ def test_patient_trend_empty_data(client: TestClient, analytics_headers, db_sess
     assert all(isinstance(v, int) for v in data["values"])
 
 
-def test_analytics_audit_logging(client: TestClient, analytics_headers, db_session):
+def test_analytics_audit_logging(client: TestClient, db_session):
     """Test that analytics access is logged in audit trail"""
     from app.models.audit_log import AuditLog
 
@@ -216,7 +207,7 @@ def test_analytics_audit_logging(client: TestClient, analytics_headers, db_sessi
     # Make request
     response = client.get(
         "/api/v1/analytics/metrics",
-        headers=analytics_headers,
+        
     )
 
     assert response.status_code == 200

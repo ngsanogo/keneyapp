@@ -94,6 +94,24 @@ def client(db: Session, test_doctor: User) -> Generator[TestClient, None, None]:
     app.dependency_overrides.clear()
 
 
+@pytest.fixture(scope="function")
+def unauthenticated_client(db: Session) -> Generator[TestClient, None, None]:
+    """Crée un client de test FastAPI sans auth override pour tester l'authentification."""
+
+    def override_get_db():
+        try:
+            yield db
+        finally:
+            pass
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    with TestClient(app) as test_client:
+        yield test_client
+
+    app.dependency_overrides.clear()
+
+
 # ============================================================================
 # TENANT FIXTURES
 # ============================================================================

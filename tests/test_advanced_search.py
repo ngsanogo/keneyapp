@@ -272,9 +272,9 @@ def test_advanced_search_empty_results(
     assert data["items"] == []
 
 
-def test_advanced_search_requires_authentication(client: TestClient):
+def test_advanced_search_requires_authentication(unauthenticated_client: TestClient):
     """Test that endpoint requires authentication"""
-    response = client.post(
+    response = unauthenticated_client.post(
         "/api/v1/patients/search/advanced",
         json={"search": "test"},
     )
