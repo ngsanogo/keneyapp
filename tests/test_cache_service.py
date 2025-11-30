@@ -16,7 +16,7 @@ def cache():
     service = CacheService()
     service.redis_client = None  # Force memory-only mode for tests
     service._memory_cache = {}
-    service.stats = {
+    service._stats = {
         "hits": 0,
         "misses": 0,
         "memory_hits": 0,
@@ -33,15 +33,15 @@ def test_set_and_get(cache):
 
     value = cache.get("test:key")
     assert value == "test_value"
-    assert cache.stats["sets"] == 1
-    assert cache.stats["hits"] == 1
+    assert cache._stats["sets"] == 1
+    assert cache._stats["hits"] == 1
 
 
 def test_get_nonexistent(cache):
     """Test get with non-existent key"""
     value = cache.get("nonexistent:key")
     assert value is None
-    assert cache.stats["misses"] == 1
+    assert cache._stats["misses"] == 1
 
 
 def test_get_with_default(cache):
@@ -57,7 +57,7 @@ def test_delete(cache):
 
     cache.delete("test:key")
     assert not cache.exists("test:key")
-    assert cache.stats["deletes"] == 1
+    assert cache._stats["deletes"] == 1
 
 
 def test_exists(cache):
@@ -123,7 +123,7 @@ def test_cached_decorator(cache):
     """Test caching decorator"""
     call_count = 0
 
-    @cache.cached(prefix="expensive", ttl=60)
+    @cache.cached(key_prefix="expensive", ttl=60)
     def expensive_function(x, y):
         nonlocal call_count
         call_count += 1

@@ -2,7 +2,7 @@
 Batch operations router for bulk patient management with PHI encryption
 """
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -215,10 +215,10 @@ async def batch_update_patients(
     summary="Delete multiple patients atomically"
 )
 async def batch_delete_patients(
-    patient_ids: List[str],
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
+    patient_ids: List[str] = Query(..., description="List of patient IDs to delete"),
 ):
     """
     Delete multiple patients in a single atomic transaction.

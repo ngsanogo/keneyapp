@@ -56,8 +56,8 @@ class RequestValidationMiddleware(BaseHTTPMiddleware):
     ]
 
     COMMAND_INJECTION_PATTERNS = [
-        r"[;&|`$]",  # Shell metacharacters
-        r"\$\([^\)]*\)",  # Command substitution
+        r"[;&|`]",  # Shell metacharacters (removed $ to allow phone numbers)
+        r"\$\(",  # Command substitution
         r"`[^`]*`",  # Backtick command execution
     ]
 

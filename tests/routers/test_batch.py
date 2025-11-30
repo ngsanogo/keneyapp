@@ -157,9 +157,6 @@ class TestBatchPatients:
         assert patient2_dict["email"] == "newemail@example.com"
     def test_batch_update_nonexistent_patient(self, client, auth_headers_doctor):
         """Test batch update with non-existent patient."""
-        headers = auth_headers_doctor
-        headers = {"Authorization": f"Bearer {test_user_token}"}
-        
         updates = [
             {
                 "id": "00000000-0000-0000-0000-000000000000",
@@ -170,7 +167,7 @@ class TestBatchPatients:
         response = client.put(
             "/api/v1/batch/patients",
             json=updates,
-            headers=headers
+            headers=auth_headers_doctor
         )
         
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -203,7 +200,7 @@ class TestBatchPatients:
         
         response = client.delete(
             "/api/v1/batch/patients",
-            json=patient_ids,
+            params={"patient_ids": patient_ids},
             headers=headers
         )
         
@@ -229,7 +226,7 @@ class TestBatchPatients:
         
         response = client.delete(
             "/api/v1/batch/patients",
-            json=patient_ids,
+            params={"patient_ids": patient_ids},
             headers=headers
         )
         
@@ -238,18 +235,18 @@ class TestBatchPatients:
         assert data["deleted"] == 1
         assert data["requested"] == 2
 
-    def test_batch_operations_require_auth(self, client):
+    def test_batch_operations_require_auth(self, unauthenticated_client):
         """Test that batch operations require authentication."""
         # POST without auth
-        response = client.post("/api/v1/batch/patients", json=[])
+        response = unauthenticated_client.post("/api/v1/batch/patients", json=[])
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         
         # PUT without auth
-        response = client.put("/api/v1/batch/patients", json=[])
+        response = unauthenticated_client.put("/api/v1/batch/patients", json=[])
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         
         # DELETE without auth
-        response = client.delete("/api/v1/batch/patients", json=[])
+        response = unauthenticated_client.delete("/api/v1/batch/patients", params={"patient_ids": []})
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
     def test_batch_operations_tenant_isolation(self, client, auth_headers_doctor, test_patient, db):
         """Test that batch operations respect tenant isolation."""
@@ -279,9 +276,6 @@ class TestBatchPatients:
         db_session.commit()
         db_session.refresh(other_patient)
         
-        headers = auth_headers_doctor
-        headers = {"Authorization": f"Bearer {test_user_token}"}
-        
         # Try to update patient from other tenant
         updates = [
             {
@@ -293,7 +287,7 @@ class TestBatchPatients:
         response = client.put(
             "/api/v1/batch/patients",
             json=updates,
-            headers=headers
+            headers=auth_headers_doctor
         )
         
         # Should fail - patient not found in current tenant
@@ -303,10 +297,12 @@ class TestBatchPatients:
         headers = auth_headers_doctor
         headers = {"Authorization": f"Bearer {test_user_token}"}
         
+    def test_batch_create_empty_list(self, client, auth_headers_doctor):
+        """Test batch creation with empty list."""
         response = client.post(
             "/api/v1/batch/patients",
             json=[],
-            headers=headers
+            headers=auth_headers_doctor
         )
         
         assert response.status_code == status.HTTP_201_CREATED
@@ -314,18 +310,16 @@ class TestBatchPatients:
         assert data["created"] == 0
         assert data["total"] == 0
         assert data["patients"] == []
+
     def test_batch_operations_rate_limiting(self, client, auth_headers_doctor):
         """Test that batch operations have rate limiting."""
-        headers = auth_headers_doctor
-        headers = {"Authorization": f"Bearer {test_user_token}"}
-        
         # Rate limit is 10/minute for batch operations
         # Make 11 requests rapidly
         for i in range(11):
             response = client.post(
                 "/api/v1/batch/patients",
                 json=[],
-                headers=headers
+                headers=auth_headers_doctor
             )
             if i < 10:
                 assert response.status_code in [status.HTTP_201_CREATED, status.HTTP_429_TOO_MANY_REQUESTS]

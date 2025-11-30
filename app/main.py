@@ -34,6 +34,7 @@ from app.core.validation import RequestValidationMiddleware
 from app.fhir.utils import operation_outcome
 from app.graphql.schema import create_graphql_router
 from app.routers import (
+    # appointments,  # Disabled: missing appointment_service.py
     auth,
     batch,
     dashboard,
@@ -123,6 +124,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(patients.router, prefix=settings.API_V1_PREFIX)
+# app.include_router(appointments.router, prefix=settings.API_V1_PREFIX)  # Disabled: missing service
 app.include_router(batch.router, prefix=settings.API_V1_PREFIX)
 app.include_router(prescriptions.router, prefix=settings.API_V1_PREFIX)
 app.include_router(dashboard.router, prefix=settings.API_V1_PREFIX)

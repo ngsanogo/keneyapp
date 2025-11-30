@@ -6,7 +6,7 @@ Provides intelligent caching strategies and cache warming
 import hashlib
 import json
 import pickle
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 import redis
@@ -117,7 +117,7 @@ class CacheService:
         # Try memory cache first
         if key in self._memory_cache:
             value, expiry = self._memory_cache[key]
-            if expiry is None or datetime.now(datetime.UTC) < expiry:
+            if expiry is None or datetime.now(timezone.utc) < expiry:
                 self._stats["hits"] += 1
                 self._stats["memory_hits"] += 1
                 return value
@@ -156,10 +156,11 @@ class CacheService:
         """
         expiry = None
         if ttl:
-                expiry = datetime.now(datetime.UTC) + timedelta(seconds=ttl)
+                expiry = datetime.now(timezone.utc) + timedelta(seconds=ttl)
 
         # Add to memory cache
         self._add_to_memory_cache(key, value, expiry)
+        self._stats["sets"] += 1
 
         # Add to Redis
         if not memory_only and self.redis_client:
@@ -169,7 +170,6 @@ class CacheService:
                     self.redis_client.setex(key, ttl, data)
                 else:
                     self.redis_client.set(key, data)
-                self._stats["sets"] += 1
                 return True
             except Exception as e:
                 logger.error(f"Redis set error for key {key}: {e}")
@@ -194,12 +194,13 @@ class CacheService:
         # Remove from memory cache
         if key in self._memory_cache:
             del self._memory_cache[key]
+        
+        self._stats["deletes"] += 1
 
         # Remove from Redis
         if self.redis_client:
             try:
                 self.redis_client.delete(key)
-                self._stats["deletes"] += 1
                 return True
             except Exception as e:
                 logger.error(f"Redis delete error for key {key}: {e}")

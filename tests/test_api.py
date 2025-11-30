@@ -181,7 +181,9 @@ def test_authenticated_patient_workflow():
         headers=headers,
     )
     assert list_response.status_code == 200
-    patients = list_response.json()
+    response_data = list_response.json()
+    assert "items" in response_data
+    patients = response_data["items"]
     assert any(p["id"] == patient_id for p in patients)
 
 
