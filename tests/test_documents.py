@@ -6,6 +6,7 @@ Covers both router handlers and document_service happy paths using the in-memory
 from __future__ import annotations
 
 import json
+import uuid
 from datetime import date
 from typing import Generator
 
@@ -40,8 +41,8 @@ def test_documents_full_flow(
     db.refresh(tenant)
 
     doctor = User(
-        email="doctor@test.com",
-        username="doctor_smith",
+        email=f"doctor_{uuid.uuid4().hex[:8]}@test.com",
+        username=f"doctor_{uuid.uuid4().hex[:8]}",
         full_name="John Smith",
         role=UserRole.DOCTOR,
         tenant_id=tenant.id,

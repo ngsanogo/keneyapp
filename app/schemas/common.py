@@ -51,7 +51,7 @@ class FilterParams(BaseModel):
     def validate_date_range(cls, v, info):
         """Ensure date_to is after date_from"""
         if v and info.data.get("date_from") and v < info.data["date_from"]:
-            raise ValueError("date_to must be after date_from")
+            raise ValueError("date_from must be before date_to")
         return v
 
 

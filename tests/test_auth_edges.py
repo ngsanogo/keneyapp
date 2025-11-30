@@ -96,35 +96,19 @@ def test_login_lockout_after_failed_attempts(client: TestClient, db: Session):
     assert locked.json()["detail"] == "Account locked due to failed login attempts"
 
 
-def test_mfa_disable_invalid_code(client: TestClient, db: Session):
-    user = _get_admin(db)
-    if not user:
-        client.post(
-            "/api/v1/auth/login", data={"username": "admin", "password": "admin123"}
-        )
-        user = _get_admin(db)
-    assert user is not None
-
+def test_mfa_disable_invalid_code(client: TestClient, db: Session, test_doctor: User):
+    """Test disabling MFA with invalid code fails"""
+    user = test_doctor  # Use the user that client fixture will return
+    
     # Enable MFA with a known secret
     user.mfa_enabled = True
     user.mfa_secret = "JBSWY3DPEHPK3PXP"  # base32 for "Hello!" style secret
     db.commit()
+    db.refresh(user)
 
-    # Build a valid JWT for this user
-    token = create_access_token(
-        data={
-            "sub": user.username,
-            "role": user.role.value,
-            "tenant_id": user.tenant_id,
-        }
-    )
-
-    headers = {"Authorization": f"Bearer {token}"}
-
-    # Send an invalid code
+    # Send an invalid code (no need for JWT - client fixture handles auth)
     resp = client.post(
         "/api/v1/auth/mfa/disable",
-        headers=headers,
         json={"code": "000000"},
     )
     assert resp.status_code == 400
