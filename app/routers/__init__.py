@@ -3,7 +3,6 @@ API routers for KeneyApp.
 """
 
 from app.routers import (
-    appointments,
     auth,
     dashboard,
     patients,
@@ -15,7 +14,6 @@ from app.routers import (
 __all__ = [
     "auth",
     "patients",
-    "appointments",
     "prescriptions",
     "dashboard",
     "users",
