@@ -1,0 +1,43 @@
+# Production Dockerfile for KeneyApp backend (Gunicorn + UvicornWorker)
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    APP_HOME=/app
+
+WORKDIR $APP_HOME
+
+# System deps
+RUN apt-get update && apt-get install -y build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies
+COPY requirements.prod.txt requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir gunicorn
+
+# Copy app sources
+COPY app ./app
+COPY alembic ./alembic
+COPY alembic.ini ./
+
+# Create non-root user
+RUN useradd -m appuser && chown -R appuser:appuser $APP_HOME
+USER appuser
+
+# Expose
+EXPOSE 8000
+
+# Healthcheck
+HEALTHCHECK --interval=10s --timeout=3s --start-period=15s --retries=5 \
+  CMD curl -fsS http://127.0.0.1:8000/health || exit 1
+
+# Run migrations then start Gunicorn
+CMD alembic upgrade head && \
+    gunicorn app.main:app \
+      --workers 3 \
+      --worker-class uvicorn.workers.UvicornWorker \
+      --bind 0.0.0.0:8000 \
+      --timeout 60 \
+      --keep-alive 30 \
+      --max-requests 1000 \
+      --max-requests-jitter 50

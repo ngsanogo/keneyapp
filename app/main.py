@@ -165,6 +165,11 @@ def health_check():
     """Health check endpoint for monitoring."""
     return {"status": "healthy"}
 
+@app.get("/ready")
+def ready_check():
+    """Readiness endpoint for orchestrators to know when app is ready."""
+    return {"ready": True}
+
 
 @app.get("/metrics")
 def metrics():
