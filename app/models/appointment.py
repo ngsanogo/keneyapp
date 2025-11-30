@@ -58,8 +58,4 @@ class Appointment(Base):
     patient = relationship("Patient", back_populates="appointments")
     doctor = relationship("User", back_populates="appointments")
     tenant = relationship(Tenant, back_populates="appointments")
-    reminders = relationship(
-        "AppointmentReminder",
-        back_populates="appointment",
-        cascade="all, delete-orphan",
-    )
+    # reminders relationship removed in minimal backend scope
