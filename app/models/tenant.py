@@ -55,7 +55,7 @@ class Tenant(Base):
     modules = relationship(
         "TenantModule", back_populates="tenant", cascade="all, delete-orphan"
     )
-    notifications = relationship("Notification", back_populates="tenant")
+    # notifications relationship removed in minimal backend scope
 
 
 class TenantModule(Base):
