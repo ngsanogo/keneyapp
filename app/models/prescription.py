@@ -49,12 +49,7 @@ class Prescription(Base):
     patient = relationship("Patient", back_populates="prescriptions")
     doctor = relationship("User", back_populates="prescriptions")
     tenant = relationship(Tenant, back_populates="prescriptions")
-    refill_requests = relationship(
-        "PrescriptionRefillRequest",
-        foreign_keys="[PrescriptionRefillRequest.prescription_id]",
-        back_populates="prescription",
-        cascade="all, delete-orphan",
-    )
+    # refill_requests relationship removed in minimal backend scope
 
     @property
     def is_active(self) -> bool:
