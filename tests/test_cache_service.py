@@ -147,11 +147,11 @@ def test_cached_decorator(cache):
 
 def test_warm_cache(cache):
     """Test cache warming"""
-    data = {
-        "key1": "value1",
-        "key2": "value2",
-        "key3": "value3",
-    }
+    data = [
+        ("key1", "value1"),
+        ("key2", "value2"),
+        ("key3", "value3"),
+    ]
 
     cache.warm_cache(data, ttl=120)
 
@@ -193,7 +193,7 @@ def test_clear_all(cache):
 
 def test_lru_eviction(cache):
     """Test LRU eviction in memory cache"""
-    cache.max_memory_items = 5
+    cache._memory_cache_max_size = 5
 
     # Add 10 items
     for i in range(10):
