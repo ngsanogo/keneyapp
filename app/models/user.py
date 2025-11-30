@@ -59,10 +59,7 @@ class User(Base):
     tenant = relationship(Tenant, back_populates="users")
     appointments = relationship("Appointment", back_populates="doctor")
     prescriptions = relationship("Prescription", back_populates="doctor")
-    notifications = relationship("Notification", back_populates="user")
-    notification_preference = relationship(
-        "NotificationPreference", back_populates="user", uselist=False
-    )
+    # notification relationships removed in minimal backend scope
     # Relationships to messages are provided via backref on Message to avoid early class resolution issues
     # TODO: Create HealthcareProfessionalCPS model before uncommenting
     # cps_credential = relationship(
