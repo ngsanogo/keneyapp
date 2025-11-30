@@ -77,9 +77,7 @@ class Patient(Base):
     # Relationships
     appointments = relationship("Appointment", back_populates="patient")
     prescriptions = relationship("Prescription", back_populates="patient")
-    refill_requests = relationship(
-        "PrescriptionRefillRequest", back_populates="patient"
-    )
+    # refill_requests relationship removed in minimal backend scope
     tenant = relationship(Tenant, back_populates="patients")
     documents = relationship("MedicalDocument", back_populates="patient")
     # Temporarily disabled - French healthcare UUID migration pending
