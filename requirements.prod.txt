@@ -24,7 +24,7 @@ pydantic-settings==2.12.0
 email-validator==2.3.0
 
 # Caching and Background Tasks
-redis==7.0.1
+redis==7.1.0
 celery==5.5.3
 
 # Rate Limiting
