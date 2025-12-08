@@ -58,11 +58,7 @@ def upgrade() -> None:
     op.create_index('idx_prescriptions_patient', 'prescriptions', ['patient_id'], unique=False)
     op.create_index('idx_prescriptions_doctor', 'prescriptions', ['doctor_id'], unique=False)
     op.create_index('idx_prescriptions_date', 'prescriptions', ['prescribed_date'], unique=False)
-    
-    # Lab result indexes
-    op.create_index('idx_lab_results_patient', 'lab_results', ['patient_id'], unique=False)
-    op.create_index('idx_lab_results_date', 'lab_results', ['test_date'], unique=False)
-    
+
     # User indexes for auth queries
     op.create_index('idx_users_username', 'users', ['username'], unique=True)
     op.create_index('idx_users_email', 'users', ['email'], unique=True)
@@ -102,11 +98,7 @@ def downgrade() -> None:
     op.drop_index('idx_prescriptions_patient', table_name='prescriptions')
     op.drop_index('idx_prescriptions_doctor', table_name='prescriptions')
     op.drop_index('idx_prescriptions_date', table_name='prescriptions')
-    
-    # Lab result indexes
-    op.drop_index('idx_lab_results_patient', table_name='lab_results')
-    op.drop_index('idx_lab_results_date', table_name='lab_results')
-    
+
     # User indexes
     op.drop_index('idx_users_username', table_name='users')
     op.drop_index('idx_users_email', table_name='users')
