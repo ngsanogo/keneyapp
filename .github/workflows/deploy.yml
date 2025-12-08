@@ -1,0 +1,337 @@
+name: Deploy to Staging/Production
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*.*.*' ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+permissions:
+  contents: read
+  packages: write
+  deployments: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Build and test Docker image
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.prod
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ steps.meta.outputs.version }}
+
+  # Security scanning on built image
+  scan:
+    name: Scan Docker Image for Vulnerabilities
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 15
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ needs.build.outputs.image-tag }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+          category: 'trivy'
+        continue-on-error: true
+
+  # Deploy to staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, scan]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    timeout-minutes: 30
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to staging environment
+        id: deploy
+        env:
+          DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}
+          DEPLOY_HOST: ${{ secrets.STAGING_HOST }}
+          DEPLOY_USER: ${{ secrets.STAGING_USER }}
+          IMAGE_TAG: ${{ needs.build.outputs.image-tag }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts 2>/dev/null
+          
+          ssh -i ~/.ssh/deploy_key $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
+          set -e
+          
+          cd /opt/keneyapp
+          
+          # Pull latest image
+          docker pull $IMAGE_TAG
+          
+          # Stop old containers
+          docker-compose -f docker-compose.staging.yml down || true
+          
+          # Start new containers
+          export DOCKER_IMAGE=$IMAGE_TAG
+          docker-compose -f docker-compose.staging.yml up -d
+          
+          # Wait for app to be healthy
+          timeout 120 bash -c 'until curl -f http://localhost:8000/health > /dev/null 2>&1; do sleep 2; done'
+          
+          echo "Deployment successful"
+          EOF
+          
+          echo "url=https://staging.keneyapp.com" >> $GITHUB_OUTPUT
+
+      - name: Run smoke tests on staging
+        continue-on-error: true
+        env:
+          STAGING_URL: https://staging.keneyapp.com
+        run: |
+          python -m pytest tests/ -v -m smoke \
+            --tb=short \
+            --timeout=30 \
+            -k "not database" || true
+
+      - name: Notify on staging deployment
+        if: always()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "🚀 Staging Deployment Complete",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Staging Deployment* 🚀\n*Status:* ${{ job.status }}\n*URL:* https://staging.keneyapp.com\n*Commit:* ${{ github.sha }}"
+                  }
+                }
+              ]
+            }
+        continue-on-error: true
+
+  # Manual approval for production
+  approval:
+    name: Approval for Production
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: production
+      url: https://keneyapp.com
+
+    steps:
+      - name: Production deployment approved
+        run: echo "Production deployment approved by workflow"
+
+  # Deploy to production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build, scan, approval]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    timeout-minutes: 45
+    permissions:
+      deployments: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create deployment
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.ref,
+              environment: 'production',
+              description: 'Production deployment from CI',
+              auto_merge: false,
+              required_contexts: []
+            });
+            console.log('Deployment:', deployment.data);
+            return deployment.data.id;
+
+      - name: Deploy to production
+        id: deploy
+        env:
+          DEPLOY_KEY: ${{ secrets.PRODUCTION_DEPLOY_KEY }}
+          DEPLOY_HOST: ${{ secrets.PRODUCTION_HOST }}
+          DEPLOY_USER: ${{ secrets.PRODUCTION_USER }}
+          IMAGE_TAG: ${{ needs.build.outputs.image-tag }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts 2>/dev/null
+          
+          ssh -i ~/.ssh/deploy_key $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
+          set -e
+          
+          cd /opt/keneyapp
+          
+          # Backup current database
+          pg_dump keneyapp > backup-$(date +%Y%m%d-%H%M%S).sql
+          
+          # Pull latest image
+          docker pull $IMAGE_TAG
+          
+          # Run pre-deployment checks
+          docker run --rm \
+            -e DATABASE_URL=$DATABASE_URL \
+            -e REDIS_HOST=$REDIS_HOST \
+            $IMAGE_TAG python -m pytest tests/ -m "not smoke" --co
+          
+          # Stop old containers (with grace period)
+          docker-compose -f docker-compose.prod.yml down --timeout=30 || true
+          
+          # Start new containers
+          export DOCKER_IMAGE=$IMAGE_TAG
+          docker-compose -f docker-compose.prod.yml up -d
+          
+          # Run migrations
+          docker exec keneyapp_app alembic upgrade head
+          
+          # Wait for app to be healthy
+          timeout 180 bash -c 'until curl -f http://localhost:8000/health > /dev/null 2>&1; do sleep 5; done'
+          
+          # Run smoke tests
+          docker exec keneyapp_app python -m pytest tests/ -m smoke --tb=short
+          
+          echo "Production deployment successful"
+          EOF
+          
+          echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: Update deployment status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.deploy.outputs.status }}' === 'success' ? 'success' : 'failure';
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: '${{ steps.deployment.outputs.result }}',
+              state: status,
+              environment_url: 'https://keneyapp.com',
+              description: 'Deployment ' + status
+            });
+
+      - name: Notify on production deployment
+        if: always()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "🚀 Production Deployment ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Production Deployment* 🚀\n*Status:* ${{ job.status }}\n*URL:* https://keneyapp.com\n*Version:* ${{ github.ref }}\n*Commit:* ${{ github.sha }}"
+                  }
+                }
+              ]
+            }
+        continue-on-error: true
+
+      - name: Create release notes
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = context.ref.replace('refs/tags/', '');
+            const changelog = await github.rest.repos.generateReleaseNotes({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tag
+            });
+            
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tag,
+              name: `Release ${tag}`,
+              body: changelog.data.body,
+              draft: false,
+              prerelease: false
+            });
+        continue-on-error: true

@@ -1,0 +1,87 @@
+name: Push Notification & Auto-Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  # Run quick validation on every push
+  validate-push:
+    name: Validate Push
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+          cache: 'pip'
+
+      - name: Check commit message format
+        run: |
+          # Validate conventional commits: type(scope): message
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          if ! echo "$COMMIT_MSG" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\(.+\))?!?: .+'; then
+            echo "Invalid commit message format"
+            echo "Expected: type(scope): message"
+            echo "Got: $COMMIT_MSG"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Quick syntax check
+        run: |
+          python -m py_compile app/*.py || exit 1
+          python -c "import py_compile; import glob; [py_compile.compile(f) for f in glob.glob('app/**/*.py', recursive=True)]" || exit 1
+
+      - name: Alert on critical changes
+        run: |
+          git diff HEAD~1 HEAD -- \
+            'app/core/security.py' \
+            'app/core/database.py' \
+            'app/core/config.py' | grep -q . && \
+            echo "⚠️ CRITICAL FILES CHANGED - Ensure thorough review" || true
+
+  # Auto-approve and auto-merge for dependabot
+  dependabot:
+    name: Handle Dependabot PRs
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    permissions:
+      pull-requests: write
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v1
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Auto-approve patch updates
+        if: |
+          steps.metadata.outputs.update-type == 'version-update:semver-patch' &&
+          steps.metadata.outputs.dependency-type == 'direct:production'
+        run: |
+          gh pr review --approve "$PR_URL"
+          gh pr merge --auto --merge "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
