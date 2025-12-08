@@ -295,18 +295,17 @@ class TestBatchPatients:
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_batch_create_empty_list(self, client, auth_headers_doctor):
-        """Test batch creation with empty list."""
+        """Test batch creation with empty list - should be rejected."""
         response = client.post(
             "/api/v1/batch/patients",
             json=[],
             headers=auth_headers_doctor
         )
         
-        assert response.status_code == status.HTTP_201_CREATED
+        # Empty batches should be rejected with 400
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         data = response.json()
-        assert data["created"] == 0
-        assert data["total"] == 0
-        assert data["patients"] == []
+        assert "detail" in data or "error" in data
 
     def test_batch_operations_rate_limiting(self, client, auth_headers_doctor):
         """Test that batch operations have rate limiting."""
