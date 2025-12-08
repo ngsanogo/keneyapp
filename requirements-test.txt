@@ -28,7 +28,7 @@ bandit==1.7.10
 safety==3.7.0
 
 # Mocking and patching
-responses==0.25.3
+responses==0.25.8
 unittest-xml-reporting==3.2.0
 
 # Code quality (use base repo pins)
