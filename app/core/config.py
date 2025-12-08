@@ -56,9 +56,7 @@ class Settings(BaseSettings):
     BOOTSTRAP_ADMIN_FULL_NAME: str = "System Administrator"
 
     # CORS
-    ALLOWED_ORIGINS: Union[str, List[str]] = (
-        "http://localhost:3000,http://localhost:8000"
-    )
+    ALLOWED_ORIGINS: Union[str, List[str]] = "http://localhost:3000,http://localhost:8000"
 
     # Redis
     REDIS_HOST: str = "localhost"
@@ -171,9 +169,7 @@ class Settings(BaseSettings):
         # Check ALLOWED_ORIGINS
         origins = self._normalized_origins(self.ALLOWED_ORIGINS)
         if not origins:
-            raise ValueError(
-                "ALLOWED_ORIGINS must include at least one origin in production"
-            )
+            raise ValueError("ALLOWED_ORIGINS must include at least one origin in production")
         if "*" in origins:
             raise ValueError("ALLOWED_ORIGINS cannot include '*' in production")
 
@@ -413,9 +409,7 @@ class Settings(BaseSettings):
         if self.SECRET_KEY == "your-secret-key-change-in-production":
             raise ValueError("SECRET_KEY must be set for production deployments.")
         if len(self.SECRET_KEY) < 32:
-            raise ValueError(
-                "SECRET_KEY must be at least 32 characters long in production."
-            )
+            raise ValueError("SECRET_KEY must be at least 32 characters long in production.")
 
     def _assert_debug_disabled(self) -> None:
         if self.DEBUG:
@@ -425,10 +419,7 @@ class Settings(BaseSettings):
         if not self.ENABLE_BOOTSTRAP_ADMIN:
             return
 
-        if (
-            self.BOOTSTRAP_ADMIN_USERNAME == "admin"
-            or self.BOOTSTRAP_ADMIN_PASSWORD == "admin123"
-        ):
+        if self.BOOTSTRAP_ADMIN_USERNAME == "admin" or self.BOOTSTRAP_ADMIN_PASSWORD == "admin123":
             raise ValueError(
                 "Disable bootstrap admin or change the default credentials before deploying to production."
             )
@@ -442,25 +433,16 @@ class Settings(BaseSettings):
     def _assert_allowed_origins_not_localhost(self) -> None:
         origins = self._normalized_origins(self.ALLOWED_ORIGINS)
         if not origins:
-            raise ValueError(
-                "ALLOWED_ORIGINS must be configured for production deployments."
-            )
+            raise ValueError("ALLOWED_ORIGINS must be configured for production deployments.")
 
-        if all(
-            origin.startswith(("http://localhost", "http://127.0.0.1"))
-            for origin in origins
-        ):
-            raise ValueError(
-                "ALLOWED_ORIGINS cannot be limited to localhost values in production."
-            )
+        if all(origin.startswith(("http://localhost", "http://127.0.0.1")) for origin in origins):
+            raise ValueError("ALLOWED_ORIGINS cannot be limited to localhost values in production.")
 
         self.ALLOWED_ORIGINS = origins
 
     def _assert_encryption_key_configured(self) -> None:
         if not self.ENCRYPTION_KEY:
-            raise ValueError(
-                "ENCRYPTION_KEY must be configured for production deployments."
-            )
+            raise ValueError("ENCRYPTION_KEY must be configured for production deployments.")
 
         if len(self.ENCRYPTION_KEY) < 32:
             raise ValueError("ENCRYPTION_KEY must be at least 32 characters long.")
@@ -481,9 +463,7 @@ class Settings(BaseSettings):
 
         return [origin for origin in parsed if origin]
 
-    model_config = SettingsConfigDict(
-        env_file=".env", case_sensitive=True, extra="allow"
-    )
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="allow")
 
 
 # ----------------------------------------------------------------------------
@@ -614,9 +594,7 @@ def validate_production_settings(current_settings: "Settings | None" = None) -> 
         not current_settings.SECRET_KEY
         or current_settings.SECRET_KEY == "your-secret-key-change-in-production"
     ):
-        issues.append(
-            "SECRET_KEY must be set to a strong, non-default value in production."
-        )
+        issues.append("SECRET_KEY must be set to a strong, non-default value in production.")
 
     if current_settings.DEBUG:
         issues.append("DEBUG must be False in production.")
@@ -627,14 +605,10 @@ def validate_production_settings(current_settings: "Settings | None" = None) -> 
     if not current_settings.ALLOWED_ORIGINS:
         issues.append("ALLOWED_ORIGINS must include at least one trusted origin.")
     elif _has_local_origin(current_settings.ALLOWED_ORIGINS):
-        issues.append(
-            "ALLOWED_ORIGINS cannot include localhost or loopback origins in production."
-        )
+        issues.append("ALLOWED_ORIGINS cannot include localhost or loopback origins in production.")
 
     if "localhost" in str(current_settings.DATABASE_URL):
-        issues.append(
-            "DATABASE_URL must point to a production database host (not localhost)."
-        )
+        issues.append("DATABASE_URL must point to a production database host (not localhost).")
 
     if "localhost" in str(current_settings.APP_URL):
         issues.append("APP_URL must not be localhost in production.")
@@ -645,9 +619,7 @@ def validate_production_settings(current_settings: "Settings | None" = None) -> 
     if not current_settings.ENCRYPTION_KEY:
         issues.append("ENCRYPTION_KEY must be provided for production deployments.")
     elif len(current_settings.ENCRYPTION_KEY) < 32:
-        issues.append(
-            "ENCRYPTION_KEY must be at least 32 characters long in production."
-        )
+        issues.append("ENCRYPTION_KEY must be at least 32 characters long in production.")
 
     if not current_settings.TOKEN_ISSUER:
         issues.append("TOKEN_ISSUER must be configured for production deployments.")
@@ -656,9 +628,7 @@ def validate_production_settings(current_settings: "Settings | None" = None) -> 
         issues.append("TOKEN_AUDIENCE must be configured for production deployments.")
 
     if issues:
-        raise RuntimeError(
-            "Production configuration validation failed: " + "; ".join(issues)
-        )
+        raise RuntimeError("Production configuration validation failed: " + "; ".join(issues))
 
 
 def _coerce_bool_env(value: str | None, default: bool) -> bool:
@@ -687,6 +657,4 @@ def is_rate_limiting_enabled() -> bool:
     Invalid or blank values fall back to the configured default.
     """
 
-    return _coerce_bool_env(
-        os.getenv("ENABLE_RATE_LIMITING"), settings.ENABLE_RATE_LIMITING
-    )
+    return _coerce_bool_env(os.getenv("ENABLE_RATE_LIMITING"), settings.ENABLE_RATE_LIMITING)

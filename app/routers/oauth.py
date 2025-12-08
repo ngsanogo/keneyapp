@@ -98,17 +98,10 @@ async def oauth_callback(
 
         # Create new user with OAuth
         tenant = (
-            db.query(Tenant)
-            .filter(Tenant.slug == "default", Tenant.is_active.is_(True))
-            .first()
+            db.query(Tenant).filter(Tenant.slug == "default", Tenant.is_active.is_(True)).first()
         )
         if not tenant:
-            tenant = (
-                db.query(Tenant)
-                .filter(Tenant.is_active.is_(True))
-                .order_by(Tenant.id)
-                .first()
-            )
+            tenant = db.query(Tenant).filter(Tenant.is_active.is_(True)).order_by(Tenant.id).first()
         if not tenant:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -121,9 +114,7 @@ async def oauth_callback(
             username=username,
             full_name=user_info.get("name", email),
             role=UserRole.RECEPTIONIST,  # Default role for OAuth users
-            hashed_password=get_password_hash(
-                "oauth-" + str(datetime.now(timezone.utc))
-            ),
+            hashed_password=get_password_hash("oauth-" + str(datetime.now(timezone.utc))),
             is_active=True,
             password_changed_at=datetime.now(timezone.utc),
         )
@@ -155,14 +146,10 @@ async def oauth_callback(
         )
 
     if not user.tenant.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Tenant is inactive"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Tenant is inactive")
 
     if user.is_locked:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="User account is locked"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User account is locked")
 
     # Update last login
     user.last_login = datetime.now(timezone.utc)

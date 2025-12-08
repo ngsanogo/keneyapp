@@ -58,7 +58,7 @@ class AppointmentSchedulerService:
     ) -> bool:
         """
         Check if a doctor is available for a time slot.
-        
+
         Uses database-level overlap detection for efficient conflict checking.
         Overlap condition: (start_time < existing_end) AND (end_time > existing_start)
 
@@ -73,22 +73,27 @@ class AppointmentSchedulerService:
             True if available, False if conflicting appointment exists
         """
         from sqlalchemy import and_, cast, func, Integer
-        
+
         end_time = start_time + timedelta(minutes=duration_minutes)
 
         # Database-level overlap detection using SQL OVERLAPS equivalent
         # Overlap: new_start < existing_end AND new_end > existing_start
         query = self.db.query(Appointment).filter(
             Appointment.doctor_id == doctor_id,
-            Appointment.status.in_([
-                AppointmentStatus.SCHEDULED,
-                AppointmentStatus.CONFIRMED,
-                AppointmentStatus.IN_PROGRESS,
-            ]),
+            Appointment.status.in_(
+                [
+                    AppointmentStatus.SCHEDULED,
+                    AppointmentStatus.CONFIRMED,
+                    AppointmentStatus.IN_PROGRESS,
+                ]
+            ),
             # Overlap condition: start_time < (appointment_date + duration_minutes)
             #               AND end_time > appointment_date
-            start_time < (Appointment.appointment_date + 
-                         cast(Appointment.duration_minutes, type_=type(timedelta()))),
+            start_time
+            < (
+                Appointment.appointment_date
+                + cast(Appointment.duration_minutes, type_=type(timedelta()))
+            ),
             end_time > Appointment.appointment_date,
         )
 
@@ -111,7 +116,7 @@ class AppointmentSchedulerService:
     ) -> bool:
         """
         Check if a patient has overlapping appointments.
-        
+
         Uses database-level overlap detection for efficiency.
 
         Args:
@@ -125,20 +130,25 @@ class AppointmentSchedulerService:
             True if available, False if conflicting appointment exists
         """
         from sqlalchemy import and_, cast
-        
+
         end_time = start_time + timedelta(minutes=duration_minutes)
 
         # Database-level overlap detection
         query = self.db.query(Appointment).filter(
             Appointment.patient_id == patient_id,
-            Appointment.status.in_([
-                AppointmentStatus.SCHEDULED,
-                AppointmentStatus.CONFIRMED,
-                AppointmentStatus.IN_PROGRESS,
-            ]),
+            Appointment.status.in_(
+                [
+                    AppointmentStatus.SCHEDULED,
+                    AppointmentStatus.CONFIRMED,
+                    AppointmentStatus.IN_PROGRESS,
+                ]
+            ),
             # Overlap condition
-            start_time < (Appointment.appointment_date + 
-                         cast(Appointment.duration_minutes, type_=type(timedelta()))),
+            start_time
+            < (
+                Appointment.appointment_date
+                + cast(Appointment.duration_minutes, type_=type(timedelta()))
+            ),
             end_time > Appointment.appointment_date,
         )
 
@@ -250,15 +260,10 @@ class AppointmentSchedulerService:
         update_dict = appointment_data.model_dump(exclude_unset=True)
 
         # If changing doctor, date, or duration, check conflicts
-        if any(
-            k in update_dict
-            for k in ["doctor_id", "appointment_date", "duration_minutes"]
-        ):
+        if any(k in update_dict for k in ["doctor_id", "appointment_date", "duration_minutes"]):
             new_doctor_id = update_dict.get("doctor_id", appointment.doctor_id)
             new_date = update_dict.get("appointment_date", appointment.appointment_date)
-            new_duration = update_dict.get(
-                "duration_minutes", appointment.duration_minutes
-            )
+            new_duration = update_dict.get("duration_minutes", appointment.duration_minutes)
 
             # Check doctor availability
             if not self.check_doctor_availability(
@@ -268,9 +273,7 @@ class AppointmentSchedulerService:
                 exclude_appointment_id=appointment_id,
                 tenant_id=tenant_id,
             ):
-                raise AppointmentConflictError(
-                    detail=f"Doctor is not available at {new_date}"
-                )
+                raise AppointmentConflictError(detail=f"Doctor is not available at {new_date}")
 
             # Check patient availability
             if not self.check_patient_availability(

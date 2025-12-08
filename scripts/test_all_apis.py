@@ -151,7 +151,7 @@ class APITester:
                 data={"username": "admin", "password": "admin123"},  # form data
                 headers={"Content-Type": "application/x-www-form-urlencoded"},
             )
-            
+
             if response.status_code == 200:
                 data = response.json()
                 self.token = data.get("access_token")
@@ -171,7 +171,6 @@ class APITester:
         except Exception as e:
             self._log(f"❌ Authentication error: {str(e)}", RED)
             return False
-
 
     def test_health_endpoints(self):
         """Test health and info endpoints."""
@@ -225,9 +224,7 @@ class APITester:
                 self._request("PUT", f"/api/v1/patients/{patient_id}", data=update_data)
 
                 # Search patient
-                self._request(
-                    "GET", "/api/v1/patients/search", params={"q": "Test", "limit": 5}
-                )
+                self._request("GET", "/api/v1/patients/search", params={"q": "Test", "limit": 5})
 
     def test_appointment_crud(self):
         """Test appointment CRUD operations."""
@@ -420,14 +417,10 @@ class APITester:
         if slowest:
             print(f"\n{YELLOW}🐢 Slowest Endpoints:{RESET}")
             for result in slowest:
-                print(
-                    f"  • {result.method:6} {result.endpoint:40} {result.response_time:.3f}s"
-                )
+                print(f"  • {result.method:6} {result.endpoint:40} {result.response_time:.3f}s")
 
         print("\n" + "=" * 80)
-        print(
-            f"{GREEN if failed == 0 else YELLOW}✅ Testing completed!{RESET}"
-        )
+        print(f"{GREEN if failed == 0 else YELLOW}✅ Testing completed!{RESET}")
         print("=" * 80 + "\n")
 
 
@@ -439,9 +432,7 @@ def main():
         default="http://localhost:8000",
         help="Base URL of the API (default: http://localhost:8000)",
     )
-    parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Verbose output"
-    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
 
     args = parser.parse_args()
 

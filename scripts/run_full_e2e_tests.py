@@ -92,9 +92,9 @@ class E2ETestOrchestrator:
 
     def check_prerequisites(self) -> bool:
         """Check if required services are running."""
-        self._log("\n" + "="*80, MAGENTA)
+        self._log("\n" + "=" * 80, MAGENTA)
         self._log("🔍 Checking Prerequisites", MAGENTA)
-        self._log("="*80, MAGENTA)
+        self._log("=" * 80, MAGENTA)
 
         prerequisites = {
             "Backend": self.backend_url,
@@ -109,6 +109,7 @@ class E2ETestOrchestrator:
                 # Check if service is running
                 try:
                     import requests
+
                     response = requests.get(value, timeout=3)
                     if response.ok:
                         self._log(f"✅ {name:15} {value}", GREEN)
@@ -158,9 +159,7 @@ class E2ETestOrchestrator:
             self.frontend_url,
         ]
 
-        success, output = self._run_command(
-            cmd, "Stage 2: Validate Frontend-Backend Alignment"
-        )
+        success, output = self._run_command(cmd, "Stage 2: Validate Frontend-Backend Alignment")
         self.results["Frontend-Backend Validation"] = (
             success,
             output[-500:] if output else "",
@@ -199,9 +198,7 @@ class E2ETestOrchestrator:
                 self.results["Database Check"] = (True, f"{count} patients")
                 return True
             else:
-                self._log(
-                    f"❌ Failed to query database: {response.status_code}", RED
-                )
+                self._log(f"❌ Failed to query database: {response.status_code}", RED)
                 self.results["Database Check"] = (False, "Query failed")
                 return False
 
@@ -214,9 +211,9 @@ class E2ETestOrchestrator:
         """Generate comprehensive test report."""
         duration = (datetime.now() - self.start_time).total_seconds()
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print(f"{MAGENTA}{'🎉 END-TO-END TEST REPORT':^80}{RESET}")
-        print("="*80)
+        print("=" * 80)
 
         # Test Results
         print(f"\n{BLUE}📊 Test Results:{RESET}")
@@ -250,12 +247,12 @@ class E2ETestOrchestrator:
         print(f"Python:           {sys.version.split()[0]}")
 
         # Final Status
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         if failed == 0:
             print(f"{GREEN}{'✅ ALL TESTS PASSED! System is ready for use.':^80}{RESET}")
         else:
             print(f"{RED}{'❌ SOME TESTS FAILED! Please review and fix issues.':^80}{RESET}")
-        print("="*80 + "\n")
+        print("=" * 80 + "\n")
 
         # Save report to file
         self.save_report_to_file(duration, passed, failed)
@@ -283,7 +280,11 @@ class E2ETestOrchestrator:
             },
         }
 
-        report_file = Path(__file__).parent.parent / "test_reports" / f"e2e_report_{self.start_time.strftime('%Y%m%d_%H%M%S')}.json"
+        report_file = (
+            Path(__file__).parent.parent
+            / "test_reports"
+            / f"e2e_report_{self.start_time.strftime('%Y%m%d_%H%M%S')}.json"
+        )
         report_file.parent.mkdir(exist_ok=True)
 
         with open(report_file, "w") as f:
@@ -293,11 +294,11 @@ class E2ETestOrchestrator:
 
     def run_full_suite(self):
         """Run complete E2E test suite."""
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print(f"{MAGENTA}{'🚀 KENEYAPP END-TO-END TEST SUITE':^80}{RESET}")
-        print("="*80)
+        print("=" * 80)
         print(f"Started: {self.start_time.strftime('%Y-%m-%d %H:%M:%S')}")
-        print("="*80)
+        print("=" * 80)
 
         # Check prerequisites
         if not self.check_prerequisites():
@@ -333,9 +334,7 @@ class E2ETestOrchestrator:
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Run comprehensive end-to-end tests for KeneyApp"
-    )
+    parser = argparse.ArgumentParser(description="Run comprehensive end-to-end tests for KeneyApp")
     parser.add_argument(
         "--backend",
         default="http://localhost:8000",

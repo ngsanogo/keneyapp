@@ -57,7 +57,9 @@ class TestMessageEncryption:
 class TestMessageCRUD:
     """Test message CRUD operations."""
 
-    def test_send_message_success(self, client: TestClient, auth_headers_doctor: dict, test_doctor_2, db: Session):
+    def test_send_message_success(
+        self, client: TestClient, auth_headers_doctor: dict, test_doctor_2, db: Session
+    ):
         """Test sending a message successfully."""
         payload = {
             "receiver_id": test_doctor_2.id,  # Use actual receiver ID
@@ -74,7 +76,9 @@ class TestMessageCRUD:
         assert data["status"] == "sent"
         assert "encrypted_content" not in data  # Should not expose encrypted field
 
-    def test_send_urgent_message(self, client: TestClient, auth_headers_doctor: dict, test_doctor_2, db: Session):
+    def test_send_urgent_message(
+        self, client: TestClient, auth_headers_doctor: dict, test_doctor_2, db: Session
+    ):
         """Test sending an urgent message."""
         payload = {
             "receiver_id": test_doctor_2.id,  # Use actual receiver ID
@@ -110,9 +114,7 @@ class TestMessageCRUD:
         """Test retrieving message details."""
         # First send a message
         payload = {"receiver_id": test_doctor_2.id, "subject": "Test", "content": "Test content"}
-        send_response = client.post(
-            "/api/v1/messages/", json=payload, headers=auth_headers_doctor
-        )
+        send_response = client.post("/api/v1/messages/", json=payload, headers=auth_headers_doctor)
         message_id = send_response.json()["id"]
 
         # Retrieve message
@@ -135,7 +137,9 @@ class TestMessageCRUD:
 class TestMessageThreads:
     """Test message threading and conversations."""
 
-    def test_create_conversation_thread(self, client: TestClient, auth_headers_doctor: dict, test_doctor_2):
+    def test_create_conversation_thread(
+        self, client: TestClient, auth_headers_doctor: dict, test_doctor_2
+    ):
         """Test creating a conversation thread."""
         # Send initial message
         payload1 = {
@@ -143,9 +147,7 @@ class TestMessageThreads:
             "subject": "Question médicale",
             "content": "Bonjour Docteur, j'ai une question.",
         }
-        response1 = client.post(
-            "/api/v1/messages/", json=payload1, headers=auth_headers_doctor
-        )
+        response1 = client.post("/api/v1/messages/", json=payload1, headers=auth_headers_doctor)
         assert response1.status_code == 201
         message1_id = response1.json()["id"]
         thread_id = response1.json().get("thread_id")
@@ -154,7 +156,9 @@ class TestMessageThreads:
         # This tests the thread_id is consistent
         assert thread_id is not None or message1_id is not None
 
-    def test_get_conversation_with_user(self, client: TestClient, auth_headers_doctor: dict, test_doctor_2):
+    def test_get_conversation_with_user(
+        self, client: TestClient, auth_headers_doctor: dict, test_doctor_2
+    ):
         """Test retrieving conversation with specific user."""
         # Send messages
         for i in range(3):
@@ -166,7 +170,9 @@ class TestMessageThreads:
             client.post("/api/v1/messages/", json=payload, headers=auth_headers_doctor)
 
         # Get conversation
-        response = client.get(f"/api/v1/messages/conversation/{test_doctor_2.id}", headers=auth_headers_doctor)
+        response = client.get(
+            f"/api/v1/messages/conversation/{test_doctor_2.id}", headers=auth_headers_doctor
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -178,13 +184,13 @@ class TestMessageThreads:
 class TestMessageReadStatus:
     """Test message read status tracking."""
 
-    def test_mark_message_as_read(self, client: TestClient, auth_headers_doctor: dict, test_doctor_2):
+    def test_mark_message_as_read(
+        self, client: TestClient, auth_headers_doctor: dict, test_doctor_2
+    ):
         """Test marking message as read."""
         # Send message
         payload = {"receiver_id": test_doctor_2.id, "subject": "Test", "content": "Test"}
-        send_response = client.post(
-            "/api/v1/messages/", json=payload, headers=auth_headers_doctor
-        )
+        send_response = client.post("/api/v1/messages/", json=payload, headers=auth_headers_doctor)
         message_id = send_response.json()["id"]
 
         # Mark as read (would need receiver auth in real scenario)
@@ -219,6 +225,7 @@ class TestMessageReadStatus:
         # Simulate marking as read
         message.status = MessageStatus.READ
         from datetime import timezone
+
         message.read_at = datetime.now(timezone.utc)
         db.commit()
 
@@ -230,7 +237,9 @@ class TestMessageReadStatus:
 class TestSoftDelete:
     """Test soft delete functionality."""
 
-    def test_soft_delete_by_sender(self, client: TestClient, auth_headers_doctor: dict, test_doctor_2):
+    def test_soft_delete_by_sender(
+        self, client: TestClient, auth_headers_doctor: dict, test_doctor_2
+    ):
         """Test sender soft-deleting a message."""
         # Send message
         payload = {
@@ -238,9 +247,7 @@ class TestSoftDelete:
             "subject": "À supprimer",
             "content": "Ce message sera supprimé",
         }
-        send_response = client.post(
-            "/api/v1/messages/", json=payload, headers=auth_headers_doctor
-        )
+        send_response = client.post("/api/v1/messages/", json=payload, headers=auth_headers_doctor)
         message_id = send_response.json()["id"]
 
         # Delete message
@@ -289,9 +296,7 @@ class TestMessageStatistics:
 class TestMessageSecurity:
     """Test message security and access control."""
 
-    def test_cannot_send_to_different_tenant(
-        self, client: TestClient, auth_headers_doctor: dict
-    ):
+    def test_cannot_send_to_different_tenant(self, client: TestClient, auth_headers_doctor: dict):
         """Test that users cannot send messages across tenants."""
         payload = {
             "receiver_id": 9999,  # User from different tenant
@@ -391,5 +396,3 @@ class TestMessagePerformance:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
-
-

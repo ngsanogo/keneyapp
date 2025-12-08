@@ -39,12 +39,8 @@ def get_or_create_thread_id(
         db.query(Message)
         .filter(
             or_(
-                and_(
-                    Message.sender_id == sender_id, Message.receiver_id == receiver_id
-                ),
-                and_(
-                    Message.sender_id == receiver_id, Message.receiver_id == sender_id
-                ),
+                and_(Message.sender_id == sender_id, Message.receiver_id == receiver_id),
+                and_(Message.sender_id == receiver_id, Message.receiver_id == sender_id),
             )
         )
         .first()
@@ -64,9 +60,7 @@ def encrypt_message_content(content: str, tenant_id: str) -> str:
 
 def decrypt_message_content(encrypted_content: str, tenant_id: str) -> str:
     """Decrypt message content."""
-    return decrypt_data(
-        encrypted_content, context={"type": "message", "tenant": tenant_id}
-    )
+    return decrypt_data(encrypted_content, context={"type": "message", "tenant": tenant_id})
 
 
 def create_message(
@@ -126,9 +120,7 @@ def create_message(
     return message
 
 
-def get_message(
-    db: Session, message_id: int, user_id: int, tenant_id: str
-) -> Optional[Message]:
+def get_message(db: Session, message_id: int, user_id: int, tenant_id: str) -> Optional[Message]:
     """Get a message if user is sender or receiver."""
     message = (
         db.query(Message)
@@ -207,10 +199,7 @@ def get_user_messages(
         query = query.filter(Message.receiver_id == user_id, Message.read_at.is_(None))
 
     # Eager load relationships to prevent N+1 queries
-    query = query.options(
-        joinedload(Message.sender),
-        joinedload(Message.receiver)
-    )
+    query = query.options(joinedload(Message.sender), joinedload(Message.receiver))
 
     return query.order_by(Message.created_at.desc()).offset(skip).limit(limit).all()
 
@@ -229,18 +218,11 @@ def get_conversation(
         .filter(
             Message.tenant_id == tenant_id,
             or_(
-                and_(
-                    Message.sender_id == user_id, Message.receiver_id == other_user_id
-                ),
-                and_(
-                    Message.sender_id == other_user_id, Message.receiver_id == user_id
-                ),
+                and_(Message.sender_id == user_id, Message.receiver_id == other_user_id),
+                and_(Message.sender_id == other_user_id, Message.receiver_id == user_id),
             ),
         )
-        .options(
-            joinedload(Message.sender),
-            joinedload(Message.receiver)
-        )
+        .options(joinedload(Message.sender), joinedload(Message.receiver))
         .order_by(Message.created_at.asc())
         .offset(skip)
         .limit(limit)

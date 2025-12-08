@@ -28,7 +28,12 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 from app.core.security import get_password_hash
 from app.models.appointment import Appointment, AppointmentStatus
-from app.models.medical_document import DocumentType, DocumentFormat, DocumentStatus, MedicalDocument
+from app.models.medical_document import (
+    DocumentType,
+    DocumentFormat,
+    DocumentStatus,
+    MedicalDocument,
+)
 from app.models.patient import Gender, Patient
 from app.models.prescription import Prescription
 from app.models.tenant import Tenant
@@ -100,9 +105,7 @@ class TestDataGenerator:
 
         for i in range(count):
             # Weighted role selection
-            role = random.choices(
-                [r[0] for r in roles], weights=[r[1] for r in roles], k=1
-            )[0]
+            role = random.choices([r[0] for r in roles], weights=[r[1] for r in roles], k=1)[0]
 
             first_name = fake.first_name()
             last_name = fake.last_name()
@@ -113,9 +116,11 @@ class TestDataGenerator:
                 email=f"{username}@{fake.domain_name()}",
                 username=username,
                 hashed_password=get_password_hash("Test123!"),
-                full_name=f"Dr. {first_name} {last_name}"
-                if role == UserRole.DOCTOR
-                else f"{first_name} {last_name}",
+                full_name=(
+                    f"Dr. {first_name} {last_name}"
+                    if role == UserRole.DOCTOR
+                    else f"{first_name} {last_name}"
+                ),
                 role=role,
                 is_active=True,
                 mfa_enabled=random.choice([True, False]),
@@ -163,9 +168,11 @@ class TestDataGenerator:
                 phone=fake.phone_number(),
                 address=fake.address().replace("\n", ", "),
                 medical_history=fake.text(max_nb_chars=500) if random.random() > 0.3 else None,
-                allergies=", ".join(fake.words(nb=random.randint(0, 3)))
-                if random.random() > 0.5
-                else None,
+                allergies=(
+                    ", ".join(fake.words(nb=random.randint(0, 3)))
+                    if random.random() > 0.5
+                    else None
+                ),
                 blood_type=random.choice(blood_types),
                 emergency_contact=fake.name(),
                 emergency_phone=fake.phone_number(),
@@ -368,9 +375,7 @@ def clean_test_data(db_session):
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Generate comprehensive test data")
-    parser.add_argument(
-        "--count", type=int, default=50, help="Number of patients to generate"
-    )
+    parser.add_argument("--count", type=int, default=50, help="Number of patients to generate")
     parser.add_argument(
         "--tenant-id", type=int, help="Specific tenant ID (default: use default tenant)"
     )

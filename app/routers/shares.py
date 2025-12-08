@@ -130,11 +130,8 @@ async def access_shared_record(
     """
     # Input validation
     if not access_request.token or len(access_request.token) < 10:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token"
-        )
-    
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
     # Get client IP
     client_ip = request.client.host if request.client else "unknown"
 
@@ -154,15 +151,10 @@ async def access_shared_record(
         return record
     except Exception as e:
         # Log failed access attempt without exposing details
-        logger = __import__('logging').getLogger(__name__)
-        logger.warning(
-            f"Failed access attempt to share from {client_ip}: {str(e)}"
-        )
+        logger = __import__("logging").getLogger(__name__)
+        logger.warning(f"Failed access attempt to share from {client_ip}: {str(e)}")
         # Return generic error to prevent information disclosure
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token or PIN"
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token or PIN")
 
 
 @router.get("/{share_id}", response_model=ShareResponse)

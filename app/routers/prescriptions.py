@@ -118,9 +118,7 @@ def get_prescriptions(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])
-    ),
+    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])),
 ):
     """
     Retrieve a list of prescriptions with pagination.
@@ -135,9 +133,7 @@ def get_prescriptions(
     Returns:
         List of prescriptions
     """
-    cache_key = (
-        f"{PRESCRIPTION_LIST_CACHE_PREFIX}:{current_user.tenant_id}:{skip}:{limit}"
-    )
+    cache_key = f"{PRESCRIPTION_LIST_CACHE_PREFIX}:{current_user.tenant_id}:{skip}:{limit}"
     cached = cache_get(cache_key)
     if cached is not None:
         log_audit_event(
@@ -160,8 +156,7 @@ def get_prescriptions(
         .all()
     )
     serialized = [
-        PrescriptionResponse.model_validate(p).model_dump(mode="json")
-        for p in prescriptions
+        PrescriptionResponse.model_validate(p).model_dump(mode="json") for p in prescriptions
     ]
 
     cache_set(cache_key, serialized, expire=PRESCRIPTION_LIST_TTL_SECONDS)
@@ -186,9 +181,7 @@ def get_prescription(
     prescription_id: int,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])
-    ),
+    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])),
 ):
     """
     Retrieve a specific prescription by ID.
@@ -202,9 +195,7 @@ def get_prescription(
     Returns:
         Prescription record
     """
-    cache_key = (
-        f"{PRESCRIPTION_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{prescription_id}"
-    )
+    cache_key = f"{PRESCRIPTION_DETAIL_CACHE_PREFIX}:{current_user.tenant_id}:{prescription_id}"
     cached = cache_get(cache_key)
     if cached is not None:
         log_audit_event(
@@ -255,9 +246,7 @@ def get_prescription(
         username=current_user.username,
         request=request,
     )
-    serialized = PrescriptionResponse.model_validate(prescription).model_dump(
-        mode="json"
-    )
+    serialized = PrescriptionResponse.model_validate(prescription).model_dump(mode="json")
     cache_set(
         cache_key,
         serialized,
@@ -272,9 +261,7 @@ def get_patient_prescriptions(
     patient_id: int,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])
-    ),
+    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])),
 ):
     """
     Retrieve all prescriptions for a specific patient.
@@ -288,9 +275,7 @@ def get_patient_prescriptions(
     Returns:
         List of patient's prescriptions
     """
-    cache_key = (
-        f"{PRESCRIPTION_PATIENT_CACHE_PREFIX}:{current_user.tenant_id}:{patient_id}"
-    )
+    cache_key = f"{PRESCRIPTION_PATIENT_CACHE_PREFIX}:{current_user.tenant_id}:{patient_id}"
     cached = cache_get(cache_key)
     if cached is not None:
         log_audit_event(
@@ -315,8 +300,7 @@ def get_patient_prescriptions(
         .all()
     )
     serialized = [
-        PrescriptionResponse.model_validate(p).model_dump(mode="json")
-        for p in prescriptions
+        PrescriptionResponse.model_validate(p).model_dump(mode="json") for p in prescriptions
     ]
     cache_set(cache_key, serialized, expire=PRESCRIPTION_LIST_TTL_SECONDS)
 

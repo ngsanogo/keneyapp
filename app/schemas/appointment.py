@@ -33,6 +33,8 @@ class AppointmentResponse(AppointmentBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
 """
 Appointment schemas for request/response validation.
 """

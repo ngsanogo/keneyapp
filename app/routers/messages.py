@@ -39,9 +39,7 @@ async def send_message(
     # Verify receiver exists and is in same tenant
     receiver = (
         db.query(User)
-        .filter(
-            User.id == message.receiver_id, User.tenant_id == current_user.tenant_id
-        )
+        .filter(User.id == message.receiver_id, User.tenant_id == current_user.tenant_id)
         .first()
     )
 
@@ -99,8 +97,7 @@ async def get_messages(
     )
 
     return [
-        messaging_service.serialize_message(msg, str(current_user.tenant_id))
-        for msg in messages
+        messaging_service.serialize_message(msg, str(current_user.tenant_id)) for msg in messages
     ]
 
 
@@ -176,8 +173,7 @@ async def get_conversation(
     )
 
     return [
-        messaging_service.serialize_message(msg, str(current_user.tenant_id))
-        for msg in messages
+        messaging_service.serialize_message(msg, str(current_user.tenant_id)) for msg in messages
     ]
 
 

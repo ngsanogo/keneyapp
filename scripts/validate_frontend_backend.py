@@ -53,9 +53,7 @@ class FrontendBackendValidator:
         """Log colored message."""
         print(f"{color}{message}{RESET}")
 
-    def _add_result(
-        self, test_name: str, success: bool, message: str, details: str = None
-    ):
+    def _add_result(self, test_name: str, success: bool, message: str, details: str = None):
         """Add validation result."""
         result = ValidationResult(test_name, success, message, details)
         self.results.append(result)
@@ -88,9 +86,7 @@ class FrontendBackendValidator:
                 )
                 return False
         except Exception as e:
-            self._add_result(
-                "Backend Health", False, "Backend is not reachable", str(e)
-            )
+            self._add_result("Backend Health", False, "Backend is not reachable", str(e))
             return False
 
     def validate_frontend_health(self) -> bool:
@@ -124,9 +120,7 @@ class FrontendBackendValidator:
                 )
                 return False
         except Exception as e:
-            self._add_result(
-                "Frontend Health", False, "Frontend is not reachable", str(e)
-            )
+            self._add_result("Frontend Health", False, "Frontend is not reachable", str(e))
             return False
 
     def validate_cors_configuration(self):
@@ -146,9 +140,7 @@ class FrontendBackendValidator:
             )
 
             cors_headers = {
-                "Access-Control-Allow-Origin": response.headers.get(
-                    "Access-Control-Allow-Origin"
-                ),
+                "Access-Control-Allow-Origin": response.headers.get("Access-Control-Allow-Origin"),
                 "Access-Control-Allow-Methods": response.headers.get(
                     "Access-Control-Allow-Methods"
                 ),
@@ -309,9 +301,7 @@ class FrontendBackendValidator:
                 )
 
         except Exception as e:
-            self._add_result(
-                "Authentication Flow", False, "Failed to validate auth", str(e)
-            )
+            self._add_result("Authentication Flow", False, "Failed to validate auth", str(e))
 
     def validate_static_assets(self):
         """Validate frontend static assets are accessible."""
@@ -337,9 +327,7 @@ class FrontendBackendValidator:
                         "Static directory accessible" if success else "Not found",
                     )
                 else:
-                    response = requests.get(
-                        f"{self.frontend_url}{asset_pattern}", timeout=5
-                    )
+                    response = requests.get(f"{self.frontend_url}{asset_pattern}", timeout=5)
                     success = response.ok
                     self._add_result(
                         f"Asset: {name}",
@@ -388,9 +376,7 @@ class FrontendBackendValidator:
         frontend_ok = self.validate_frontend_health()
 
         if not backend_ok:
-            self._log(
-                "\n❌ Backend is not running. Start backend and try again.", RED
-            )
+            self._log("\n❌ Backend is not running. Start backend and try again.", RED)
             return
 
         # Run other validations
@@ -435,22 +421,16 @@ class FrontendBackendValidator:
                 f"\n{GREEN}✅ All validations passed! Frontend and backend are properly aligned.{RESET}"
             )
         elif failed <= 3:
-            print(
-                f"\n{YELLOW}⚠️  Minor issues detected. System should mostly work.{RESET}"
-            )
+            print(f"\n{YELLOW}⚠️  Minor issues detected. System should mostly work.{RESET}")
         else:
-            print(
-                f"\n{RED}❌ Significant issues detected. Please fix before proceeding.{RESET}"
-            )
+            print(f"\n{RED}❌ Significant issues detected. Please fix before proceeding.{RESET}")
 
         print("=" * 80 + "\n")
 
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Validate frontend-backend alignment"
-    )
+    parser = argparse.ArgumentParser(description="Validate frontend-backend alignment")
     parser.add_argument(
         "--backend",
         default="http://localhost:8000",

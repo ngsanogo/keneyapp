@@ -90,25 +90,17 @@ def deliver_subscription_webhook(subscription_id: int, resource: dict):
     try:
         sub = db.query(Subscription).filter(Subscription.id == subscription_id).first()
         if not sub:
-            logger.error(
-                "Subscription %s not found for webhook delivery", subscription_id
-            )
+            logger.error("Subscription %s not found for webhook delivery", subscription_id)
             return {"status": "error", "reason": "subscription_not_found"}
 
         headers = {"Content-Type": sub.payload or "application/fhir+json"}
         try:
             # Use json param to ensure proper serialization
-            resp = requests.post(
-                sub.endpoint, json=resource, headers=headers, timeout=5
-            )
-            logger.info(
-                "Delivered webhook to %s status=%s", sub.endpoint, resp.status_code
-            )
+            resp = requests.post(sub.endpoint, json=resource, headers=headers, timeout=5)
+            logger.info("Delivered webhook to %s status=%s", sub.endpoint, resp.status_code)
             return {"status": "ok", "http_status": resp.status_code}
         except Exception as exc:  # pragma: no cover - best effort
-            logger.warning(
-                "Webhook delivery failed for subscription %s: %s", subscription_id, exc
-            )
+            logger.warning("Webhook delivery failed for subscription %s: %s", subscription_id, exc)
             return {"status": "error", "reason": str(exc)}
     finally:
         try:
@@ -280,9 +272,7 @@ def send_upcoming_appointment_reminders():
                     patient_email=appt.patient.email,
                     patient_name=f"{appt.patient.first_name} {appt.patient.last_name}",
                     appointment_date=appt.appointment_date,
-                    doctor_name=(
-                        appt.doctor.full_name if appt.doctor else "votre médecin"
-                    ),
+                    doctor_name=(appt.doctor.full_name if appt.doctor else "votre médecin"),
                     phone=appt.patient.phone,
                 )
                 sent_count += 1
@@ -316,9 +306,7 @@ def send_lab_results_notifications(document_id: int, patient_id: int):
     db = SessionLocal()
     try:
         patient = db.query(Patient).filter(Patient.id == patient_id).first()
-        document = (
-            db.query(MedicalDocument).filter(MedicalDocument.id == document_id).first()
-        )
+        document = db.query(MedicalDocument).filter(MedicalDocument.id == document_id).first()
 
         if patient and document and patient.email:
             NotificationService.send_lab_results_notification(
@@ -361,9 +349,7 @@ def send_prescription_renewal_reminders():
 
         prescriptions = (
             db.query(Prescription)
-            .filter(
-                Prescription.refill_date >= now, Prescription.refill_date <= next_week
-            )
+            .filter(Prescription.refill_date >= now, Prescription.refill_date <= next_week)
             .all()
         )
 

@@ -51,9 +51,7 @@ def test_validate_production_settings_flags_insecure_defaults(monkeypatch):
 def test_validate_production_settings_allows_hardened_configuration(monkeypatch):
     monkeypatch.setattr(settings, "ENVIRONMENT", "production")
     monkeypatch.setattr(settings, "DEBUG", False)
-    monkeypatch.setattr(
-        settings, "SECRET_KEY", "sufficiently-long-and-random-secret-key-value"
-    )
+    monkeypatch.setattr(settings, "SECRET_KEY", "sufficiently-long-and-random-secret-key-value")
     monkeypatch.setattr(settings, "ENABLE_BOOTSTRAP_ADMIN", False)
     monkeypatch.setattr(
         settings, "DATABASE_URL", "postgresql://prod_user:secret@prod-db:5432/keneyapp"
@@ -149,6 +147,4 @@ def test_enforce_production_allowed_origins_empty_check():
     with pytest.raises(ValueError) as exc_info:
         test_settings.enforce_production_safety()
 
-    assert "ALLOWED_ORIGINS must include at least one origin in production" in str(
-        exc_info.value
-    )
+    assert "ALLOWED_ORIGINS must include at least one origin in production" in str(exc_info.value)

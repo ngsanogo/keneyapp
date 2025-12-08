@@ -140,9 +140,7 @@ class TestObservationFHIR:
         db.commit()
         db.refresh(obs)
 
-        response = client.get(
-            f"/api/v1/fhir/Observation/{obs.id}", headers=auth_headers
-        )
+        response = client.get(f"/api/v1/fhir/Observation/{obs.id}", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["resourceType"] == "Observation"
@@ -150,9 +148,7 @@ class TestObservationFHIR:
         assert data["code"]["coding"][0]["code"] == "8480-6"
         assert "ETag" in response.headers
 
-    def test_search_observations(
-        self, client, db, tenant, patient, doctor, auth_headers
-    ):
+    def test_search_observations(self, client, db, tenant, patient, doctor, auth_headers):
         """Test GET /fhir/Observation with search params."""
         obs1 = Observation(
             tenant_id=tenant.id,
@@ -190,9 +186,7 @@ class TestObservationFHIR:
         assert "link" in data  # HATEOAS paging links
 
         # Search by code
-        response = client.get(
-            "/api/v1/fhir/Observation?code=8480-6", headers=auth_headers
-        )
+        response = client.get("/api/v1/fhir/Observation?code=8480-6", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 1
@@ -226,9 +220,7 @@ class TestConditionFHIR:
         db.commit()
         db.refresh(condition)
 
-        response = client.get(
-            f"/api/v1/fhir/Condition/{condition.id}", headers=auth_headers
-        )
+        response = client.get(f"/api/v1/fhir/Condition/{condition.id}", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["resourceType"] == "Condition"
@@ -260,17 +252,13 @@ class TestConditionFHIR:
         db.commit()
 
         # Search by patient
-        response = client.get(
-            f"/api/v1/fhir/Condition?patient={patient.id}", headers=auth_headers
-        )
+        response = client.get(f"/api/v1/fhir/Condition?patient={patient.id}", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 2
 
         # Search by clinical status
-        response = client.get(
-            "/api/v1/fhir/Condition?clinical-status=active", headers=auth_headers
-        )
+        response = client.get("/api/v1/fhir/Condition?clinical-status=active", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 1
@@ -295,9 +283,7 @@ class TestProcedureFHIR:
         db.commit()
         db.refresh(procedure)
 
-        response = client.get(
-            f"/api/v1/fhir/Procedure/{procedure.id}", headers=auth_headers
-        )
+        response = client.get(f"/api/v1/fhir/Procedure/{procedure.id}", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["resourceType"] == "Procedure"
@@ -319,9 +305,7 @@ class TestProcedureFHIR:
         db.commit()
 
         # Search by patient
-        response = client.get(
-            f"/api/v1/fhir/Procedure?patient={patient.id}", headers=auth_headers
-        )
+        response = client.get(f"/api/v1/fhir/Procedure?patient={patient.id}", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 1

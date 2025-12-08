@@ -68,9 +68,7 @@ class PatientService:
             .first()
         )
 
-    def list_patients(
-        self, tenant_id: int, skip: int = 0, limit: int = 100
-    ) -> List[Patient]:
+    def list_patients(self, tenant_id: int, skip: int = 0, limit: int = 100) -> List[Patient]:
         """
         List patients with pagination.
 
@@ -85,10 +83,7 @@ class PatientService:
         return (
             self.db.query(Patient)
             .filter(Patient.tenant_id == tenant_id)
-            .options(
-                selectinload(Patient.appointments),
-                selectinload(Patient.documents)
-            )
+            .options(selectinload(Patient.appointments), selectinload(Patient.documents))
             .offset(skip)
             .limit(min(100, max(1, limit)))
             .all()
@@ -159,10 +154,7 @@ class PatientService:
             query = query.order_by(Patient.created_at.desc())
 
         # Add eager loading to prevent N+1 queries
-        query = query.options(
-            selectinload(Patient.appointments),
-            selectinload(Patient.documents)
-        )
+        query = query.options(selectinload(Patient.appointments), selectinload(Patient.documents))
 
         # Apply pagination
         patients = query.offset(skip).limit(min(100, max(1, limit))).all()
@@ -179,11 +171,7 @@ class PatientService:
         Returns:
             Total patient count
         """
-        return (
-            self.db.query(func.count(Patient.id))
-            .filter(Patient.tenant_id == tenant_id)
-            .scalar()
-        )
+        return self.db.query(func.count(Patient.id)).filter(Patient.tenant_id == tenant_id).scalar()
 
     def create_patient(self, patient_data: PatientCreate, tenant_id: int) -> Patient:
         """
@@ -417,9 +405,7 @@ class PatientService:
                 query = query.filter(Patient.allergies.isnot(None))
                 query = query.filter(Patient.allergies != "")
             else:
-                query = query.filter(
-                    or_(Patient.allergies.is_(None), Patient.allergies == "")
-                )
+                query = query.filter(or_(Patient.allergies.is_(None), Patient.allergies == ""))
 
         if has_medical_history is not None:
             if has_medical_history:

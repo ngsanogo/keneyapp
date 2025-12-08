@@ -27,10 +27,10 @@ class RecommendationService:
     def _parse_duration_days(duration_str: str) -> int:
         """
         Parse duration string to extract number of days.
-        
+
         Args:
             duration_str: Duration string like "30 days" or "90 days"
-            
+
         Returns:
             Number of days or 0 if parsing fails
         """
@@ -38,19 +38,17 @@ class RecommendationService:
             return 0
         try:
             duration_lower = duration_str.lower()
-            if 'day' in duration_lower:
-                days = int(''.join(filter(str.isdigit, duration_lower)))
+            if "day" in duration_lower:
+                days = int("".join(filter(str.isdigit, duration_lower)))
                 return days
         except (ValueError, TypeError):
             pass
         return 0
 
-    def get_patient_care_recommendations(
-        self, patient_id: int, tenant_id: int
-    ) -> List[Dict]:
+    def get_patient_care_recommendations(self, patient_id: int, tenant_id: int) -> List[Dict]:
         """
         Generate personalized care recommendations for a patient.
-        
+
         Checks for:
         - Overdue follow-ups (>180 days since last appointment)
         - Expiring prescriptions (7 days or less)
@@ -64,7 +62,7 @@ class RecommendationService:
             List of recommendation dictionaries
         """
         recommendations = []
-        
+
         # Fetch patient with basic validation
         patient = (
             self.db.query(Patient)
@@ -94,16 +92,18 @@ class RecommendationService:
                 else last_appointment.appointment_date
             )
             days_since = (today - appointment_date).days
-            
+
             if days_since > 180:
-                recommendations.append({
-                    "type": "follow_up",
-                    "priority": "high",
-                    "title": "Schedule Follow-up Appointment",
-                    "description": f"Last appointment was {days_since} days ago. Consider scheduling a follow-up.",
-                    "action": "schedule_appointment",
-                    "metadata": {"days_since_last": days_since},
-                })
+                recommendations.append(
+                    {
+                        "type": "follow_up",
+                        "priority": "high",
+                        "title": "Schedule Follow-up Appointment",
+                        "description": f"Last appointment was {days_since} days ago. Consider scheduling a follow-up.",
+                        "action": "schedule_appointment",
+                        "metadata": {"days_since_last": days_since},
+                    }
+                )
 
         # Check prescription refills - single query instead of loading all
         prescriptions = (
@@ -126,20 +126,22 @@ class RecommendationService:
                     )
                     end_date = prescribed_date + timedelta(days=days)
                     days_until_end = (end_date - today).days
-                    
+
                     if 0 < days_until_end <= 7:
-                        recommendations.append({
-                            "type": "prescription_refill",
-                            "priority": "medium",
-                            "title": "Prescription Expiring Soon",
-                            "description": f"Prescription for {prescription.medication_name} expires in {days_until_end} days.",
-                            "action": "renew_prescription",
-                            "metadata": {
-                                "prescription_id": prescription.id,
-                                "medication": prescription.medication_name,
-                                "days_until_end": days_until_end,
-                            },
-                        })
+                        recommendations.append(
+                            {
+                                "type": "prescription_refill",
+                                "priority": "medium",
+                                "title": "Prescription Expiring Soon",
+                                "description": f"Prescription for {prescription.medication_name} expires in {days_until_end} days.",
+                                "action": "renew_prescription",
+                                "metadata": {
+                                    "prescription_id": prescription.id,
+                                    "medication": prescription.medication_name,
+                                    "days_until_end": days_until_end,
+                                },
+                            }
+                        )
 
         # Check for missing patient information
         missing_fields = []
@@ -149,14 +151,16 @@ class RecommendationService:
             missing_fields.append(("emergency_contact", "Emergency Contact", "medium"))
 
         for field_name, field_label, priority in missing_fields:
-            recommendations.append({
-                "type": "data_quality",
-                "priority": priority,
-                "title": f"Update {field_label}",
-                "description": f"No {field_label.lower()} on file. Please update patient record.",
-                "action": "update_patient",
-                "metadata": {"field": field_name},
-            })
+            recommendations.append(
+                {
+                    "type": "data_quality",
+                    "priority": priority,
+                    "title": f"Update {field_label}",
+                    "description": f"No {field_label.lower()} on file. Please update patient record.",
+                    "action": "update_patient",
+                    "metadata": {"field": field_name},
+                }
+            )
 
         return recommendations
 
@@ -165,7 +169,7 @@ class RecommendationService:
     ) -> List[Dict]:
         """
         Recommend optimal appointment slots based on doctor availability.
-        
+
         Uses a simple heuristic: avoid 12-1 PM (lunch) and recommend morning/afternoon peak hours.
 
         Args:
@@ -177,10 +181,10 @@ class RecommendationService:
             List of recommended time slots
         """
         target_date = date.date()
-        
+
         # Get all occupied hours for the doctor on that date
         existing_appointments = (
-            self.db.query(func.extract('hour', Appointment.appointment_date))
+            self.db.query(func.extract("hour", Appointment.appointment_date))
             .filter(
                 Appointment.doctor_id == doctor_id,
                 Appointment.tenant_id == tenant_id,
@@ -191,7 +195,7 @@ class RecommendationService:
         )
 
         occupied_hours = {int(apt[0]) for apt in existing_appointments if apt[0] is not None}
-        
+
         # Define working hours and preferred times
         working_hours = range(9, 17)  # 9 AM to 5 PM
         preferred_hours = {9, 10, 14, 15}  # Morning and afternoon peaks
@@ -200,12 +204,18 @@ class RecommendationService:
         recommendations = []
         for hour in working_hours:
             if hour not in occupied_hours and hour != lunch_hour:
-                recommendations.append({
-                    "time": f"{hour:02d}:00",
-                    "available": True,
-                    "recommended": hour in preferred_hours,
-                    "reason": "Optimal time based on peak appointment hours" if hour in preferred_hours else "Available slot",
-                })
+                recommendations.append(
+                    {
+                        "time": f"{hour:02d}:00",
+                        "available": True,
+                        "recommended": hour in preferred_hours,
+                        "reason": (
+                            "Optimal time based on peak appointment hours"
+                            if hour in preferred_hours
+                            else "Available slot"
+                        ),
+                    }
+                )
 
         return recommendations
 
@@ -214,7 +224,7 @@ class RecommendationService:
     ) -> List[Dict]:
         """
         Check for potential medication interactions.
-        
+
         Uses a simple interaction database. In production, integrate with
         a comprehensive pharmacy database (e.g., DrugBank, FDA).
 
@@ -251,33 +261,36 @@ class RecommendationService:
         }
 
         new_med_lower = new_medication.lower()
-        
+
         for prescription in active_prescriptions:
             existing_med = prescription.medication_name.lower()
 
             # Check bidirectional interactions
             is_interaction = (
-                (new_med_lower in known_interactions and 
-                 existing_med in known_interactions[new_med_lower]) or
-                (existing_med in known_interactions and 
-                 new_med_lower in known_interactions[existing_med])
+                new_med_lower in known_interactions
+                and existing_med in known_interactions[new_med_lower]
+            ) or (
+                existing_med in known_interactions
+                and new_med_lower in known_interactions[existing_med]
             )
 
             if is_interaction:
-                warnings.append({
-                    "severity": "high",
-                    "medication_1": new_medication,
-                    "medication_2": prescription.medication_name,
-                    "description": f"Potential interaction between {new_medication} and {prescription.medication_name}",
-                    "recommendation": "Consult with pharmacist before prescribing",
-                })
+                warnings.append(
+                    {
+                        "severity": "high",
+                        "medication_1": new_medication,
+                        "medication_2": prescription.medication_name,
+                        "description": f"Potential interaction between {new_medication} and {prescription.medication_name}",
+                        "recommendation": "Consult with pharmacist before prescribing",
+                    }
+                )
 
         return warnings
 
     def get_resource_optimization_recommendations(self, tenant_id: int) -> List[Dict]:
         """
         Provide recommendations for optimizing resource utilization.
-        
+
         Analyzes doctor workload distribution and appointment cancellation patterns
         to identify optimization opportunities.
 
@@ -312,22 +325,24 @@ class RecommendationService:
         if doctor_loads:
             loads = [load[2] for load in doctor_loads]
             avg_load = sum(loads) / len(loads)
-            
+
             for doctor_id, doctor_name, load in doctor_loads:
                 if load > avg_load * 1.5:
                     overload_percent = int((load / avg_load - 1) * 100)
-                    recommendations.append({
-                        "type": "workload_balance",
-                        "priority": "medium",
-                        "title": f"High Workload for Dr. {doctor_name}",
-                        "description": f"Dr. {doctor_name} has {load} appointments this week, {overload_percent}% above average.",
-                        "action": "redistribute_appointments",
-                        "metadata": {
-                            "doctor_id": doctor_id,
-                            "current_load": load,
-                            "average_load": int(avg_load),
-                        },
-                    })
+                    recommendations.append(
+                        {
+                            "type": "workload_balance",
+                            "priority": "medium",
+                            "title": f"High Workload for Dr. {doctor_name}",
+                            "description": f"Dr. {doctor_name} has {load} appointments this week, {overload_percent}% above average.",
+                            "action": "redistribute_appointments",
+                            "metadata": {
+                                "doctor_id": doctor_id,
+                                "current_load": load,
+                                "average_load": int(avg_load),
+                            },
+                        }
+                    )
 
         # Check for appointment cancellation pattern - single aggregated query
         total_recent = (
@@ -336,7 +351,8 @@ class RecommendationService:
                 Appointment.tenant_id == tenant_id,
                 Appointment.appointment_date >= today - timedelta(days=30),
             )
-            .scalar() or 0
+            .scalar()
+            or 0
         )
 
         if total_recent > 0:
@@ -347,22 +363,25 @@ class RecommendationService:
                     Appointment.status == AppointmentStatus.CANCELLED,
                     Appointment.appointment_date >= today - timedelta(days=30),
                 )
-                .scalar() or 0
+                .scalar()
+                or 0
             )
-            
+
             cancellation_rate = cancelled_count / total_recent
-            
+
             if cancellation_rate > 0.15:  # > 15% cancellation
-                recommendations.append({
-                    "type": "no_show_reduction",
-                    "priority": "high",
-                    "title": "High Appointment Cancellation Rate",
-                    "description": f"Cancellation rate is {int(cancellation_rate * 100)}%. Consider implementing reminder system.",
-                    "action": "enable_reminders",
-                    "metadata": {
-                        "cancellation_rate": round(cancellation_rate * 100, 1),
-                        "total_appointments": total_recent,
-                    },
-                })
+                recommendations.append(
+                    {
+                        "type": "no_show_reduction",
+                        "priority": "high",
+                        "title": "High Appointment Cancellation Rate",
+                        "description": f"Cancellation rate is {int(cancellation_rate * 100)}%. Consider implementing reminder system.",
+                        "action": "enable_reminders",
+                        "metadata": {
+                            "cancellation_rate": round(cancellation_rate * 100, 1),
+                            "total_appointments": total_recent,
+                        },
+                    }
+                )
 
         return recommendations

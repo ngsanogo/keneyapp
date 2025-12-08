@@ -14,7 +14,7 @@ import sys
 from typing import List, Dict, Any
 
 # Add parent directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from sqlalchemy import inspect, MetaData
 from sqlalchemy.engine import create_engine
@@ -29,7 +29,7 @@ def generate_table_documentation(inspector, table_name: str) -> str:
     # Get table comment if exists
     try:
         comment = inspector.get_table_comment(table_name)
-        if comment and comment.get('text'):
+        if comment and comment.get("text"):
             doc += f"_{comment['text']}_\n\n"
     except:
         pass
@@ -41,11 +41,11 @@ def generate_table_documentation(inspector, table_name: str) -> str:
     doc += "|--------|------|----------|---------|-------------|\n"
 
     for col in columns:
-        name = col['name']
-        col_type = str(col['type'])
-        nullable = "Yes" if col['nullable'] else "No"
-        default = str(col['default']) if col['default'] else "-"
-        comment = col.get('comment', '')
+        name = col["name"]
+        col_type = str(col["type"])
+        nullable = "Yes" if col["nullable"] else "No"
+        default = str(col["default"]) if col["default"] else "-"
+        comment = col.get("comment", "")
 
         doc += f"| `{name}` | {col_type} | {nullable} | {default} | {comment} |\n"
 
@@ -53,7 +53,7 @@ def generate_table_documentation(inspector, table_name: str) -> str:
 
     # Primary Key
     pk = inspector.get_pk_constraint(table_name)
-    if pk and pk['constrained_columns']:
+    if pk and pk["constrained_columns"]:
         doc += "#### Primary Key\n\n"
         doc += f"- **Columns**: {', '.join(f'`{col}`' for col in pk['constrained_columns'])}\n\n"
 
@@ -62,9 +62,9 @@ def generate_table_documentation(inspector, table_name: str) -> str:
     if fks:
         doc += "#### Foreign Keys\n\n"
         for fk in fks:
-            referred_table = fk['referred_table']
-            constrained_cols = ', '.join(f'`{col}`' for col in fk['constrained_columns'])
-            referred_cols = ', '.join(f'`{col}`' for col in fk['referred_columns'])
+            referred_table = fk["referred_table"]
+            constrained_cols = ", ".join(f"`{col}`" for col in fk["constrained_columns"])
+            referred_cols = ", ".join(f"`{col}`" for col in fk["referred_columns"])
             doc += f"- **{fk.get('name', 'FK')}**: {constrained_cols} → `{referred_table}`({referred_cols})\n"
         doc += "\n"
 
@@ -75,9 +75,9 @@ def generate_table_documentation(inspector, table_name: str) -> str:
         doc += "| Index Name | Columns | Unique |\n"
         doc += "|------------|---------|--------|\n"
         for idx in indexes:
-            name = idx['name']
-            cols = ', '.join(f'`{col}`' for col in idx['column_names'])
-            unique = "Yes" if idx['unique'] else "No"
+            name = idx["name"]
+            cols = ", ".join(f"`{col}`" for col in idx["column_names"])
+            unique = "Yes" if idx["unique"] else "No"
             doc += f"| {name} | {cols} | {unique} |\n"
         doc += "\n"
 

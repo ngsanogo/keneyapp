@@ -75,7 +75,7 @@ class TestDocumentUpload:
     def test_upload_pdf_document(self, client: TestClient, auth_headers_doctor: dict, test_patient):
         """Test uploading a PDF document."""
         print(f"\nTest patient ID: {test_patient.id}, Tenant ID: {test_patient.tenant_id}")
-        
+
         # Create a fake PDF file
         pdf_content = b"%PDF-1.4\n%Test PDF content"
         file = io.BytesIO(pdf_content)
@@ -88,14 +88,12 @@ class TestDocumentUpload:
             "patient_id": str(test_patient.id),  # Convert to string for form data
             "description": "Résultats d'analyses sanguines",
         }
-        
+
         print(f"Sending data: {data}")
 
         # Don't pass headers when uploading files - let TestClient handle content-type
-        response = client.post(
-            "/api/v1/documents/upload", files=files, data=data
-        )
-        
+        response = client.post("/api/v1/documents/upload", files=files, data=data)
+
         # Debug output
         print(f"Response status: {response.status_code}")
         if response.status_code == 422:
@@ -105,14 +103,19 @@ class TestDocumentUpload:
         elif response.status_code not in [200, 201]:
             print(f"Response: {response.text[:200]}")
 
-        assert response.status_code in [201, 200], f"Expected 200/201, got {response.status_code}: {response.text[:500]}"
+        assert response.status_code in [
+            201,
+            200,
+        ], f"Expected 200/201, got {response.status_code}: {response.text[:500]}"
         if response.status_code == 201:
             result = response.json()
             assert result["document_type"] == "lab_result"
             assert result["mime_type"] == "application/pdf"
             assert "id" in result
 
-    def test_upload_image_document(self, client: TestClient, auth_headers_doctor: dict, test_patient):
+    def test_upload_image_document(
+        self, client: TestClient, auth_headers_doctor: dict, test_patient
+    ):
         """Test uploading an image document."""
         # Create a minimal valid JPEG
         jpeg_content = bytes.fromhex(
@@ -133,16 +136,16 @@ class TestDocumentUpload:
             "description": "Radiographie thorax",
         }
 
-        response = client.post(
-            "/api/v1/documents/upload", files=files, data=data
-        )
+        response = client.post("/api/v1/documents/upload", files=files, data=data)
 
         assert response.status_code in [201, 200]
 
-    def test_upload_file_too_large(self, client: TestClient, auth_headers_doctor: dict, test_patient):
+    def test_upload_file_too_large(
+        self, client: TestClient, auth_headers_doctor: dict, test_patient
+    ):
         """Test that files exceeding size limit are rejected."""
         from fastapi.exceptions import HTTPException
-        
+
         # Create a large file (> 50 MB)
         large_content = b"x" * (51 * 1024 * 1024)  # 51 MB
         file = io.BytesIO(large_content)
@@ -152,23 +155,21 @@ class TestDocumentUpload:
 
         # The middleware raises HTTPException, TestClient re-raises it
         with pytest.raises(HTTPException) as exc_info:
-            response = client.post(
-                "/api/v1/documents/upload", files=files, data=data
-            )
-        
+            response = client.post("/api/v1/documents/upload", files=files, data=data)
+
         # Should be rejected with 413 (Payload Too Large)
         assert exc_info.value.status_code == 413
 
-    def test_upload_invalid_mime_type(self, client: TestClient, auth_headers_doctor: dict, test_patient):
+    def test_upload_invalid_mime_type(
+        self, client: TestClient, auth_headers_doctor: dict, test_patient
+    ):
         """Test that invalid MIME types are rejected."""
         file = io.BytesIO(b"executable content")
 
         files = {"file": ("malicious.exe", file, "application/x-msdownload")}
         data = {"document_type": "other", "patient_id": str(test_patient.id)}
 
-        response = client.post(
-            "/api/v1/documents/upload", files=files, data=data
-        )
+        response = client.post("/api/v1/documents/upload", files=files, data=data)
 
         assert response.status_code in [400, 415, 422]
 
@@ -182,9 +183,7 @@ class TestDocumentUpload:
             # Missing patient_id
         }
 
-        response = client.post(
-            "/api/v1/documents/upload", files=files, data=data
-        )
+        response = client.post("/api/v1/documents/upload", files=files, data=data)
 
         assert response.status_code == 422
 
@@ -193,7 +192,9 @@ class TestDocumentUpload:
 class TestDuplicateDetection:
     """Test duplicate document detection."""
 
-    def test_duplicate_checksum_detection(self, client: TestClient, auth_headers_doctor: dict, test_patient):
+    def test_duplicate_checksum_detection(
+        self, client: TestClient, auth_headers_doctor: dict, test_patient
+    ):
         """Test that duplicate files are detected by checksum."""
         content = b"Unique document content for duplicate test"
         file1 = io.BytesIO(content)
@@ -202,9 +203,7 @@ class TestDuplicateDetection:
         files1 = {"file": ("document1.pdf", file1, "application/pdf")}
         data1 = {"document_type": "lab_result", "patient_id": str(test_patient.id)}
 
-        response1 = client.post(
-            "/api/v1/documents/upload", files=files1, data=data1
-        )
+        response1 = client.post("/api/v1/documents/upload", files=files1, data=data1)
 
         assert response1.status_code in [201, 200]
 
@@ -213,9 +212,7 @@ class TestDuplicateDetection:
         files2 = {"file": ("document2.pdf", file2, "application/pdf")}
         data2 = {"document_type": "lab_result", "patient_id": str(test_patient.id)}
 
-        response2 = client.post(
-            "/api/v1/documents/upload", files=files2, data=data2
-        )
+        response2 = client.post("/api/v1/documents/upload", files=files2, data=data2)
 
         # Should either reject or return existing document
         assert response2.status_code in [200, 201, 409]
@@ -230,7 +227,9 @@ class TestDuplicateDetection:
 class TestDocumentRetrieval:
     """Test document retrieval operations."""
 
-    def test_get_patient_documents(self, client: TestClient, auth_headers_doctor: dict, test_patient):
+    def test_get_patient_documents(
+        self, client: TestClient, auth_headers_doctor: dict, test_patient
+    ):
         """Test retrieving all documents for a patient."""
         # First upload a document
         file = io.BytesIO(b"Test content")
@@ -243,22 +242,24 @@ class TestDocumentRetrieval:
 
         if upload_response.status_code in [200, 201]:
             # Get patient documents
-            response = client.get(f"/api/v1/documents/patient/{test_patient.id}", headers=auth_headers_doctor)
+            response = client.get(
+                f"/api/v1/documents/patient/{test_patient.id}", headers=auth_headers_doctor
+            )
 
             assert response.status_code == 200
             documents = response.json()
             assert isinstance(documents, list)
 
-    def test_get_document_details(self, client: TestClient, auth_headers_doctor: dict, test_patient):
+    def test_get_document_details(
+        self, client: TestClient, auth_headers_doctor: dict, test_patient
+    ):
         """Test retrieving document details."""
         # Upload document first
         file = io.BytesIO(b"Test content")
         files = {"file": ("test.pdf", file, "application/pdf")}
         data = {"document_type": "lab_result", "patient_id": str(test_patient.id)}
 
-        upload_response = client.post(
-            "/api/v1/documents/upload", files=files, data=data
-        )
+        upload_response = client.post("/api/v1/documents/upload", files=files, data=data)
 
         if upload_response.status_code in [200, 201]:
             doc_id = upload_response.json()["id"]
@@ -278,9 +279,7 @@ class TestDocumentRetrieval:
         files = {"file": ("test.pdf", file, "application/pdf")}
         data = {"document_type": "lab_result", "patient_id": str(test_patient.id)}
 
-        upload_response = client.post(
-            "/api/v1/documents/upload", files=files, data=data
-        )
+        upload_response = client.post("/api/v1/documents/upload", files=files, data=data)
 
         if upload_response.status_code in [200, 201]:
             doc_id = upload_response.json()["id"]
@@ -298,7 +297,9 @@ class TestDocumentRetrieval:
 class TestDocumentMetadata:
     """Test document metadata management."""
 
-    def test_update_document_metadata(self, client: TestClient, auth_headers_doctor: dict, test_patient):
+    def test_update_document_metadata(
+        self, client: TestClient, auth_headers_doctor: dict, test_patient
+    ):
         """Test updating document metadata."""
         # Upload document first
         file = io.BytesIO(b"Test content")
@@ -309,9 +310,7 @@ class TestDocumentMetadata:
             "description": "Original description",
         }
 
-        upload_response = client.post(
-            "/api/v1/documents/upload", files=files, data=data
-        )
+        upload_response = client.post("/api/v1/documents/upload", files=files, data=data)
 
         if upload_response.status_code in [200, 201]:
             doc_id = upload_response.json()["id"]
@@ -338,9 +337,7 @@ class TestDocumentMetadata:
             "tags": ["blood_test", "annual_checkup"],
         }
 
-        response = client.post(
-            "/api/v1/documents/upload", files=files, data=data
-        )
+        response = client.post("/api/v1/documents/upload", files=files, data=data)
 
         if response.status_code in [200, 201]:
             _ = response.json()
@@ -360,15 +357,15 @@ class TestDocumentSecurity:
 
         assert response.status_code in [403, 404]
 
-    def test_rbac_doctor_can_upload(self, client: TestClient, auth_headers_doctor: dict, test_patient):
+    def test_rbac_doctor_can_upload(
+        self, client: TestClient, auth_headers_doctor: dict, test_patient
+    ):
         """Test that doctors can upload documents."""
         file = io.BytesIO(b"Test content")
         files = {"file": ("test.pdf", file, "application/pdf")}
         data = {"document_type": "prescription", "patient_id": str(test_patient.id)}
 
-        response = client.post(
-            "/api/v1/documents/upload", files=files, data=data
-        )
+        response = client.post("/api/v1/documents/upload", files=files, data=data)
 
         # Should succeed (200/201) or be forbidden if not doctor role
         assert response.status_code in [200, 201, 403]
@@ -404,31 +401,27 @@ class TestDocumentStatistics:
 class TestDocumentDeletion:
     """Test document deletion (soft delete)."""
 
-    def test_soft_delete_document(self, client: TestClient, auth_headers_doctor: dict, test_patient):
+    def test_soft_delete_document(
+        self, client: TestClient, auth_headers_doctor: dict, test_patient
+    ):
         """Test soft-deleting a document."""
         # Upload document first
         file = io.BytesIO(b"Test content")
         files = {"file": ("test.pdf", file, "application/pdf")}
         data = {"document_type": "other", "patient_id": str(test_patient.id)}
 
-        upload_response = client.post(
-            "/api/v1/documents/upload", files=files, data=data
-        )
+        upload_response = client.post("/api/v1/documents/upload", files=files, data=data)
 
         if upload_response.status_code in [200, 201]:
             doc_id = upload_response.json()["id"]
 
             # Delete document
-            response = client.delete(
-                f"/api/v1/documents/{doc_id}", headers=auth_headers_doctor
-            )
+            response = client.delete(f"/api/v1/documents/{doc_id}", headers=auth_headers_doctor)
 
             assert response.status_code in [200, 204]
 
             # Verify soft delete (document should not be retrievable)
-            get_response = client.get(
-                f"/api/v1/documents/{doc_id}", headers=auth_headers_doctor
-            )
+            get_response = client.get(f"/api/v1/documents/{doc_id}", headers=auth_headers_doctor)
             assert get_response.status_code in [404, 410]
 
 
@@ -443,11 +436,13 @@ class TestDICOMSupport:
         file = io.BytesIO(dicom_content)
 
         files = {"file": ("scan.dcm", file, "application/dicom")}
-        data = {"document_type": "imaging", "patient_id": str(test_patient.id), "description": "CT Scan"}
+        data = {
+            "document_type": "imaging",
+            "patient_id": str(test_patient.id),
+            "description": "CT Scan",
+        }
 
-        response = client.post(
-            "/api/v1/documents/upload", files=files, data=data
-        )
+        response = client.post("/api/v1/documents/upload", files=files, data=data)
 
         # Should accept or validate DICOM format
         assert response.status_code in [200, 201, 400, 415]
@@ -490,9 +485,7 @@ class TestDocumentTypes:
         files = {"file": ("test.pdf", file, "application/pdf")}
         data = {"document_type": doc_type, "patient_id": str(test_patient.id)}
 
-        response = client.post(
-            "/api/v1/documents/upload", files=files, data=data
-        )
+        response = client.post("/api/v1/documents/upload", files=files, data=data)
 
         assert response.status_code in [200, 201]
 

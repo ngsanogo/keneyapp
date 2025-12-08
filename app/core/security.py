@@ -58,9 +58,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         claims["aud"] = settings.TOKEN_AUDIENCE
 
     to_encode.update(claims)
-    encoded_jwt = jwt.encode(
-        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
-    )
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
 

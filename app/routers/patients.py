@@ -55,9 +55,7 @@ def create_patient(
     patient_data: PatientCreate,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])
-    ),
+    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])),
 ):
     """
     Create a new patient record.
@@ -107,9 +105,7 @@ def create_patient(
     # Cache management
     serialized_patient = serialize_patient_dict(db_patient)
 
-    cache_key = cache_service.generate_key(
-        "patients:detail", current_user.tenant_id, db_patient.id
-    )
+    cache_key = cache_service.generate_key("patients:detail", current_user.tenant_id, db_patient.id)
     cache_service.set(cache_key, serialized_patient, ttl=PATIENT_DETAIL_TTL_SECONDS)
 
     # Invalidate list caches
@@ -137,9 +133,7 @@ def get_patients(
     filters: FilterParams = Depends(),
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(
-            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
-        )
+        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
     ),
 ):
     """
@@ -246,9 +240,7 @@ def get_patient(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(
-            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
-        )
+        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
     ),
 ):
     """
@@ -263,9 +255,7 @@ def get_patient(
     Returns:
         Patient record
     """
-    cache_key = cache_service.generate_key(
-        "patients:detail", current_user.tenant_id, patient_id
-    )
+    cache_key = cache_service.generate_key("patients:detail", current_user.tenant_id, patient_id)
     cached_patient = cache_service.get(cache_key)
     if cached_patient is not None:
         log_audit_event(
@@ -296,9 +286,7 @@ def get_patient(
             details={"reason": "not_found"},
             request=request,
         )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
 
     log_audit_event(
         db=db,
@@ -339,9 +327,7 @@ def update_patient(
     """
     service = PatientService(db)
     try:
-        patient = service.update_patient(
-            patient_id, patient_data, current_user.tenant_id
-        )
+        patient = service.update_patient(patient_id, patient_data, current_user.tenant_id)
         db.commit()
     except PatientNotFoundError:
         log_audit_event(
@@ -355,9 +341,7 @@ def update_patient(
             details={"reason": "not_found"},
             request=request,
         )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
     except DuplicateResourceError as exc:
         log_audit_event(
             db=db,
@@ -383,16 +367,12 @@ def update_patient(
         status="success",
         user_id=current_user.id,
         username=current_user.username,
-        details={
-            "updated_fields": list(patient_data.model_dump(exclude_unset=True).keys())
-        },
+        details={"updated_fields": list(patient_data.model_dump(exclude_unset=True).keys())},
         request=request,
     )
 
     serialized_patient = serialize_patient_dict(patient)
-    cache_key = cache_service.generate_key(
-        "patients:detail", current_user.tenant_id, patient.id
-    )
+    cache_key = cache_service.generate_key("patients:detail", current_user.tenant_id, patient.id)
     cache_service.set(cache_key, serialized_patient, ttl=PATIENT_DETAIL_TTL_SECONDS)
     cache_service.delete_pattern(f"patients:list:{current_user.tenant_id}:*")
     cache_service.delete_pattern("dashboard:*")
@@ -442,9 +422,7 @@ def delete_patient(
             details={"reason": "not_found"},
             request=request,
         )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
 
     log_audit_event(
         db=db,
@@ -460,9 +438,7 @@ def delete_patient(
     cache_service.delete_pattern(f"patients:list:{current_user.tenant_id}:*")
     cache_service.delete_pattern("dashboard:*")
     cache_service.delete(
-        cache_service.generate_key(
-            "patients:detail", current_user.tenant_id, patient_id
-        )
+        cache_service.generate_key("patients:detail", current_user.tenant_id, patient_id)
     )
 
     patient_operations_total.labels(operation="delete").inc()
@@ -486,9 +462,7 @@ def advanced_patient_search(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(
-            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
-        )
+        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
     ),
 ):
     """
@@ -552,8 +526,7 @@ def advanced_patient_search(
                 [
                     k
                     for k, v in filters.model_dump(exclude_unset=True).items()
-                    if v is not None
-                    and k not in ["page", "page_size", "sort_by", "sort_order"]
+                    if v is not None and k not in ["page", "page_size", "sort_by", "sort_order"]
                 ]
             ),
             "results_count": len(patients),
@@ -616,9 +589,7 @@ def bulk_delete_patients(
 
             # Clear cache for deleted patient
             cache_service.delete(
-                cache_service.generate_key(
-                    "patients:detail", current_user.tenant_id, patient_id
-                )
+                cache_service.generate_key("patients:detail", current_user.tenant_id, patient_id)
             )
         except PatientNotFoundError:
             failed += 1
@@ -679,9 +650,7 @@ def export_patients(
     search: str = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(
-            [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST]
-        )
+        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
     ),
 ):
     """
@@ -805,9 +774,7 @@ def get_patient_medical_history(
     event_types: list[str] = None,
     sort: str = "desc",
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])
-    ),
+    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])),
 ):
     """
     Get comprehensive medical history timeline for a patient.
@@ -934,9 +901,7 @@ def get_patient_medical_history(
                         "title": f"Lab Test - {lab.test_name}",
                         "description": f"Result: {lab.result_value} {lab.unit or ''}",
                         "doctor": lab.ordered_by,
-                        "status": (
-                            lab.status.value if hasattr(lab, "status") else "completed"
-                        ),
+                        "status": (lab.status.value if hasattr(lab, "status") else "completed"),
                         "metadata": {
                             "test_name": lab.test_name,
                             "result": lab.result_value,
@@ -966,8 +931,7 @@ def get_patient_medical_history(
                         "date": doc.created_at.isoformat(),
                         "type": "document",
                         "title": f"Document - {doc.document_type}",
-                        "description": doc.description
-                        or f"{doc.document_type} document uploaded",
+                        "description": doc.description or f"{doc.document_type} document uploaded",
                         "status": "available",
                         "metadata": {
                             "document_type": doc.document_type,

@@ -48,9 +48,7 @@ class TestTerminologyService:
 
     def test_get_coding_dict_atc(self):
         """Test ATC coding dictionary generation."""
-        coding = TerminologyService.get_coding_dict(
-            CodeSystem.ATC, "A10BA02", "Metformin"
-        )
+        coding = TerminologyService.get_coding_dict(CodeSystem.ATC, "A10BA02", "Metformin")
 
         assert coding is not None
         assert coding["system"] == "http://www.whocc.no/atc"

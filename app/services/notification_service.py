@@ -178,7 +178,9 @@ class NotificationService:
         L'équipe KeneyApp
         """
 
-        sms_body = f"Vos résultats pour {test_name} sont disponibles. Consultez votre compte KeneyApp."
+        sms_body = (
+            f"Vos résultats pour {test_name} sont disponibles. Consultez votre compte KeneyApp."
+        )
 
         results = {
             "email": EmailNotification.send_email(patient_email, subject, email_body),
@@ -314,18 +316,14 @@ class EnhancedNotificationService:
             .first()
         )
 
-    def create_default_preferences(
-        self, user_id: int, tenant_id: int
-    ) -> NotificationPreference:
+    def create_default_preferences(self, user_id: int, tenant_id: int) -> NotificationPreference:
         """Create default notification preferences for a user."""
         prefs = NotificationPreference(user_id=user_id, tenant_id=tenant_id)
         self.db.add(prefs)
         self.db.flush()
         return prefs
 
-    def update_preferences(
-        self, user_id: int, preferences_data: dict
-    ) -> NotificationPreference:
+    def update_preferences(self, user_id: int, preferences_data: dict) -> NotificationPreference:
         """Update user notification preferences."""
         prefs = self.get_user_preferences(user_id)
         if not prefs:
@@ -497,9 +495,7 @@ class EnhancedNotificationService:
                 title=title,
                 message=message,
                 action_url=action_url,
-                recipient_email=(
-                    user.email if channel == NotificationChannel.EMAIL else None
-                ),
+                recipient_email=(user.email if channel == NotificationChannel.EMAIL else None),
                 resource_type=resource_type,
                 resource_id=resource_id,
             )
@@ -507,9 +503,7 @@ class EnhancedNotificationService:
             # Send via appropriate channel
             try:
                 if channel == NotificationChannel.EMAIL:
-                    success = EmailNotification.send_email(
-                        user.email, title, message, html=False
-                    )
+                    success = EmailNotification.send_email(user.email, title, message, html=False)
                     if success:
                         notification.status = NotificationStatus.SENT
                         notification.sent_at = datetime.now()
@@ -587,19 +581,14 @@ class EnhancedNotificationService:
 
         total = query.count()
         notifications = (
-            query.order_by(Notification.created_at.desc())
-            .offset(skip)
-            .limit(limit)
-            .all()
+            query.order_by(Notification.created_at.desc()).offset(skip).limit(limit).all()
         )
 
         return notifications, total
 
     def get_notification_stats(self, user_id: int) -> dict:
         """Get notification statistics for user."""
-        total = (
-            self.db.query(Notification).filter(Notification.user_id == user_id).count()
-        )
+        total = self.db.query(Notification).filter(Notification.user_id == user_id).count()
 
         unread = (
             self.db.query(Notification)
@@ -615,9 +604,7 @@ class EnhancedNotificationService:
         for notif_type in NotificationType:
             count = (
                 self.db.query(Notification)
-                .filter(
-                    Notification.user_id == user_id, Notification.type == notif_type
-                )
+                .filter(Notification.user_id == user_id, Notification.type == notif_type)
                 .count()
             )
             if count > 0:

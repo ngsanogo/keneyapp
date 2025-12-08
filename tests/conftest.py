@@ -59,8 +59,8 @@ def db_engine():
 def db(db_engine) -> Generator[Session, None, None]:
     """Crée une session de base de données pour un test"""
     TestingSessionLocal = sessionmaker(
-        autocommit=False, 
-        autoflush=False, 
+        autocommit=False,
+        autoflush=False,
         bind=db_engine,
         expire_on_commit=False,  # Prevent detached instance issues
     )
@@ -349,11 +349,11 @@ def _create_auth_token(user: User) -> str:
     """Helper to create real JWT token for testing."""
     from app.core.security import create_access_token
     from datetime import timedelta
-    
+
     token_data = {
         "sub": user.username,
         "tenant_id": user.tenant_id,
-        "role": user.role.value if hasattr(user.role, 'value') else str(user.role),
+        "role": user.role.value if hasattr(user.role, "value") else str(user.role),
         "user_id": user.id,
     }
     return create_access_token(token_data, expires_delta=timedelta(hours=1))
@@ -577,9 +577,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "api: marque les tests d'API")
     config.addinivalue_line("markers", "security: marque les tests de sécurité")
     config.addinivalue_line("markers", "performance: marque les tests de performance")
-    config.addinivalue_line(
-        "markers", "smoke: smoke tests that require a running server"
-    )
+    config.addinivalue_line("markers", "smoke: smoke tests that require a running server")
 
 
 # ============================================================================
@@ -592,8 +590,7 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         # Ajouter marker 'unit' par défaut si aucun autre marker
         if not any(
-            marker in item.keywords
-            for marker in ["integration", "api", "slow", "performance"]
+            marker in item.keywords for marker in ["integration", "api", "slow", "performance"]
         ):
             item.add_marker(pytest.mark.unit)
 

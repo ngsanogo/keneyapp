@@ -17,11 +17,16 @@ depends_on = None
 
 def upgrade() -> None:
     """Add performance indexes for frequently queried columns."""
-    
+
     # Patient indexes for search and filtering
     op.create_index('idx_patients_email', 'patients', ['email'], unique=False)
-    op.create_index('idx_patients_phone', 'patients', ['phone_number'], unique=False)
-    op.create_index('idx_patients_tenant_active', 'patients', ['tenant_id', 'is_deleted'], unique=False)
+    op.create_index('idx_patients_phone', 'patients', ['phone'], unique=False)
+    op.create_index(
+        'idx_patients_tenant_active',
+        'patients',
+        ['tenant_id', 'is_deleted'],
+        unique=False,
+    )
     op.create_index('idx_patients_last_name', 'patients', ['last_name'], unique=False)
     op.create_index('idx_patients_date_of_birth', 'patients', ['date_of_birth'], unique=False)
     

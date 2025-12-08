@@ -31,9 +31,7 @@ class PatientCareRecommendation(BaseModel):
     title: str = Field(..., description="Recommendation title")
     description: str = Field(..., description="Detailed description")
     action: str = Field(..., description="Suggested action to take")
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class AppointmentSlotRecommendation(BaseModel):
@@ -73,9 +71,7 @@ class MedicationInteractionWarning(BaseModel):
         },
     )
 
-    severity: str = Field(
-        ..., description="Severity level (low, medium, high, critical)"
-    )
+    severity: str = Field(..., description="Severity level (low, medium, high, critical)")
     medication_1: str = Field(..., description="First medication name")
     medication_2: str = Field(..., description="Second medication name")
     description: str = Field(..., description="Description of the interaction")
@@ -111,6 +107,4 @@ class ResourceOptimizationRecommendation(BaseModel):
     title: str = Field(..., description="Recommendation title")
     description: str = Field(..., description="Detailed description")
     action: str = Field(..., description="Suggested action to take")
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")

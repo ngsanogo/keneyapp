@@ -9,31 +9,33 @@ import subprocess
 import sys
 
 # ANSI colors
-GREEN = '\033[0;32m'
-RED = '\033[0;31m'
-YELLOW = '\033[1;33m'
-BLUE = '\033[0;34m'
-NC = '\033[0m'  # No Color
+GREEN = "\033[0;32m"
+RED = "\033[0;31m"
+YELLOW = "\033[1;33m"
+BLUE = "\033[0;34m"
+NC = "\033[0m"  # No Color
+
 
 def get_image_size(image_name):
     """Get the size of a Docker image in MB"""
     try:
         result = subprocess.run(
-            ['docker', 'images', f'{image_name}:latest', '--format', '{{.Size}}'],
+            ["docker", "images", f"{image_name}:latest", "--format", "{{.Size}}"],
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
         size_str = result.stdout.strip()
 
-        if 'GB' in size_str:
-            return int(float(size_str.replace('GB', '')) * 1024)
-        elif 'MB' in size_str:
-            return int(float(size_str.replace('MB', '')))
+        if "GB" in size_str:
+            return int(float(size_str.replace("GB", "")) * 1024)
+        elif "MB" in size_str:
+            return int(float(size_str.replace("MB", "")))
         else:
             return 0
     except (subprocess.CalledProcessError, ValueError):
         return None
+
 
 def main():
     print("🐳 KeneyApp Docker Image Optimization Results")
@@ -42,11 +44,11 @@ def main():
 
     # Before sizes (reference from original images)
     before_sizes = {
-        'backend': 1970,
-        'frontend': 1400,
-        'celery_worker': 1970,
-        'celery_beat': 1970,
-        'flower': 1970,
+        "backend": 1970,
+        "frontend": 1400,
+        "celery_worker": 1970,
+        "celery_beat": 1970,
+        "flower": 1970,
     }
 
     print("📊 Current Image Sizes:")
@@ -57,7 +59,7 @@ def main():
     results = []
 
     for service, before_mb in before_sizes.items():
-        image = f'keneyapp-{service}'
+        image = f"keneyapp-{service}"
         current_mb = get_image_size(image)
 
         if current_mb is not None:
@@ -78,16 +80,20 @@ def main():
                 color = RED
                 emoji = "⚠️"
 
-            print(f"{color}{service:<20}{NC} {before_mb:>6} MB → {current_mb:>6} MB  "
-                  f"{color}{emoji} -{reduction:>4.1f}%{NC} ({saved:>4} MB saved)")
+            print(
+                f"{color}{service:<20}{NC} {before_mb:>6} MB → {current_mb:>6} MB  "
+                f"{color}{emoji} -{reduction:>4.1f}%{NC} ({saved:>4} MB saved)"
+            )
 
-            results.append({
-                'service': service,
-                'before': before_mb,
-                'after': current_mb,
-                'saved': saved,
-                'reduction': reduction
-            })
+            results.append(
+                {
+                    "service": service,
+                    "before": before_mb,
+                    "after": current_mb,
+                    "saved": saved,
+                    "reduction": reduction,
+                }
+            )
         else:
             print(f"{RED}✗ {service}: Image not found{NC}")
 
@@ -152,5 +158,6 @@ def main():
 
     return 0
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main())

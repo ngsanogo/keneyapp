@@ -32,15 +32,11 @@ appointment_bookings_total = Counter(
     "appointment_bookings_total", "Total appointment bookings", ["status"]
 )
 
-prescription_created_total = Counter(
-    "prescription_created_total", "Total prescriptions created"
-)
+prescription_created_total = Counter("prescription_created_total", "Total prescriptions created")
 
 active_users = Gauge("active_users", "Number of currently active users")
 
-database_connections = Gauge(
-    "database_connections", "Number of active database connections"
-)
+database_connections = Gauge("database_connections", "Number of active database connections")
 
 # Business KPI Metrics
 daily_active_patients = Gauge(

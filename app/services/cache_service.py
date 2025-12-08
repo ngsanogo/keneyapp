@@ -59,9 +59,7 @@ class CacheService:
             self.redis_client.ping()
             logger.info("Redis cache service initialized successfully")
         except Exception as e:
-            logger.warning(
-                f"Redis connection failed: {e}. " "Falling back to memory cache only."
-            )
+            logger.warning(f"Redis connection failed: {e}. " "Falling back to memory cache only.")
             self.redis_client = None
 
     def _generate_key(self, prefix: str, *args, **kwargs) -> str:
@@ -156,7 +154,7 @@ class CacheService:
         """
         expiry = None
         if ttl:
-                expiry = datetime.now(timezone.utc) + timedelta(seconds=ttl)
+            expiry = datetime.now(timezone.utc) + timedelta(seconds=ttl)
 
         # Add to memory cache
         self._add_to_memory_cache(key, value, expiry)
@@ -177,9 +175,7 @@ class CacheService:
 
         return True
 
-    def _add_to_memory_cache(
-        self, key: str, value: Any, expiry: Optional[datetime] = None
-    ):
+    def _add_to_memory_cache(self, key: str, value: Any, expiry: Optional[datetime] = None):
         """Add item to memory cache with LRU eviction"""
         # Simple LRU: remove oldest if at capacity
         if len(self._memory_cache) >= self._memory_cache_max_size:
@@ -194,7 +190,7 @@ class CacheService:
         # Remove from memory cache
         if key in self._memory_cache:
             del self._memory_cache[key]
-        
+
         self._stats["deletes"] += 1
 
         # Remove from Redis
@@ -221,9 +217,7 @@ class CacheService:
         count = 0
 
         # Get matching keys from memory cache
-        keys_to_delete = [
-            k for k in self._memory_cache.keys() if self._matches_pattern(k, pattern)
-        ]
+        keys_to_delete = [k for k in self._memory_cache.keys() if self._matches_pattern(k, pattern)]
         for key in keys_to_delete:
             del self._memory_cache[key]
             count += 1
@@ -233,9 +227,7 @@ class CacheService:
             try:
                 cursor = 0
                 while True:
-                    cursor, keys = self.redis_client.scan(
-                        cursor, match=pattern, count=100
-                    )
+                    cursor, keys = self.redis_client.scan(cursor, match=pattern, count=100)
                     if keys:
                         self.redis_client.delete(*keys)
                         count += len(keys)
@@ -346,9 +338,7 @@ class CacheService:
     def get_stats(self) -> Dict[str, Any]:
         """Get cache statistics"""
         total_requests = self._stats["hits"] + self._stats["misses"]
-        hit_rate = (
-            (self._stats["hits"] / total_requests * 100) if total_requests > 0 else 0
-        )
+        hit_rate = (self._stats["hits"] / total_requests * 100) if total_requests > 0 else 0
 
         stats = {
             **self._stats,
