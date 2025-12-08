@@ -42,17 +42,22 @@ def upgrade() -> None:
     op.create_index('idx_messages_sender', 'messages', ['sender_id'], unique=False)
     op.create_index('idx_messages_status', 'messages', ['status'], unique=False)
     op.create_index('idx_messages_created', 'messages', ['created_at'], unique=False)
-    op.create_index('idx_messages_receiver_status', 'messages', ['receiver_id', 'status'], unique=False)
-    
+    op.create_index(
+        'idx_messages_receiver_status',
+        'messages',
+        ['receiver_id', 'status'],
+        unique=False,
+    )
+
     # Document indexes for patient and tenant queries
     op.create_index('idx_documents_patient', 'medical_documents', ['patient_id'], unique=False)
     op.create_index('idx_documents_type', 'medical_documents', ['document_type'], unique=False)
     op.create_index('idx_documents_created', 'medical_documents', ['created_at'], unique=False)
-    
+
     # Prescription indexes
     op.create_index('idx_prescriptions_patient', 'prescriptions', ['patient_id'], unique=False)
-    op.create_index('idx_prescriptions_doctor', 'prescriptions', ['prescribed_by'], unique=False)
-    op.create_index('idx_prescriptions_date', 'prescriptions', ['prescription_date'], unique=False)
+    op.create_index('idx_prescriptions_doctor', 'prescriptions', ['doctor_id'], unique=False)
+    op.create_index('idx_prescriptions_date', 'prescriptions', ['prescribed_date'], unique=False)
     
     # Lab result indexes
     op.create_index('idx_lab_results_patient', 'lab_results', ['patient_id'], unique=False)
