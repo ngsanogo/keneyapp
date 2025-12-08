@@ -248,6 +248,7 @@ class TestBatchPatients:
         # DELETE without auth
         response = unauthenticated_client.delete("/api/v1/batch/patients", params={"patient_ids": []})
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
     def test_batch_operations_tenant_isolation(self, client, auth_headers_doctor, test_patient, db):
         """Test that batch operations respect tenant isolation."""
         # Create patient in different tenant
@@ -292,11 +293,7 @@ class TestBatchPatients:
         
         # Should fail - patient not found in current tenant
         assert response.status_code == status.HTTP_404_NOT_FOUND
-    def test_batch_create_empty_list(self, client, auth_headers_doctor):
-        """Test batch creation with empty list."""
-        headers = auth_headers_doctor
-        headers = {"Authorization": f"Bearer {test_user_token}"}
-        
+
     def test_batch_create_empty_list(self, client, auth_headers_doctor):
         """Test batch creation with empty list."""
         response = client.post(

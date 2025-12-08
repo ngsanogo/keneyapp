@@ -182,6 +182,7 @@ def health_check():
         "timestamp": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat()
     }
 
+
 @app.get("/ready")
 def ready_check():
     """

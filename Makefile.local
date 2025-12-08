@@ -1,0 +1,253 @@
+.PHONY: help up down logs logs-backend logs-worker logs-beat logs-flower shell shell-backend shell-worker shell-db shell-redis db-migrate db-seed db-reset test lint format security clean health
+
+COMPOSE_FILE := docker-compose.local.yml
+PROJECT_NAME := keneyapp
+
+help: ## Show this help message
+	@echo "╔════════════════════════════════════════════════════════╗"
+	@echo "║         🤖 KeneyApp Local Development Stack            ║"
+	@echo "║              AI-Powered Healthcare Platform            ║"
+	@echo "╚════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "📚 Available Commands:"
+	@echo ""
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
+	@echo ""
+
+# Docker Operations
+up: ## Start all services in detached mode
+	@echo "🚀 Starting KeneyApp stack..."
+	docker-compose -f $(COMPOSE_FILE) up -d
+	@echo "✅ Services started"
+	@sleep 5
+	@$(MAKE) health
+
+down: ## Stop all services
+	@echo "⏹️  Stopping services..."
+	docker-compose -f $(COMPOSE_FILE) down
+	@echo "✅ Services stopped"
+
+restart: ## Restart all services
+	@echo "🔄 Restarting services..."
+	@$(MAKE) down
+	@$(MAKE) up
+
+# Logs
+logs: ## Show logs from all services
+	docker-compose -f $(COMPOSE_FILE) logs -f
+
+logs-backend: ## Show logs from backend service
+	docker-compose -f $(COMPOSE_FILE) logs -f backend
+
+logs-worker: ## Show logs from Celery worker
+	docker-compose -f $(COMPOSE_FILE) logs -f celery_worker
+
+logs-beat: ## Show logs from Celery Beat
+	docker-compose -f $(COMPOSE_FILE) logs -f celery_beat
+
+logs-flower: ## Show logs from Flower
+	docker-compose -f $(COMPOSE_FILE) logs -f flower
+
+logs-prometheus: ## Show logs from Prometheus
+	docker-compose -f $(COMPOSE_FILE) logs -f prometheus
+
+logs-grafana: ## Show logs from Grafana
+	docker-compose -f $(COMPOSE_FILE) logs -f grafana
+
+# Shell Access
+shell: shell-backend ## Access backend container shell (default)
+
+shell-backend: ## Access backend container shell
+	@echo "📦 Accessing backend container..."
+	docker exec -it $(PROJECT_NAME)_backend bash
+
+shell-worker: ## Access Celery worker container shell
+	@echo "📦 Accessing Celery worker container..."
+	docker exec -it $(PROJECT_NAME)_celery_worker bash
+
+shell-db: ## Access PostgreSQL container
+	@echo "📦 Accessing PostgreSQL container..."
+	docker exec -it $(PROJECT_NAME)_postgres psql -U keneyapp -d keneyapp
+
+shell-redis: ## Access Redis container
+	@echo "📦 Accessing Redis container..."
+	docker exec -it $(PROJECT_NAME)_redis redis-cli -a redis_secure_pass
+
+# Database Operations
+db-migrate: ## Run database migrations
+	@echo "🔄 Running database migrations..."
+	docker exec -it $(PROJECT_NAME)_backend alembic upgrade head
+	@echo "✅ Migrations completed"
+
+db-seed: ## Seed database with demo data
+	@echo "🌱 Seeding database..."
+	docker exec -it $(PROJECT_NAME)_backend python scripts/init_db.py
+	@echo "✅ Database seeded"
+
+db-reset: ## Reset database (drop, migrate, seed)
+	@echo "🔄 Resetting database..."
+	@$(MAKE) down
+	docker-compose -f $(COMPOSE_FILE) up -d postgres
+	@sleep 5
+	docker exec -it $(PROJECT_NAME)_postgres psql -U keneyapp -d postgres -c "DROP DATABASE IF EXISTS keneyapp;" || true
+	docker exec -it $(PROJECT_NAME)_postgres psql -U keneyapp -d postgres -c "CREATE DATABASE keneyapp;" || true
+	@sleep 2
+	docker-compose -f $(COMPOSE_FILE) up -d
+	@sleep 5
+	@$(MAKE) db-migrate
+	@$(MAKE) db-seed
+	@echo "✅ Database reset complete"
+
+db-backup: ## Backup database to file
+	@echo "💾 Creating database backup..."
+	docker exec $(PROJECT_NAME)_postgres pg_dump -U keneyapp keneyapp > backup_$(shell date +%Y%m%d_%H%M%S).sql
+	@echo "✅ Backup created"
+
+# Code Quality
+test: ## Run backend tests
+	@echo "🧪 Running tests..."
+	docker exec -it $(PROJECT_NAME)_backend pytest tests/ -v -m "not smoke"
+
+test-all: ## Run all tests including slow ones
+	@echo "🧪 Running all tests..."
+	docker exec -it $(PROJECT_NAME)_backend pytest tests/ -v
+
+test-coverage: ## Run tests with coverage report
+	@echo "📊 Running tests with coverage..."
+	docker exec -it $(PROJECT_NAME)_backend pytest --cov=app tests/ -v
+
+test-fast: ## Run fast tests only
+	@echo "⚡ Running fast tests..."
+	docker exec -it $(PROJECT_NAME)_backend pytest tests/ -v -m "not slow and not smoke"
+
+lint: ## Run code linters (flake8, mypy)
+	@echo "🔍 Running linters..."
+	docker exec -it $(PROJECT_NAME)_backend flake8 app tests
+	docker exec -it $(PROJECT_NAME)_backend mypy app
+
+format: ## Format code (Black + isort)
+	@echo "✨ Formatting code..."
+	docker exec -it $(PROJECT_NAME)_backend black app tests
+	docker exec -it $(PROJECT_NAME)_backend isort app tests
+
+format-check: ## Check code formatting without changes
+	@echo "✨ Checking code formatting..."
+	docker exec -it $(PROJECT_NAME)_backend black --check app tests
+	docker exec -it $(PROJECT_NAME)_backend isort --check-only app tests
+
+security: ## Run security checks
+	@echo "🔐 Running security checks..."
+	docker exec -it $(PROJECT_NAME)_backend bandit -r app
+	docker exec -it $(PROJECT_NAME)_backend pip-audit
+
+type-check: ## Run type checking
+	@echo "📝 Running type checks..."
+	docker exec -it $(PROJECT_NAME)_backend mypy app
+
+quality: lint format-check type-check ## Run all code quality checks
+
+# Health & Monitoring
+health: ## Check health of all services
+	@echo "🏥 Checking service health..."
+	@echo ""
+	@echo "Services Status:"
+	docker-compose -f $(COMPOSE_FILE) ps
+	@echo ""
+	@echo "Backend Health:"
+	@curl -s http://localhost:8000/health | python -m json.tool || echo "  ⏳ Not ready yet"
+	@echo ""
+	@echo "Available at:"
+	@echo "  • API:        http://localhost:8000"
+	@echo "  • Swagger:    http://localhost:8000/docs"
+	@echo "  • Flower:     http://localhost:5555"
+	@echo "  • Prometheus: http://localhost:9090"
+	@echo "  • Grafana:    http://localhost:3000"
+	@echo "  • pgAdmin:    http://localhost:5050"
+
+urls: ## Show all available service URLs
+	@echo ""
+	@echo "📚 Available Services:"
+	@echo ""
+	@echo "API & Documentation:"
+	@echo "  • FastAPI:    http://localhost:8000"
+	@echo "  • Swagger:    http://localhost:8000/docs"
+	@echo "  • ReDoc:      http://localhost:8000/redoc"
+	@echo "  • Health:     http://localhost:8000/health"
+	@echo "  • Metrics:    http://localhost:8000/metrics"
+	@echo ""
+	@echo "Monitoring & Analytics:"
+	@echo "  • Flower:     http://localhost:5555   (Celery task monitoring)"
+	@echo "  • Prometheus: http://localhost:9090   (Metrics collection)"
+	@echo "  • Grafana:    http://localhost:3000   (Metrics visualization)"
+	@echo ""
+	@echo "Database Management:"
+	@echo "  • pgAdmin:    http://localhost:5050   (PostgreSQL UI)"
+	@echo "  • Redis:      localhost:6379          (Redis cache)"
+	@echo ""
+
+# Build & Cleanup
+build: ## Build Docker images
+	@echo "🔨 Building images..."
+	docker-compose -f $(COMPOSE_FILE) build
+
+build-nocache: ## Build Docker images without cache
+	@echo "🔨 Building images (no cache)..."
+	docker-compose -f $(COMPOSE_FILE) build --no-cache
+
+prune: ## Remove unused Docker resources
+	@echo "🧹 Cleaning up Docker resources..."
+	docker system prune -f --volumes
+	@echo "✅ Cleanup complete"
+
+clean: ## Remove all containers, volumes, and build artifacts
+	@echo "🧹 Deep cleaning..."
+	docker-compose -f $(COMPOSE_FILE) down -v
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete
+	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
+	@echo "✅ Cleanup complete"
+
+# Development Setup
+setup: build up db-migrate db-seed ## Full setup (build, start, migrate, seed)
+	@echo "✅ Setup complete!"
+
+dev: up logs-backend ## Start stack and follow backend logs
+
+watch-tests: ## Watch tests and rerun on changes
+	@echo "👀 Watching tests..."
+	docker exec -it $(PROJECT_NAME)_backend pytest-watch tests/
+
+# Docker Compose commands
+ps: ## Show running containers
+	docker-compose -f $(COMPOSE_FILE) ps
+
+events: ## Show Docker events
+	docker events --filter 'label=com.docker.compose.project=$(PROJECT_NAME)'
+
+pull: ## Pull latest images
+	docker-compose -f $(COMPOSE_FILE) pull
+
+push: ## Push images to registry (requires configuration)
+	docker-compose -f $(COMPOSE_FILE) push
+
+# Advanced
+exec: ## Execute command in backend container (use: make exec CMD="your command")
+	docker exec -it $(PROJECT_NAME)_backend $(CMD)
+
+exec-bg: ## Execute command in backend container (background)
+	docker exec -d $(PROJECT_NAME)_backend $(CMD)
+
+# Git & Documentation
+status: ## Show git status
+	git status
+
+log: ## Show git log
+	git log --oneline -10
+
+docs: ## Generate API documentation (if applicable)
+	@echo "📚 Generating documentation..."
+	docker exec -it $(PROJECT_NAME)_backend python -m mkdocs build
+
+# Default target
+.DEFAULT_GOAL := help

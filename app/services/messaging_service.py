@@ -9,7 +9,7 @@ from typing import List, Optional
 
 from fastapi import Request
 from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Session, joinedload, selectinload
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.audit import log_audit_event
 from app.core.encryption import decrypt_data, encrypt_data
