@@ -350,6 +350,56 @@ class EnhancedNotificationService:
         else:  # Quiet hours cross midnight
             return now >= start or now <= end
 
+    def _get_notification_type_preference(
+        self,
+        notification_type: NotificationType,
+        channel: NotificationChannel,
+        prefs: NotificationPreference,
+    ) -> bool:
+        """Get preference for specific notification type and channel."""
+        # Security alerts always sent
+        if notification_type == NotificationType.SECURITY_ALERT:
+            return True
+
+        # Map by channel
+        if channel == NotificationChannel.EMAIL:
+            type_map = {
+                NotificationType.APPOINTMENT_REMINDER: prefs.email_appointment_reminders,
+                NotificationType.APPOINTMENT_CONFIRMED: prefs.email_appointment_reminders,
+                NotificationType.APPOINTMENT_CANCELLED: prefs.email_appointment_reminders,
+                NotificationType.LAB_RESULTS_READY: prefs.email_lab_results,
+                NotificationType.PRESCRIPTION_RENEWAL: prefs.email_prescription_renewals,
+                NotificationType.MESSAGE_RECEIVED: prefs.email_messages,
+                NotificationType.DOCUMENT_SHARED: prefs.email_documents,
+                NotificationType.DOCUMENT_UPLOADED: prefs.email_documents,
+                NotificationType.SYSTEM_ALERT: prefs.email_system_alerts,
+            }
+        elif channel == NotificationChannel.SMS:
+            type_map = {
+                NotificationType.APPOINTMENT_REMINDER: prefs.sms_appointment_reminders,
+                NotificationType.APPOINTMENT_CONFIRMED: prefs.sms_appointment_reminders,
+                NotificationType.APPOINTMENT_CANCELLED: prefs.sms_appointment_reminders,
+                NotificationType.LAB_RESULTS_READY: prefs.sms_lab_results,
+                NotificationType.PRESCRIPTION_RENEWAL: prefs.sms_prescription_renewals,
+                NotificationType.MESSAGE_RECEIVED: prefs.sms_messages,
+            }
+        elif channel == NotificationChannel.PUSH:
+            type_map = {
+                NotificationType.APPOINTMENT_REMINDER: prefs.push_appointment_reminders,
+                NotificationType.APPOINTMENT_CONFIRMED: prefs.push_appointment_reminders,
+                NotificationType.APPOINTMENT_CANCELLED: prefs.push_appointment_reminders,
+                NotificationType.LAB_RESULTS_READY: prefs.push_lab_results,
+                NotificationType.PRESCRIPTION_RENEWAL: prefs.push_prescription_renewals,
+                NotificationType.MESSAGE_RECEIVED: prefs.push_messages,
+                NotificationType.DOCUMENT_SHARED: prefs.push_documents,
+                NotificationType.DOCUMENT_UPLOADED: prefs.push_documents,
+                NotificationType.SYSTEM_ALERT: True,
+            }
+        else:
+            return True
+
+        return type_map.get(notification_type, True)
+
     def should_send_notification(
         self,
         user: User,
@@ -369,59 +419,19 @@ class EnhancedNotificationService:
             if self.is_in_quiet_hours(prefs):
                 return False
 
-        # Check channel-specific preferences
-        if channel == NotificationChannel.EMAIL:
-            if not prefs.email_enabled:
-                return False
-            type_map = {
-                NotificationType.APPOINTMENT_REMINDER: prefs.email_appointment_reminders,
-                NotificationType.APPOINTMENT_CONFIRMED: prefs.email_appointment_reminders,
-                NotificationType.APPOINTMENT_CANCELLED: prefs.email_appointment_reminders,
-                NotificationType.LAB_RESULTS_READY: prefs.email_lab_results,
-                NotificationType.PRESCRIPTION_RENEWAL: prefs.email_prescription_renewals,
-                NotificationType.MESSAGE_RECEIVED: prefs.email_messages,
-                NotificationType.DOCUMENT_SHARED: prefs.email_documents,
-                NotificationType.DOCUMENT_UPLOADED: prefs.email_documents,
-                NotificationType.SYSTEM_ALERT: prefs.email_system_alerts,
-                NotificationType.SECURITY_ALERT: True,  # Always send security alerts
-            }
-            return type_map.get(notification_type, True)
+        # Check if channel is enabled
+        channel_enabled_map = {
+            NotificationChannel.EMAIL: prefs.email_enabled,
+            NotificationChannel.SMS: prefs.sms_enabled,
+            NotificationChannel.PUSH: prefs.push_enabled,
+            NotificationChannel.WEBSOCKET: prefs.websocket_enabled,
+        }
 
-        elif channel == NotificationChannel.SMS:
-            if not prefs.sms_enabled:
-                return False
-            type_map = {
-                NotificationType.APPOINTMENT_REMINDER: prefs.sms_appointment_reminders,
-                NotificationType.APPOINTMENT_CONFIRMED: prefs.sms_appointment_reminders,
-                NotificationType.APPOINTMENT_CANCELLED: prefs.sms_appointment_reminders,
-                NotificationType.LAB_RESULTS_READY: prefs.sms_lab_results,
-                NotificationType.PRESCRIPTION_RENEWAL: prefs.sms_prescription_renewals,
-                NotificationType.MESSAGE_RECEIVED: prefs.sms_messages,
-                NotificationType.SECURITY_ALERT: True,
-            }
-            return type_map.get(notification_type, False)
+        if not channel_enabled_map.get(channel, False):
+            return False
 
-        elif channel == NotificationChannel.PUSH:
-            if not prefs.push_enabled:
-                return False
-            type_map = {
-                NotificationType.APPOINTMENT_REMINDER: prefs.push_appointment_reminders,
-                NotificationType.APPOINTMENT_CONFIRMED: prefs.push_appointment_reminders,
-                NotificationType.APPOINTMENT_CANCELLED: prefs.push_appointment_reminders,
-                NotificationType.LAB_RESULTS_READY: prefs.push_lab_results,
-                NotificationType.PRESCRIPTION_RENEWAL: prefs.push_prescription_renewals,
-                NotificationType.MESSAGE_RECEIVED: prefs.push_messages,
-                NotificationType.DOCUMENT_SHARED: prefs.push_documents,
-                NotificationType.DOCUMENT_UPLOADED: prefs.push_documents,
-                NotificationType.SYSTEM_ALERT: True,
-                NotificationType.SECURITY_ALERT: True,
-            }
-            return type_map.get(notification_type, True)
-
-        elif channel == NotificationChannel.WEBSOCKET:
-            return prefs.websocket_enabled
-
-        return True
+        # Check notification type preference
+        return self._get_notification_type_preference(notification_type, channel, prefs)
 
     def create_notification(
         self,
