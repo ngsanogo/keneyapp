@@ -53,7 +53,9 @@ def test_correlation_id_in_health_endpoint():
 
     assert response.status_code == 200
     assert "X-Correlation-ID" in response.headers
-    assert response.json() == {"status": "healthy"}
+    data = response.json()
+    assert data["status"] == "healthy"
+    assert "version" in data
 
 
 def test_correlation_id_persists_on_error():

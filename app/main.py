@@ -11,6 +11,7 @@ from fastapi.exception_handlers import (
 )
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
@@ -101,6 +102,9 @@ app = FastAPI(
 
 instrument_app(app)
 
+# Add GZip compression for responses > 1KB
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 # Add custom middleware
 app.add_middleware(CorrelationIdMiddleware)
 app.add_middleware(MetricsMiddleware)
@@ -166,13 +170,66 @@ def root():
 
 @app.get("/health")
 def health_check():
-    """Health check endpoint for monitoring."""
-    return {"status": "healthy"}
+    """
+    Health check endpoint for monitoring.
+    
+    Returns basic health status for load balancers and monitoring systems.
+    Use /ready for detailed dependency checks.
+    """
+    return {
+        "status": "healthy",
+        "version": settings.APP_VERSION,
+        "timestamp": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat()
+    }
 
 @app.get("/ready")
 def ready_check():
-    """Readiness endpoint for orchestrators to know when app is ready."""
-    return {"ready": True}
+    """
+    Readiness endpoint for orchestrators to know when app is ready.
+    
+    Performs dependency checks (database, cache) to determine if the service
+    is ready to accept traffic.
+    """
+    from app.core.database import SessionLocal
+    from app.core.cache import redis_client
+    
+    checks = {
+        "database": False,
+        "cache": False,
+        "overall": False
+    }
+    
+    # Check database connectivity
+    try:
+        db = SessionLocal()
+        db.execute(__import__("sqlalchemy").text("SELECT 1"))
+        db.close()
+        checks["database"] = True
+    except Exception as e:
+        logger.warning(f"Database readiness check failed: {e}")
+    
+    # Check Redis connectivity
+    try:
+        if redis_client:
+            redis_client.ping()
+            checks["cache"] = True
+        else:
+            checks["cache"] = True  # Cache is optional
+    except Exception as e:
+        logger.warning(f"Cache readiness check failed: {e}")
+        checks["cache"] = True  # Cache failures shouldn't block readiness
+    
+    checks["overall"] = checks["database"]  # Database is required
+    
+    status_code = 200 if checks["overall"] else 503
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "ready": checks["overall"],
+            "checks": checks,
+            "version": settings.APP_VERSION
+        }
+    )
 
 
 @app.get("/metrics")

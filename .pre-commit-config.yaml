@@ -5,7 +5,7 @@
 repos:
   # Python formatting with Black
   - repo: https://github.com/psf/black
-    rev: 24.10.0
+    rev: 25.11.0
     hooks:
       - id: black
         language_version: python3.11
@@ -14,7 +14,7 @@ repos:
 
   # Python linting with flake8
   - repo: https://github.com/pycqa/flake8
-    rev: 7.1.1
+    rev: 7.3.0
     hooks:
       - id: flake8
         args: ['--max-line-length=88', '--extend-ignore=E203,W503,C901']
@@ -31,7 +31,7 @@ repos:
 
   # Python type checking with mypy
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.11.2
+    rev: v1.19.0
     hooks:
       - id: mypy
         args: ['--config-file=mypy.ini', '--install-types', '--non-interactive']
@@ -41,7 +41,7 @@ repos:
 
   # Python security checks with bandit
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.9
+    rev: 1.7.10
     hooks:
       - id: bandit
         args: ['-c', 'pyproject.toml', '-r', 'app']

@@ -42,6 +42,7 @@ def db_engine():
         SQLALCHEMY_DATABASE_URL,
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
+        echo=False,  # Disable SQL echo for cleaner test output
     )
 
     # Créer toutes les tables
@@ -49,15 +50,19 @@ def db_engine():
 
     yield engine
 
-    # Cleanup
+    # Cleanup - properly dispose connections
     Base.metadata.drop_all(bind=engine)
+    engine.dispose()
 
 
 @pytest.fixture(scope="function")
 def db(db_engine) -> Generator[Session, None, None]:
     """Crée une session de base de données pour un test"""
     TestingSessionLocal = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_engine
+        autocommit=False, 
+        autoflush=False, 
+        bind=db_engine,
+        expire_on_commit=False,  # Prevent detached instance issues
     )
 
     session = TestingSessionLocal()
@@ -340,13 +345,26 @@ def test_patients_bulk(db: Session, test_tenant) -> list[Patient]:
 # ============================================================================
 
 
+def _create_auth_token(user: User) -> str:
+    """Helper to create real JWT token for testing."""
+    from app.core.security import create_access_token
+    from datetime import timedelta
+    
+    token_data = {
+        "sub": user.username,
+        "tenant_id": user.tenant_id,
+        "role": user.role.value if hasattr(user.role, 'value') else str(user.role),
+        "user_id": user.id,
+    }
+    return create_access_token(token_data, expires_delta=timedelta(hours=1))
+
+
 @pytest.fixture
 def auth_headers_super_admin(test_super_admin) -> dict:
     """Headers d'authentification pour super admin"""
-    # En production, générer un vrai JWT token
-    # Pour les tests, utiliser un mock
+    token = _create_auth_token(test_super_admin)
     return {
-        "Authorization": f"Bearer mock_token_superadmin_{test_super_admin.id}",
+        "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",
     }
 
@@ -354,8 +372,9 @@ def auth_headers_super_admin(test_super_admin) -> dict:
 @pytest.fixture
 def auth_headers_admin(test_admin) -> dict:
     """Headers d'authentification pour admin"""
+    token = _create_auth_token(test_admin)
     return {
-        "Authorization": f"Bearer mock_token_admin_{test_admin.id}",
+        "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",
     }
 
@@ -363,8 +382,9 @@ def auth_headers_admin(test_admin) -> dict:
 @pytest.fixture
 def auth_headers_doctor(test_doctor) -> dict:
     """Headers d'authentification pour médecin"""
+    token = _create_auth_token(test_doctor)
     return {
-        "Authorization": f"Bearer mock_token_doctor_{test_doctor.id}",
+        "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",
     }
 
@@ -372,8 +392,9 @@ def auth_headers_doctor(test_doctor) -> dict:
 @pytest.fixture
 def auth_headers_doctor_2(test_doctor_2) -> dict:
     """Headers d'authentification pour second médecin"""
+    token = _create_auth_token(test_doctor_2)
     return {
-        "Authorization": f"Bearer mock_token_doctor2_{test_doctor_2.id}",
+        "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",
     }
 
@@ -381,8 +402,9 @@ def auth_headers_doctor_2(test_doctor_2) -> dict:
 @pytest.fixture
 def auth_headers_nurse(test_nurse) -> dict:
     """Headers d'authentification pour infirmière"""
+    token = _create_auth_token(test_nurse)
     return {
-        "Authorization": f"Bearer mock_token_nurse_{test_nurse.id}",
+        "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",
     }
 
@@ -390,8 +412,9 @@ def auth_headers_nurse(test_nurse) -> dict:
 @pytest.fixture
 def auth_headers_receptionist(test_receptionist) -> dict:
     """Headers d'authentification pour réceptionniste"""
+    token = _create_auth_token(test_receptionist)
     return {
-        "Authorization": f"Bearer mock_token_receptionist_{test_receptionist.id}",
+        "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",
     }
 

@@ -9,7 +9,7 @@ from typing import List, Optional
 
 from fastapi import Request
 from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.audit import log_audit_event
 from app.core.encryption import decrypt_data, encrypt_data
@@ -206,6 +206,12 @@ def get_user_messages(
     if unread_only:
         query = query.filter(Message.receiver_id == user_id, Message.read_at.is_(None))
 
+    # Eager load relationships to prevent N+1 queries
+    query = query.options(
+        joinedload(Message.sender),
+        joinedload(Message.receiver)
+    )
+
     return query.order_by(Message.created_at.desc()).offset(skip).limit(limit).all()
 
 
@@ -230,6 +236,10 @@ def get_conversation(
                     Message.sender_id == other_user_id, Message.receiver_id == user_id
                 ),
             ),
+        )
+        .options(
+            joinedload(Message.sender),
+            joinedload(Message.receiver)
         )
         .order_by(Message.created_at.asc())
         .offset(skip)
@@ -286,6 +296,26 @@ def get_message_stats(db: Session, user_id: int, tenant_id: str) -> MessageStats
         or 0
     )
 
+    total_received = (
+        db.query(func.count(Message.id))
+        .filter(
+            Message.tenant_id == tenant_id,
+            Message.receiver_id == user_id,
+        )
+        .scalar()
+        or 0
+    )
+
+    total_sent = (
+        db.query(func.count(Message.id))
+        .filter(
+            Message.tenant_id == tenant_id,
+            Message.sender_id == user_id,
+        )
+        .scalar()
+        or 0
+    )
+
     unread = (
         db.query(func.count(Message.id))
         .filter(
@@ -323,8 +353,12 @@ def get_message_stats(db: Session, user_id: int, tenant_id: str) -> MessageStats
 
     return MessageStats(
         total_messages=total,
+        total_received=total_received,
+        total_sent=total_sent,
         unread_messages=unread,
+        unread_count=unread,  # Backwards compatibility
         urgent_messages=urgent,
+        urgent_count=urgent,  # Backwards compatibility
         conversations=conversations,
     )
 

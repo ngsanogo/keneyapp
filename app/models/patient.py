@@ -5,6 +5,7 @@ Patient model for healthcare record management.
 import enum
 
 from sqlalchemy import (
+    Boolean,
     Column,
     Date,
     DateTime,
@@ -63,6 +64,9 @@ class Patient(Base):
     social_security_number = Column(
         String(15), index=True
     )  # NIR: 13 digits + 2 key digits
+
+    # Soft delete support
+    is_deleted = Column(Boolean, default=False, nullable=False, index=True)
 
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

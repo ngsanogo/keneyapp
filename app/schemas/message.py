@@ -94,6 +94,10 @@ class MessageStats(BaseModel):
     """Messaging statistics for dashboard."""
 
     total_messages: int
+    total_received: int
+    total_sent: int
     unread_messages: int
+    unread_count: int  # Alias for backwards compatibility
     urgent_messages: int
+    urgent_count: int  # Alias for backwards compatibility
     conversations: int

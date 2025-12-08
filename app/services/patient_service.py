@@ -9,7 +9,7 @@ from datetime import date, datetime
 from typing import List, Optional, Tuple
 
 from sqlalchemy import func, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.exceptions import (
     DuplicateResourceError,
@@ -85,6 +85,10 @@ class PatientService:
         return (
             self.db.query(Patient)
             .filter(Patient.tenant_id == tenant_id)
+            .options(
+                selectinload(Patient.appointments),
+                selectinload(Patient.documents)
+            )
             .offset(skip)
             .limit(min(100, max(1, limit)))
             .all()
@@ -153,6 +157,12 @@ class PatientService:
         else:
             # Default sort by created_at descending
             query = query.order_by(Patient.created_at.desc())
+
+        # Add eager loading to prevent N+1 queries
+        query = query.options(
+            selectinload(Patient.appointments),
+            selectinload(Patient.documents)
+        )
 
         # Apply pagination
         patients = query.offset(skip).limit(min(100, max(1, limit))).all()

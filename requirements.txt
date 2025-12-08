@@ -1,5 +1,5 @@
 # FastAPI and server
-fastapi>=0.120.4
+fastapi>=0.123.0
 uvicorn[standard]==0.38.0
 gunicorn==23.0.0
 python-multipart==0.0.20
@@ -15,31 +15,31 @@ psycopg2-binary>=2.9.9  # Python 3.13 requires >=2.9.11 on Windows
 # Security
 python-jose[cryptography]>=3.5.0
 passlib[bcrypt]==1.7.4
-bcrypt==4.3.0
+bcrypt==5.0.0
 ecdsa>=0.19.1  # Note: Known Minerva timing attack - acceptable for non-critical use
 
 # Environment variables
 python-dotenv==1.2.1
 
 # Validation
-pydantic==2.12.4
+pydantic==2.12.5
 pydantic-settings==2.12.0
 email-validator==2.3.0
 
 # Testing
-pytest==8.4.2
+pytest==9.0.1
 pytest-asyncio==1.3.0
 httpx==0.28.1
-faker==33.3.1  # E2E test data generation
+faker==38.2.0  # E2E test data generation
 
 # Code quality
-black==25.9.0
+black==25.11.0
 flake8==7.3.0
-mypy==1.18.2
+mypy==1.19.0
 
 # Caching and Background Tasks
-redis==7.0.1
-celery==5.5.3
+redis==7.1.0
+celery==5.6.0
 flower==2.0.1
 
 # Rate Limiting
@@ -72,14 +72,14 @@ itsdangerous==2.2.0
 strawberry-graphql[fastapi]>=0.257.0
 
 # HL7/FHIR Support
-fhir.resources==7.1.0
+fhir.resources==8.1.0
 
 # File processing (removed pycryptodome - using cryptography instead)
-twilio==9.8.5  # SMS notifications
+twilio==9.8.7  # SMS notifications
 
 # File processing
 python-magic==0.4.27  # MIME type detection
-Pillow==11.3.0  # Image processing
+Pillow==12.0.0  # Image processing
 
 # Export and Reporting
 reportlab>=4.0.0  # PDF generation

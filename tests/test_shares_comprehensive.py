@@ -267,7 +267,7 @@ class TestShareExpiration:
             share_token=secrets.token_urlsafe(32),
             scope="full_record",
             status="active",
-            expires_at=datetime.utcnow() - timedelta(hours=1),  # Expired 1 hour ago
+            expires_at=datetime.now(timezone.utc) - timedelta(hours=1),  # Expired 1 hour ago
             tenant_id=1,
         )
         db_session.add(expired_share)

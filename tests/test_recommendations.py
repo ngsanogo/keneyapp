@@ -93,6 +93,10 @@ def test_patient_care_recommendations_prescription_refill(db, test_tenant):
     db.add(doctor)
     db.flush()
 
+    # Create a prescription expiring soon (prescribed 30 days ago, duration 35 days = 5 days left)
+    from datetime import timezone
+    prescribed_date = datetime.now(timezone.utc) - timedelta(days=30)
+    
     prescription = Prescription(
         tenant_id=test_tenant.id,
         patient_id=patient.id,
@@ -100,9 +104,9 @@ def test_patient_care_recommendations_prescription_refill(db, test_tenant):
         medication_name="Lisinopril",
         dosage="10mg",
         frequency="Once daily",
-        start_date=datetime.now().date() - timedelta(days=30),
-        end_date=datetime.now().date() + timedelta(days=5),
-        notes="Blood pressure medication",
+        duration="35 days",
+        instructions="Blood pressure medication",
+        prescribed_date=prescribed_date,
     )
     db.add(prescription)
     db.commit()
@@ -267,9 +271,8 @@ def test_medication_interaction_warnings(db, test_tenant):
         medication_name="Warfarin",
         dosage="5mg",
         frequency="Once daily",
-        start_date=datetime.now().date(),
-        end_date=datetime.now().date() + timedelta(days=90),
-        notes="Anticoagulant",
+        duration="90 days",
+        instructions="Anticoagulant",
     )
     db.add(prescription)
     db.commit()

@@ -7,6 +7,7 @@ def _set_base_env(monkeypatch, **overrides):
     base_values = {
         "ENVIRONMENT": "production",
         "SECRET_KEY": "x" * 64,
+        "ENCRYPTION_KEY": "y" * 32,
         "ALLOWED_ORIGINS": "https://example.com",
         "DATABASE_URL": "postgresql://user:pass@db:5432/prod",
         "ENABLE_BOOTSTRAP_ADMIN": "false",

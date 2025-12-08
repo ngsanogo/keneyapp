@@ -56,9 +56,12 @@ class RecommendationService:
         )
 
         if last_appointment:
-            days_since = (
-                datetime.now().date() - last_appointment.appointment_date
-            ).days
+            # Convert datetime to date for comparison if needed
+            appointment_date = last_appointment.appointment_date
+            if isinstance(appointment_date, datetime):
+                appointment_date = appointment_date.date()
+            
+            days_since = (datetime.now().date() - appointment_date).days
             if days_since > 180:
                 recommendations.append(
                     {
@@ -82,23 +85,38 @@ class RecommendationService:
         )
 
         for prescription in active_prescriptions:
-            if prescription.end_date:
-                days_until_end = (prescription.end_date - datetime.now().date()).days
-                if 0 < days_until_end <= 7:
-                    recommendations.append(
-                        {
-                            "type": "prescription_refill",
-                            "priority": "medium",
-                            "title": "Prescription Expiring Soon",
-                            "description": f"Prescription for {prescription.medication_name} expires in {days_until_end} days.",
-                            "action": "renew_prescription",
-                            "metadata": {
-                                "prescription_id": prescription.id,
-                                "medication": prescription.medication_name,
-                                "days_until_end": days_until_end,
-                            },
-                        }
-                    )
+            # Check if prescription has duration info and calculate end date
+            if prescription.prescribed_date and prescription.duration:
+                try:
+                    # Try to parse duration (e.g., "30 days", "90 days")
+                    duration_str = prescription.duration.lower()
+                    if 'day' in duration_str:
+                        days = int(''.join(filter(str.isdigit, duration_str)))
+                        prescribed_date = prescription.prescribed_date
+                        if isinstance(prescribed_date, datetime):
+                            prescribed_date = prescribed_date.date()
+                        
+                        end_date = prescribed_date + timedelta(days=days)
+                        days_until_end = (end_date - datetime.now().date()).days
+                        
+                        if 0 < days_until_end <= 7:
+                            recommendations.append(
+                                {
+                                    "type": "prescription_refill",
+                                    "priority": "medium",
+                                    "title": "Prescription Expiring Soon",
+                                    "description": f"Prescription for {prescription.medication_name} expires in {days_until_end} days.",
+                                    "action": "renew_prescription",
+                                    "metadata": {
+                                        "prescription_id": prescription.id,
+                                        "medication": prescription.medication_name,
+                                        "days_until_end": days_until_end,
+                                    },
+                                }
+                            )
+                except (ValueError, AttributeError):
+                    # Skip if duration can't be parsed
+                    pass
 
         # Check for missing patient information
         if not patient.allergies or patient.allergies.strip() == "":
