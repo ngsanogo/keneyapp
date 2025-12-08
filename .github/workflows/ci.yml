@@ -98,7 +98,7 @@ jobs:
       
       - name: Format check (Black)
         run: |
-          black --check app tests
+          black --check --line-length=100 app tests
       
       - name: Import sort check (isort)
         run: |
