@@ -102,7 +102,7 @@ async def get_my_shares(
 
 
 @router.post("/access", response_model=SharedMedicalRecord)
-@limiter.limit("20/hour")
+@limiter.limit("5/hour")  # Reduced from 20/hour for better brute force protection
 async def access_shared_record(
     request: Request, access_request: ShareAccessRequest, db: Session = Depends(get_db)
 ):
@@ -111,36 +111,58 @@ async def access_shared_record(
 
     **Public endpoint** - No authentication required
 
-    **Rate limit:** 20 accesses per hour per IP
+    **Rate limit:** 5 accesses per hour per IP (strict limit for brute force protection)
 
     **Security:**
-    - Token and PIN validation
+    - Token and PIN validation with strict rate limiting
     - Expiration check
     - Access count limits
     - IP logging for audit
+    - Failed attempt logging
 
     **Returns:** Medical record data based on share scope
 
     **Errors:**
-    - 404: Share not found or invalid PIN
+    - 404: Share not found
+    - 401: Invalid PIN (not returned explicitly to prevent enumeration)
     - 403: Share expired, revoked, or max accesses reached
+    - 429: Rate limit exceeded (too many access attempts)
     """
+    # Input validation
+    if not access_request.token or len(access_request.token) < 10:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token"
+        )
+    
     # Get client IP
     client_ip = request.client.host if request.client else "unknown"
 
-    # Validate and record access
-    share = share_service.validate_and_access_share(
-        db=db,
-        token=access_request.token,
-        pin=access_request.pin,
-        ip_address=client_ip,
-        request=request,
-    )
+    try:
+        # Validate and record access
+        share = share_service.validate_and_access_share(
+            db=db,
+            token=access_request.token,
+            pin=access_request.pin,
+            ip_address=client_ip,
+            request=request,
+        )
 
-    # Get medical record data
-    record = share_service.get_shared_medical_record(db, share)
+        # Get medical record data
+        record = share_service.get_shared_medical_record(db, share)
 
-    return record
+        return record
+    except Exception as e:
+        # Log failed access attempt without exposing details
+        logger = __import__('logging').getLogger(__name__)
+        logger.warning(
+            f"Failed access attempt to share from {client_ip}: {str(e)}"
+        )
+        # Return generic error to prevent information disclosure
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token or PIN"
+        )
 
 
 @router.get("/{share_id}", response_model=ShareResponse)

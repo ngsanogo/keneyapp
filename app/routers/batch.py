@@ -37,11 +37,53 @@ async def batch_create_patients(
     - PHI fields are automatically encrypted
     - Audit log created for each patient
     - Cache invalidated on success
+    
+    Validation:
+    - Rejects empty batches (400)
+    - Limits batch size to 100 items
+    - Validates all fields before processing
+    - Checks for duplicate emails within batch
     """
+    # Input validation
+    if not patients:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Batch must contain at least 1 patient"
+        )
+    
+    if len(patients) > 100:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="Batch size limited to 100 patients"
+        )
+    
+    # Check for duplicate emails within batch (prevent duplicates in same batch)
+    emails_in_batch = set()
+    for idx, patient_data in enumerate(patients):
+        if patient_data.email:
+            if patient_data.email.lower() in emails_in_batch:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Duplicate email in batch: {patient_data.email} (position {idx})"
+                )
+            emails_in_batch.add(patient_data.email.lower())
+    
     created_patients = []
     
     try:
         for idx, patient_data in enumerate(patients):
+            # Validate patient doesn't already exist
+            if patient_data.email:
+                existing = db.query(Patient).filter(
+                    Patient.email == patient_data.email,
+                    Patient.tenant_id == current_user.tenant_id
+                ).first()
+                if existing:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail=f"Patient with email {patient_data.email} already exists (position {idx})"
+                    )
+            
             # Encrypt PHI fields
             patient_dict = patient_data.model_dump()
             patient_dict["tenant_id"] = current_user.tenant_id
@@ -95,6 +137,9 @@ async def batch_create_patients(
             "patients": response_patients
         }
     
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(
