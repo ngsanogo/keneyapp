@@ -183,7 +183,7 @@ class TestServicePatterns:
 
             # Trigger rollback
             db.rollback()
-        except:
+        except Exception:
             pass
 
         final_count = service.count(tenant_id=test_tenant.id)

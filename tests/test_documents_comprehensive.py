@@ -155,7 +155,7 @@ class TestDocumentUpload:
 
         # The middleware raises HTTPException, TestClient re-raises it
         with pytest.raises(HTTPException) as exc_info:
-            response = client.post("/api/v1/documents/upload", files=files, data=data)
+            client.post("/api/v1/documents/upload", files=files, data=data)
 
         # Should be rejected with 413 (Payload Too Large)
         assert exc_info.value.status_code == 413

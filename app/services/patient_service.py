@@ -9,7 +9,7 @@ from datetime import date, datetime
 from typing import List, Optional, Tuple
 
 from sqlalchemy import func, or_
-from sqlalchemy.orm import Session, joinedload, selectinload
+from sqlalchemy.orm import Session, selectinload
 
 from app.exceptions import (
     DuplicateResourceError,

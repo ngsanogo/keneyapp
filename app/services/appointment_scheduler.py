@@ -72,7 +72,7 @@ class AppointmentSchedulerService:
         Returns:
             True if available, False if conflicting appointment exists
         """
-        from sqlalchemy import and_, cast, func, Integer
+        from sqlalchemy import cast
 
         end_time = start_time + timedelta(minutes=duration_minutes)
 
@@ -129,7 +129,7 @@ class AppointmentSchedulerService:
         Returns:
             True if available, False if conflicting appointment exists
         """
-        from sqlalchemy import and_, cast
+        from sqlalchemy import cast
 
         end_time = start_time + timedelta(minutes=duration_minutes)
 

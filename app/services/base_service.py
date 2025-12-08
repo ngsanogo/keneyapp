@@ -7,7 +7,6 @@ reducing code duplication and ensuring consistency across services.
 
 from typing import Generic, List, Optional, Type, TypeVar
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
 
 from app.core.database import Base
 from app.exceptions import ResourceNotFoundError, TenantMismatchError
@@ -104,7 +103,7 @@ class BaseService(Generic[ModelType]):
 
         # Filter out soft-deleted records
         if not include_deleted and hasattr(self.model, "is_deleted"):
-            query = query.filter(self.model.is_deleted == False)
+            query = query.filter(~self.model.is_deleted)
 
         # Apply custom filters
         if filters:
@@ -142,7 +141,7 @@ class BaseService(Generic[ModelType]):
 
         # Filter out soft-deleted records
         if not include_deleted and hasattr(self.model, "is_deleted"):
-            query = query.filter(self.model.is_deleted == False)
+            query = query.filter(~self.model.is_deleted)
 
         # Apply custom filters
         if filters:

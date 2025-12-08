@@ -571,6 +571,47 @@ def is_production_environment(env_name: str) -> bool:
     return env_name.lower() in ("production", "prod")
 
 
+def _validate_secret_key(current_settings: "Settings", issues: List[str]) -> None:
+    """Validate SECRET_KEY setting."""
+    if (
+        not current_settings.SECRET_KEY
+        or current_settings.SECRET_KEY == "your-secret-key-change-in-production"
+    ):
+        issues.append("SECRET_KEY must be set to a strong, non-default value in production.")
+
+
+def _validate_debug_and_bootstrap(current_settings: "Settings", issues: List[str]) -> None:
+    """Validate DEBUG and BOOTSTRAP_ADMIN settings."""
+    if current_settings.DEBUG:
+        issues.append("DEBUG must be False in production.")
+
+    if current_settings.ENABLE_BOOTSTRAP_ADMIN:
+        issues.append("ENABLE_BOOTSTRAP_ADMIN must be False in production.")
+
+
+def _validate_origins_and_urls(current_settings: "Settings", issues: List[str]) -> None:
+    """Validate ALLOWED_ORIGINS and URL settings."""
+    if not current_settings.ALLOWED_ORIGINS:
+        issues.append("ALLOWED_ORIGINS must include at least one trusted origin.")
+    elif _has_local_origin(current_settings.ALLOWED_ORIGINS):
+        issues.append("ALLOWED_ORIGINS cannot include localhost or loopback origins in production.")
+
+    if "localhost" in str(current_settings.DATABASE_URL):
+        issues.append("DATABASE_URL must point to a production database host (not localhost).")
+
+    if "localhost" in str(current_settings.APP_URL):
+        issues.append("APP_URL must not be localhost in production.")
+
+
+def _validate_tokens_and_encryption(current_settings: "Settings", issues: List[str]) -> None:
+    """Validate token and encryption settings."""
+    if current_settings.ACCESS_TOKEN_EXPIRE_MINUTES <= 0:
+        issues.append("ACCESS_TOKEN_EXPIRE_MINUTES must be a positive integer.")
+
+    if not current_settings.ENCRYPTION_KEY:
+        issues.append("ENCRYPTION_KEY must be provided for production deployments.")
+
+
 def validate_production_settings(current_settings: "Settings | None" = None) -> None:
     """Ensure critical settings are hardened when running in production.
 
@@ -590,35 +631,12 @@ def validate_production_settings(current_settings: "Settings | None" = None) -> 
 
     issues: List[str] = []
 
-    if (
-        not current_settings.SECRET_KEY
-        or current_settings.SECRET_KEY == "your-secret-key-change-in-production"
-    ):
-        issues.append("SECRET_KEY must be set to a strong, non-default value in production.")
+    _validate_secret_key(current_settings, issues)
+    _validate_debug_and_bootstrap(current_settings, issues)
+    _validate_origins_and_urls(current_settings, issues)
+    _validate_tokens_and_encryption(current_settings, issues)
 
-    if current_settings.DEBUG:
-        issues.append("DEBUG must be False in production.")
-
-    if current_settings.ENABLE_BOOTSTRAP_ADMIN:
-        issues.append("ENABLE_BOOTSTRAP_ADMIN must be False in production.")
-
-    if not current_settings.ALLOWED_ORIGINS:
-        issues.append("ALLOWED_ORIGINS must include at least one trusted origin.")
-    elif _has_local_origin(current_settings.ALLOWED_ORIGINS):
-        issues.append("ALLOWED_ORIGINS cannot include localhost or loopback origins in production.")
-
-    if "localhost" in str(current_settings.DATABASE_URL):
-        issues.append("DATABASE_URL must point to a production database host (not localhost).")
-
-    if "localhost" in str(current_settings.APP_URL):
-        issues.append("APP_URL must not be localhost in production.")
-
-    if current_settings.ACCESS_TOKEN_EXPIRE_MINUTES <= 0:
-        issues.append("ACCESS_TOKEN_EXPIRE_MINUTES must be a positive integer.")
-
-    if not current_settings.ENCRYPTION_KEY:
-        issues.append("ENCRYPTION_KEY must be provided for production deployments.")
-    elif len(current_settings.ENCRYPTION_KEY) < 32:
+    if len(current_settings.ENCRYPTION_KEY) < 32:
         issues.append("ENCRYPTION_KEY must be at least 32 characters long in production.")
 
     if not current_settings.TOKEN_ISSUER:

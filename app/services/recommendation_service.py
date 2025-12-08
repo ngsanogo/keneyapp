@@ -8,7 +8,7 @@ optimize resource utilization, and detect potential issues early.
 
 from datetime import datetime, timedelta
 from typing import Dict, List
-from sqlalchemy import and_, func, or_
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.models.appointment import Appointment, AppointmentStatus

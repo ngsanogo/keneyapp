@@ -77,8 +77,6 @@ def test_sort_params_validation():
 
 def test_filter_params():
     """Test filter parameters"""
-    from datetime import datetime
-
     params = FilterParams(search="test", date_from=date(2024, 1, 1), date_to=date(2024, 12, 31))
     assert params.search == "test"
     # Pydantic converts date to datetime

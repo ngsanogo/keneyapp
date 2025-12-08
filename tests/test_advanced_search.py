@@ -169,7 +169,7 @@ def test_advanced_search_date_range(client: TestClient, auth_headers_doctor, sam
     )
 
     assert response.status_code == 200
-    data = response.json()
+    response.json()
     # Should return patients created in the range
 
 

@@ -800,7 +800,6 @@ def get_patient_medical_history(
     from app.models.prescription import Prescription
     from app.models.lab_result import LabResult
     from app.models.medical_document import MedicalDocument
-    from sqlalchemy import desc as sql_desc, asc as sql_asc
 
     # Verify patient exists and belongs to tenant
     patient = (
