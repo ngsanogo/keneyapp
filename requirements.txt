@@ -33,7 +33,7 @@ httpx==0.28.1
 faker==38.2.0  # E2E test data generation
 
 # Code quality
-black==25.11.0
+black==25.12.0
 flake8==7.3.0
 mypy==1.19.0
 
