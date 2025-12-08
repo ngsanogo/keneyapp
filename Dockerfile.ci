@@ -1,0 +1,58 @@
+# CI Test Environment - Reproduces GitHub Actions locally
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    redis-tools \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+RUN python -m pip install --upgrade pip
+
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
+
+COPY requirements-test.txt ./
+RUN pip install -r requirements-test.txt
+
+COPY requirements-dev.txt ./
+RUN pip install -r requirements-dev.txt
+
+# Copy application code
+COPY . .
+
+# Expose ports (for reference, not used in Docker)
+EXPOSE 8000
+
+# Default command: run all CI checks
+CMD ["/bin/bash", "-c", "echo '=== Running CI Checks ===' && \
+    echo '1. Running migrations...' && \
+    alembic upgrade head && \
+    echo '✓ Migrations passed' && \
+    echo '' && \
+    echo '2. Running tests...' && \
+    pytest tests/ -v --cov=app --cov-report=term-missing -m 'not smoke' && \
+    echo '✓ Tests passed' && \
+    echo '' && \
+    echo '3. Format check (Black)...' && \
+    black --check --line-length=100 app tests && \
+    echo '✓ Black passed' && \
+    echo '' && \
+    echo '4. Import sort check (isort)...' && \
+    isort --check-only app tests && \
+    echo '✓ isort passed' && \
+    echo '' && \
+    echo '5. Lint check (Flake8)...' && \
+    flake8 app tests --max-line-length=120 --extend-ignore=E203,W503 && \
+    echo '✓ Flake8 passed' && \
+    echo '' && \
+    echo '6. Type check (mypy)...' && \
+    mypy app --ignore-missing-imports && \
+    echo '✓ mypy passed' && \
+    echo '' && \
+    echo '=== All CI Checks Passed! ===' \
+    "]

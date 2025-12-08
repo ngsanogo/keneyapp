@@ -12,13 +12,12 @@ venv/
 ENV/
 .mypy_cache/
 
-# Tests
+# Tests (but keep tests/ directory for ci builds)
 .pytest_cache/
 .coverage
 htmlcov/
 coverage.xml
 .tox/
-tests/
 test_results/
 e2e_run.log
 

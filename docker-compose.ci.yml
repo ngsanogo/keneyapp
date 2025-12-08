@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: keneyapp-ci-postgres
+    environment:
+      POSTGRES_USER: keneyapp
+      POSTGRES_PASSWORD: keneyapp_secure_pass
+      POSTGRES_DB: keneyapp
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keneyapp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: keneyapp-ci-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis_data:/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.ci
+    container_name: keneyapp-ci-test
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://keneyapp:keneyapp_secure_pass@postgres:5432/keneyapp
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SECRET_KEY: test-secret-key
+      ENCRYPTION_KEY: test-encryption-key-32-chars-exactly!!
+      PYTHONUNBUFFERED: 1
+    volumes:
+      - .:/app
+    networks:
+      - ci-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  ci-network:
+    driver: bridge

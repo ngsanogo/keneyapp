@@ -1,174 +1,3 @@
-from typing import List, Optional
-
-from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy.orm import Session
-
-from app.core.rate_limit import limiter
-from app.core.dependencies import get_db, get_current_active_user, require_roles
-from app.core.audit import log_audit_event
-from app.core.cache import cache_get, cache_set, cache_clear_pattern
-from app.core.metrics import patient_operations_total
-from app.schemas.appointment import AppointmentCreate, AppointmentUpdate, AppointmentResponse
-from app.services.appointment_service import AppointmentService
-from app.models.user import UserRole
-
-
-router = APIRouter(prefix="/appointments", tags=["appointments"])
-
-
-@router.get("/", response_model=List[AppointmentResponse])
-@limiter.limit("100/minute")
-def list_appointments(
-    request: Request,
-    patient_id: Optional[int] = None,
-    current_user=Depends(get_current_active_user),
-    db: Session = Depends(get_db),
-):
-    require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])(current_user)
-    tenant_id = current_user.tenant_id
-
-    cache_key = f"appointments:list:{tenant_id}:{patient_id or 'all'}"
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
-
-    service = AppointmentService(db)
-    items = service.list(tenant_id=tenant_id, patient_id=patient_id)
-    cache_set(cache_key, items, ttl_seconds=120)
-
-    log_audit_event(
-        action="read",
-        resource="appointments",
-        request=request,
-        user_id=current_user.id,
-        tenant_id=tenant_id,
-        details={"patient_id": patient_id} if patient_id else {"list": True},
-    )
-    return items
-
-
-@router.get("/{appointment_id}", response_model=AppointmentResponse)
-@limiter.limit("100/minute")
-def get_appointment(
-    request: Request,
-    appointment_id: int,
-    current_user=Depends(get_current_active_user),
-    db: Session = Depends(get_db),
-):
-    require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE])(current_user)
-    tenant_id = current_user.tenant_id
-    cache_key = f"appointments:detail:{tenant_id}:{appointment_id}"
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
-
-    service = AppointmentService(db)
-    try:
-        appt = service.get_by_id(appointment_id, tenant_id)
-    except HTTPException:
-        raise
-    except Exception:
-        raise HTTPException(status_code=404, detail="Appointment not found")
-
-    cache_set(cache_key, appt, ttl_seconds=300)
-    log_audit_event(
-        action="read",
-        resource="appointments",
-        request=request,
-        user_id=current_user.id,
-        tenant_id=tenant_id,
-        details={"appointment_id": appointment_id},
-    )
-    return appt
-
-
-@router.post("/", response_model=AppointmentResponse, status_code=201)
-@limiter.limit("10/minute")
-def create_appointment(
-    request: Request,
-    payload: AppointmentCreate,
-    current_user=Depends(get_current_active_user),
-    db: Session = Depends(get_db),
-):
-    require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST])(current_user)
-    tenant_id = current_user.tenant_id
-    service = AppointmentService(db)
-    appt = service.create(payload.model_dump(), tenant_id)
-
-    cache_clear_pattern(f"appointments:list:{tenant_id}:*")
-    cache_clear_pattern("dashboard:*")
-
-    patient_operations_total.labels(action="create", tenant_id=str(tenant_id)).inc()
-    log_audit_event(
-        action="create",
-        resource="appointments",
-        request=request,
-        user_id=current_user.id,
-        tenant_id=tenant_id,
-        details={"appointment_id": appt.id, "patient_id": appt.patient_id},
-    )
-    return appt
-
-
-@router.put("/{appointment_id}", response_model=AppointmentResponse)
-@limiter.limit("10/minute")
-def update_appointment(
-    request: Request,
-    appointment_id: int,
-    payload: AppointmentUpdate,
-    current_user=Depends(get_current_active_user),
-    db: Session = Depends(get_db),
-):
-    require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST])(current_user)
-    tenant_id = current_user.tenant_id
-    service = AppointmentService(db)
-    appt = service.update(appointment_id, payload.model_dump(exclude_unset=True), tenant_id)
-
-    cache_clear_pattern(f"appointments:detail:{tenant_id}:{appointment_id}")
-    cache_clear_pattern(f"appointments:list:{tenant_id}:*")
-    cache_clear_pattern("dashboard:*")
-
-    patient_operations_total.labels(action="update", tenant_id=str(tenant_id)).inc()
-    log_audit_event(
-        action="update",
-        resource="appointments",
-        request=request,
-        user_id=current_user.id,
-        tenant_id=tenant_id,
-        details={"appointment_id": appointment_id},
-    )
-    return appt
-
-
-@router.delete("/{appointment_id}", status_code=204)
-@limiter.limit("10/minute")
-def delete_appointment(
-    request: Request,
-    appointment_id: int,
-    current_user=Depends(get_current_active_user),
-    db: Session = Depends(get_db),
-):
-    require_roles([UserRole.ADMIN, UserRole.DOCTOR])(current_user)
-    tenant_id = current_user.tenant_id
-    service = AppointmentService(db)
-    service.delete(appointment_id, tenant_id)
-
-    cache_clear_pattern(f"appointments:detail:{tenant_id}:{appointment_id}")
-    cache_clear_pattern(f"appointments:list:{tenant_id}:*")
-    cache_clear_pattern("dashboard:*")
-
-    patient_operations_total.labels(action="delete", tenant_id=str(tenant_id)).inc()
-    log_audit_event(
-        action="delete",
-        resource="appointments",
-        request=request,
-        user_id=current_user.id,
-        tenant_id=tenant_id,
-        details={"appointment_id": appointment_id},
-    )
-    return None
-
-
 """
 Appointment management router for scheduling and tracking appointments.
 """
@@ -221,7 +50,7 @@ def create_appointment(
     current_user: User = Depends(
         require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST])
     ),
-):
+) -> AppointmentResponse:
     """
     Create a new appointment.
 
@@ -261,7 +90,7 @@ def create_appointment(
             appointment_id=db_appointment.id,
             patient_email=patient_email or "",
         )
-    except Exception as exc:  # pragma: no cover - best effort
+    except Exception as exc:  # noqa: E722
         logger.warning("Failed to queue appointment reminder: %s", exc)
 
     log_audit_event(
@@ -284,7 +113,7 @@ def create_appointment(
     try:
         fhir_res = fhir_converter.appointment_to_fhir(db_appointment)
         publish_event(db, current_user.tenant_id, "Appointment", fhir_res)
-    except Exception as exc:  # pragma: no cover - best effort
+    except Exception as exc:  # noqa: E722
         logger.warning("Failed to publish appointment create event: %s", exc)
 
     return db_appointment
@@ -301,7 +130,7 @@ def get_appointments(
     current_user: User = Depends(
         require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
     ),
-):
+) -> List[AppointmentResponse]:
     """
     Retrieve a list of appointments with pagination.
 
@@ -380,7 +209,7 @@ def get_appointment(
     current_user: User = Depends(
         require_roles([UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST])
     ),
-):
+) -> AppointmentResponse:
     """
     Retrieve a specific appointment by ID.
 
@@ -461,7 +290,7 @@ def update_appointment(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.DOCTOR])),
-):
+) -> AppointmentResponse:
     """
     Update an appointment.
 
@@ -533,7 +362,7 @@ def update_appointment(
     try:
         fhir_res = fhir_converter.appointment_to_fhir(appointment)
         publish_event(db, current_user.tenant_id, "Appointment", fhir_res)
-    except Exception as exc:  # pragma: no cover - best effort
+    except Exception as exc:  # noqa: E722
         logger.warning("Failed to publish appointment update event: %s", exc)
 
     return serialized
@@ -546,7 +375,7 @@ def delete_appointment(
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(UserRole.ADMIN)),
-):
+) -> None:
     """
     Delete an appointment.
 
@@ -609,5 +438,5 @@ def delete_appointment(
             "Appointment",
             {"resourceType": "Appointment", "id": str(appointment_id), "deleted": True},
         )
-    except Exception as exc:  # pragma: no cover - best effort
+    except Exception as exc:  # noqa: E722
         logger.warning("Failed to publish appointment delete event: %s", exc)
